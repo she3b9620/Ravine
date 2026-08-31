@@ -78,6 +78,7 @@ export default function HomePage() {
   const [creators, setCreators] = useState<Creator[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentProfile, setCurrentProfile] = useState<any>(null);
 
   const [dark, setDark] = useState(true);
   const [loading, setLoading] = useState(true);
@@ -91,7 +92,20 @@ export default function HomePage() {
 
       const userResult = await supabase.auth.getUser();
 
-      setCurrentUser(userResult.data.user ?? null);
+      const user = userResult.data.user ?? null;
+      setCurrentUser(user);
+
+      if (user) {
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select(
+            "display_name,username,avatar_url,cover_url,is_verified"
+          )
+          .eq("id", user.id)
+          .maybeSingle();
+
+        setCurrentProfile(profileData ?? null);
+      }
 
       const [videoResult, creatorResult, categoryResult] =
         await Promise.all([
@@ -316,14 +330,37 @@ export default function HomePage() {
 
             {currentUser ? (
               <a
-                href={`/${locale}/library`}
-                className="rounded-full border px-3 py-2 text-xs font-semibold"
+                href={`/${locale}/account`}
+                className="flex items-center gap-2 rounded-full border px-3 py-2 text-xs font-semibold"
                 style={{
                   backgroundColor: card,
                   borderColor: border
                 }}
               >
-                {currentUser.email?.split("@")[0] || "Account"}
+                <img
+                  src={
+                    currentProfile?.avatar_url ||
+                    "/RAVINE.png"
+                  }
+                  alt=""
+                  className="h-7 w-7 rounded-full object-cover"
+                />
+
+                <span className="max-w-32 truncate">
+                  {currentProfile?.display_name ||
+                    currentProfile?.username ||
+                    currentUser.email?.split("@")[0] ||
+                    "Account"}
+                </span>
+
+                {currentProfile?.is_verified && (
+                  <span
+                    className="text-[#C47A52]"
+                    title="Verified"
+                  >
+                    ✓
+                  </span>
+                )}
               </a>
             ) : (
               <a
