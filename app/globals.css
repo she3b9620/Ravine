@@ -1,26 +1,368 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =========================================================
+   RAVINE TYPOGRAPHY
+   ========================================================= */
+
+@font-face {
+  font-family: "Thmanyah Sans";
+  src: url("/fonts/thmanyahsans-Light.woff2") format("woff2");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Thmanyah Sans";
+  src: url("/fonts/thmanyahsans-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Thmanyah Sans";
+  src: url("/fonts/thmanyahsans-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Thmanyah Sans";
+  src: url("/fonts/thmanyahsans-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Thmanyah Sans";
+  src: url("/fonts/thmanyahsans-Black.woff2") format("woff2");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/Satoshi-Light.otf") format("opentype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/Satoshi-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/Satoshi-Medium.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/Satoshi-Bold.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/Satoshi-Black.otf") format("opentype");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/Satoshi-Italic.otf") format("opentype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* =========================================================
+   RAVINE DESIGN TOKENS
+   ========================================================= */
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --ravine-obsidian: #090909;
+  --ravine-charcoal: #151719;
+  --ravine-petrol: #183F46;
+  --ravine-copper: #C47A52;
+  --ravine-ivory: #F1E9DC;
+
+  --background: var(--ravine-obsidian);
+  --foreground: var(--ravine-ivory);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* =========================================================
+   RESET
+   ========================================================= */
+
+* {
+  box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  min-height: 100%;
+  scroll-behavior: smooth;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+  background: var(--ravine-obsidian);
+  color: var(--ravine-ivory);
+}
+
+/* =========================================================
+   LANGUAGE TYPOGRAPHY
+   ========================================================= */
+
+html[lang="ar"] body {
+  font-family: "Thmanyah Sans", sans-serif;
+}
+
+html[lang="en"] body {
+  font-family: "Satoshi", sans-serif;
+}
+
+.font-ar {
+  font-family: "Thmanyah Sans", sans-serif !important;
+}
+
+.font-en {
+  font-family: "Satoshi", sans-serif !important;
+}
+
+/* Keep explicit language wrappers independent */
+.font-ar *,
+.font-en * {
+  font-family: inherit !important;
+}
+
+/* =========================================================
+   COMMON ELEMENTS
+   ========================================================= */
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+a,
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* =========================================================
+   RAVINE SCROLL REVEAL
+   ========================================================= */
+
+@keyframes ravine-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@supports (animation-timeline: view()) {
+
+  #discover,
+  #categories,
+  #creators,
+  main > section:last-of-type {
+    animation: ravine-reveal linear both;
+    animation-timeline: view();
+    animation-range: entry 5% cover 30%;
+  }
+
+  #discover article,
+  #creators article,
+  #categories button {
+    animation: ravine-reveal linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 22%;
+  }
+
+  #discover article:nth-child(2),
+  #creators article:nth-child(2),
+  #categories button:nth-child(2) {
+    animation-range: entry 4% cover 26%;
+  }
+
+  #discover article:nth-child(3),
+  #creators article:nth-child(3),
+  #categories button:nth-child(3) {
+    animation-range: entry 8% cover 30%;
+  }
+
+  #discover article:nth-child(4),
+  #creators article:nth-child(4),
+  #categories button:nth-child(4) {
+    animation-range: entry 12% cover 34%;
+  }
+
+  /* subtle hero depth */
+  main > section:first-of-type article {
+    animation: ravine-reveal linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 24%;
+  }
+}
+
+/* Normal hover motion always works */
+#discover article,
+#creators article {
+  transition:
+    transform 450ms cubic-bezier(.22,1,.36,1),
+    box-shadow 450ms cubic-bezier(.22,1,.36,1);
+}
+
+#discover article:hover,
+#creators article:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 40px rgba(0,0,0,.18);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #discover article,
+  #creators article,
+  #categories button,
+  #discover,
+  #categories,
+  #creators,
+  main > section:first-of-type article,
+  main > section:last-of-type {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+/* =========================================================
+   RAVINE HERO PARALLAX
+   ========================================================= */
+
+@keyframes ravine-hero-parallax {
+  from {
+    transform: scale(1.04) translateY(-18px);
+  }
+
+  to {
+    transform: scale(1.08) translateY(18px);
+  }
+}
+
+@keyframes ravine-glow-parallax {
+  from {
+    transform: translate3d(0, -20px, 0) scale(1);
+  }
+
+  to {
+    transform: translate3d(0, 24px, 0) scale(1.08);
+  }
+}
+
+@supports (animation-timeline: view()) {
+
+  /* Main hero image */
+  main > section:first-of-type article img {
+    animation: ravine-hero-parallax linear both;
+    animation-timeline: view();
+    animation-range: cover 0% cover 100%;
+    will-change: transform;
+  }
+
+  /* Atmospheric background glow */
+  main > section:first-of-type .blur-\[110px\],
+  main > section:first-of-type .blur-\[120px\] {
+    animation: ravine-glow-parallax linear both;
+    animation-timeline: view();
+    animation-range: cover 0% cover 100%;
+    will-change: transform;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  main > section:first-of-type article img,
+  main > section:first-of-type .blur-\[110px\],
+  main > section:first-of-type .blur-\[120px\] {
+    animation: none !important;
+    transform: none !important;
+  }
+}
+/* =========================================================
+   RAVINE PAGE INTRO
+   ========================================================= */
+
+@keyframes ravine-page-intro {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ravine-header-intro {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* First-load animation only */
+body > main {
+  animation: ravine-page-intro 700ms cubic-bezier(.22, 1, .36, 1) both;
+}
+
+body > header {
+  animation: ravine-header-intro 550ms cubic-bezier(.22, 1, .36, 1) both;
+}
+
+/* Respect reduced-motion preference */
+@media (prefers-reduced-motion: reduce) {
+  body > main,
+  body > header {
+    animation: none !important;
+  }
 }

@@ -1,0 +1,52 @@
+{
+  "nav": {
+    "home": "Home",
+    "discover": "Discover",
+    "categories": "Categories",
+    "creators": "Creators",
+    "search": "Search RAVINE...",
+    "create": "Create",
+    "signIn": "Sign In"
+  },
+  "hero": {
+    "eyebrow": "FEATURES TODAY",
+    "title": "A PLACE FOR ORIGINAL VOICES",
+    "tagline": "Create. Share. Discover.",
+    "description": "A creator-first home for remarkable videos, curious audiences, and ideas that deserve to be discovered.",
+    "explore": "Explore RAVINE",
+    "start": "Start Creating"
+  },
+  "featured": {
+    "category": "CRAFT",
+    "title": "Fire, form, and the patience to begin again",
+    "meta": "Mara Velez · 184K views"
+  },
+  "discover": {
+    "eyebrow": "FRESH FROM THE COMMUNITY",
+    "title": "What's happening",
+    "viewAll": "View all videos"
+  },
+  "categories": {
+    "eyebrow": "FOLLOW YOUR CURIOSITY",
+    "title": "Browse categories",
+    "cinema": "Cinema",
+    "gaming": "Gaming",
+    "technology": "Technology",
+    "music": "Music",
+    "education": "Education",
+    "podcast": "Podcast",
+    "documentary": "Documentary",
+    "lifestyle": "Lifestyle"
+  },
+  "creators": {
+    "eyebrow": "PEOPLE TO KNOW",
+    "title": "Creators worth discovering",
+    "follow": "Follow"
+  },
+  "cta": {
+    "eyebrow": "YOUR WORK BELONGS HERE",
+    "title": "Make something worth finding.",
+    "description": "Publish on your terms and reach people who care about what you create.",
+    "button": "Create your channel"
+  }
+}
