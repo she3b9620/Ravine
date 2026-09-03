@@ -167,9 +167,9 @@ export default function LibraryPage() {
 
         <div className="mt-8 flex flex-wrap gap-2">
           {[
-            ["saved", "Saved"],
-            ["history", "Watch History"],
-            ["liked", "Liked Videos"]
+            ["saved", isArabic ? "المحفوظات" : "Saved"],
+            ["history", isArabic ? "سجل المشاهدة" : "Watch History"],
+            ["liked", isArabic ? "المعجب بها" : "Liked Videos"]
           ].map(([value, label]) => (
             <button
               key={value}
@@ -256,7 +256,7 @@ export default function LibraryPage() {
 
                       <p className="mt-2 text-xs text-[#F1E9DC]/40">
                         {row.completed
-                          ? "{isArabic ? "مكتمل" : "Completed"}"
+                          ? {isArabic ? "مكتمل" : "Completed"}
                           : `{isArabic ? "استئناف من" : "Resume at"} ${duration(
                               row.progress_seconds
                             )}`}
@@ -286,7 +286,7 @@ export default function LibraryPage() {
               videos.map((video) => (
                 <a
                   key={video.id}
-                  href={`/ar/watch/${video.id}`}
+                  href={`/${locale}/watch/${video.id}`}
                   className="overflow-hidden rounded-3xl border border-[#183F46]/60 bg-[#151719]"
                 >
                   <div className="aspect-video overflow-hidden bg-[#183F46]">
@@ -306,8 +306,8 @@ export default function LibraryPage() {
                     </h2>
 
                     <p className="mt-2 text-xs text-[#F1E9DC]/40">
-                      {(video.views ?? 0).toLocaleString()} views ·{" "}
-                      {(video.likes ?? 0).toLocaleString()} likes
+                      {(video.views ?? 0).toLocaleString()} {isArabic ? "مشاهدة" : "views"} ·{" "}
+                      {(video.likes ?? 0).toLocaleString()} {isArabic ? "إعجاب" : "likes"}
                     </p>
                   </div>
                 </a>
