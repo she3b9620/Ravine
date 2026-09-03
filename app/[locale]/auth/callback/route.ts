@@ -46,13 +46,16 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      return NextResponse.redirect(
-        new URL(getSafeDestination(locale, next), request.url)
-      );
+      const destination = new URL(getSafeDestination(locale, next), request.url);
+      const response = NextResponse.redirect(destination);
+      response.headers.set("Cache-Control", "no-store, max-age=0");
+      return response;
     }
   }
 
   const errorUrl = new URL(`/${locale}/auth`, request.url);
   errorUrl.searchParams.set("error", "auth_callback_failed");
-  return NextResponse.redirect(errorUrl);
+  return NextResponse.redirect(errorUrl, {
+    headers: { "Cache-Control": "no-store, max-age=0" },
+  });
 }
