@@ -1,10 +1,12 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
+import { useLocale } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 
 export default function ForgotPasswordPage() {
-  const supabase = createClient();
+  const locale = useLocale();
+  const supabase = useMemo(() => createClient(), []);
 
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -18,7 +20,7 @@ export default function ForgotPasswordPage() {
     setError("");
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/ar/auth/update-password`,
+      redirectTo: `${window.location.origin}/${locale}/auth/update-password`,
     });
 
     if (error) {
@@ -33,7 +35,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#090909] px-5 py-20 text-[#F1E9DC]">
+    <main dir={locale === "ar" ? "rtl" : "ltr"} className="min-h-screen bg-[#090909 px-5 py-20 text-[#F1E9DC]">
       <div className="mx-auto w-full max-w-md">
         <div className="mb-10 text-center">
           <div className="mb-6 text-3xl font-black tracking-[0.18em] text-[#C47A52]">
