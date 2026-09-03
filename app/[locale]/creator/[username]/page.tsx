@@ -73,7 +73,7 @@ export default function CreatorProfilePage() {
   const ar = locale === "ar";
   const params = useParams();
   const username = String(params.username);
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   const [creator, setCreator] = useState<Creator | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -176,7 +176,7 @@ export default function CreatorProfilePage() {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      window.location.href = `/${locale}/auth`;
+      window.location.href = `/${locale}/auth?next=/${locale}/creator/${username}`;
       return;
     }
 
