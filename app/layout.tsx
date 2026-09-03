@@ -8,6 +8,7 @@ import "./guest-home-overrides.css";
 import LocaleTypography from "../components/LocaleTypography";
 import VideoHoverPreview from "../components/VideoHoverPreview";
 import GuestMenuMotion from "../components/GuestMenuMotion";
+import OAuthRecovery from "../components/OAuthRecovery";
 
 export const metadata: Metadata = {
   title: "RAVINE — Platform",
@@ -29,6 +30,7 @@ export default async function RootLayout({
         {children}
         <VideoHoverPreview />
         <GuestMenuMotion />
+        <OAuthRecovery />
       </body>
     </html>
   );
