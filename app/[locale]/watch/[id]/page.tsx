@@ -281,33 +281,27 @@ export default function WatchPage() {
         }
       }
 
-      const storagePath = extractStoragePath(
-        loadedVideo.video_url
-      );
-
-      if (!storagePath) {
-        setError("Video file is unavailable.");
-        setLoading(false);
-        return;
-      }
-
-      const { data: signedData, error: signedError } =
-        await supabase.storage
-          .from("videos")
-          .createSignedUrl(storagePath, 60 * 60);
+      const signedResponse = await fetch(`/api/watch/${id}`, {
+        method: "GET",
+        cache: "no-store",
+      });
 
       if (cancelled) return;
 
-      if (signedError || !signedData?.signedUrl) {
+      const signedPayload = (await signedResponse.json()) as {
+        signedUrl?: string;
+        error?: string;
+      };
+
+      if (!signedResponse.ok || !signedPayload.signedUrl) {
         setError(
-          signedError?.message ||
-            "Unable to create secure video URL."
+          signedPayload.error || "Unable to create secure video URL."
         );
         setLoading(false);
         return;
       }
 
-      setSignedUrl(signedData.signedUrl);
+      setSignedUrl(signedPayload.signedUrl);
 
       await loadComments(Number(id));
 
