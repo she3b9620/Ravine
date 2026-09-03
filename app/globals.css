@@ -13,7 +13,6 @@
   font-style: normal;
   font-display: swap;
 }
-
 @font-face {
   font-family: "Thmanyah Sans";
   src: url("/fonts/thmanyahsans-Regular.woff2") format("woff2");
@@ -21,7 +20,6 @@
   font-style: normal;
   font-display: swap;
 }
-
 @font-face {
   font-family: "Thmanyah Sans";
   src: url("/fonts/thmanyahsans-Medium.woff2") format("woff2");
@@ -29,7 +27,6 @@
   font-style: normal;
   font-display: swap;
 }
-
 @font-face {
   font-family: "Thmanyah Sans";
   src: url("/fonts/thmanyahsans-Bold.woff2") format("woff2");
@@ -37,7 +34,6 @@
   font-style: normal;
   font-display: swap;
 }
-
 @font-face {
   font-family: "Thmanyah Sans";
   src: url("/fonts/thmanyahsans-Black.woff2") format("woff2");
@@ -53,7 +49,6 @@
   font-style: normal;
   font-display: swap;
 }
-
 @font-face {
   font-family: "Satoshi";
   src: url("/fonts/Satoshi-Regular.otf") format("opentype");
@@ -61,7 +56,6 @@
   font-style: normal;
   font-display: swap;
 }
-
 @font-face {
   font-family: "Satoshi";
   src: url("/fonts/Satoshi-Medium.otf") format("opentype");
@@ -69,7 +63,6 @@
   font-style: normal;
   font-display: swap;
 }
-
 @font-face {
   font-family: "Satoshi";
   src: url("/fonts/Satoshi-Bold.otf") format("opentype");
@@ -77,7 +70,6 @@
   font-style: normal;
   font-display: swap;
 }
-
 @font-face {
   font-family: "Satoshi";
   src: url("/fonts/Satoshi-Black.otf") format("opentype");
@@ -85,7 +77,6 @@
   font-style: normal;
   font-display: swap;
 }
-
 @font-face {
   font-family: "Satoshi";
   src: url("/fonts/Satoshi-Italic.otf") format("opentype");
@@ -108,9 +99,7 @@
   --foreground: var(--ravine-ivory);
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 html {
   min-height: 100%;
@@ -119,12 +108,7 @@ html {
   scrollbar-width: thin;
 }
 
-html,
-body {
-  margin: 0;
-  padding: 0;
-  min-height: 100%;
-}
+html, body { margin: 0; padding: 0; min-height: 100%; }
 
 body {
   min-height: 100vh;
@@ -132,245 +116,86 @@ body {
   color: var(--ravine-ivory);
 }
 
+/* Arabic route uses Thmanyah Serif Display first; Latin text can fall back to Satoshi. */
 html[lang="ar"] body {
-  font-family: "Thmanyah Sans", sans-serif;
+  font-family: "Thmanyah Serif Display", "Satoshi", "Thmanyah Sans", serif;
 }
 
+/* English route uses Satoshi first; Arabic glyphs can fall back to Thmanyah Serif Display. */
 html[lang="en"] body {
-  font-family: "Satoshi", sans-serif;
+  font-family: "Satoshi", "Thmanyah Serif Display", sans-serif;
 }
 
 .font-ar {
-  font-family: "Thmanyah Sans", sans-serif !important;
+  font-family: "Thmanyah Serif Display", "Satoshi", "Thmanyah Sans", serif !important;
 }
 
 .font-en {
-  font-family: "Satoshi", sans-serif !important;
+  font-family: "Satoshi", "Thmanyah Serif Display", sans-serif !important;
 }
 
-.font-ar *,
-.font-en * {
-  font-family: inherit !important;
-}
+.font-ar *, .font-en * { font-family: inherit !important; }
 
-button,
-input,
-textarea,
-select {
-  font: inherit;
-}
-
-img {
-  display: block;
-  max-width: 100%;
-}
-
-a,
-button {
-  -webkit-tap-highlight-color: transparent;
-}
-
-::selection {
-  background: rgba(196, 122, 82, .30);
-  color: #fffaf1;
-}
+button, input, textarea, select { font: inherit; }
+img { display: block; max-width: 100%; }
+a, button { -webkit-tap-highlight-color: transparent; }
+::selection { background: rgba(196, 122, 82, .30); color: #fffaf1; }
 
 /* =========================================================
    CINEMATIC MOTION SYSTEM
    ========================================================= */
 
 @keyframes ravine-page-in {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-
 @keyframes ravine-float-a {
-  0%, 100% {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  50% {
-    transform: translate3d(28px, -24px, 0) scale(1.08);
-  }
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(28px, -24px, 0) scale(1.08); }
 }
-
 @keyframes ravine-float-b {
-  0%, 100% {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  50% {
-    transform: translate3d(-34px, 20px, 0) scale(1.12);
-  }
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(-34px, 20px, 0) scale(1.12); }
 }
-
 @keyframes ravine-sheen {
-  from {
-    transform: translateX(-130%) skewX(-18deg);
-    opacity: 0;
-  }
-  20% {
-    opacity: .18;
-  }
-  80% {
-    opacity: .18;
-  }
-  to {
-    transform: translateX(130%) skewX(-18deg);
-    opacity: 0;
-  }
+  from { transform: translateX(-130%) skewX(-18deg); opacity: 0; }
+  20% { opacity: .18; }
+  80% { opacity: .18; }
+  to { transform: translateX(130%) skewX(-18deg); opacity: 0; }
 }
-
 @keyframes ravine-pulse-ring {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(196, 122, 82, 0);
-  }
-  50% {
-    box-shadow: 0 0 0 10px rgba(196, 122, 82, .03);
-  }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(196, 122, 82, 0); }
+  50% { box-shadow: 0 0 0 10px rgba(196, 122, 82, .03); }
 }
-
 @keyframes ravine-reveal {
-  from {
-    opacity: 0;
-    transform: translateY(24px) scale(.985);
-    filter: blur(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-    filter: blur(0);
-  }
+  from { opacity: 0; transform: translateY(24px) scale(.985); filter: blur(4px); }
+  to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
 }
-
 @keyframes ravine-gradient-shift {
-  0%, 100% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
 }
 
-.ravine-page {
-  isolation: isolate;
-  animation: ravine-page-in 700ms cubic-bezier(.22, 1, .36, 1) both;
-}
-
-.ravine-ambient {
-  position: absolute;
-  width: 34rem;
-  height: 34rem;
-  border-radius: 9999px;
-  filter: blur(120px);
-  opacity: .11;
-}
-
-.ravine-ambient-one {
-  top: -10rem;
-  inset-inline-end: -7rem;
-  animation: ravine-float-a 16s ease-in-out infinite;
-}
-
-.ravine-ambient-two {
-  bottom: -12rem;
-  inset-inline-start: -8rem;
-  animation: ravine-float-b 19s ease-in-out infinite;
-}
-
-.ravine-grain {
-  position: absolute;
-  inset: 0;
-  opacity: .035;
-  background-image: radial-gradient(rgba(255,255,255,.75) .55px, transparent .55px);
-  background-size: 5px 5px;
-  mix-blend-mode: soft-light;
-}
-
-.ravine-hero-shell {
-  box-shadow:
-    0 40px 100px rgba(0, 0, 0, .18),
-    inset 0 1px 0 rgba(255,255,255,.035);
-}
-
-.ravine-hero-shell::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  width: 35%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,.05), transparent);
-  transform: translateX(-130%) skewX(-18deg);
-  animation: ravine-sheen 9s ease-in-out infinite;
-  pointer-events: none;
-}
-
-.ravine-nav-item:hover {
-  background: rgba(196, 122, 82, .08);
-  color: var(--ravine-ivory) !important;
-  transform: translateX(2px);
-}
-
-.ravine-light .ravine-nav-item:hover {
-  color: #191716 !important;
-}
-
-.ravine-card,
-.ravine-feature-card,
-.ravine-creator-card {
-  transition:
-    transform 500ms cubic-bezier(.22, 1, .36, 1),
-    border-color 350ms ease,
-    box-shadow 500ms cubic-bezier(.22, 1, .36, 1),
-    background-color 350ms ease;
-}
-
-.ravine-card:hover,
-.ravine-feature-card:hover,
-.ravine-creator-card:hover {
-  transform: translateY(-7px);
-  box-shadow: 0 22px 55px rgba(0,0,0,.20);
-  border-color: rgba(196, 122, 82, .23) !important;
-}
-
-.ravine-card:hover {
-  animation: ravine-pulse-ring 2.5s ease-in-out infinite;
-}
-
-/* Better scrollbar for the platform feel */
-.ravine-page::-webkit-scrollbar {
-  width: 8px;
-}
-
-.ravine-page::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, rgba(196,122,82,.65), rgba(24,63,70,.70));
-  border-radius: 999px;
-}
-
-.ravine-page::-webkit-scrollbar-track {
-  background: transparent;
-}
+.ravine-page { isolation: isolate; animation: ravine-page-in 700ms cubic-bezier(.22, 1, .36, 1) both; }
+.ravine-ambient { position: absolute; width: 34rem; height: 34rem; border-radius: 9999px; filter: blur(120px); opacity: .11; }
+.ravine-ambient-one { top: -10rem; inset-inline-end: -7rem; animation: ravine-float-a 16s ease-in-out infinite; }
+.ravine-ambient-two { bottom: -12rem; inset-inline-start: -8rem; animation: ravine-float-b 19s ease-in-out infinite; }
+.ravine-grain { position: absolute; inset: 0; opacity: .035; background-image: radial-gradient(rgba(255,255,255,.75) .55px, transparent .55px); background-size: 5px 5px; mix-blend-mode: soft-light; }
+.ravine-hero-shell { box-shadow: 0 40px 100px rgba(0, 0, 0, .18), inset 0 1px 0 rgba(255,255,255,.035); }
+.ravine-hero-shell::after { content: ""; position: absolute; inset: 0; width: 35%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.05), transparent); transform: translateX(-130%) skewX(-18deg); animation: ravine-sheen 9s ease-in-out infinite; pointer-events: none; }
+.ravine-nav-item:hover { background: rgba(196, 122, 82, .08); color: var(--ravine-ivory) !important; transform: translateX(2px); }
+.ravine-light .ravine-nav-item:hover { color: #191716 !important; }
+.ravine-card, .ravine-feature-card, .ravine-creator-card { transition: transform 500ms cubic-bezier(.22, 1, .36, 1), border-color 350ms ease, box-shadow 500ms cubic-bezier(.22, 1, .36, 1), background-color 350ms ease; }
+.ravine-card:hover, .ravine-feature-card:hover, .ravine-creator-card:hover { transform: translateY(-7px); box-shadow: 0 22px 55px rgba(0,0,0,.20); border-color: rgba(196, 122, 82, .23) !important; }
+.ravine-card:hover { animation: ravine-pulse-ring 2.5s ease-in-out infinite; }
+.ravine-page::-webkit-scrollbar { width: 8px; }
+.ravine-page::-webkit-scrollbar-thumb { background: linear-gradient(180deg, rgba(196,122,82,.65), rgba(24,63,70,.70)); border-radius: 999px; }
+.ravine-page::-webkit-scrollbar-track { background: transparent; }
 
 @supports (animation-timeline: view()) {
-  .ravine-card,
-  .ravine-feature-card,
-  .ravine-creator-card {
-    animation: ravine-reveal linear both;
-    animation-timeline: view();
-    animation-range: entry 2% cover 18%;
-  }
+  .ravine-card, .ravine-feature-card, .ravine-creator-card { animation: ravine-reveal linear both; animation-timeline: view(); animation-range: entry 2% cover 18%; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    scroll-behavior: auto !important;
-    animation-duration: .01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: .01ms !important;
-  }
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
