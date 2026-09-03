@@ -47,6 +47,8 @@ export async function GET(request: Request) {
 
     if (!error) {
       const destination = new URL(getSafeDestination(locale, next), request.url);
+      destination.searchParams.set("ravine_auth", "fresh");
+      destination.searchParams.set("t", Date.now().toString());
       const response = NextResponse.redirect(destination);
       response.headers.set("Cache-Control", "no-store, max-age=0");
       return response;
