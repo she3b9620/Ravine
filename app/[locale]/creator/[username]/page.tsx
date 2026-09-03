@@ -411,10 +411,12 @@ export default function CreatorProfilePage() {
         <div className="mt-12 flex flex-col gap-4 rounded-[30px] border p-6 md:flex-row md:items-center md:justify-between md:p-7" style={{ borderColor: "rgba(196,122,82,.18)", background: "linear-gradient(135deg, rgba(196,122,82,.08), rgba(24,63,70,.10))" }} dir={ar ? "rtl" : "ltr"}>
           <div>
             <p className="text-xs font-black uppercase tracking-[.18em]" style={{ color: "#C47A52" }}>RAVINE COMMUNITY</p>
-            <h2 className="mt-2 text-xl font-black">{ar ? "المرحلة التالية: مساحة مجتمع المبدع." : "Next: the creator community layer."}</h2>
-            <p className="mt-1 text-sm opacity-50">{ar ? "البروفايل أصبح هوية؛ لاحقًا يضاف المجتمع، التحديثات، ما وراء الكواليس والفعاليات." : "The profile is now an identity; community, updates, BTS and events plug into it next."}</p>
+            <h2 className="mt-2 text-xl font-black">{ar ? "شوف ما يحدث حول المبدعين." : "See what is happening around the creators."}</h2>
+            <p className="mt-1 text-sm opacity-50">{ar ? "اكتشف النقاشات، التحديثات والأعمال الجديدة في مجتمع RAVINE." : "Discover conversations, updates and new work across the RAVINE community."}</p>
           </div>
-          <span className="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold opacity-55" style={{ borderColor: "rgba(241,233,220,.10)" }}><Sparkles size={14} /> RAVINE Select</span>
+          <a href={`/${locale}/community`} className="inline-flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-xs font-black" style={{ background: "#C47A52", color: "#090909" }}>
+            {ar ? "اذهب إلى المجتمع" : "Open community"} <ArrowUpRight size={14} />
+          </a>
         </div>
 
         <div className="mt-7 text-center text-xs opacity-30">
