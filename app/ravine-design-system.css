@@ -199,6 +199,11 @@ select option {
   display: none !important;
 }
 
+/* In light mode, keep the hero layout and cinematic gradients, but remove its photographic image. */
+.ravine-page.ravine-light .ravine-hero-shell > div:first-child {
+  background-image: none !important;
+}
+
 /* Trend and work rails become image-led/editorial, not a card wall. */
 .ravine-page .ravine-card,
 .ravine-page .ravine-home-card {
