@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocale } from "next-intl";
 import { Radio, Users, Video } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -11,7 +11,7 @@ type LiveItem = { id: number; title: string; thumbnail_url: string | null; views
 export default function LivePage() {
   const locale = useLocale();
   const ar = locale === "ar";
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const [live, setLive] = useState<LiveItem[]>([]);
   const [loading, setLoading] = useState(true);
 
