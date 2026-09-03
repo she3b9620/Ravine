@@ -167,6 +167,73 @@ select option {
   border-top: 1px solid var(--ravine-border-soft) !important;
 }
 
+/* Homepage: the work stays louder than the chrome. */
+.ravine-page > .relative.z-10 > header {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.ravine-page > .relative.z-10 > header .border {
+  border-color: transparent !important;
+  background: transparent !important;
+}
+
+.ravine-page .ravine-hero-shell {
+  border-color: transparent !important;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.14);
+}
+
+.ravine-page .ravine-hero-shell h1 {
+  max-width: 12ch;
+  font-size: clamp(3.1rem, 6vw, 5.75rem);
+}
+
+.ravine-page .ravine-hero-shell > .absolute.bottom-5 {
+  display: none !important;
+}
+
+/* Trend and work rails become image-led/editorial, not a card wall. */
+.ravine-page .ravine-card,
+.ravine-page .ravine-home-card {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.ravine-page .ravine-card {
+  border-color: transparent !important;
+}
+
+.ravine-page .ravine-card > a > div:last-child,
+.ravine-page .ravine-home-card > div:last-child {
+  padding-inline: 0.25rem;
+}
+
+/* Category navigation is a typographic rail rather than eight boxes. */
+.ravine-page section:nth-of-type(3) > div:last-child > a {
+  border-color: transparent !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+  padding-inline: 0.25rem;
+  border-bottom: 1px solid var(--ravine-border-soft);
+}
+
+/* Creator strip: identity first, container second. */
+.ravine-page section:nth-of-type(4) a {
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Community CTA is a closing editorial spread, not another card. */
+.ravine-page section:last-of-type {
+  border-color: transparent !important;
+  box-shadow: none !important;
+  border-top: 1px solid var(--ravine-border-soft);
+  border-radius: 0 !important;
+  padding-inline: 0 !important;
+}
+
 /* Creator identity: imagery and personality outrank database metadata. */
 .ravine-creator-culture {
   position: relative;
@@ -210,6 +277,20 @@ select option {
 .ravine-light .ravine-ambient,
 .ravine-platform-shell[style*="#F1E9DC"] .ravine-ambient {
   opacity: .18;
+}
+
+/* Auth/account surfaces inherit RAVINE's editorial language instead of generic SaaS panels. */
+main[class~="py-20"][class~="text-[#F1E9DC]"],
+main[class~="py-12"][class~="text-[#F1E9DC]"] {
+  background:
+    radial-gradient(circle at 75% 8%, rgba(196,122,82,.10), transparent 28%),
+    radial-gradient(circle at 15% 95%, rgba(24,63,70,.18), transparent 34%),
+    #090909 !important;
+}
+
+main[class~="py-20"][class~="text-[#F1E9DC]"] > div,
+main[class~="py-12"][class~="text-[#F1E9DC]"] > div {
+  max-width: 1100px;
 }
 
 /* Motion hierarchy: hero/work may move; utility chrome should not perform. */
