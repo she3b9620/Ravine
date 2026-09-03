@@ -44,11 +44,17 @@ select option {
 .ravine-page [class*="rounded-[30px]"],
 .ravine-page [class*="rounded-[32px]"],
 .ravine-page [class*="rounded-[34px]"],
+.ravine-page [class*="rounded-[36px]"],
+.ravine-page [class*="rounded-[40px]"],
+.ravine-page [class*="rounded-[48px]"],
 .ravine-platform-shell [class*="rounded-3xl"],
 .ravine-platform-shell [class*="rounded-[28px]"],
 .ravine-platform-shell [class*="rounded-[30px]"],
 .ravine-platform-shell [class*="rounded-[32px]"],
-.ravine-platform-shell [class*="rounded-[34px]"] {
+.ravine-platform-shell [class*="rounded-[34px]"],
+.ravine-platform-shell [class*="rounded-[36px]"],
+.ravine-platform-shell [class*="rounded-[40px]"],
+.ravine-platform-shell [class*="rounded-[48px]"] {
   border-radius: var(--ravine-radius-xl) !important;
 }
 
@@ -312,6 +318,18 @@ main[class~="py-12"][class~="text-[#F1E9DC]"] > div {
 .ravine-page a:not(.ravine-card):not(.ravine-home-work),
 .ravine-platform-shell a:not(.ravine-creator-culture) {
   transition-timing-function: cubic-bezier(.22, 1, .36, 1);
+}
+
+/* Pages outside the homepage still inherit the same editorial geometry. */
+.ravine-platform-shell [class*="rounded-[5rem]"],
+.ravine-platform-shell [class*="rounded-[4rem]"],
+.ravine-platform-shell [class*="rounded-[3.5rem]"] {
+  border-radius: var(--ravine-radius-xl) !important;
+}
+
+/* Dense utility controls stay compact and square-ish even when copied from older surfaces. */
+.ravine-platform-shell [class*="rounded-lg"] {
+  border-radius: var(--ravine-radius-md) !important;
 }
 
 @media (max-width: 1023px) {
