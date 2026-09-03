@@ -101,7 +101,7 @@ export default function WatchPage() {
   const [video, setVideo] = useState<Video | null>(null);
   const [signedUrl, setSignedUrl] = useState("");
 
-  const [comments, setComments] = useState<Comment[]>([]);
+  const [comments, set{locale === "ar" ? "التعليقات" : "Comments"}] = useState<Comment[]>([]);
   const [profiles, setProfiles] = useState<Record<string, Profile>>({});
 
   const [commentText, setCommentText] = useState("");
@@ -327,7 +327,7 @@ export default function WatchPage() {
     const user = await getCurrentUser();
 
     if (!user) {
-      window.location.href = `/${locale}/auth`;
+      window.location.href = `/${locale}/auth?next=/${locale}/watch/${id}`;
       return null;
     }
 
@@ -614,7 +614,7 @@ export default function WatchPage() {
     return (
       <main className="min-h-screen bg-[#090909] px-5 py-20 text-[#F1E9DC]">
         <div className="mx-auto max-w-6xl text-center">
-          Loading video...
+          {locale === "ar" ? "جارٍ تحميل العمل..." : "Loading video..."}
         </div>
       </main>
     );
@@ -633,7 +633,7 @@ export default function WatchPage() {
 
           <div className="mt-8 rounded-3xl border border-red-500/20 bg-[#151719] p-8">
             <h1 className="text-2xl font-bold">
-              Unable to load video
+              {locale === "ar" ? "تعذر تحميل العمل" : "Unable to load video"}
             </h1>
 
             <p className="mt-3 break-all text-sm text-red-200">
@@ -662,7 +662,7 @@ export default function WatchPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#090909] px-5 py-10 text-[#F1E9DC]">
+    <main dir={locale === "ar" ? "rtl" : "ltr"} className="min-h-screen bg-[#090909] px-5 py-10 text-[#F1E9DC]">
       <div className="mx-auto max-w-6xl">
 
         <a
@@ -717,7 +717,7 @@ export default function WatchPage() {
               />
             ) : (
               <div className="flex h-full items-center justify-center text-sm text-[#F1E9DC]/50">
-                Video unavailable.
+                {locale === "ar" ? "ملف العمل غير متاح." : "Video unavailable."}
               </div>
             )}
           </div>
