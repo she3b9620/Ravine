@@ -1,0 +1,3 @@
+Backup marker before fixing auth/guest race condition.
+Base commit: 24f4341421a8d50d3224efeb5945f6b016571527
+Date: 2026-09-03
