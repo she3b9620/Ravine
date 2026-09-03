@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useLocale } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 
 type Video = {
@@ -21,7 +22,9 @@ type HistoryItem = {
 };
 
 export default function LibraryPage() {
-  const supabase = createClient();
+  const locale = useLocale();
+  const isArabic = locale === "ar";
+  const supabase = useMemo(() => createClient(), []);
 
   const [tab, setTab] = useState<
     "saved" | "history" | "liked"
@@ -42,7 +45,7 @@ export default function LibraryPage() {
       } = await supabase.auth.getUser();
 
       if (!user) {
-        window.location.href = "/ar/auth";
+        window.location.href = `/${locale}/auth?next=/${locale}/library`;
         return;
       }
 
@@ -158,7 +161,7 @@ export default function LibraryPage() {
           </div>
 
           <h1 className="mt-3 text-4xl font-black">
-            My Library
+            {isArabic ? "مكتبتي" : "My Library"}
           </h1>
         </div>
 
@@ -205,13 +208,13 @@ export default function LibraryPage() {
 
         {loading ? (
           <div className="mt-10 text-sm text-[#F1E9DC]/50">
-            Loading library...
+            {isArabic ? "جارٍ تحميل المكتبة..." : "Loading library..."}
           </div>
         ) : tab === "history" ? (
           <div className="mt-8 space-y-4">
             {history.length === 0 ? (
               <div className="rounded-3xl border border-[#183F46]/60 bg-[#151719] p-8 text-sm text-[#F1E9DC]/50">
-                Your watch history is empty.
+                {isArabic ? "سجل المشاهدة فارغ." : "Your watch history is empty."}
               </div>
             ) : (
               history.map((row) => {
@@ -232,7 +235,7 @@ export default function LibraryPage() {
                 return (
                   <a
                     key={`${video.id}-${row.last_watched_at}`}
-                    href={`/ar/watch/${video.id}`}
+                    href={`/${locale}/watch/${video.id}`}
                     className="block rounded-3xl border border-[#183F46]/60 bg-[#151719] p-4 md:flex md:gap-5"
                   >
                     <div className="relative aspect-video overflow-hidden rounded-2xl bg-[#183F46] md:w-64 md:shrink-0">
@@ -253,8 +256,8 @@ export default function LibraryPage() {
 
                       <p className="mt-2 text-xs text-[#F1E9DC]/40">
                         {row.completed
-                          ? "Completed"
-                          : `Resume at ${duration(
+                          ? "{isArabic ? "مكتمل" : "Completed"}"
+                          : `{isArabic ? "استئناف من" : "Resume at"} ${duration(
                               row.progress_seconds
                             )}`}
                       </p>
@@ -277,7 +280,7 @@ export default function LibraryPage() {
           <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {videos.length === 0 ? (
               <div className="rounded-3xl border border-[#183F46]/60 bg-[#151719] p-8 text-sm text-[#F1E9DC]/50">
-                Nothing here yet.
+                {isArabic ? "لا يوجد شيء هنا حتى الآن." : "Nothing here yet."}
               </div>
             ) : (
               videos.map((video) => (
@@ -314,7 +317,7 @@ export default function LibraryPage() {
         )}
 
         <a
-          href="/ar"
+          href={`/${locale}`}
           className="mt-10 inline-block text-sm text-[#F1E9DC]/50 hover:text-[#C47A52]"
         >
           ← Back to RAVINE
