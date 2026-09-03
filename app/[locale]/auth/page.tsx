@@ -1,10 +1,17 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
+import { useLocale } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 export default function AuthPage() {
-  const supabase = createClient();
+  const locale = useLocale();
+  const searchParams = useSearchParams();
+  const supabase = useMemo(() => createClient(), []);
+
+  const isArabic = locale === "ar";
+  const requestedNext = searchParams.get("next");
 
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
@@ -18,6 +25,16 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+
+  function safeNext() {
+    const fallback = `/${locale}`;
+
+    if (!requestedNext) return fallback;
+    if (requestedNext.startsWith("//")) return fallback;
+    if (!requestedNext.startsWith(`/${locale}`)) return fallback;
+
+    return requestedNext;
+  }
 
   useEffect(() => {
     async function clearStaleMfa() {
@@ -35,8 +52,8 @@ export default function AuthPage() {
       }
     }
 
-    clearStaleMfa();
-  }, []);
+    void clearStaleMfa();
+  }, [supabase]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -47,18 +64,25 @@ export default function AuthPage() {
 
     try {
       if (mode === "signup") {
+        const callback = new URL(
+          `${window.location.origin}/${locale}/auth/callback`
+        );
+        callback.searchParams.set("next", safeNext());
+
         const { error } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/ar/auth/callback`,
+            emailRedirectTo: callback.toString(),
           },
         });
 
         if (error) throw error;
 
         setMessage(
-          "Check your email to confirm your account before signing in."
+          isArabic
+            ? "راجع بريدك الإلكتروني لتأكيد الحساب قبل تسجيل الدخول."
+            : "Check your email to confirm your account before signing in."
         );
         return;
       }
@@ -87,7 +111,9 @@ export default function AuthPage() {
 
         if (!factor) {
           throw new Error(
-            "Your account requires MFA, but no verified authenticator was found."
+            isArabic
+              ? "الحساب يتطلب المصادقة الثنائية، لكن لم يتم العثور على تطبيق موثق."
+              : "Your account requires MFA, but no verified authenticator was found."
           );
         }
 
@@ -104,11 +130,14 @@ export default function AuthPage() {
         return;
       }
 
-      const locale = window.location.pathname.split("/")[1] || "ar";
-      window.location.href = `/${locale}`;
+      window.location.href = safeNext();
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Something went wrong."
+        err instanceof Error
+          ? err.message
+          : isArabic
+            ? "حدث خطأ غير متوقع."
+            : "Something went wrong."
       );
     } finally {
       setLoading(false);
@@ -122,7 +151,11 @@ export default function AuthPage() {
 
     try {
       if (!/^\d{6}$/.test(mfaCode)) {
-        throw new Error("Enter the 6-digit code from your authenticator app.");
+        throw new Error(
+          isArabic
+            ? "أدخل الرمز المكون من 6 أرقام من تطبيق المصادقة."
+            : "Enter the 6-digit code from your authenticator app."
+        );
       }
 
       const { error } = await supabase.auth.mfa.verify({
@@ -137,14 +170,21 @@ export default function AuthPage() {
         await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
 
       if (!aal || aal.currentLevel !== "aal2") {
-        throw new Error("MFA verification could not be completed.");
+        throw new Error(
+          isArabic
+            ? "تعذر إكمال التحقق بالمصادقة الثنائية."
+            : "MFA verification could not be completed."
+        );
       }
 
-      const locale = window.location.pathname.split("/")[1] || "ar";
-      window.location.href = `/${locale}`;
+      window.location.href = safeNext();
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "MFA verification failed."
+        err instanceof Error
+          ? err.message
+          : isArabic
+            ? "فشل التحقق بالمصادقة الثنائية."
+            : "MFA verification failed."
       );
     } finally {
       setLoading(false);
@@ -161,11 +201,13 @@ export default function AuthPage() {
             </div>
 
             <h1 className="text-3xl font-bold">
-              Two-factor authentication
+              {isArabic ? "المصادقة الثنائية" : "Two-factor authentication"}
             </h1>
 
             <p className="mt-3 text-sm text-[#F1E9DC]/60">
-              Enter the 6-digit code from your authenticator app.
+              {isArabic
+                ? "أدخل الرمز المكون من 6 أرقام من تطبيق المصادقة."
+                : "Enter the 6-digit code from your authenticator app."}
             </p>
           </div>
 
@@ -185,11 +227,17 @@ export default function AuthPage() {
 
             <button
               type="button"
-              onClick={verifyMfa}
+              onClick={() => void verifyMfa()}
               disabled={loading || mfaCode.length !== 6}
               className="mt-5 w-full rounded-2xl bg-[#C47A52] px-4 py-3 font-semibold text-[#090909] disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {loading ? "Verifying..." : "Verify and continue"}
+              {loading
+                ? isArabic
+                  ? "جارٍ التحقق..."
+                  : "Verifying..."
+                : isArabic
+                  ? "تحقق وتابع"
+                  : "Verify and continue"}
             </button>
 
             {error && (
@@ -202,11 +250,11 @@ export default function AuthPage() {
               type="button"
               onClick={async () => {
                 await supabase.auth.signOut({ scope: "local" });
-                window.location.href = "/ar/auth";
+                window.location.href = `/${locale}/auth`;
               }}
               className="mt-4 w-full text-sm text-[#F1E9DC]/50 hover:text-[#C47A52]"
             >
-              Cancel and sign out
+              {isArabic ? "إلغاء وتسجيل الخروج" : "Cancel and sign out"}
             </button>
           </div>
         </div>
@@ -223,13 +271,23 @@ export default function AuthPage() {
           </div>
 
           <h1 className="text-3xl font-bold">
-            {mode === "signin" ? "Welcome back" : "Create your account"}
+            {mode === "signin"
+              ? isArabic
+                ? "مرحبًا بعودتك"
+                : "Welcome back"
+              : isArabic
+                ? "أنشئ حسابك"
+                : "Create your account"}
           </h1>
 
           <p className="mt-3 text-sm text-[#F1E9DC]/60">
             {mode === "signin"
-              ? "Sign in to continue to RAVINE."
-              : "Create your RAVINE account with your email."}
+              ? isArabic
+                ? "سجل الدخول للمتابعة إلى RAVINE."
+                : "Sign in to continue to RAVINE."
+              : isArabic
+                ? "أنشئ حساب RAVINE باستخدام بريدك الإلكتروني."
+                : "Create your RAVINE account with your email."}
           </p>
         </div>
 
@@ -238,7 +296,7 @@ export default function AuthPage() {
           className="rounded-3xl border border-[#183F46]/60 bg-[#151719] p-6 shadow-2xl"
         >
           <label className="block text-sm">
-            Email
+            {isArabic ? "البريد الإلكتروني" : "Email"}
             <input
               type="email"
               required
@@ -251,7 +309,7 @@ export default function AuthPage() {
           </label>
 
           <label className="mt-5 block text-sm">
-            Password
+            {isArabic ? "كلمة المرور" : "Password"}
             <input
               type="password"
               required
@@ -268,10 +326,10 @@ export default function AuthPage() {
 
           <div className="mt-4 flex justify-end">
             <a
-              href="/ar/auth/forgot-password"
+              href={`/${locale}/auth/forgot-password`}
               className="text-sm text-[#F1E9DC]/60 hover:text-[#C47A52]"
             >
-              Forgot password?
+              {isArabic ? "نسيت كلمة المرور؟" : "Forgot password?"}
             </a>
           </div>
 
@@ -281,10 +339,16 @@ export default function AuthPage() {
             className="mt-6 w-full rounded-2xl bg-[#C47A52] px-4 py-3 font-semibold text-[#090909] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading
-              ? "Please wait..."
+              ? isArabic
+                ? "برجاء الانتظار..."
+                : "Please wait..."
               : mode === "signin"
-                ? "Sign in"
-                : "Create account"}
+                ? isArabic
+                  ? "تسجيل الدخول"
+                  : "Sign in"
+                : isArabic
+                  ? "إنشاء الحساب"
+                  : "Create account"}
           </button>
 
           {message && (
@@ -309,8 +373,12 @@ export default function AuthPage() {
             className="mt-5 w-full text-sm text-[#F1E9DC]/60 hover:text-[#C47A52]"
           >
             {mode === "signin"
-              ? "Don't have an account? Create one"
-              : "Already have an account? Sign in"}
+              ? isArabic
+                ? "ليس لديك حساب؟ أنشئ حسابًا"
+                : "Don't have an account? Create one"
+              : isArabic
+                ? "لديك حساب بالفعل؟ سجل الدخول"
+                : "Already have an account? Sign in"}
           </button>
         </form>
       </div>
