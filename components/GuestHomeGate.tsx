@@ -39,9 +39,10 @@ export default function GuestHomeGate({ children }: Props) {
     let active = true;
     supabase.auth.getUser().then(async ({ data }) => {
       if (!active) return;
-      setAuthenticated(Boolean(data.user));
+      const isSignedIn = Boolean(data.user);
+      setAuthenticated(isSignedIn);
       setResolved(true);
-      if (isHome && !data.user) {
+      if (isHome && !isSignedIn) {
         const [works, creators, categories] = await Promise.all([
           supabase.from("videos").select("id", { count: "exact", head: true }).eq("published", true),
           supabase.from("creators").select("id", { count: "exact", head: true }),
@@ -52,15 +53,42 @@ export default function GuestHomeGate({ children }: Props) {
       }
     });
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
       if (!active) return;
-      setAuthenticated(Boolean(session?.user));
+      const signedIn = Boolean(session?.user);
+      setAuthenticated(signedIn);
+      if (signedIn) {
+        setAuthOpen(false);
+        setPublicGateOpen(false);
+        if (isHome && event === "SIGNED_IN") {
+          window.location.replace(`/${locale}`);
+        }
+      }
     });
     return () => {
       active = false;
       listener.subscription.unsubscribe();
     };
-  }, [isHome, supabase]);
+  }, [isHome, locale, supabase]);
+
+  useEffect(() => {
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (isHome && event.persisted) {
+        window.location.reload();
+      }
+    };
+    window.addEventListener("pageshow", handlePageShow);
+    return () => window.removeEventListener("pageshow", handlePageShow);
+  }, [isHome]);
+
+  useEffect(() => {
+    if (isHome && resolved && authenticated) {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("ravine_auth") === "fresh") {
+        window.history.replaceState({}, document.title, `/${locale}`);
+      }
+    }
+  }, [authenticated, isHome, locale, resolved]);
 
   useEffect(() => {
     if (!isHome || !resolved || authenticated) {
