@@ -66,11 +66,22 @@ export default function StudioContentPage() {
   async function togglePublished(video: Video) {
     setUpdatingId(video.id);
     setError("");
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      window.location.href = `/${locale}/auth?next=/${locale}/studio/content`;
+      return;
+    }
+
     const nextPublished = !video.published;
     const { error: updateError } = await supabase
       .from("videos")
       .update({ published: nextPublished })
-      .eq("id", video.id);
+      .eq("id", video.id)
+      .eq("user_id", user.id);
 
     if (updateError) {
       setError(updateError.message);
