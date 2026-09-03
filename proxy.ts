@@ -12,6 +12,7 @@ const protectedRoutes = [
   "/admin",
   "/creator/upload",
   "/creator/video",
+  "/creators-hub",
 ];
 
 function isProtectedPath(pathname: string) {
