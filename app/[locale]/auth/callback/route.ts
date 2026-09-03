@@ -55,9 +55,12 @@ export async function GET(request: Request) {
     }
   }
 
-  const errorUrl = new URL(`/${locale}/auth`, request.url);
-  errorUrl.searchParams.set("error", "auth_callback_failed");
-  return NextResponse.redirect(errorUrl, {
-    headers: { "Cache-Control": "no-store, max-age=0" },
-  });
+  // Never expose the legacy auth error page after an OAuth callback fails.
+  // Return to the home shell so the client can restore any valid session itself.
+  const fallback = new URL(`/${locale}`, request.url);
+  fallback.searchParams.set("ravine_auth", "callback_failed");
+  fallback.searchParams.set("t", Date.now().toString());
+  const response = NextResponse.redirect(fallback);
+  response.headers.set("Cache-Control", "no-store, max-age=0");
+  return response;
 }
