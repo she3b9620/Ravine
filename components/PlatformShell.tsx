@@ -60,11 +60,14 @@ export default function PlatformShell({ children, active = "", title, eyebrow, d
 
   useEffect(() => {
     let mounted = true;
-    void supabase.auth.getUser().then(({ data }) => {
-      if (mounted) setUserName(data.user?.email?.split("@")[0] || "");
+
+    void supabase.auth.getSession().then(({ data }) => {
+      if (!mounted) return;
+      setUserName(data.session?.user?.email?.split("@")[0] || "");
     }).catch(() => {
       if (mounted) setUserName("");
     });
+
     return () => {
       mounted = false;
     };
