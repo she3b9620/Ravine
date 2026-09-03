@@ -216,7 +216,7 @@ export default function AccountPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#090909] px-5 py-12 text-[#F1E9DC]">
+    <main dir={isArabic ? "rtl" : "ltr"} className="min-h-screen bg-[#090909] px-5 py-12 text-[#F1E9DC]">
       <div className="mx-auto max-w-4xl">
         <a
           href={`/${locale}`}
@@ -261,10 +261,6 @@ export default function AccountPage() {
             <div className="mt-1 text-xs text-[#F1E9DC]/40">{isArabic ? "إدارة أعمالك" : "Manage your work"}</div>
           </a>
 
-          <a href={`/${locale}/admin`} className="rounded-2xl border border-[#183F46]/60 bg-[#151719] p-5">
-            <div className="text-sm font-bold">{isArabic ? "الإدارة" : "Admin"}</div>
-            <div className="mt-1 text-xs text-[#F1E9DC]/40">{isArabic ? "الإشراف" : "Moderation"}</div>
-          </a>
         </div>
 
         <form
