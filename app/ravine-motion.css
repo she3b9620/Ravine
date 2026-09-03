@@ -17,10 +17,21 @@ main > *:nth-child(3) { animation-delay: 100ms; }
 main > *:nth-child(4) { animation-delay: 150ms; }
 main > *:nth-child(5) { animation-delay: 200ms; }
 
+/* Home cinematic background: deliberately subtle so content remains dominant. */
+.ravine-page { position: relative; isolation: isolate; }
+.ravine-page::before { content: ""; position: fixed; inset: 76px 0 0; z-index: -2; pointer-events: none; background-image: url("https://wallpapercave.com/wp/wp15299591.png"); background-position: center center; background-size: cover; background-repeat: no-repeat; filter: grayscale(.18) brightness(.42) contrast(.88) saturate(.72); opacity: .16; transform: scale(1.025); }
+.ravine-page::after { content: ""; position: fixed; inset: 76px 0 0; z-index: -1; pointer-events: none; background: radial-gradient(circle at 50% 30%, rgba(0,0,0,.12), rgba(0,0,0,.60) 72%), linear-gradient(180deg, rgba(9,9,9,.28), rgba(9,9,9,.78)); }
+main.relative.z-10:has(> section.mx-auto) { position: relative; isolation: isolate; }
+main.relative.z-10:has(> section.mx-auto)::before { content: ""; position: absolute; inset: 0; z-index: -2; pointer-events: none; background-image: url("https://wallpapercave.com/wp/wp15299591.png"); background-position: center top; background-size: cover; background-repeat: no-repeat; filter: grayscale(.18) brightness(.43) contrast(.88) saturate(.72); opacity: .15; }
+main.relative.z-10:has(> section.mx-auto)::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(circle at 50% 18%, rgba(200,154,82,.05), transparent 34%), linear-gradient(180deg, rgba(11,11,11,.12), rgba(11,11,11,.76) 72%, rgba(11,11,11,.92)); }
+
 .ravine-hero-shell::before { content: ""; position: absolute; z-index: 3; left: 50%; top: 6%; width: 480px; height: 380px; transform: translateX(-50%); background: url("/RAVINE.png") center / contain no-repeat; filter: drop-shadow(0 22px 55px rgba(0,0,0,.38)); opacity: .98; pointer-events: none; animation: ravine-logo-breathe 7s ease-in-out infinite; }
 .ravine-light .ravine-hero-shell::before { filter: invert(1) drop-shadow(0 22px 55px rgba(0,0,0,.16)); }
-.ravine-hero-shell > div.relative.flex { transform: translateY(-34px); }
+.ravine-hero-shell > div.relative.flex { transform: translateY(-82px); }
 .ravine-hero-shell > div.relative.flex > img[src="/RAVINE.png"] { width: 520px !important; max-width: min(72vw, 520px); }
+
+/* Guest hero: move the logo + heading block higher so it anchors the first fold. */
+main.relative.z-10:has(> section.mx-auto) > section.mx-auto > div.grid > div:first-child { transform: translateY(-118px); }
 
 .ravine-page section, .ravine-page article, .ravine-page .ravine-card, .ravine-page .ravine-nav-item, .ravine-page header, .ravine-page aside, .ravine-page footer, .ravine-page form, .ravine-page [role="button"] { animation: ravine-focus-in 760ms cubic-bezier(.22,1,.36,1) both; }
 .ravine-card, .ravine-creator-card, .ravine-nav-item, .ravine-interactive { position: relative; overflow: hidden; isolation: isolate; }
@@ -48,8 +59,9 @@ main > *:nth-child(5) { animation-delay: 200ms; }
 
 @media (max-width: 1023px) {
   .ravine-hero-shell::before { width: 250px; height: 200px; top: 5%; }
-  .ravine-hero-shell > div.relative.flex { transform: translateY(-22px); }
+  .ravine-hero-shell > div.relative.flex { transform: translateY(-52px); }
   .ravine-hero-shell > div.relative.flex > img[src="/RAVINE.png"] { width: 420px !important; max-width: min(80vw, 420px); }
+  main.relative.z-10:has(> section.mx-auto) > section.mx-auto > div.grid > div:first-child { transform: translateY(-78px); }
 }
 @media (hover: none), (pointer: coarse) { .ravine-video-hover-target::after { display: none; } .ravine-preview-video, .ravine-preview-shade, .ravine-preview-visible .ravine-preview-video { display: none !important; } }
 @media (prefers-reduced-motion: reduce) { main > *, .ravine-hero-shell::before, .ravine-preview-video, .ravine-page section, .ravine-page article, .ravine-page .ravine-card, .ravine-page .ravine-nav-item, .ravine-page header, .ravine-page aside, .ravine-page footer, .ravine-page form, .ravine-page [role="button"] { animation: none !important; } a, button, input, textarea, select { transition: none !important; } }
