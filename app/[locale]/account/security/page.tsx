@@ -228,7 +228,7 @@ export default function SecurityPage() {
 
   if (loading) {
     return (
-      <main dir={locale === "ar" ? "rtl" : "ltr"} className="min-h-screen bg-[#090909" px-5 py-20 text-[#F1E9DC]">
+      <main dir={locale === "ar" ? "rtl" : "ltr"} className="min-h-screen bg-[#090909] px-5 py-20 text-[#F1E9DC]">
         <div className="mx-auto max-w-3xl text-center text-sm text-[#F1E9DC]/60">
           Loading security settings...
         </div>
