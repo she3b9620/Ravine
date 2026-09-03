@@ -8,6 +8,23 @@
   50% { transform: translate(-50%, -4px) scale(1.025); opacity: 1; }
 }
 
+@keyframes ravine-preview-in {
+  from { opacity: 0; transform: scale(1.012); filter: blur(5px) saturate(.82); }
+  to { opacity: 1; transform: scale(1); filter: blur(0) saturate(1); }
+}
+
+@keyframes ravine-preview-out {
+  from { opacity: 1; filter: blur(0); }
+  to { opacity: 0; filter: blur(5px); }
+}
+
+@keyframes ravine-preview-swap {
+  0% { opacity: 1; filter: blur(0); }
+  44% { opacity: 0; filter: blur(4px); transform: scale(1.01); }
+  56% { opacity: 0; filter: blur(4px); transform: scale(1.01); }
+  100% { opacity: 1; filter: blur(0); transform: scale(1); }
+}
+
 body { transition: background-color 420ms ease, color 420ms ease; }
 
 a, button { transition-property: transform, opacity, color, background-color, border-color, box-shadow, filter; transition-duration: 320ms; transition-timing-function: cubic-bezier(.22,1,.36,1); }
@@ -39,10 +56,51 @@ main > *:nth-child(5) { animation-delay: 200ms; }
 
 .ravine-light .ravine-hero-shell::before { filter: invert(1) drop-shadow(0 18px 45px rgba(0,0,0,.16)); }
 
+.ravine-video-hover-target {
+  position: relative !important;
+  isolation: isolate;
+  overflow: hidden;
+  background: #111;
+}
+
+.ravine-video-hover-target::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(0,0,0,.06), transparent 42%, rgba(0,0,0,.38));
+  opacity: .72;
+}
+
+.ravine-preview-video {
+  animation: ravine-preview-in 620ms cubic-bezier(.22,1,.36,1) both;
+  will-change: opacity, transform, filter;
+}
+
+.ravine-preview-shade {
+  background: linear-gradient(180deg, rgba(8,8,8,.08), transparent 40%, rgba(8,8,8,.34));
+}
+
+.ravine-preview-visible .ravine-preview-video { opacity: 1 !important; }
+.ravine-preview-swap .ravine-preview-video { animation: ravine-preview-swap 520ms cubic-bezier(.22,1,.36,1) both; }
+.ravine-preview-out .ravine-preview-video { animation: ravine-preview-out 440ms ease both; }
+.ravine-preview-out .ravine-preview-shade { opacity: 0; transition: opacity 360ms ease; }
+
+.ravine-video-hover-target:hover {
+  box-shadow: 0 18px 48px rgba(0,0,0,.18), 0 0 0 1px rgba(200,154,82,.14);
+}
+
 @media (max-width: 1023px) {
   .ravine-hero-shell::before { width: 190px; height: 150px; top: 7%; }
 }
 
+@media (hover: none), (pointer: coarse) {
+  .ravine-video-hover-target::after { display: none; }
+  .ravine-preview-video, .ravine-preview-shade, .ravine-preview-visible .ravine-preview-video { display: none !important; }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  main > *, .ravine-hero-shell::before { animation: none !important; }
+  main > *, .ravine-hero-shell::before, .ravine-preview-video { animation: none !important; }
+  a, button { transition: none !important; }
 }
