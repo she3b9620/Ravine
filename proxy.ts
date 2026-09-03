@@ -27,8 +27,7 @@ function isProtectedPath(pathname: string) {
   const appPath = `/${segments.slice(1).join("/")}` || "/";
 
   return protectedRoutes.some(
-    (route) =>
-      appPath === route || appPath.startsWith(`${route}/`)
+    (route) => appPath === route || appPath.startsWith(`${route}/`)
   );
 }
 
@@ -41,32 +40,42 @@ function copyCookies(from: NextResponse, to: NextResponse) {
 export default async function proxy(request: NextRequest) {
   const response = intlMiddleware(request);
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => {
-            request.cookies.set(name, value);
-          });
+  // Public routes do not need a Supabase server client. Keeping auth work out of
+  // the public request path prevents a missing/invalid runtime Supabase variable
+  // from taking down the entire site before the page can render.
+  if (!isProtectedPath(request.nextUrl.pathname)) {
+    return response;
+  }
 
-          cookiesToSet.forEach(({ name, value, options }) => {
-            response.cookies.set(name, value, options);
-          });
-        },
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    return response;
+  }
+
+  const supabase = createServerClient(supabaseUrl, supabaseKey, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll();
       },
-    }
-  );
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value }) => {
+          request.cookies.set(name, value);
+        });
+
+        cookiesToSet.forEach(({ name, value, options }) => {
+          response.cookies.set(name, value, options);
+        });
+      },
+    },
+  });
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!isProtectedPath(request.nextUrl.pathname) || user) {
+  if (user) {
     return response;
   }
 
@@ -77,7 +86,10 @@ export default async function proxy(request: NextRequest) {
     : routing.defaultLocale;
 
   const loginUrl = new URL(`/${locale}/auth`, request.url);
-  loginUrl.searchParams.set("next", `${request.nextUrl.pathname}${request.nextUrl.search}`);
+  loginUrl.searchParams.set(
+    "next",
+    `${request.nextUrl.pathname}${request.nextUrl.search}`
+  );
 
   const redirectResponse = NextResponse.redirect(loginUrl);
   copyCookies(response, redirectResponse);
