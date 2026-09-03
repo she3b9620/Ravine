@@ -55,10 +55,15 @@ export default function PlatformShell({ children, active = "", title, eyebrow, d
   const supabase = useMemo(() => createClient(), []);
   const [open, setOpen] = useState(false);
   const [dark, setDark] = useState(true);
+  const [themeReady, setThemeReady] = useState(false);
   const [userName, setUserName] = useState("");
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   useEffect(() => {
+    const savedTheme = window.localStorage.getItem("ravine-theme");
+    if (savedTheme === "light") setDark(false);
+    setThemeReady(true);
+
     let mounted = true;
 
     void supabase.auth.getSession().then(({ data }) => {
@@ -110,6 +115,14 @@ export default function PlatformShell({ children, active = "", title, eyebrow, d
     );
   };
 
+  function toggleTheme() {
+    setDark((current) => {
+      const next = !current;
+      window.localStorage.setItem("ravine-theme", next ? "dark" : "light");
+      return next;
+    });
+  }
+
   async function signOut() {
     if (isSigningOut) return;
     setIsSigningOut(true);
@@ -132,7 +145,7 @@ export default function PlatformShell({ children, active = "", title, eyebrow, d
           <div className="ms-auto flex items-center gap-2">
             <a href={href("/search")} className="flex h-10 w-10 items-center justify-center rounded-full border sm:w-auto sm:px-3" style={{ borderColor: line, background: panel }} aria-label={isArabic ? "البحث" : "Search"}><Search size={17} /><span className="hidden px-2 text-xs sm:inline">{isArabic ? "ابحث" : "Search"}</span></a>
             <a href={locale === "ar" ? "/en" : "/ar"} className="hidden rounded-full border px-3 py-2 text-[11px] font-bold sm:block" style={{ borderColor: line, background: panel }}>{locale === "ar" ? "EN" : "AR"}</a>
-            <button onClick={() => setDark((value) => !value)} className="flex h-10 w-10 items-center justify-center rounded-full border" style={{ borderColor: line, background: panel }} aria-label={isArabic ? "تغيير المظهر" : "Toggle theme"}>{dark ? <Sun size={16} /> : <Moon size={16} />}</button>
+            <button onClick={toggleTheme} className="flex h-10 w-10 items-center justify-center rounded-full border" style={{ borderColor: line, background: panel }} aria-label={isArabic ? "تغيير المظهر" : "Toggle theme"}>{dark ? <Sun size={16} /> : <Moon size={16} />}</button>
             {userName && <a href={href("/notifications")} className="hidden h-10 w-10 items-center justify-center rounded-full border md:flex" style={{ borderColor: line, background: panel }} aria-label={isArabic ? "الإشعارات" : "Notifications"}><Bell size={16} /></a>}
             {userName ? (
               <div className="hidden items-center gap-2 md:flex">
@@ -165,7 +178,7 @@ export default function PlatformShell({ children, active = "", title, eyebrow, d
         </div>
       </aside>
 
-      {open && <div className="fixed inset-0 z-[90] bg-black/60 backdrop-blur-sm lg:hidden" onClick={() => setOpen(false)}><aside className="h-full w-[min(86vw,320px)] border-e p-5" style={{ background: bg, borderColor: line }} onClick={(event) => event.stopPropagation()}><div className="flex items-center justify-between"><img src="/RAVINE.png" alt="RAVINE" className="h-11 w-auto" /><button onClick={() => setOpen(false)} className="flex h-10 w-10 items-center justify-center rounded-full border" style={{ borderColor: line }} aria-label={isArabic ? "إغلاق القائمة" : "Close menu"}><X size={18} /></button></div><div className="mt-8 space-y-1">{mainItems.map(renderItem)}</div></aside></div>}
+      {open && <div className="fixed inset-0 z-[90] bg-black/60 backdrop-blur-sm lg:hidden" onClick={() => setOpen(false)}><aside className="h-full w-[min(86vw,320px)] border-e p-5" style={{ background: bg, borderColor: line }} onClick={(event) => event.stopPropagation()}><div className="flex items-center justify-between"><img src="/RAVINE.png" alt="RAVINE" className="h-11 w-auto" /><button onClick={() => setOpen(false)} className="flex h-10 w-10 items-center justify-center rounded-full border" style={{ borderColor: line }} aria-label={isArabic ? "إغلاق القائمة" : "Close menu"}><X size={18} /></button></div><div className="mt-8 space-y-1">{mainItems.map(renderItem)}</div><div className="my-5 h-px" style={{ background: line }} /><div className="space-y-1"><a href={href("/library")} onClick={() => setOpen(false)} className="flex items-center gap-3 rounded-[14px] px-3 py-2.5 text-sm" style={{color: muted}}><span className="flex h-8 w-8 items-center justify-center rounded-[10px]"><Library size={17}/></span>{isArabic ? "مكتبتي" : "Library"}</a><a href={href("/account/security")} onClick={() => setOpen(false)} className="flex items-center gap-3 rounded-[14px] px-3 py-2.5 text-sm" style={{color: muted}}><span className="flex h-8 w-8 items-center justify-center rounded-[10px]"><Settings2 size={17}/></span>{isArabic ? "الإعدادات" : "Settings"}</a></div></aside></div>}
 
       <main className="lg:ps-[236px]">
         {(title || eyebrow) && (
