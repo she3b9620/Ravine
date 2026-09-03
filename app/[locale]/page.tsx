@@ -167,8 +167,7 @@ export default function HomePage() {
 
   useEffect(() => {
     try {
-      const storedTheme =
-        window.localStorage.getItem("ravine-theme");
+      const storedTheme = window.localStorage.getItem("ravine-theme");
 
       if (storedTheme === "light") {
         setDarkMode(false);
@@ -177,9 +176,7 @@ export default function HomePage() {
       } else {
         setDarkMode(
           !window.matchMedia ||
-            window.matchMedia(
-              "(prefers-color-scheme: dark)"
-            ).matches
+            window.matchMedia("(prefers-color-scheme: dark)").matches
         );
       }
     } catch {
@@ -230,12 +227,13 @@ export default function HomePage() {
 
         if (!mounted) return;
 
-        const loadedVideos = (videosResponse.data ??
-          []) as VideoRecord[];
+        const loadedVideos = Array.isArray(videosResponse.data)
+          ? (videosResponse.data as unknown as VideoRecord[])
+          : [];
 
-        const loadedCategories =
-          (categoriesResponse.data ??
-            []) as Category[];
+        const loadedCategories = Array.isArray(categoriesResponse.data)
+          ? (categoriesResponse.data as unknown as Category[])
+          : [];
 
         setVideos(loadedVideos);
 
@@ -248,19 +246,17 @@ export default function HomePage() {
         const user = profileResponse.data.user;
 
         if (user?.id) {
-          const { data: currentProfile } =
-            await supabase
-              .from("profiles")
-              .select(
-                "id,username,display_name,avatar_url"
-              )
-              .eq("id", user.id)
-              .maybeSingle();
+          const { data: currentProfile } = await supabase
+            .from("profiles")
+            .select("id,username,display_name,avatar_url")
+            .eq("id", user.id)
+            .maybeSingle();
 
           if (mounted) {
             setProfile(
-              (currentProfile ??
-                null) as Profile | null
+              currentProfile
+                ? (currentProfile as unknown as Profile)
+                : null
             );
           }
         }
@@ -268,23 +264,31 @@ export default function HomePage() {
         const creatorIds = Array.from(
           new Set(
             loadedVideos
-              .map((video: VideoRecord) => video.creator_id)
-              .filter(Boolean) as string[]
+              .map(
+                (video: VideoRecord) =>
+                  video.creator_id ?? null
+              )
+              .filter(
+                (creatorId): creatorId is string =>
+                  typeof creatorId === "string" &&
+                  creatorId.length > 0
+              )
           )
         ).slice(0, 16);
 
         if (creatorIds.length > 0) {
-          const { data: loadedCreators } =
-            await supabase
-              .from("profiles")
-              .select(
-                "id,username,display_name,avatar_url,bio"
-              )
-              .in("id", creatorIds);
+          const { data: loadedCreators } = await supabase
+            .from("profiles")
+            .select(
+              "id,username,display_name,avatar_url,bio"
+            )
+            .in("id", creatorIds);
 
           if (mounted) {
             setCreators(
-              (loadedCreators ?? []) as Creator[]
+              Array.isArray(loadedCreators)
+                ? (loadedCreators as unknown as Creator[])
+                : []
             );
           }
         } else {
@@ -357,77 +361,87 @@ export default function HomePage() {
     },
   ];
 
-  const filteredVideos = useMemo<VideoRecord[]>(
-    () => {
-      let result: VideoRecord[] = [...videos];
+  const filteredVideos: VideoRecord[] = useMemo(() => {
+    let result: VideoRecord[] = [...videos];
 
-      if (searchQuery.trim()) {
-        const query =
-          searchQuery.trim().toLowerCase();
+    if (searchQuery.trim()) {
+      const query = searchQuery.trim().toLowerCase();
 
-        result = result.filter(
-          (video: VideoRecord) => {
-            const title =
-              video.title?.toLowerCase() ?? "";
+      result = result.filter(
+        (video: VideoRecord) => {
+          const title =
+            typeof video.title === "string"
+              ? video.title.toLowerCase()
+              : "";
 
-            const description =
-              video.description?.toLowerCase() ?? "";
+          const description =
+            typeof video.description === "string"
+              ? video.description.toLowerCase()
+              : "";
 
-            return (
-              title.includes(query) ||
-              description.includes(query)
-            );
-          }
-        );
-      }
+          return (
+            title.includes(query) ||
+            description.includes(query)
+          );
+        }
+      );
+    }
 
-      if (activeRange !== "All") {
-        const now = Date.now();
+    if (activeRange !== "All") {
+      const now = Date.now();
 
-        const days =
-          activeRange === "Today"
-            ? 1
-            : activeRange === "This week"
-              ? 7
-              : 30;
+      const days =
+        activeRange === "Today"
+          ? 1
+          : activeRange === "This week"
+            ? 7
+            : 30;
 
-        const threshold =
-          now - days * 24 * 60 * 60 * 1000;
+      const threshold =
+        now - days * 24 * 60 * 60 * 1000;
 
-        result = result.filter(
-          (video: VideoRecord) => {
-            if (!video.created_at) return true;
+      result = result.filter(
+        (video: VideoRecord) => {
+          if (!video.created_at) return true;
 
-            const timestamp = new Date(
-              video.created_at
-            ).getTime();
+          const timestamp = new Date(
+            video.created_at
+          ).getTime();
 
-            return timestamp >= threshold;
-          }
-        );
-      }
+          return timestamp >= threshold;
+        }
+      );
+    }
 
-      return result;
-    },
-    [videos, searchQuery, activeRange]
-  );
+    return result;
+  }, [videos, searchQuery, activeRange]);
 
-  const trendingVideos: VideoRecord[] =
-    filteredVideos.slice(0, 6);
+  const trendingVideos: VideoRecord[] = (
+    filteredVideos as VideoRecord[]
+  ).slice(0, 6);
 
-  const freshVideos: VideoRecord[] =
-    filteredVideos.slice(6, 14);
+  const freshVideos: VideoRecord[] = (
+    filteredVideos as VideoRecord[]
+  ).slice(6, 14);
 
-  const liveVideos: VideoRecord[] =
-    filteredVideos
-      .filter(
-        (video: VideoRecord) =>
-          video.status === "live"
-      )
-      .slice(0, 4);
+  const liveVideos: VideoRecord[] = (
+    filteredVideos as VideoRecord[]
+  )
+    .filter(
+      (video: VideoRecord) =>
+        video.status === "live"
+    )
+    .slice(0, 4);
 
-  const displayCreators: Creator[] =
-    creators.slice(0, 8);
+  const displayCreators: Creator[] = (
+    creators as Creator[]
+  ).slice(0, 8);
+
+  const visibleCategories: Category[] = (
+    categories.length > 0
+      ? categories
+      : fallbackCategories
+  ).slice(0, 6);
 
   const pageBg = darkMode
     ? "bg-[#090909]"
@@ -1079,19 +1093,19 @@ export default function HomePage() {
                   />
 
                   <div className="absolute inset-0 grid grid-cols-6 opacity-[0.14]">
-                    {Array.from({
-                      length: 36,
-                    }).map((_, index) => (
-                      <span
-                        key={index}
-                        className={[
-                          "border-e border-b",
-                          darkMode
-                            ? "border-white/[0.09]"
-                            : "border-[#1C1814]/[0.12]",
-                        ].join(" ")}
-                      />
-                    ))}
+                    {Array.from({ length: 36 }).map(
+                      (_, index) => (
+                        <span
+                          key={index}
+                          className={[
+                            "border-e border-b",
+                            darkMode
+                              ? "border-white/[0.09]"
+                              : "border-[#1C1814]/[0.12]",
+                          ].join(" ")}
+                        />
+                      )
+                    )}
                   </div>
 
                   <div className="absolute inset-x-8 bottom-8 top-8 border border-[#C47A52]/20" />
@@ -1161,26 +1175,26 @@ export default function HomePage() {
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {loading
-                ? Array.from({
-                    length: 6,
-                  }).map((_, index) => (
-                    <div
-                      key={`skeleton-${index}`}
-                      className={[
-                        "overflow-hidden border animate-pulse",
-                        darkMode
-                          ? "border-white/[0.06] bg-white/[0.02]"
-                          : "border-[#241F1B]/[0.08] bg-black/[0.018]",
-                      ].join(" ")}
-                    >
-                      <div className="aspect-video bg-black/10" />
+                ? Array.from({ length: 6 }).map(
+                    (_, index) => (
+                      <div
+                        key={`skeleton-${index}`}
+                        className={[
+                          "overflow-hidden border animate-pulse",
+                          darkMode
+                            ? "border-white/[0.06] bg-white/[0.02]"
+                            : "border-[#241F1B]/[0.08] bg-black/[0.018]",
+                        ].join(" ")}
+                      >
+                        <div className="aspect-video bg-black/10" />
 
-                      <div className="space-y-3 p-4">
-                        <div className="h-4 w-4/5 bg-current opacity-[0.06]" />
-                        <div className="h-3 w-2/5 bg-current opacity-[0.05]" />
+                        <div className="space-y-3 p-4">
+                          <div className="h-4 w-4/5 bg-current opacity-[0.06]" />
+                          <div className="h-3 w-2/5 bg-current opacity-[0.05]" />
+                        </div>
                       </div>
-                    </div>
-                  ))
+                    )
+                  )
                 : trendingVideos.map(
                     (video: VideoRecord) => (
                       <Link
@@ -1248,7 +1262,10 @@ export default function HomePage() {
                             ].join(" ")}
                           >
                             <span>
-                              {formatViews(video.views)} views
+                              {formatViews(
+                                video.views
+                              )}{" "}
+                              views
                             </span>
 
                             <span>
@@ -1280,10 +1297,7 @@ export default function HomePage() {
             </div>
 
             <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-              {(categories.length > 0
-                ? categories.slice(0, 6)
-                : fallbackCategories
-              ).map(
+              {visibleCategories.map(
                 (
                   category: Category,
                   index: number
@@ -1453,48 +1467,48 @@ export default function HomePage() {
                       </Link>
                     )
                   )
-                : Array.from({
-                    length: 4,
-                  }).map((_, index) => (
-                    <div
-                      key={`creator-placeholder-${index}`}
-                      className={[
-                        "flex items-center gap-4 border p-4",
-                        darkMode
-                          ? "border-white/[0.06] bg-[#111416]"
-                          : "border-[#241F1B]/[0.08] bg-[#FBF8F2]",
-                      ].join(" ")}
-                    >
+                : Array.from({ length: 4 }).map(
+                    (_, index) => (
                       <div
+                        key={`creator-placeholder-${index}`}
                         className={[
-                          "size-12 shrink-0",
+                          "flex items-center gap-4 border p-4",
                           darkMode
-                            ? "bg-white/[0.04]"
-                            : "bg-black/[0.04]",
+                            ? "border-white/[0.06] bg-[#111416]"
+                            : "border-[#241F1B]/[0.08] bg-[#FBF8F2]",
                         ].join(" ")}
-                      />
-
-                      <div className="min-w-0 flex-1 space-y-2">
+                      >
                         <div
                           className={[
-                            "h-3 w-3/5",
+                            "size-12 shrink-0",
                             darkMode
-                              ? "bg-white/[0.05]"
-                              : "bg-black/[0.05]",
+                              ? "bg-white/[0.04]"
+                              : "bg-black/[0.04]",
                           ].join(" ")}
                         />
 
-                        <div
-                          className={[
-                            "h-2 w-2/5",
-                            darkMode
-                              ? "bg-white/[0.035]"
-                              : "bg-black/[0.035]",
-                          ].join(" ")}
-                        />
+                        <div className="min-w-0 flex-1 space-y-2">
+                          <div
+                            className={[
+                              "h-3 w-3/5",
+                              darkMode
+                                ? "bg-white/[0.05]"
+                                : "bg-black/[0.05]",
+                            ].join(" ")}
+                          />
+
+                          <div
+                            className={[
+                              "h-2 w-2/5",
+                              darkMode
+                                ? "bg-white/[0.035]"
+                                : "bg-black/[0.035]",
+                            ].join(" ")}
+                          />
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  )}
             </div>
           </section>
 
