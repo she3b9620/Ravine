@@ -1,4 +1,3 @@
-```tsx
 "use client";
 
 import { useEffect, useMemo, useState, type FormEvent } from "react";
@@ -104,6 +103,7 @@ const rangeLabels = [
 
 function formatDuration(seconds: number | null) {
   if (!seconds || seconds <= 0) return "—";
+
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   const remaining = seconds % 60;
@@ -250,6 +250,7 @@ export default function HomePage() {
 
   const heroVideo = videos[0] ?? null;
   const featured = videos.slice(0, 6);
+
   const liveVideos = videos
     .filter((video) => video.content_type === "live")
     .slice(0, 4);
@@ -288,6 +289,7 @@ export default function HomePage() {
     const next = !dark;
 
     setDark(next);
+
     window.localStorage.setItem(
       "ravine-theme",
       next ? "dark" : "light",
@@ -374,14 +376,17 @@ export default function HomePage() {
           className="ravine-ambient ravine-ambient-one"
           style={{ background: palette.indigo }}
         />
+
         <div
           className="ravine-ambient ravine-ambient-two"
           style={{ background: palette.copper }}
         />
+
         <div className="ravine-grain" />
       </div>
 
       <aside
+        id="ravine-home-sidebar"
         className={`fixed inset-y-0 start-0 z-[90] w-[min(86vw,320px)] transform border-e backdrop-blur-2xl transition-transform duration-500 ${
           sidebarOpen
             ? "translate-x-0"
@@ -577,7 +582,10 @@ export default function HomePage() {
               {sidebarOpen ? <X size={18} /> : <Menu size={18} />}
             </button>
 
-            <a href={`/${locale}`}>
+            <a
+              href={`/${locale}`}
+              aria-label="RAVINE home"
+            >
               <img
                 src="/RAVINE.png"
                 alt="RAVINE"
@@ -652,6 +660,9 @@ export default function HomePage() {
                     borderColor: palette.line,
                     backgroundColor: palette.soft,
                   }}
+                  aria-label={
+                    isArabic ? "الإشعارات" : "Notifications"
+                  }
                 >
                   <Bell size={17} />
                 </a>
@@ -667,7 +678,10 @@ export default function HomePage() {
                   }}
                 >
                   <img
-                    src={currentProfile?.avatar_url || "/RAVINE.png"}
+                    src={
+                      currentProfile?.avatar_url ||
+                      "/RAVINE.png"
+                    }
                     alt=""
                     className="h-7 w-7 rounded-full object-cover"
                   />
@@ -728,9 +742,14 @@ export default function HomePage() {
                 >
                   <span
                     className="h-1.5 w-1.5 animate-pulse rounded-full"
-                    style={{ backgroundColor: palette.copper }}
+                    style={{
+                      backgroundColor: palette.copper,
+                    }}
                   />
-                  {isArabic ? "اختيار RAVINE" : "RAVINE FEATURE"}
+
+                  {isArabic
+                    ? "اختيار RAVINE"
+                    : "RAVINE FEATURE"}
                 </div>
 
                 <h1 className="mt-5 max-w-xl text-5xl font-black leading-[.98] tracking-[-.05em] md:text-7xl">
@@ -755,19 +774,28 @@ export default function HomePage() {
                       className="group inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-bold"
                       style={{
                         backgroundColor: palette.copper,
-                        color: dark ? palette.bg : "#fff8ee",
+                        color: dark
+                          ? palette.bg
+                          : "#fff8ee",
                       }}
                     >
                       <span
                         className="flex h-7 w-7 items-center justify-center rounded-full"
                         style={{
-                          backgroundColor: "rgba(0,0,0,.14)",
+                          backgroundColor:
+                            "rgba(0,0,0,.14)",
                         }}
                       >
-                        <Play size={13} fill="currentColor" />
+                        <Play
+                          size={13}
+                          fill="currentColor"
+                        />
                       </span>
 
-                      {isArabic ? "شاهد العمل" : "Watch feature"}
+                      {isArabic
+                        ? "شاهد العمل"
+                        : "Watch feature"}
+
                       <ArrowUpRight size={15} />
                     </a>
 
@@ -790,12 +818,24 @@ export default function HomePage() {
                   className="mt-8 flex flex-wrap gap-3 text-[11px]"
                   style={{ color: palette.muted }}
                 >
-                  <span>{isArabic ? "سينما" : "Cinema"}</span>
+                  <span>
+                    {isArabic ? "سينما" : "Cinema"}
+                  </span>
+
                   <span>•</span>
-                  <span>{isArabic ? "مبدعون" : "Creators"}</span>
+
+                  <span>
+                    {isArabic ? "مبدعون" : "Creators"}
+                  </span>
+
                   <span>•</span>
-                  <span>{isArabic ? "مجتمع" : "Community"}</span>
+
+                  <span>
+                    {isArabic ? "مجتمع" : "Community"}
+                  </span>
+
                   <span>•</span>
+
                   <span>
                     {isArabic
                       ? "تجربة 4K"
@@ -837,7 +877,8 @@ export default function HomePage() {
                   <div
                     className="rounded-2xl px-3 py-2"
                     style={{
-                      backgroundColor: `${palette.copper}16`,
+                      backgroundColor:
+                        `${palette.copper}16`,
                       color: palette.copper,
                     }}
                   >
@@ -855,7 +896,9 @@ export default function HomePage() {
                   className="text-[10px] font-bold uppercase tracking-[.28em]"
                   style={{ color: palette.copper }}
                 >
-                  {isArabic ? "المحتوى الرائج" : "TRENDING"}
+                  {isArabic
+                    ? "المحتوى الرائج"
+                    : "TRENDING"}
                 </span>
 
                 <h2 className="mt-2 text-3xl font-black tracking-tight md:text-4xl">
@@ -899,117 +942,149 @@ export default function HomePage() {
 
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               {loading
-                ? Array.from({ length: 4 }, (_, index) => (
-                    <div
-                      key={`trend-skeleton-${index}`}
-                      className="overflow-hidden rounded-[26px] border"
-                      style={{
-                        backgroundColor: palette.surface,
-                        borderColor: palette.line,
-                      }}
-                    >
+                ? Array.from(
+                    { length: 4 },
+                    (_, index) => (
                       <div
-                        className="aspect-[16/10] animate-pulse"
+                        key={`trend-skeleton-${index}`}
+                        className="overflow-hidden rounded-[26px] border"
                         style={{
-                          backgroundColor: palette.soft,
+                          backgroundColor:
+                            palette.surface,
+                          borderColor: palette.line,
                         }}
-                      />
-
-                      <div className="space-y-3 p-4">
+                      >
                         <div
-                          className="h-4 animate-pulse rounded-full"
+                          className="aspect-[16/10] animate-pulse"
                           style={{
-                            backgroundColor: palette.soft,
+                            backgroundColor:
+                              palette.soft,
                           }}
                         />
 
-                        <div
-                          className="h-3 w-2/3 animate-pulse rounded-full"
-                          style={{
-                            backgroundColor: palette.soft,
-                          }}
-                        />
-                      </div>
-                    </div>
-                  ))
-                : featured.slice(0, 4).map((video) => (
-                    <article
-                      key={video.id}
-                      className="ravine-card group overflow-hidden rounded-[26px] border"
-                      style={{
-                        backgroundColor: palette.surface,
-                        borderColor: palette.line,
-                      }}
-                    >
-                      <a href={`/${locale}/watch/${video.id}`}>
-                        <div
-                          className="relative aspect-[16/10] overflow-hidden"
-                          style={{
-                            backgroundColor: palette.soft,
-                          }}
-                        >
-                          {video.thumbnail_url ? (
-                            <img
-                              src={video.thumbnail_url}
-                              alt={video.title}
-                              className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.04]"
-                            />
-                          ) : (
-                            <div
-                              className="flex h-full items-center justify-center"
-                              style={{ color: palette.muted }}
-                            >
-                              <Play />
-                            </div>
-                          )}
-
-                          <span
-                            className="absolute bottom-3 start-3 rounded-full px-2 py-1 text-[10px] font-bold"
+                        <div className="space-y-3 p-4">
+                          <div
+                            className="h-4 animate-pulse rounded-full"
                             style={{
-                              background: "rgba(0,0,0,.72)",
-                              color: "#fff",
+                              backgroundColor:
+                                palette.soft,
                             }}
-                          >
-                            {formatDuration(video.duration)}
-                          </span>
-
-                          <span
-                            className="absolute top-3 end-3 rounded-full px-2 py-1 text-[10px] font-bold"
-                            style={{
-                              background: `${palette.bg}cc`,
-                              color: palette.text,
-                            }}
-                          >
-                            {contentLabel(
-                              video.content_type,
-                              isArabic,
-                            )}
-                          </span>
-                        </div>
-
-                        <div className="p-4">
-                          <p className="line-clamp-2 text-sm font-bold leading-6">
-                            {video.title}
-                          </p>
+                          />
 
                           <div
-                            className="mt-3 flex items-center justify-between text-[11px]"
-                            style={{ color: palette.muted }}
+                            className="h-3 w-2/3 animate-pulse rounded-full"
+                            style={{
+                              backgroundColor:
+                                palette.soft,
+                            }}
+                          />
+                        </div>
+                      </div>
+                    ),
+                  )
+                : featured
+                    .slice(0, 4)
+                    .map((video) => (
+                      <article
+                        key={video.id}
+                        className="ravine-card group overflow-hidden rounded-[26px] border"
+                        style={{
+                          backgroundColor:
+                            palette.surface,
+                          borderColor: palette.line,
+                        }}
+                      >
+                        <a
+                          href={`/${locale}/watch/${video.id}`}
+                        >
+                          <div
+                            className="relative aspect-[16/10] overflow-hidden"
+                            style={{
+                              backgroundColor:
+                                palette.soft,
+                            }}
                           >
-                            <span>
-                              {formatCount(video.views)}{" "}
-                              {isArabic ? "مشاهدة" : "views"}
+                            {video.thumbnail_url ? (
+                              <img
+                                src={video.thumbnail_url}
+                                alt={video.title}
+                                className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.04]"
+                              />
+                            ) : (
+                              <div
+                                className="flex h-full items-center justify-center"
+                                style={{
+                                  color:
+                                    palette.muted,
+                                }}
+                              >
+                                <Play />
+                              </div>
+                            )}
+
+                            <span
+                              className="absolute bottom-3 start-3 rounded-full px-2 py-1 text-[10px] font-bold"
+                              style={{
+                                background:
+                                  "rgba(0,0,0,.72)",
+                                color: "#fff",
+                              }}
+                            >
+                              {formatDuration(
+                                video.duration,
+                              )}
                             </span>
 
-                            <span>
-                              {formatCount(video.likes)}{" "}
-                              {isArabic ? "إعجاب" : "likes"}
+                            <span
+                              className="absolute top-3 end-3 rounded-full px-2 py-1 text-[10px] font-bold"
+                              style={{
+                                background:
+                                  `${palette.bg}cc`,
+                                color:
+                                  palette.text,
+                              }}
+                            >
+                              {contentLabel(
+                                video.content_type,
+                                isArabic,
+                              )}
                             </span>
                           </div>
-                        </div>
-                      </a>
-                    </article>
-                  ))}
+
+                          <div className="p-4">
+                            <p className="line-clamp-2 text-sm font-bold leading-6">
+                              {video.title}
+                            </p>
+
+                            <div
+                              className="mt-3 flex items-center justify-between text-[11px]"
+                              style={{
+                                color:
+                                  palette.muted,
+                              }}
+                            >
+                              <span>
+                                {formatCount(
+                                  video.views,
+                                )}{" "}
+                                {isArabic
+                                  ? "مشاهدة"
+                                  : "views"}
+                              </span>
+
+                              <span>
+                                {formatCount(
+                                  video.likes,
+                                )}{" "}
+                                {isArabic
+                                  ? "إعجاب"
+                                  : "likes"}
+                              </span>
+                            </div>
+                          </div>
+                        </a>
+                      </article>
+                    ))}
             </div>
           </section>
 
@@ -1024,7 +1099,9 @@ export default function HomePage() {
                 </span>
 
                 <h2 className="mt-2 text-3xl font-black">
-                  {isArabic ? "التصنيفات" : "Browse by category"}
+                  {isArabic
+                    ? "التصنيفات"
+                    : "Browse by category"}
                 </h2>
               </div>
 
@@ -1040,7 +1117,8 @@ export default function HomePage() {
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
               {visibleCategories.map((category) => {
                 const Icon =
-                  categoryIcons[category.slug] ?? Sparkles;
+                  categoryIcons[category.slug] ??
+                  Sparkles;
 
                 return (
                   <a
@@ -1050,14 +1128,16 @@ export default function HomePage() {
                     )}`}
                     className="group rounded-3xl border p-4 transition hover:-translate-y-0.5"
                     style={{
-                      backgroundColor: palette.surface,
+                      backgroundColor:
+                        palette.surface,
                       borderColor: palette.line,
                     }}
                   >
                     <div
                       className="mb-4 flex h-10 w-10 items-center justify-center rounded-2xl"
                       style={{
-                        backgroundColor: `${palette.copper}14`,
+                        backgroundColor:
+                          `${palette.copper}14`,
                         color: palette.copper,
                       }}
                     >
@@ -1080,7 +1160,9 @@ export default function HomePage() {
                   className="text-[10px] font-bold uppercase tracking-[.28em]"
                   style={{ color: palette.copper }}
                 >
-                  {isArabic ? "المبدعون" : "CREATORS"}
+                  {isArabic
+                    ? "المبدعون"
+                    : "CREATORS"}
                 </span>
 
                 <h2 className="mt-2 text-3xl font-black">
@@ -1095,85 +1177,106 @@ export default function HomePage() {
                 className="text-xs font-bold"
                 style={{ color: palette.copper }}
               >
-                {isArabic ? "كل المبدعين" : "All creators"}
+                {isArabic
+                  ? "كل المبدعين"
+                  : "All creators"}
               </a>
             </div>
 
             {loading ? (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                {Array.from({ length: 4 }, (_, index) => (
-                  <div
-                    key={`creator-skeleton-${index}`}
-                    className="h-40 animate-pulse rounded-[28px] border"
-                    style={{
-                      backgroundColor: palette.surface,
-                      borderColor: palette.line,
-                    }}
-                  />
-                ))}
+                {Array.from(
+                  { length: 4 },
+                  (_, index) => (
+                    <div
+                      key={`creator-skeleton-${index}`}
+                      className="h-40 animate-pulse rounded-[28px] border"
+                      style={{
+                        backgroundColor:
+                          palette.surface,
+                        borderColor: palette.line,
+                      }}
+                    />
+                  ),
+                )}
               </div>
             ) : (
-              creators.slice(0, 4).map((creator) => (
-                <div
-                  key={creator.id}
-                  className="inline-block w-full align-top sm:w-1/2 sm:px-2 lg:w-1/4"
-                >
-                  <a
-                    href={
-                      creator.username
-                        ? `/${locale}/creator/${creator.username}`
-                        : `/${locale}/creators`
-                    }
-                    className="block h-full rounded-[28px] border p-5 transition hover:-translate-y-1"
-                    style={{
-                      backgroundColor: palette.surface,
-                      borderColor: palette.line,
-                    }}
+              creators
+                .slice(0, 4)
+                .map((creator) => (
+                  <div
+                    key={creator.id}
+                    className="inline-block w-full align-top sm:w-1/2 sm:px-2 lg:w-1/4"
                   >
-                    <div className="flex items-center gap-4">
-                      <img
-                        src={
-                          creator.avatar_url ||
-                          "/RAVINE.png"
-                        }
-                        alt=""
-                        className="h-14 w-14 rounded-2xl object-cover"
-                      />
+                    <a
+                      href={
+                        creator.username
+                          ? `/${locale}/creator/${creator.username}`
+                          : `/${locale}/creators`
+                      }
+                      className="block h-full rounded-[28px] border p-5 transition hover:-translate-y-1"
+                      style={{
+                        backgroundColor:
+                          palette.surface,
+                        borderColor: palette.line,
+                      }}
+                    >
+                      <div className="flex items-center gap-4">
+                        <img
+                          src={
+                            creator.avatar_url ||
+                            "/RAVINE.png"
+                          }
+                          alt=""
+                          className="h-14 w-14 rounded-2xl object-cover"
+                        />
 
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-black">
-                          {creator.name}
-                        </p>
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-black">
+                            {creator.name}
+                          </p>
 
-                        <p
-                          className="mt-1 truncate text-xs"
-                          style={{ color: palette.muted }}
-                        >
-                          @{creator.username || "creator"}
-                        </p>
+                          <p
+                            className="mt-1 truncate text-xs"
+                            style={{
+                              color: palette.muted,
+                            }}
+                          >
+                            @
+                            {creator.username ||
+                              "creator"}
+                          </p>
+                        </div>
                       </div>
-                    </div>
 
-                    <p
-                      className="mt-4 line-clamp-2 text-xs leading-6"
-                      style={{ color: palette.muted }}
-                    >
-                      {creator.bio ||
-                        (isArabic
-                          ? "صانع محتوى بصري على RAVINE."
-                          : "Visual creator on RAVINE.")}
-                    </p>
+                      <p
+                        className="mt-4 line-clamp-2 text-xs leading-6"
+                        style={{
+                          color: palette.muted,
+                        }}
+                      >
+                        {creator.bio ||
+                          (isArabic
+                            ? "صانع محتوى بصري على RAVINE."
+                            : "Visual creator on RAVINE.")}
+                      </p>
 
-                    <div
-                      className="mt-4 text-[11px] font-semibold"
-                      style={{ color: palette.copper }}
-                    >
-                      {formatCount(creator.followers)}{" "}
-                      {isArabic ? "متابع" : "followers"}
-                    </div>
-                  </a>
-                </div>
-              ))
+                      <div
+                        className="mt-4 text-[11px] font-semibold"
+                        style={{
+                          color: palette.copper,
+                        }}
+                      >
+                        {formatCount(
+                          creator.followers,
+                        )}{" "}
+                        {isArabic
+                          ? "متابع"
+                          : "followers"}
+                      </div>
+                    </a>
+                  </div>
+                ))
             )}
           </section>
 
@@ -1188,7 +1291,9 @@ export default function HomePage() {
                 </span>
 
                 <h2 className="mt-2 text-3xl font-black">
-                  {isArabic ? "أعمال جديدة" : "Fresh work"}
+                  {isArabic
+                    ? "أعمال جديدة"
+                    : "Fresh work"}
                 </h2>
               </div>
 
@@ -1199,14 +1304,16 @@ export default function HomePage() {
                     href={`/${locale}/watch/${video.id}`}
                     className="group rounded-[26px] border p-3"
                     style={{
-                      backgroundColor: palette.surface,
+                      backgroundColor:
+                        palette.surface,
                       borderColor: palette.line,
                     }}
                   >
                     <div
                       className="aspect-video overflow-hidden rounded-[20px]"
                       style={{
-                        backgroundColor: palette.soft,
+                        backgroundColor:
+                          palette.soft,
                       }}
                     >
                       {video.thumbnail_url ? (
@@ -1218,7 +1325,9 @@ export default function HomePage() {
                       ) : (
                         <div
                           className="flex h-full items-center justify-center"
-                          style={{ color: palette.muted }}
+                          style={{
+                            color: palette.muted,
+                          }}
                         >
                           <Play />
                         </div>
@@ -1232,10 +1341,14 @@ export default function HomePage() {
 
                       <div
                         className="mt-2 text-[11px]"
-                        style={{ color: palette.muted }}
+                        style={{
+                          color: palette.muted,
+                        }}
                       >
                         {formatCount(video.views)}{" "}
-                        {isArabic ? "مشاهدة" : "views"}
+                        {isArabic
+                          ? "مشاهدة"
+                          : "views"}
                       </div>
                     </div>
                   </a>
@@ -1265,7 +1378,9 @@ export default function HomePage() {
                   className="text-xs font-bold"
                   style={{ color: palette.copper }}
                 >
-                  {isArabic ? "كل البثوث" : "All live"}
+                  {isArabic
+                    ? "كل البثوث"
+                    : "All live"}
                 </a>
               </div>
 
@@ -1276,14 +1391,16 @@ export default function HomePage() {
                     href={`/${locale}/watch/${video.id}`}
                     className="rounded-[26px] border p-3"
                     style={{
-                      backgroundColor: palette.surface,
+                      backgroundColor:
+                        palette.surface,
                       borderColor: palette.line,
                     }}
                   >
                     <div
                       className="aspect-video overflow-hidden rounded-[20px]"
                       style={{
-                        backgroundColor: palette.soft,
+                        backgroundColor:
+                          palette.soft,
                       }}
                     >
                       {video.thumbnail_url && (
@@ -1299,7 +1416,8 @@ export default function HomePage() {
                       <span
                         className="rounded-full px-2 py-1 text-[10px] font-bold"
                         style={{
-                          background: `${palette.copper}18`,
+                          background:
+                            `${palette.copper}18`,
                           color: palette.copper,
                         }}
                       >
@@ -1365,7 +1483,9 @@ export default function HomePage() {
                 className="mt-7 inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-bold"
                 style={{
                   backgroundColor: palette.copper,
-                  color: dark ? palette.bg : "#fff8ee",
+                  color: dark
+                    ? palette.bg
+                    : "#fff8ee",
                 }}
               >
                 {isArabic
@@ -1405,4 +1525,3 @@ export default function HomePage() {
     </main>
   );
 }
-```
