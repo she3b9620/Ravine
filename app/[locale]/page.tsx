@@ -131,6 +131,7 @@ export default function HomePage() {
   const [creators, setCreators] = useState<Creator[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [currentUser, setCurrentUser] = useState<{ id: string } | null>(null);
+  const [authResolved, setAuthResolved] = useState(false);
   const [currentProfile, setCurrentProfile] = useState<Profile | null>(null);
   const [search, setSearch] = useState("");
   const [dark, setDark] = useState(true);
@@ -164,6 +165,7 @@ export default function HomePage() {
         profileData = result.data ?? null;
       }
       setCurrentProfile(profileData);
+      setAuthResolved(true);
 
       const [videoResult, creatorResult, categoryResult] = await Promise.all([
         supabase
@@ -268,7 +270,7 @@ export default function HomePage() {
         <div className="ravine-grain" />
       </div>
 
-      <aside className={`fixed inset-y-0 z-[70] w-[280px] transform border-e backdrop-blur-2xl transition-transform duration-500 xl:translate-x-0 ${sidebarOpen ? "translate-x-0" : isArabic ? "translate-x-full" : "-translate-x-full"}`} style={{ backgroundColor: dark ? "rgba(9,10,10,.90)" : "rgba(244,239,231,.94)", borderColor: palette.line }}>
+      <aside className={`fixed inset-y-0 z-[70] w-[280px] transform border-e backdrop-blur-2xl transition-transform duration-500 ${sidebarOpen ? "translate-x-0" : isArabic ? "translate-x-full" : "-translate-x-full"}`} style={{ backgroundColor: dark ? "rgba(9,10,10,.90)" : "rgba(244,239,231,.94)", borderColor: palette.line }}>
         <div className="flex h-full flex-col px-5 py-6">
           <div className="flex items-center justify-between">
             <a href={`/${locale}`} aria-label="RAVINE home"><img src="/RAVINE.png" alt="RAVINE" className={`h-12 w-auto object-contain ${!dark ? "invert" : ""}`} /></a>
@@ -311,10 +313,10 @@ export default function HomePage() {
 
       {sidebarOpen && <button type="button" onClick={() => setSidebarOpen(false)} className="fixed inset-0 z-[60] bg-black/45 backdrop-blur-sm xl:hidden" aria-label={isArabic ? "إغلاق" : "Close"} />}
 
-      <div className="relative z-10 xl:ps-[280px]">
+      <div className={`relative z-10 transition-[padding] duration-500 ${sidebarOpen ? "xl:ps-[280px]" : ""}`}>
         <header className="sticky top-0 z-50 border-b backdrop-blur-2xl" style={{ backgroundColor: dark ? "rgba(8,9,9,.72)" : "rgba(244,239,231,.78)", borderColor: palette.line }}>
           <div className="mx-auto flex h-[76px] max-w-[1560px] items-center gap-3 px-4 md:px-7">
-            <button type="button" onClick={() => setSidebarOpen(true)} className="rounded-full border p-2.5 xl:hidden" style={{ borderColor: palette.line, backgroundColor: palette.soft }} aria-label={isArabic ? "فتح القائمة" : "Open menu"}><Menu size={18} /></button>
+            <button type="button" onClick={() => setSidebarOpen((value) => !value)} className="rounded-full border p-2.5" style={{ borderColor: palette.line, backgroundColor: palette.soft }} aria-label={isArabic ? "فتح القائمة" : "Open menu"}><Menu size={18} /></button>
             <a href={`/${locale}`} className="xl:hidden"><img src="/RAVINE.png" alt="RAVINE" className={`h-10 w-auto ${!dark ? "invert" : ""}`} /></a>
             <form onSubmit={doSearch} className="ms-auto flex-1 sm:max-w-xl xl:mx-auto">
               <div className="flex items-center rounded-full border px-4 py-1.5" style={{ backgroundColor: palette.surface, borderColor: palette.line }}>
