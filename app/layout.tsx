@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getLocale } from "next-intl/server";
 import "./globals.css";
 import "./typography-overrides.css";
+import "./ravine-motion.css";
 import LocaleTypography from "../components/LocaleTypography";
 
 export const metadata: Metadata = {
