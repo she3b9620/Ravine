@@ -56,6 +56,7 @@ export default function PlatformShell({ children, active = "", title, eyebrow, d
   const [open, setOpen] = useState(false);
   const [dark, setDark] = useState(true);
   const [userName, setUserName] = useState("");
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -109,7 +110,7 @@ export default function PlatformShell({ children, active = "", title, eyebrow, d
             <a href={locale === "ar" ? "/en" : "/ar"} className="hidden rounded-full border px-3 py-2 text-[11px] font-bold sm:block" style={{ borderColor: line, background: panel }}>{locale === "ar" ? "EN" : "AR"}</a>
             <button onClick={() => setDark((value) => !value)} className="flex h-10 w-10 items-center justify-center rounded-full border" style={{ borderColor: line, background: panel }} aria-label={isArabic ? "تغيير المظهر" : "Toggle theme"}>{dark ? <Sun size={16} /> : <Moon size={16} />}</button>
             <a href={href("/notifications")} className="hidden h-10 w-10 items-center justify-center rounded-full border md:flex" style={{ borderColor: line, background: panel }} aria-label={isArabic ? "الإشعارات" : "Notifications"}><Bell size={16} /></a>
-            {userName ? <a href={href("/account")} className="hidden items-center gap-2 rounded-full border px-3 py-2 text-xs font-semibold md:flex" style={{ borderColor: line, background: panel }}><span className="flex h-7 w-7 items-center justify-center rounded-full" style={{ background: `linear-gradient(135deg, ${teal}, ${accent})` }}>{userName.charAt(0).toUpperCase()}</span>{userName}</a> : <a href={href("/auth")} className="rounded-full px-4 py-2 text-xs font-bold" style={{ background: accent, color: bg }}>{isArabic ? "دخول" : "Sign in"}</a>}
+            {userName ? <div className="hidden items-center gap-2 md:flex"><a href={href("/account")} className="flex items-center gap-2 rounded-full border px-3 py-2 text-xs font-semibold" style={{ borderColor: line, background: panel }}><span className="flex h-7 w-7 items-center justify-center rounded-full" style={{ background: `linear-gradient(135deg, ${teal}, ${accent})` }}>{userName.charAt(0).toUpperCase()}</span>{userName}</a><button type="button" disabled={isSigningOut} onClick={async () => { setIsSigningOut(true); await supabase.auth.signOut(); window.location.href = href(""); }} className="rounded-full border px-3 py-2 text-[11px] font-bold transition hover:-translate-y-0.5 disabled:opacity-50" style={{ borderColor: line, background: panel, color: muted }}>{isSigningOut ? (isArabic ? "جارٍ الخروج..." : "Signing out...") : (isArabic ? "تسجيل الخروج" : "Sign out")}</button></div> : <a href={href("/auth")} className="rounded-full px-4 py-2 text-xs font-bold" style={{ background: accent, color: bg }}>{isArabic ? "دخول" : "Sign in"}</a>}
           </div>
         </div>
       </header>
