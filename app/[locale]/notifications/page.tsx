@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useLocale } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 
 type Notification = {
@@ -13,7 +14,9 @@ type Notification = {
 };
 
 export default function NotificationsPage() {
-  const supabase = createClient();
+  const locale = useLocale();
+  const isArabic = locale === "ar";
+  const supabase = useMemo(() => createClient(), []);
 
   const [items, setItems] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,7 +29,7 @@ export default function NotificationsPage() {
       } = await supabase.auth.getUser();
 
       if (!user) {
-        window.location.href = "/ar/auth";
+        window.location.href = `/${locale}/auth?next=/${locale}/notifications`;
         return;
       }
 
@@ -48,7 +51,7 @@ export default function NotificationsPage() {
     }
 
     load();
-  }, []);
+  }, [locale, supabase]);
 
   async function markRead(id: string) {
     const { error: updateError } = await supabase
@@ -100,14 +103,14 @@ export default function NotificationsPage() {
     return (
       <main className="min-h-screen bg-[#090909] px-5 py-20 text-[#F1E9DC]">
         <div className="mx-auto max-w-4xl text-center">
-          Loading notifications...
+          {isArabic ? "جارٍ تحميل الإشعارات..." : "Loading notifications..."}
         </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#090909] px-5 py-12 text-[#F1E9DC]">
+    <main dir={isArabic ? "rtl" : "ltr"} className="min-h-screen bg-[#090909] px-5 py-12 text-[#F1E9DC]">
       <div className="mx-auto max-w-4xl">
 
         <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
@@ -126,7 +129,7 @@ export default function NotificationsPage() {
             onClick={markAllRead}
             className="rounded-2xl border border-[#F1E9DC]/10 px-4 py-2 text-sm text-[#F1E9DC]/70"
           >
-            Mark all as read
+            {isArabic ? "تحديد الكل كمقروء" : "Mark all as read"}
           </button>
         </div>
 
@@ -139,7 +142,7 @@ export default function NotificationsPage() {
         <div className="mt-8 space-y-3">
           {items.length === 0 ? (
             <div className="rounded-3xl border border-[#183F46]/60 bg-[#151719] p-8 text-sm text-[#F1E9DC]/50">
-              No notifications yet.
+              {isArabic ? "لا توجد إشعارات حتى الآن." : "No notifications yet."}
             </div>
           ) : (
             items.map((item) => (
@@ -184,7 +187,7 @@ export default function NotificationsPage() {
         </div>
 
         <a
-          href="/ar"
+          href={`/${locale}`}
           className="mt-8 inline-block text-sm text-[#F1E9DC]/50 hover:text-[#C47A52]"
         >
           ← Back to RAVINE
