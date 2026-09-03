@@ -708,6 +708,13 @@ export default function WatchPage() {
                     true
                   );
                 }}
+                onError={() => {
+                  setError(
+                    locale === "ar"
+                      ? "تعذر تشغيل هذا العمل الآن. حاول إعادة التحميل."
+                      : "This work could not be played right now. Try reloading the page."
+                  );
+                }}
               />
             ) : (
               <div className="flex h-full items-center justify-center text-sm text-[#F1E9DC]/50">
