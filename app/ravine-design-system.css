@@ -40,87 +40,134 @@ select option {
 .ravine-page [class*="rounded-3xl"],
 .ravine-page [class*="rounded-[28px]"],
 .ravine-page [class*="rounded-[30px]"],
-.ravine-page [class*="rounded-[32px]"] {
+.ravine-page [class*="rounded-[32px]"],
+.ravine-platform-shell [class*="rounded-3xl"],
+.ravine-platform-shell [class*="rounded-[28px]"],
+.ravine-platform-shell [class*="rounded-[30px]"],
+.ravine-platform-shell [class*="rounded-[32px]"] {
   border-radius: var(--ravine-radius-xl) !important;
 }
 
-.ravine-page [class*="rounded-2xl"] {
+.ravine-page [class*="rounded-2xl"],
+.ravine-platform-shell [class*="rounded-2xl"] {
   border-radius: var(--ravine-radius-lg) !important;
 }
 
-.ravine-page [class*="rounded-xl"] {
+.ravine-page [class*="rounded-xl"],
+.ravine-platform-shell [class*="rounded-xl"] {
   border-radius: var(--ravine-radius-md) !important;
 }
 
 /* Let visual work dominate UI chrome. */
-.ravine-page img {
+.ravine-page img,
+.ravine-platform-shell img {
   image-rendering: auto;
 }
 
-.ravine-page section > .grid > * {
+.ravine-page section > .grid > *,
+.ravine-platform-shell section > .grid > * {
   min-width: 0;
 }
 
-/* Restrain generic surface repetition. */
+/* Keep repeated surfaces quiet. */
 .ravine-page .border,
-.ravine-page [class*="border-["] {
+.ravine-page [class*="border-["],
+.ravine-platform-shell .border,
+.ravine-platform-shell [class*="border-["] {
   border-color: var(--ravine-border-soft) !important;
 }
 
-/* Preserve explicit copper/teal accent borders when they are intentional. */
+/* Preserve deliberate copper accents. */
 .ravine-page [style*="rgba(196,122,82,.30)"],
 .ravine-page [style*="rgba(196,122,82,.28)"],
-.ravine-page [style*="rgba(196,122,82,.25)"] {
+.ravine-page [style*="rgba(196,122,82,.25)"],
+.ravine-platform-shell [style*="rgba(196,122,82,.30)"],
+.ravine-platform-shell [style*="rgba(196,122,82,.28)"],
+.ravine-platform-shell [style*="rgba(196,122,82,.25)"] {
   border-color: var(--ravine-border-accent) !important;
 }
 
 /* Shared platform chrome: quieter, more editorial, less dashboard-like. */
-main.min-h-screen[dir] header {
+.ravine-platform-shell header {
   box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
 }
 
-main.min-h-screen[dir] header nav,
-main.min-h-screen[dir] aside > div {
+.ravine-platform-shell header nav {
   min-width: 0;
 }
 
-/* Desktop sidebar navigation reads as one continuous rail rather than cards. */
-main.min-h-screen[dir] aside a {
+.ravine-platform-shell aside a {
   transition:
     color 220ms ease,
     background-color 220ms ease,
     transform 220ms cubic-bezier(.22, 1, .36, 1);
 }
 
-/* Mobile overlay spacing. */
-@media (max-width: 1023px) {
-  main.min-h-screen[dir] header {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  }
+/* Forms read as editorial sections rather than one giant rounded panel. */
+.ravine-platform-shell form[class*="rounded-3xl"],
+.ravine-platform-shell form[class*="rounded-[32px]"] {
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.10);
+}
+
+.ravine-platform-shell input,
+.ravine-platform-shell textarea,
+.ravine-platform-shell select {
+  transition:
+    border-color 220ms ease,
+    background-color 220ms ease,
+    box-shadow 220ms ease;
+}
+
+.ravine-platform-shell input:focus,
+.ravine-platform-shell textarea:focus,
+.ravine-platform-shell select:focus {
+  box-shadow: 0 0 0 3px rgba(196, 122, 82, 0.08);
+}
+
+/* Keep action hierarchy sharp: primary CTA copper, utilities quiet. */
+.ravine-platform-shell button,
+.ravine-platform-shell a {
+  transition-timing-function: cubic-bezier(.22, 1, .36, 1);
 }
 
 /* Typography hierarchy: editorial headings carry more weight than utility labels. */
 .ravine-page h1,
 .ravine-page h2,
-.ravine-page h3 {
+.ravine-page h3,
+.ravine-platform-shell h1,
+.ravine-platform-shell h2,
+.ravine-platform-shell h3 {
   text-wrap: balance;
 }
 
 .ravine-page p,
-.ravine-page li {
+.ravine-page li,
+.ravine-platform-shell p,
+.ravine-platform-shell li {
   text-wrap: pretty;
 }
 
 /* Reduce blanket motion; important hero/feature motion remains intact. */
 .ravine-page a,
-.ravine-page button {
-  transition-timing-function: cubic-bezier(.22, 1, .36, 1);
+.ravine-page button,
+.ravine-platform-shell a,
+.ravine-platform-shell button {
+  transition-duration: 300ms;
+}
+
+@media (max-width: 1023px) {
+  .ravine-platform-shell header {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .ravine-page *,
   .ravine-page *::before,
-  .ravine-page *::after {
+  .ravine-page *::after,
+  .ravine-platform-shell *,
+  .ravine-platform-shell *::before,
+  .ravine-platform-shell *::after {
     animation: none !important;
     transition: none !important;
     scroll-behavior: auto !important;
