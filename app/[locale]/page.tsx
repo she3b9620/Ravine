@@ -28,6 +28,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import AuthModal from "@/components/AuthModal";
 
 type VideoRecord = {
   id: number;
@@ -132,6 +133,7 @@ export default function HomePage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [currentUser, setCurrentUser] = useState<{ id: string } | null>(null);
   const [authResolved, setAuthResolved] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   const [currentProfile, setCurrentProfile] = useState<Profile | null>(null);
   const [search, setSearch] = useState("");
   const [dark, setDark] = useState(true);
@@ -333,7 +335,7 @@ export default function HomePage() {
                   <img src={currentProfile?.avatar_url || "/RAVINE.png"} alt="" className="h-7 w-7 rounded-full object-cover" />
                   <span className="hidden max-w-28 truncate text-xs font-semibold sm:block">{currentProfile?.display_name || currentProfile?.username || "Account"}</span>
                 </a>
-              ) : <a href={`/${locale}/auth`} className="rounded-full px-4 py-2.5 text-xs font-bold" style={{ backgroundColor: palette.copper, color: dark ? palette.bg : "#fff8ee" }}>{isArabic ? "دخول" : "Sign In"}</a>}
+              ) : <button type="button" onClick={() => setAuthModalOpen(true)} className="rounded-full px-4 py-2.5 text-xs font-bold" style={{ backgroundColor: palette.copper, color: dark ? palette.bg : "#fff8ee" }}>{isArabic ? "دخول" : "Sign In"}</button>}
             </div>
           </div>
         </header>
@@ -386,6 +388,7 @@ export default function HomePage() {
           <footer className="mt-12 flex flex-col gap-4 border-t py-8 text-[11px] md:flex-row md:items-center md:justify-between" style={{ borderColor: palette.line, color: palette.muted }}><span>RAVINE — {isArabic ? "حيث تصبح الرؤية سينما." : "Where vision becomes cinema."}</span><span>{new Date().getFullYear()} RAVINE</span></footer>
         </div>
       </div>
+      <AuthModal open={authModalOpen} onClose={() => setAuthModalOpen(false)} />
     </main>
   );
 }
