@@ -120,7 +120,7 @@ export default function NotificationsPage() {
             </div>
 
             <h1 className="mt-3 text-4xl font-black">
-              Notifications
+              {isArabic ? "الإشعارات" : "Notifications"}
             </h1>
           </div>
 
@@ -150,7 +150,7 @@ export default function NotificationsPage() {
                 key={item.id}
                 type="button"
                 onClick={() => markRead(item.id)}
-                className="block w-full rounded-3xl border p-5 text-left"
+                className="block w-full rounded-3xl border p-5 text-start"
                 style={{
                   backgroundColor: item.is_read
                     ? "#151719"
@@ -190,7 +190,7 @@ export default function NotificationsPage() {
           href={`/${locale}`}
           className="mt-8 inline-block text-sm text-[#F1E9DC]/50 hover:text-[#C47A52]"
         >
-          ← Back to RAVINE
+          {isArabic ? "← العودة إلى RAVINE" : "← Back to RAVINE"}
         </a>
 
       </div>
