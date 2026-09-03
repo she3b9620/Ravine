@@ -55,15 +55,12 @@ export default function PlatformShell({ children, active = "", title, eyebrow, d
   const supabase = useMemo(() => createClient(), []);
   const [open, setOpen] = useState(false);
   const [dark, setDark] = useState(true);
-  const [themeReady, setThemeReady] = useState(false);
   const [userName, setUserName] = useState("");
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   useEffect(() => {
     const savedTheme = window.localStorage.getItem("ravine-theme");
     if (savedTheme === "light") setDark(false);
-    setThemeReady(true);
-
     let mounted = true;
 
     void supabase.auth.getSession().then(({ data }) => {
