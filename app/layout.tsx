@@ -4,6 +4,7 @@ import "./globals.css";
 import "./typography-overrides.css";
 import "./ravine-motion.css";
 import LocaleTypography from "../components/LocaleTypography";
+import VideoHoverPreview from "../components/VideoHoverPreview";
 
 export const metadata: Metadata = {
   title: "RAVINE — Platform",
@@ -23,6 +24,7 @@ export default async function RootLayout({
       <body>
         <LocaleTypography />
         {children}
+        <VideoHoverPreview />
       </body>
     </html>
   );
