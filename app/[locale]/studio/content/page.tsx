@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useLocale } from "next-intl";
-import { ArrowUpRight, FileVideo2, Filter, Plus, Search, Sparkles } from "lucide-react";
+import { ArrowUpRight, FileVideo2, Filter, Loader2, Plus, Search, Sparkles } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import PlatformShell from "@/components/PlatformShell";
 
@@ -34,13 +34,16 @@ export default function StudioContentPage() {
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<"all" | "published" | "drafts">("all");
+  const [updatingId, setUpdatingId] = useState<number | null>(null);
 
   useEffect(() => {
     let mounted = true;
     async function load() {
-      const { data: userData } = await supabase.auth.getUser();
+      setLoading(true);
+      setError("");
+      const { data: userData, error: authError } = await supabase.auth.getUser();
       if (!mounted) return;
-      if (!userData.user) {
+      if (authError || !userData.user) {
         window.location.href = `/${locale}/auth?next=/${locale}/studio/content`;
         return;
       }
@@ -60,14 +63,37 @@ export default function StudioContentPage() {
     return () => { mounted = false; };
   }, [locale, supabase]);
 
+  async function togglePublished(video: Video) {
+    setUpdatingId(video.id);
+    setError("");
+
+    const nextPublished = !video.published;
+    const { error: updateError } = await supabase
+      .from("videos")
+      .update({ published: nextPublished })
+      .eq("id", video.id);
+
+    if (updateError) {
+      setError(isArabic ? "تعذر تغيير حالة النشر." : "Could not change publishing status.");
+      setUpdatingId(null);
+      return;
+    }
+
+    setVideos((current) =>
+      current.map((item) => item.id === video.id ? { ...item, published: nextPublished } : item)
+    );
+    setUpdatingId(null);
+  }
+
   const filtered = videos.filter((video) => {
-    const matchesQuery = !query.trim() || video.title.toLowerCase().includes(query.trim().toLowerCase());
+    const normalizedQuery = query.trim().toLowerCase();
+    const matchesQuery = !normalizedQuery || video.title.toLowerCase().includes(normalizedQuery);
     const matchesFilter = filter === "all" || (filter === "published" ? video.published : !video.published);
     return matchesQuery && matchesFilter;
   });
 
   return (
-    <PlatformShell active="creators" eyebrow="RAVINE Studio" title={isArabic ? "إدارة المحتوى" : "Content workspace"} description={isArabic ? "كل أعمالك في مساحة واحدة: منشور، مسودة، وقريبًا دورة النشر الكاملة." : "Your works in one place: published, drafts, and the full publishing workflow ahead."}>
+    <PlatformShell active="creators" eyebrow="RAVINE Studio" title={isArabic ? "إدارة المحتوى" : "Content workspace"} description={isArabic ? "كل أعمالك في مساحة واحدة: منشور، مسودة، وإدارة مباشرة لحالة النشر." : "Your works in one place: published, drafts, with direct control over publishing status."}>
       <div className="mx-auto max-w-[1440px] space-y-6 px-5 pb-16 pt-8 md:px-8 lg:px-10">
         <section className="rounded-[32px] border p-6 md:p-8" style={{ borderColor: "rgba(241,233,220,.10)", background: "linear-gradient(145deg,rgba(24,63,70,.23),rgba(21,23,25,.82))" }}>
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
@@ -95,7 +121,7 @@ export default function StudioContentPage() {
           </div>
         </section>
 
-        {error && <div className="rounded-3xl border px-5 py-4 text-sm" style={{ borderColor: "rgba(196,122,82,.35)", background: "rgba(196,122,82,.08)" }}>{isArabic ? "تعذر تحميل المحتوى." : "Content could not be loaded."}</div>}
+        {error && <div className="rounded-3xl border px-5 py-4 text-sm" style={{ borderColor: "rgba(196,122,82,.35)", background: "rgba(196,122,82,.08)" }}>{error}</div>}
 
         <section className="rounded-[32px] border p-6 md:p-8" style={{ borderColor: "rgba(241,233,220,.10)", background: "rgba(21,23,25,.74)" }}>
           <div className="mb-5 flex items-center justify-between gap-4"><div><p className="text-[10px] font-bold uppercase tracking-[.25em]" style={{ color: "#C47A52" }}>{isArabic ? "الأعمال" : "Works"}</p><h2 className="mt-2 text-2xl font-black">{isArabic ? "مكتبة النشر" : "Publishing library"}</h2></div><div className="text-xs" style={{ color: "rgba(241,233,220,.4)" }}>{filtered.length} / {videos.length}</div></div>
@@ -115,7 +141,13 @@ export default function StudioContentPage() {
                       <div className="mt-3 flex items-center gap-3 text-[10px]" style={{ color: "rgba(241,233,220,.38)" }}><span>{compact(video.views)} {isArabic ? "مشاهدة" : "views"}</span><span>{compact(video.likes)} {isArabic ? "إعجاب" : "likes"}</span><span>{video.content_type || "video"}</span></div>
                     </div>
                   </div>
-                  <div className="flex items-center justify-end border-t px-4 py-3" style={{borderColor:"rgba(241,233,220,.06)"}}><a href={`/${locale}/watch/${video.id}`} className="inline-flex items-center gap-1.5 text-xs font-bold" style={{color:"#C47A52"}}>{isArabic ? "فتح العمل" : "Open work"}<ArrowUpRight size={14}/></a></div>
+                  <div className="flex items-center justify-between border-t px-4 py-3" style={{borderColor:"rgba(241,233,220,.06)"}}>
+                    <button type="button" onClick={() => void togglePublished(video)} disabled={updatingId === video.id} className="inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-[11px] font-bold disabled:cursor-not-allowed disabled:opacity-50" style={{ background: video.published ? "rgba(241,233,220,.05)" : "rgba(196,122,82,.12)", color: video.published ? "rgba(241,233,220,.65)" : "#C47A52" }}>
+                      {updatingId === video.id && <Loader2 size={13} className="animate-spin" />}
+                      {video.published ? (isArabic ? "تحويل لمسودة" : "Move to draft") : (isArabic ? "نشر العمل" : "Publish work")}
+                    </button>
+                    <a href={`/${locale}/watch/${video.id}`} className="inline-flex items-center gap-1.5 text-xs font-bold" style={{color:"#C47A52"}}>{isArabic ? "فتح العمل" : "Open work"}<ArrowUpRight size={14}/></a>
+                  </div>
                 </article>
               ))}
             </div>
