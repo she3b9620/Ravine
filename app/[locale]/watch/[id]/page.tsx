@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useLocale } from "next-intl";
 import { useParams } from "next/navigation";
 import {
   Heart,
@@ -51,9 +52,13 @@ function extractStoragePath(videoUrl: string | null) {
   const markerIndex = videoUrl.indexOf(marker);
 
   if (markerIndex !== -1) {
-    return decodeURIComponent(
-      videoUrl.slice(markerIndex + marker.length)
-    );
+    try {
+      return decodeURIComponent(
+        videoUrl.slice(markerIndex + marker.length)
+      );
+    } catch {
+      return videoUrl.slice(markerIndex + marker.length);
+    }
   }
 
   if (
@@ -66,15 +71,18 @@ function extractStoragePath(videoUrl: string | null) {
   return null;
 }
 
-function formatDate(value: string | null) {
+function formatDate(value: string | null, locale: string) {
   if (!value) return "";
 
   try {
-    return new Date(value).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric"
-    });
+    return new Date(value).toLocaleDateString(
+      locale === "ar" ? "ar-EG" : "en-US",
+      {
+        year: "numeric",
+        month: "short",
+        day: "numeric"
+      }
+    );
   } catch {
     return "";
   }
@@ -82,11 +90,13 @@ function formatDate(value: string | null) {
 
 export default function WatchPage() {
   const params = useParams();
+  const locale = useLocale();
   const id = String(params.id);
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   const countedView = useRef(false);
   const playerRef = useRef<HTMLVideoElement | null>(null);
+  const lastProgressSavedAt = useRef(-5);
 
   const [video, setVideo] = useState<Video | null>(null);
   const [signedUrl, setSignedUrl] = useState("");
@@ -164,6 +174,8 @@ export default function WatchPage() {
   }
 
   useEffect(() => {
+    let cancelled = false;
+
     async function loadVideo() {
       setLoading(true);
       setError("");
@@ -176,6 +188,8 @@ export default function WatchPage() {
         .eq("published", true)
         .single();
 
+      if (cancelled) return;
+
       if (videoError || !data) {
         setError(videoError?.message || "Video not found.");
         setLoading(false);
@@ -187,6 +201,8 @@ export default function WatchPage() {
 
       const user = await getCurrentUser();
 
+      if (cancelled) return;
+
       if (user) {
         const { data: followRow } = await supabase
           .from("follows")
@@ -195,6 +211,7 @@ export default function WatchPage() {
           .eq("creator_id", loadedVideo.creator_id)
           .maybeSingle();
 
+        if (cancelled) return;
         setFollowing(Boolean(followRow));
 
         const { data: historyRow } = await supabase
@@ -204,6 +221,7 @@ export default function WatchPage() {
           .eq("video_id", Number(id))
           .maybeSingle();
 
+        if (cancelled) return;
         if (historyRow && !historyRow.completed) {
           setResumeSeconds(Number(historyRow.progress_seconds || 0));
         }
@@ -214,6 +232,7 @@ export default function WatchPage() {
           .eq("user_id", user.id)
           .eq("is_read", false);
 
+        if (cancelled) return;
         setNotificationCount(count ?? 0);
 
         const { data: likeRow } = await supabase
@@ -223,12 +242,16 @@ export default function WatchPage() {
           .eq("video_id", Number(id))
           .maybeSingle();
 
+        if (cancelled) return;
+
         const { data: saveRow } = await supabase
           .from("video_saves")
           .select("video_id")
           .eq("user_id", user.id)
           .eq("video_id", Number(id))
           .maybeSingle();
+
+        if (cancelled) return;
 
         setLiked(Boolean(likeRow));
         setSaved(Boolean(saveRow));
@@ -243,6 +266,8 @@ export default function WatchPage() {
             video_id_input: Number(id)
           }
         );
+
+        if (cancelled) return;
 
         if (typeof newViews === "number") {
           setVideo((current) =>
@@ -271,6 +296,8 @@ export default function WatchPage() {
           .from("videos")
           .createSignedUrl(storagePath, 60 * 60);
 
+      if (cancelled) return;
+
       if (signedError || !signedData?.signedUrl) {
         setError(
           signedError?.message ||
@@ -284,17 +311,23 @@ export default function WatchPage() {
 
       await loadComments(Number(id));
 
-      setLoading(false);
+      if (!cancelled) {
+        setLoading(false);
+      }
     }
 
-    loadVideo();
-  }, [id]);
+    void loadVideo();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id, supabase]);
 
   async function requireUser() {
     const user = await getCurrentUser();
 
     if (!user) {
-      window.location.href = "/ar/auth";
+      window.location.href = `/${locale}/auth`;
       return null;
     }
 
@@ -358,6 +391,7 @@ export default function WatchPage() {
       completed_input: completed
     });
   }
+
   async function toggleLike() {
     if (!video || interacting) return;
 
@@ -591,7 +625,7 @@ export default function WatchPage() {
       <main className="min-h-screen bg-[#090909] px-5 py-20 text-[#F1E9DC]">
         <div className="mx-auto max-w-6xl">
           <a
-            href="/ar"
+            href={`/${locale}`}
             className="text-sm text-[#F1E9DC]/60 hover:text-[#C47A52]"
           >
             ← Back to RAVINE
@@ -632,7 +666,7 @@ export default function WatchPage() {
       <div className="mx-auto max-w-6xl">
 
         <a
-          href="/ar"
+          href={`/${locale}`}
           className="text-sm text-[#F1E9DC]/60 hover:text-[#C47A52]"
         >
           ← Back to RAVINE
@@ -662,10 +696,10 @@ export default function WatchPage() {
                 }}
                 onTimeUpdate={(event) => {
                   const player = event.currentTarget;
+                  const seconds = Math.floor(player.currentTime);
 
-                  if (
-                    Math.floor(player.currentTime) % 5 === 0
-                  ) {
+                  if (seconds >= lastProgressSavedAt.current + 5) {
+                    lastProgressSavedAt.current = seconds;
                     void saveWatchProgress(
                       player.currentTime,
                       false
@@ -673,8 +707,10 @@ export default function WatchPage() {
                   }
                 }}
                 onEnded={(event) => {
+                  const duration = event.currentTarget.duration || 0;
+                  lastProgressSavedAt.current = Math.floor(duration);
                   void saveWatchProgress(
-                    event.currentTarget.duration || 0,
+                    duration,
                     true
                   );
                 }}
@@ -717,7 +753,9 @@ export default function WatchPage() {
 
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <span className="text-sm text-[#F1E9DC]/50">
-                {(video?.views ?? 0).toLocaleString()} views
+                {(video?.views ?? 0).toLocaleString(
+                  locale === "ar" ? "ar-EG" : "en-US"
+                )} views
               </span>
 
               <button
@@ -740,7 +778,9 @@ export default function WatchPage() {
                 />
                 {liked ? "Liked" : "Like"}
                 <span>
-                  {(video?.likes ?? 0).toLocaleString()}
+                  {(video?.likes ?? 0).toLocaleString(
+                    locale === "ar" ? "ar-EG" : "en-US"
+                  )}
                 </span>
               </button>
 
@@ -760,7 +800,7 @@ export default function WatchPage() {
               <button
                 type="button"
                 onClick={() => {
-                  window.location.href = "/ar/notifications";
+                  window.location.href = `/${locale}/notifications`;
                 }}
                 className="inline-flex items-center gap-2 rounded-full border border-[#F1E9DC]/10 px-4 py-2 text-sm text-[#F1E9DC]/80 transition"
               >
@@ -812,7 +852,9 @@ export default function WatchPage() {
               </h2>
 
               <p className="mt-1 text-sm text-[#F1E9DC]/40">
-                {comments.length.toLocaleString()} comments
+                {comments.length.toLocaleString(
+                  locale === "ar" ? "ar-EG" : "en-US"
+                )} comments
               </p>
             </div>
           </div>
@@ -876,7 +918,7 @@ export default function WatchPage() {
                           </span>
 
                           <span className="text-xs text-[#F1E9DC]/30">
-                            {formatDate(comment.created_at)}
+                            {formatDate(comment.created_at, locale)}
                           </span>
                         </div>
 
@@ -975,7 +1017,8 @@ export default function WatchPage() {
 
                                       <span className="text-[11px] text-[#F1E9DC]/30">
                                         {formatDate(
-                                          reply.created_at
+                                          reply.created_at,
+                                          locale
                                         )}
                                       </span>
                                     </div>
