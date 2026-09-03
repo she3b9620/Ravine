@@ -1,17 +1,19 @@
 /* =========================================================
-   RAVINE DESIGN SYSTEM REFINEMENT
-   Preserve the existing identity; refine hierarchy, density,
-   surfaces, radii, controls and motion restraint.
+   RAVINE DESIGN SYSTEM
+   One visual language across audience, creator and utility surfaces.
+   Identity stays Obsidian / Copper / Petrol / Ivory.
    ========================================================= */
 
 :root {
-  --ravine-radius-sm: 0.75rem;
-  --ravine-radius-md: 1rem;
-  --ravine-radius-lg: 1.25rem;
+  --ravine-radius-sm: 0.625rem;
+  --ravine-radius-md: 0.875rem;
+  --ravine-radius-lg: 1.125rem;
   --ravine-radius-xl: 1.5rem;
-  --ravine-border-soft: rgba(241, 233, 220, 0.08);
+  --ravine-border-soft: rgba(241, 233, 220, 0.075);
   --ravine-border: rgba(241, 233, 220, 0.11);
-  --ravine-border-accent: rgba(196, 122, 82, 0.26);
+  --ravine-copper: #c47a52;
+  --ravine-petrol: #183f46;
+  --ravine-ivory: #f1e9dc;
 }
 
 button,
@@ -36,15 +38,17 @@ select option {
   color: #f1e9dc;
 }
 
-/* Keep the premium identity, but reduce the rounded/card-heavy SaaS feel. */
+/* RAVINE is editorial first: fewer pills, less visual boxing. */
 .ravine-page [class*="rounded-3xl"],
 .ravine-page [class*="rounded-[28px]"],
 .ravine-page [class*="rounded-[30px]"],
 .ravine-page [class*="rounded-[32px]"],
+.ravine-page [class*="rounded-[34px]"],
 .ravine-platform-shell [class*="rounded-3xl"],
 .ravine-platform-shell [class*="rounded-[28px]"],
 .ravine-platform-shell [class*="rounded-[30px]"],
-.ravine-platform-shell [class*="rounded-[32px]"] {
+.ravine-platform-shell [class*="rounded-[32px]"],
+.ravine-platform-shell [class*="rounded-[34px]"] {
   border-radius: var(--ravine-radius-xl) !important;
 }
 
@@ -58,10 +62,10 @@ select option {
   border-radius: var(--ravine-radius-md) !important;
 }
 
-/* Let visual work dominate UI chrome. */
-.ravine-page img,
-.ravine-platform-shell img {
-  image-rendering: auto;
+/* Keep true utility pills circular; content containers should not become pills. */
+.ravine-page .rounded-full,
+.ravine-platform-shell .rounded-full {
+  border-radius: 9999px !important;
 }
 
 .ravine-page section > .grid > *,
@@ -69,7 +73,12 @@ select option {
   min-width: 0;
 }
 
-/* Keep repeated surfaces quiet. */
+.ravine-page img,
+.ravine-platform-shell img {
+  image-rendering: auto;
+}
+
+/* Borders become a quiet alignment tool rather than the default decoration. */
 .ravine-page .border,
 .ravine-page [class*="border-["],
 .ravine-platform-shell .border,
@@ -77,45 +86,37 @@ select option {
   border-color: var(--ravine-border-soft) !important;
 }
 
-/* Preserve deliberate copper accents. */
+/* Restore intentional accent borders only where they are semantically meaningful. */
 .ravine-page [style*="rgba(196,122,82,.30)"],
 .ravine-page [style*="rgba(196,122,82,.28)"],
 .ravine-page [style*="rgba(196,122,82,.25)"],
 .ravine-platform-shell [style*="rgba(196,122,82,.30)"],
 .ravine-platform-shell [style*="rgba(196,122,82,.28)"],
 .ravine-platform-shell [style*="rgba(196,122,82,.25)"] {
-  border-color: var(--ravine-border-accent) !important;
+  border-color: rgba(196, 122, 82, 0.26) !important;
 }
 
-/* Shared platform chrome: quieter, more editorial, less dashboard-like. */
+/* Shared shell: one navigation authority on desktop. */
 .ravine-platform-shell header {
   box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
 }
 
-.ravine-platform-shell header nav {
-  min-width: 0;
+.ravine-platform-shell aside {
+  box-shadow: 16px 0 50px rgba(0, 0, 0, 0.08);
 }
 
 .ravine-platform-shell aside a {
-  transition:
-    color 220ms ease,
-    background-color 220ms ease,
-    transform 220ms cubic-bezier(.22, 1, .36, 1);
+  transition: color 180ms ease, background-color 180ms ease, transform 180ms cubic-bezier(.22, 1, .36, 1);
 }
 
-/* Forms read as editorial sections rather than one giant rounded panel. */
-.ravine-platform-shell form[class*="rounded-3xl"],
-.ravine-platform-shell form[class*="rounded-[32px]"] {
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.10);
+.ravine-platform-shell aside a:hover {
+  transform: translateX(2px);
 }
 
 .ravine-platform-shell input,
 .ravine-platform-shell textarea,
 .ravine-platform-shell select {
-  transition:
-    border-color 220ms ease,
-    background-color 220ms ease,
-    box-shadow 220ms ease;
+  transition: border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
 }
 
 .ravine-platform-shell input:focus,
@@ -124,13 +125,7 @@ select option {
   box-shadow: 0 0 0 3px rgba(196, 122, 82, 0.08);
 }
 
-/* Keep action hierarchy sharp: primary CTA copper, utilities quiet. */
-.ravine-platform-shell button,
-.ravine-platform-shell a {
-  transition-timing-function: cubic-bezier(.22, 1, .36, 1);
-}
-
-/* Typography hierarchy: editorial headings carry more weight than utility labels. */
+/* Editorial headings; UI labels remain deliberately quiet. */
 .ravine-page h1,
 .ravine-page h2,
 .ravine-page h3,
@@ -147,17 +142,116 @@ select option {
   text-wrap: pretty;
 }
 
-/* Reduce blanket motion; important hero/feature motion remains intact. */
-.ravine-page a,
-.ravine-page button,
-.ravine-platform-shell a,
-.ravine-platform-shell button {
-  transition-duration: 300ms;
+/* Work-first home hierarchy. */
+.ravine-home-work {
+  position: relative;
+}
+
+.ravine-home-work img {
+  filter: saturate(0.96) contrast(1.03);
+}
+
+.ravine-home-editorial {
+  border-top: 1px solid var(--ravine-border-soft);
+  padding-top: 1.5rem;
+}
+
+.ravine-home-card {
+  background: transparent !important;
+  border-color: transparent !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.ravine-home-card + .ravine-home-card {
+  border-top: 1px solid var(--ravine-border-soft) !important;
+}
+
+/* Creator identity: imagery and personality outrank database metadata. */
+.ravine-creator-culture {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--ravine-radius-xl);
+  background: linear-gradient(145deg, rgba(24,63,70,.18), rgba(21,23,25,.62));
+}
+
+.ravine-creator-culture img {
+  transition: transform 600ms cubic-bezier(.22, 1, .36, 1);
+}
+
+.ravine-creator-culture:hover img {
+  transform: scale(1.035);
+}
+
+/* Dashboard: one primary metric, supporting metrics visually subordinate. */
+.ravine-dashboard-stats > :first-child {
+  background: linear-gradient(145deg, rgba(196,122,82,.10), rgba(21,23,25,.72)) !important;
+  border-color: rgba(196,122,82,.20) !important;
+}
+
+.ravine-dashboard-stats > :not(:first-child) {
+  background: rgba(21,23,25,.56) !important;
+}
+
+.ravine-dashboard-row {
+  border-inline-start: 2px solid transparent;
+}
+
+.ravine-dashboard-row:hover {
+  border-inline-start-color: rgba(196,122,82,.45);
+}
+
+/* Light theme is editorial ivory, not a white inversion of dark mode. */
+.ravine-light,
+.ravine-platform-shell:has([style*="#F1E9DC"]) {
+  --ravine-light-line: rgba(25, 23, 22, 0.10);
+}
+
+.ravine-light .ravine-ambient,
+.ravine-platform-shell[style*="#F1E9DC"] .ravine-ambient {
+  opacity: .18;
+}
+
+/* Motion hierarchy: hero/work may move; utility chrome should not perform. */
+.ravine-platform-shell header a,
+.ravine-platform-shell header button,
+.ravine-platform-shell aside a,
+.ravine-platform-shell aside button {
+  transition-duration: 180ms !important;
+}
+
+.ravine-page .ravine-hero-shell img {
+  transition-duration: 900ms;
+}
+
+.ravine-page .ravine-card img {
+  transition-duration: 650ms;
+}
+
+.ravine-page a:not(.ravine-card):not(.ravine-home-work),
+.ravine-platform-shell a:not(.ravine-creator-culture) {
+  transition-timing-function: cubic-bezier(.22, 1, .36, 1);
 }
 
 @media (max-width: 1023px) {
   .ravine-platform-shell header {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  }
+
+  .ravine-page .ravine-hero-shell {
+    min-height: min(76vh, 680px) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .ravine-page h1 {
+    font-size: clamp(2.65rem, 13vw, 4rem);
+    line-height: .98;
+    letter-spacing: -.045em;
+  }
+
+  .ravine-page section {
+    margin-top: 3.5rem;
   }
 }
 
