@@ -13,6 +13,7 @@ const protectedRoutes = [
   "/creator/upload",
   "/creator/video",
   "/creators-hub",
+  "/studio",
 ];
 
 function isProtectedPath(pathname: string) {
