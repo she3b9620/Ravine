@@ -1,3 +1,4 @@
+```tsx
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -69,7 +70,10 @@ type Profile = {
 type NavItem = {
   label: string;
   href: string;
-  icon: React.ComponentType<{ size?: number; strokeWidth?: number }>;
+  icon: React.ComponentType<{
+    size?: number;
+    strokeWidth?: number;
+  }>;
 };
 
 const categoryIcons = [
@@ -112,11 +116,15 @@ function formatViews(value: number | null | undefined) {
   if (!value) return "0";
 
   if (value >= 1_000_000) {
-    return `${(value / 1_000_000).toFixed(value >= 10_000_000 ? 0 : 1)}M`;
+    return `${(value / 1_000_000).toFixed(
+      value >= 10_000_000 ? 0 : 1
+    )}M`;
   }
 
   if (value >= 1_000) {
-    return `${(value / 1_000).toFixed(value >= 10_000 ? 0 : 1)}K`;
+    return `${(value / 1_000).toFixed(
+      value >= 10_000 ? 0 : 1
+    )}K`;
   }
 
   return value.toString();
@@ -160,7 +168,8 @@ export default function HomePage() {
 
   useEffect(() => {
     try {
-      const storedTheme = window.localStorage.getItem("ravine-theme");
+      const storedTheme =
+        window.localStorage.getItem("ravine-theme");
 
       if (storedTheme === "light") {
         setDarkMode(false);
@@ -169,7 +178,9 @@ export default function HomePage() {
       } else {
         setDarkMode(
           !window.matchMedia ||
-            window.matchMedia("(prefers-color-scheme: dark)").matches
+            window.matchMedia(
+              "(prefers-color-scheme: dark)"
+            ).matches
         );
       }
     } catch {
@@ -179,7 +190,10 @@ export default function HomePage() {
 
   useEffect(() => {
     try {
-      window.localStorage.setItem("ravine-theme", darkMode ? "dark" : "light");
+      window.localStorage.setItem(
+        "ravine-theme",
+        darkMode ? "dark" : "light"
+      );
     } catch {
       // Ignore storage failures.
     }
@@ -217,11 +231,14 @@ export default function HomePage() {
 
         if (!mounted) return;
 
-        const loadedVideos = (videosResponse.data ?? []) as VideoRecord[];
-        const loadedCategories =
-          (categoriesResponse.data ?? []) as Category[];
+        const loadedVideos = (videosResponse.data ??
+          []) as VideoRecord[];
+
+        const loadedCategories = (categoriesResponse.data ??
+          []) as Category[];
 
         setVideos(loadedVideos);
+
         setCategories(
           loadedCategories.length > 0
             ? loadedCategories
@@ -233,12 +250,16 @@ export default function HomePage() {
         if (user?.id) {
           const { data: currentProfile } = await supabase
             .from("profiles")
-            .select("id,username,display_name,avatar_url")
+            .select(
+              "id,username,display_name,avatar_url"
+            )
             .eq("id", user.id)
             .maybeSingle();
 
           if (mounted) {
-            setProfile((currentProfile ?? null) as Profile | null);
+            setProfile(
+              (currentProfile ?? null) as Profile | null
+            );
           }
         }
 
@@ -253,11 +274,15 @@ export default function HomePage() {
         if (creatorIds.length > 0) {
           const { data: loadedCreators } = await supabase
             .from("profiles")
-            .select("id,username,display_name,avatar_url,bio")
+            .select(
+              "id,username,display_name,avatar_url,bio"
+            )
             .in("id", creatorIds);
 
           if (mounted) {
-            setCreators((loadedCreators ?? []) as Creator[]);
+            setCreators(
+              (loadedCreators ?? []) as Creator[]
+            );
           }
         } else {
           setCreators([]);
@@ -329,15 +354,16 @@ export default function HomePage() {
     },
   ];
 
-  const filteredVideos = useMemo(() => {
-    let result = [...videos];
+  const filteredVideos = useMemo<VideoRecord[]>(() => {
+    let result: VideoRecord[] = [...videos];
 
     if (searchQuery.trim()) {
       const query = searchQuery.trim().toLowerCase();
 
-      result = result.filter((video) => {
+      result = result.filter((video: VideoRecord) => {
         const title = video.title?.toLowerCase() ?? "";
-        const description = video.description?.toLowerCase() ?? "";
+        const description =
+          video.description?.toLowerCase() ?? "";
 
         return (
           title.includes(query) ||
@@ -348,6 +374,7 @@ export default function HomePage() {
 
     if (activeRange !== "All") {
       const now = Date.now();
+
       const days =
         activeRange === "Today"
           ? 1
@@ -355,37 +382,52 @@ export default function HomePage() {
             ? 7
             : 30;
 
-      const threshold = now - days * 24 * 60 * 60 * 1000;
+      const threshold =
+        now - days * 24 * 60 * 60 * 1000;
 
-      result = result.filter((video) => {
-        if (!video.created_at) return true;
+      result = result.filter(
+        (video: VideoRecord) => {
+          if (!video.created_at) return true;
 
-        const timestamp = new Date(video.created_at).getTime();
+          const timestamp = new Date(
+            video.created_at
+          ).getTime();
 
-        return timestamp >= threshold;
-      });
+          return timestamp >= threshold;
+        }
+      );
     }
 
     return result;
   }, [videos, searchQuery, activeRange]);
 
-  const trendingVideos = filteredVideos.slice(0, 6);
-  const freshVideos = filteredVideos.slice(6, 14);
-  const liveVideos = filteredVideos
-    .filter((video) => video.status === "live")
-    .slice(0, 4);
+  const trendingVideos: VideoRecord[] =
+    filteredVideos.slice(0, 6);
 
-  const displayCreators = creators.slice(0, 8);
+  const freshVideos: VideoRecord[] =
+    filteredVideos.slice(6, 14);
 
-  const pageBg = darkMode ? "bg-[#090909]" : "bg-[#F4EEE5]";
-  const textPrimary = darkMode ? "text-[#F1E9DC]" : "text-[#181716]";
-  const textSecondary = darkMode
-    ? "text-[#B7B1AA]"
-    : "text-[#6B625A]";
+  const liveVideos: VideoRecord[] =
+    filteredVideos
+      .filter(
+        (video: VideoRecord) => video.status === "live"
+      )
+      .slice(0, 4);
+
+  const displayCreators: Creator[] =
+    creators.slice(0, 8);
+
+  const pageBg = darkMode
+    ? "bg-[#090909]"
+    : "bg-[#F4EEE5]";
+
+  const textPrimary = darkMode
+    ? "text-[#F1E9DC]"
+    : "text-[#181716]";
+
   const borderColor = darkMode
     ? "border-[#F1E9DC]/[0.08]"
     : "border-[#241F1B]/[0.09]";
-  const panelBg = darkMode ? "bg-[#111416]" : "bg-[#FBF8F2]";
 
   const closeSidebar = () => setSidebarOpen(false);
 
@@ -415,7 +457,9 @@ export default function HomePage() {
       >
         <div className="flex min-h-0 flex-1 flex-col">
           {/* Brand */}
-          <div className={`border-b px-5 pb-5 pt-5 ${borderColor}`}>
+          <div
+            className={`border-b px-5 pb-5 pt-5 ${borderColor}`}
+          >
             <div className="flex items-start justify-between gap-4">
               <Link
                 href={`/${locale}`}
@@ -459,7 +503,9 @@ export default function HomePage() {
               <button
                 type="button"
                 onClick={closeSidebar}
-                aria-label={isArabic ? "إغلاق القائمة" : "Close menu"}
+                aria-label={
+                  isArabic ? "إغلاق القائمة" : "Close menu"
+                }
                 className={[
                   "grid size-9 shrink-0 place-items-center border transition",
                   darkMode
@@ -490,7 +536,10 @@ export default function HomePage() {
             <nav className="space-y-1.5">
               {primaryNav.map((item) => {
                 const Icon = item.icon;
-                const active = item.label === (isArabic ? "الرئيسية" : "Home");
+
+                const active =
+                  item.label ===
+                  (isArabic ? "الرئيسية" : "Home");
 
                 return (
                   <Link
@@ -544,7 +593,9 @@ export default function HomePage() {
               })}
             </nav>
 
-            <div className={`my-6 border-t ${borderColor}`} />
+            <div
+              className={`my-6 border-t ${borderColor}`}
+            />
 
             <div className="mb-3 px-3">
               <span
@@ -612,7 +663,9 @@ export default function HomePage() {
                       : "text-[#A95F39]",
                   ].join(" ")}
                 >
-                  {isArabic ? "مساحة صانع المحتوى" : "Creator space"}
+                  {isArabic
+                    ? "مساحة صانع المحتوى"
+                    : "Creator space"}
                 </span>
 
                 <Sparkles
@@ -650,20 +703,29 @@ export default function HomePage() {
                 ].join(" ")}
               >
                 <span>
-                  {isArabic ? "افتح الاستوديو" : "Open Studio"}
+                  {isArabic
+                    ? "افتح الاستوديو"
+                    : "Open Studio"}
                 </span>
 
-                <ArrowUpRight size={15} strokeWidth={1.8} />
+                <ArrowUpRight
+                  size={15}
+                  strokeWidth={1.8}
+                />
               </Link>
             </div>
           </div>
 
           {/* Bottom controls */}
-          <div className={`border-t p-3 ${borderColor}`}>
+          <div
+            className={`border-t p-3 ${borderColor}`}
+          >
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={() => setDarkMode((value) => !value)}
+                onClick={() =>
+                  setDarkMode((value) => !value)
+                }
                 className={[
                   "flex min-h-[42px] flex-1 items-center gap-2 border px-3 text-[11px] font-medium transition",
                   darkMode
@@ -672,12 +734,20 @@ export default function HomePage() {
                 ].join(" ")}
               >
                 {darkMode ? (
-                  <Moon size={15} strokeWidth={1.8} />
+                  <Moon
+                    size={15}
+                    strokeWidth={1.8}
+                  />
                 ) : (
-                  <Sun size={15} strokeWidth={1.8} />
+                  <Sun
+                    size={15}
+                    strokeWidth={1.8}
+                  />
                 )}
 
-                <span>{darkMode ? "Dark" : "Light"}</span>
+                <span>
+                  {darkMode ? "Dark" : "Light"}
+                </span>
               </button>
 
               <Link
@@ -690,7 +760,10 @@ export default function HomePage() {
                     : "border-[#241F1B]/[0.08] bg-black/[0.02] text-[#706962] hover:border-[#C47A52]/20 hover:text-[#201A16]",
                 ].join(" ")}
               >
-                <Settings2 size={16} strokeWidth={1.8} />
+                <Settings2
+                  size={16}
+                  strokeWidth={1.8}
+                />
               </Link>
             </div>
           </div>
@@ -701,7 +774,11 @@ export default function HomePage() {
       {sidebarOpen && (
         <button
           type="button"
-          aria-label={isArabic ? "إغلاق القائمة" : "Close sidebar"}
+          aria-label={
+            isArabic
+              ? "إغلاق القائمة الجانبية"
+              : "Close sidebar"
+          }
           onClick={closeSidebar}
           className="fixed inset-0 z-[80] cursor-default bg-black/55 backdrop-blur-[2px]"
         />
@@ -723,10 +800,16 @@ export default function HomePage() {
           <div className="mx-auto flex h-[72px] max-w-[1600px] items-center gap-3 px-4 sm:px-6 xl:px-8">
             <button
               type="button"
-              onClick={() => setSidebarOpen((value) => !value)}
+              onClick={() =>
+                setSidebarOpen((value) => !value)
+              }
               aria-expanded={sidebarOpen}
               aria-controls="ravine-home-sidebar"
-              aria-label={isArabic ? "فتح القائمة" : "Open menu"}
+              aria-label={
+                isArabic
+                  ? "فتح القائمة"
+                  : "Open menu"
+              }
               className={[
                 "grid size-11 shrink-0 place-items-center border transition",
                 darkMode
@@ -737,7 +820,10 @@ export default function HomePage() {
               {sidebarOpen ? (
                 <X size={19} strokeWidth={1.8} />
               ) : (
-                <Menu size={19} strokeWidth={1.8} />
+                <Menu
+                  size={19}
+                  strokeWidth={1.8}
+                />
               )}
             </button>
 
@@ -759,7 +845,9 @@ export default function HomePage() {
             <div
               className={[
                 "mx-1 hidden h-6 w-px sm:block",
-                darkMode ? "bg-white/[0.08]" : "bg-[#241F1B]/[0.08]",
+                darkMode
+                  ? "bg-white/[0.08]"
+                  : "bg-[#241F1B]/[0.08]",
               ].join(" ")}
             />
 
@@ -784,7 +872,9 @@ export default function HomePage() {
 
                 <input
                   value={searchQuery}
-                  onChange={(event) => setSearchQuery(event.target.value)}
+                  onChange={(event) =>
+                    setSearchQuery(event.target.value)
+                  }
                   placeholder={
                     isArabic
                       ? "ابحث عن أعمال، صناع، أفلام..."
@@ -802,7 +892,11 @@ export default function HomePage() {
 
             <button
               type="button"
-              aria-label={isArabic ? "الإشعارات" : "Notifications"}
+              aria-label={
+                isArabic
+                  ? "الإشعارات"
+                  : "Notifications"
+              }
               className={[
                 "grid size-11 shrink-0 place-items-center border transition",
                 darkMode
@@ -810,13 +904,20 @@ export default function HomePage() {
                   : "border-[#241F1B]/[0.08] bg-black/[0.02] text-[#766D65] hover:border-[#C47A52]/25 hover:text-[#241F1B]",
               ].join(" ")}
             >
-              <Bell size={18} strokeWidth={1.75} />
+              <Bell
+                size={18}
+                strokeWidth={1.75}
+              />
             </button>
 
             {profile ? (
               <Link
                 href={`/${locale}/profile`}
-                aria-label={isArabic ? "الملف الشخصي" : "Profile"}
+                aria-label={
+                  isArabic
+                    ? "الملف الشخصي"
+                    : "Profile"
+                }
                 className={[
                   "grid size-11 shrink-0 place-items-center overflow-hidden border",
                   darkMode
@@ -827,14 +928,19 @@ export default function HomePage() {
                 {profile.avatar_url ? (
                   <img
                     src={profile.avatar_url}
-                    alt={profile.display_name ?? "Profile"}
+                    alt={
+                      profile.display_name ??
+                      "Profile"
+                    }
                     className="size-full object-cover"
                   />
                 ) : (
                   <span className="text-[12px] font-semibold">
-                    {(profile.display_name ??
+                    {(
+                      profile.display_name ??
                       profile.username ??
-                      "R")[0].toUpperCase()}
+                      "R"
+                    )[0].toUpperCase()}
                   </span>
                 )}
               </Link>
@@ -866,6 +972,7 @@ export default function HomePage() {
                 <div className="relative z-10 flex flex-col justify-end p-7 sm:p-10 lg:p-14">
                   <div className="mb-5 flex items-center gap-2">
                     <span className="h-px w-8 bg-[#C47A52]" />
+
                     <span className="text-[9px] font-semibold uppercase tracking-[0.24em] text-[#C47A52]">
                       {isArabic
                         ? "منصة إبداعية"
@@ -904,8 +1011,14 @@ export default function HomePage() {
                       href={`/${locale}/explore`}
                       className="inline-flex min-h-12 items-center gap-2 bg-[#C47A52] px-5 text-[12px] font-semibold text-[#160F0B] transition hover:bg-[#D18A61]"
                     >
-                      <Compass size={16} strokeWidth={1.8} />
-                      {isArabic ? "استكشف الآن" : "Explore now"}
+                      <Compass
+                        size={16}
+                        strokeWidth={1.8}
+                      />
+
+                      {isArabic
+                        ? "استكشف الآن"
+                        : "Explore now"}
                     </Link>
 
                     <Link
@@ -917,7 +1030,11 @@ export default function HomePage() {
                           : "border-[#241F1B]/[0.09] bg-black/[0.018] text-[#302923] hover:border-[#C47A52]/30 hover:bg-[#C47A52]/10",
                       ].join(" ")}
                     >
-                      <Sparkles size={16} strokeWidth={1.7} />
+                      <Sparkles
+                        size={16}
+                        strokeWidth={1.7}
+                      />
+
                       {isArabic
                         ? "ابدأ بصناعة شيء"
                         : "Start creating"}
@@ -943,17 +1060,19 @@ export default function HomePage() {
                   />
 
                   <div className="absolute inset-0 grid grid-cols-6 opacity-[0.14]">
-                    {Array.from({ length: 36 }).map((_, index) => (
-                      <span
-                        key={index}
-                        className={[
-                          "border-e border-b",
-                          darkMode
-                            ? "border-white/[0.09]"
-                            : "border-[#1C1814]/[0.12]",
-                        ].join(" ")}
-                      />
-                    ))}
+                    {Array.from({ length: 36 }).map(
+                      (_, index) => (
+                        <span
+                          key={index}
+                          className={[
+                            "border-e border-b",
+                            darkMode
+                              ? "border-white/[0.09]"
+                              : "border-[#1C1814]/[0.12]",
+                          ].join(" ")}
+                        />
+                      )
+                    )}
                   </div>
 
                   <div className="absolute inset-x-8 bottom-8 top-8 border border-[#C47A52]/20" />
@@ -961,6 +1080,7 @@ export default function HomePage() {
                   <div className="absolute bottom-10 start-10 max-w-[260px]">
                     <div className="mb-3 flex items-center gap-2">
                       <div className="size-2 bg-[#C47A52]" />
+
                       <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-[#C47A52]">
                         RAVINE
                       </span>
@@ -989,11 +1109,15 @@ export default function HomePage() {
             <div className="mb-6 flex items-end justify-between gap-4">
               <div>
                 <span className="mb-2 block text-[9px] font-semibold uppercase tracking-[0.23em] text-[#C47A52]">
-                  {isArabic ? "الأكثر مشاهدة" : "Trending"}
+                  {isArabic
+                    ? "الأكثر مشاهدة"
+                    : "Trending"}
                 </span>
 
                 <h2 className="text-2xl font-semibold tracking-[-0.035em] sm:text-3xl">
-                  {isArabic ? "ما يحدث الآن" : "What’s happening now"}
+                  {isArabic
+                    ? "ما يحدث الآن"
+                    : "What’s happening now"}
                 </h2>
               </div>
 
@@ -1007,15 +1131,18 @@ export default function HomePage() {
                 ].join(" ")}
               >
                 {isArabic ? "عرض الكل" : "View all"}
-                <ArrowUpRight size={15} strokeWidth={1.8} />
+
+                <ArrowUpRight
+                  size={15}
+                  strokeWidth={1.8}
+                />
               </Link>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {(loading ? Array.from({ length: 6 }) : trendingVideos).map(
-                (video, index) => {
-                  if (loading) {
-                    return (
+              {loading
+                ? Array.from({ length: 6 }).map(
+                    (_, index) => (
                       <div
                         key={`skeleton-${index}`}
                         className={[
@@ -1032,77 +1159,88 @@ export default function HomePage() {
                           <div className="h-3 w-2/5 bg-current opacity-[0.05]" />
                         </div>
                       </div>
-                    );
-                  }
+                    )
+                  )
+                : trendingVideos.map(
+                    (video: VideoRecord) => (
+                      <Link
+                        key={video.id}
+                        href={`/${locale}/watch/${video.id}`}
+                        className={[
+                          "group overflow-hidden border transition",
+                          darkMode
+                            ? "border-white/[0.06] bg-[#111416] hover:border-[#C47A52]/25"
+                            : "border-[#241F1B]/[0.08] bg-[#FBF8F2] hover:border-[#C47A52]/25",
+                        ].join(" ")}
+                      >
+                        <div className="relative aspect-video overflow-hidden">
+                          {video.thumbnail_url ? (
+                            <img
+                              src={video.thumbnail_url}
+                              alt={video.title}
+                              className="size-full object-cover transition duration-500 group-hover:scale-[1.035]"
+                            />
+                          ) : (
+                            <div
+                              className={[
+                                "size-full",
+                                darkMode
+                                  ? "bg-[#183F46]"
+                                  : "bg-[#DDE5E0]",
+                              ].join(" ")}
+                            />
+                          )}
 
-                  return (
-                    <Link
-                      key={video.id}
-                      href={`/${locale}/watch/${video.id}`}
-                      className={[
-                        "group overflow-hidden border transition",
-                        darkMode
-                          ? "border-white/[0.06] bg-[#111416] hover:border-[#C47A52]/25"
-                          : "border-[#241F1B]/[0.08] bg-[#FBF8F2] hover:border-[#C47A52]/25",
-                      ].join(" ")}
-                    >
-                      <div className="relative aspect-video overflow-hidden">
-                        {video.thumbnail_url ? (
-                          <img
-                            src={video.thumbnail_url}
-                            alt={video.title}
-                            className="size-full object-cover transition duration-500 group-hover:scale-[1.035]"
-                          />
-                        ) : (
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
+
+                          <span className="absolute bottom-3 end-3 bg-black/70 px-2 py-1 text-[9px] font-medium text-white">
+                            {formatDuration(
+                              video.duration_seconds
+                            )}
+                          </span>
+
+                          <span className="absolute start-3 top-3 flex size-8 items-center justify-center border border-white/15 bg-black/35 text-white backdrop-blur-sm">
+                            <Play
+                              size={13}
+                              fill="currentColor"
+                            />
+                          </span>
+                        </div>
+
+                        <div className="p-4">
+                          <h3
+                            className={[
+                              "line-clamp-2 text-[14px] font-semibold leading-5",
+                              darkMode
+                                ? "text-[#F1E9DC]"
+                                : "text-[#261F1A]",
+                            ].join(" ")}
+                          >
+                            {video.title}
+                          </h3>
+
                           <div
                             className={[
-                              "size-full",
+                              "mt-3 flex items-center justify-between text-[10px]",
                               darkMode
-                                ? "bg-[#183F46]"
-                                : "bg-[#DDE5E0]",
+                                ? "text-[#7F8584]"
+                                : "text-[#948A82]",
                             ].join(" ")}
-                          />
-                        )}
+                          >
+                            <span>
+                              {formatViews(video.views)} views
+                            </span>
 
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
-
-                        <span className="absolute bottom-3 end-3 bg-black/70 px-2 py-1 text-[9px] font-medium text-white">
-                          {formatDuration(video.duration_seconds)}
-                        </span>
-
-                        <span className="absolute start-3 top-3 flex size-8 items-center justify-center border border-white/15 bg-black/35 text-white backdrop-blur-sm">
-                          <Play size={13} fill="currentColor" />
-                        </span>
-                      </div>
-
-                      <div className="p-4">
-                        <h3
-                          className={[
-                            "line-clamp-2 text-[14px] font-semibold leading-5",
-                            darkMode
-                              ? "text-[#F1E9DC]"
-                              : "text-[#261F1A]",
-                          ].join(" ")}
-                        >
-                          {video.title}
-                        </h3>
-
-                        <div
-                          className={[
-                            "mt-3 flex items-center justify-between text-[10px]",
-                            darkMode
-                              ? "text-[#7F8584]"
-                              : "text-[#948A82]",
-                          ].join(" ")}
-                        >
-                          <span>{formatViews(video.views)} views</span>
-                          <span>{formatDate(video.created_at)}</span>
+                            <span>
+                              {formatDate(
+                                video.created_at
+                              )}
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    </Link>
-                  );
-                }
-              )}
+                      </Link>
+                    )
+                  )}
             </div>
           </section>
 
@@ -1114,7 +1252,9 @@ export default function HomePage() {
               </span>
 
               <h2 className="text-2xl font-semibold tracking-[-0.035em] sm:text-3xl">
-                {isArabic ? "اكتشف حسب المجال" : "Explore by discipline"}
+                {isArabic
+                  ? "اكتشف حسب المجال"
+                  : "Explore by discipline"}
               </h2>
             </div>
 
@@ -1122,53 +1262,63 @@ export default function HomePage() {
               {(categories.length > 0
                 ? categories.slice(0, 6)
                 : fallbackCategories
-              ).map((category, index) => {
-                const Icon =
-                  categoryIcons[index % categoryIcons.length];
+              ).map(
+                (
+                  category: Category,
+                  index: number
+                ) => {
+                  const Icon =
+                    categoryIcons[
+                      index % categoryIcons.length
+                    ];
 
-                const slug =
-                  category.slug ??
-                  category.name
-                    ?.toLowerCase()
-                    .replace(/\s+/g, "-") ??
-                  category.id;
+                  const slug =
+                    category.slug ??
+                    category.name
+                      ?.toLowerCase()
+                      .replace(/\s+/g, "-") ??
+                    category.id;
 
-                return (
-                  <Link
-                    key={category.id}
-                    href={`/${locale}/category/${slug}`}
-                    className={[
-                      "group min-h-[138px] border p-4 transition",
-                      darkMode
-                        ? "border-white/[0.06] bg-[#111416] hover:border-[#C47A52]/25 hover:bg-[#C47A52]/[0.05]"
-                        : "border-[#241F1B]/[0.08] bg-[#FBF8F2] hover:border-[#C47A52]/25 hover:bg-[#C47A52]/[0.05]",
-                    ].join(" ")}
-                  >
-                    <div
+                  return (
+                    <Link
+                      key={category.id}
+                      href={`/${locale}/category/${slug}`}
                       className={[
-                        "mb-8 grid size-10 place-items-center border transition",
+                        "group min-h-[138px] border p-4 transition",
                         darkMode
-                          ? "border-white/[0.08] bg-white/[0.02] text-[#C47A52] group-hover:border-[#C47A52]/25"
-                          : "border-[#241F1B]/[0.08] bg-black/[0.018] text-[#A95F39] group-hover:border-[#C47A52]/25",
+                          ? "border-white/[0.06] bg-[#111416] hover:border-[#C47A52]/25 hover:bg-[#C47A52]/[0.05]"
+                          : "border-[#241F1B]/[0.08] bg-[#FBF8F2] hover:border-[#C47A52]/25 hover:bg-[#C47A52]/[0.05]",
                       ].join(" ")}
                     >
-                      <Icon size={18} strokeWidth={1.7} />
-                    </div>
+                      <div
+                        className={[
+                          "mb-8 grid size-10 place-items-center border transition",
+                          darkMode
+                            ? "border-white/[0.08] bg-white/[0.02] text-[#C47A52] group-hover:border-[#C47A52]/25"
+                            : "border-[#241F1B]/[0.08] bg-black/[0.018] text-[#A95F39] group-hover:border-[#C47A52]/25",
+                        ].join(" ")}
+                      >
+                        <Icon
+                          size={18}
+                          strokeWidth={1.7}
+                        />
+                      </div>
 
-                    <div className="flex items-end justify-between gap-2">
-                      <span className="text-[12px] font-semibold">
-                        {category.name ?? category.id}
-                      </span>
+                      <div className="flex items-end justify-between gap-2">
+                        <span className="text-[12px] font-semibold">
+                          {category.name ?? category.id}
+                        </span>
 
-                      <ArrowUpRight
-                        size={14}
-                        className="text-[#C47A52] opacity-50 transition group-hover:opacity-100"
-                        strokeWidth={1.8}
-                      />
-                    </div>
-                  </Link>
-                );
-              })}
+                        <ArrowUpRight
+                          size={14}
+                          className="text-[#C47A52] opacity-50 transition group-hover:opacity-100"
+                          strokeWidth={1.8}
+                        />
+                      </div>
+                    </Link>
+                  );
+                }
+              )}
             </div>
           </section>
 
@@ -1196,113 +1346,130 @@ export default function HomePage() {
                     : "text-[#776E67] hover:text-[#201B18]",
                 ].join(" ")}
               >
-                {isArabic ? "كل الصنّاع" : "All creators"}
-                <ArrowUpRight size={15} strokeWidth={1.8} />
+                {isArabic
+                  ? "كل الصنّاع"
+                  : "All creators"}
+
+                <ArrowUpRight
+                  size={15}
+                  strokeWidth={1.8}
+                />
               </Link>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {displayCreators.length > 0
-                ? displayCreators.map((creator) => (
-                    <Link
-                      key={creator.id}
-                      href={`/${locale}/creator/${creator.username ?? creator.id}`}
-                      className={[
-                        "group flex items-center gap-4 border p-4 transition",
-                        darkMode
-                          ? "border-white/[0.06] bg-[#111416] hover:border-[#C47A52]/25"
-                          : "border-[#241F1B]/[0.08] bg-[#FBF8F2] hover:border-[#C47A52]/25",
-                      ].join(" ")}
-                    >
-                      <div
+                ? displayCreators.map(
+                    (creator: Creator) => (
+                      <Link
+                        key={creator.id}
+                        href={`/${locale}/creator/${
+                          creator.username ?? creator.id
+                        }`}
                         className={[
-                          "grid size-12 shrink-0 place-items-center overflow-hidden border",
+                          "group flex items-center gap-4 border p-4 transition",
                           darkMode
-                            ? "border-white/[0.08] bg-[#183F46]"
-                            : "border-[#241F1B]/[0.08] bg-[#DDE5E0]",
+                            ? "border-white/[0.06] bg-[#111416] hover:border-[#C47A52]/25"
+                            : "border-[#241F1B]/[0.08] bg-[#FBF8F2] hover:border-[#C47A52]/25",
                         ].join(" ")}
                       >
-                        {creator.avatar_url ? (
-                          <img
-                            src={creator.avatar_url}
-                            alt={creator.display_name ?? "Creator"}
-                            className="size-full object-cover"
-                          />
-                        ) : (
-                          <span className="text-[13px] font-semibold">
-                            {(creator.display_name ??
-                              creator.username ??
-                              "C")[0].toUpperCase()}
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="min-w-0 flex-1">
-                        <div className="truncate text-[12px] font-semibold">
-                          {creator.display_name ??
-                            creator.username ??
-                            "Creator"}
-                        </div>
-
                         <div
                           className={[
-                            "mt-1 truncate text-[10px]",
+                            "grid size-12 shrink-0 place-items-center overflow-hidden border",
                             darkMode
-                              ? "text-[#777D7C]"
-                              : "text-[#948A82]",
+                              ? "border-white/[0.08] bg-[#183F46]"
+                              : "border-[#241F1B]/[0.08] bg-[#DDE5E0]",
                           ].join(" ")}
                         >
-                          @{creator.username ?? "creator"}
+                          {creator.avatar_url ? (
+                            <img
+                              src={creator.avatar_url}
+                              alt={
+                                creator.display_name ??
+                                "Creator"
+                              }
+                              className="size-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-[13px] font-semibold">
+                              {(
+                                creator.display_name ??
+                                creator.username ??
+                                "C"
+                              )[0].toUpperCase()}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="min-w-0 flex-1">
+                          <div className="truncate text-[12px] font-semibold">
+                            {creator.display_name ??
+                              creator.username ??
+                              "Creator"}
+                          </div>
+
+                          <div
+                            className={[
+                              "mt-1 truncate text-[10px]",
+                              darkMode
+                                ? "text-[#777D7C]"
+                                : "text-[#948A82]",
+                            ].join(" ")}
+                          >
+                            @{creator.username ?? "creator"}
+                          </div>
+                        </div>
+
+                        <ArrowUpRight
+                          size={15}
+                          className="shrink-0 text-[#C47A52] opacity-50 transition group-hover:opacity-100"
+                          strokeWidth={1.8}
+                        />
+                      </Link>
+                    )
+                  )
+                : Array.from({ length: 4 }).map(
+                    (_, index) => (
+                      <div
+                        key={`creator-placeholder-${index}`}
+                        className={[
+                          "flex items-center gap-4 border p-4",
+                          darkMode
+                            ? "border-white/[0.06] bg-[#111416]"
+                            : "border-[#241F1B]/[0.08] bg-[#FBF8F2]",
+                        ].join(" ")}
+                      >
+                        <div
+                          className={[
+                            "size-12 shrink-0",
+                            darkMode
+                              ? "bg-white/[0.04]"
+                              : "bg-black/[0.04]",
+                          ].join(" ")}
+                        />
+
+                        <div className="min-w-0 flex-1 space-y-2">
+                          <div
+                            className={[
+                              "h-3 w-3/5",
+                              darkMode
+                                ? "bg-white/[0.05]"
+                                : "bg-black/[0.05]",
+                            ].join(" ")}
+                          />
+
+                          <div
+                            className={[
+                              "h-2 w-2/5",
+                              darkMode
+                                ? "bg-white/[0.035]"
+                                : "bg-black/[0.035]",
+                            ].join(" ")}
+                          />
                         </div>
                       </div>
-
-                      <ArrowUpRight
-                        size={15}
-                        className="shrink-0 text-[#C47A52] opacity-50 transition group-hover:opacity-100"
-                        strokeWidth={1.8}
-                      />
-                    </Link>
-                  ))
-                : Array.from({ length: 4 }).map((_, index) => (
-                    <div
-                      key={`creator-placeholder-${index}`}
-                      className={[
-                        "flex items-center gap-4 border p-4",
-                        darkMode
-                          ? "border-white/[0.06] bg-[#111416]"
-                          : "border-[#241F1B]/[0.08] bg-[#FBF8F2]",
-                      ].join(" ")}
-                    >
-                      <div
-                        className={[
-                          "size-12 shrink-0",
-                          darkMode
-                            ? "bg-white/[0.04]"
-                            : "bg-black/[0.04]",
-                        ].join(" ")}
-                      />
-
-                      <div className="min-w-0 flex-1 space-y-2">
-                        <div
-                          className={[
-                            "h-3 w-3/5",
-                            darkMode
-                              ? "bg-white/[0.05]"
-                              : "bg-black/[0.05]",
-                          ].join(" ")}
-                        />
-
-                        <div
-                          className={[
-                            "h-2 w-2/5",
-                            darkMode
-                              ? "bg-white/[0.035]"
-                              : "bg-black/[0.035]",
-                          ].join(" ")}
-                        />
-                      </div>
-                    </div>
-                  ))}
+                    )
+                  )}
             </div>
           </section>
 
@@ -1321,8 +1488,9 @@ export default function HomePage() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              {freshVideos.length > 0
-                ? freshVideos.map((video) => (
+              {freshVideos.length > 0 ? (
+                freshVideos.map(
+                  (video: VideoRecord) => (
                     <Link
                       key={video.id}
                       href={`/${locale}/watch/${video.id}`}
@@ -1354,7 +1522,9 @@ export default function HomePage() {
                         <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
 
                         <span className="absolute bottom-3 end-3 bg-black/70 px-2 py-1 text-[9px] text-white">
-                          {formatDuration(video.duration_seconds)}
+                          {formatDuration(
+                            video.duration_seconds
+                          )}
                         </span>
                       </div>
 
@@ -1382,36 +1552,37 @@ export default function HomePage() {
                         </div>
                       </div>
                     </Link>
-                  ))
-                : (
-                    <div
-                      className={[
-                        "col-span-full border px-6 py-16 text-center",
-                        darkMode
-                          ? "border-white/[0.06] bg-[#111416]"
-                          : "border-[#241F1B]/[0.08] bg-[#FBF8F2]",
-                      ].join(" ")}
-                    >
-                      <BookOpen
-                        size={24}
-                        className="mx-auto mb-3 text-[#C47A52]"
-                        strokeWidth={1.7}
-                      />
+                  )
+                )
+              ) : (
+                <div
+                  className={[
+                    "col-span-full border px-6 py-16 text-center",
+                    darkMode
+                      ? "border-white/[0.06] bg-[#111416]"
+                      : "border-[#241F1B]/[0.08] bg-[#FBF8F2]",
+                  ].join(" ")}
+                >
+                  <BookOpen
+                    size={24}
+                    className="mx-auto mb-3 text-[#C47A52]"
+                    strokeWidth={1.7}
+                  />
 
-                      <p
-                        className={[
-                          "text-sm",
-                          darkMode
-                            ? "text-[#A6A29B]"
-                            : "text-[#766D65]",
-                        ].join(" ")}
-                      >
-                        {isArabic
-                          ? "لا يوجد محتوى جديد حاليًا."
-                          : "There is no fresh work here yet."}
-                      </p>
-                    </div>
-                  )}
+                  <p
+                    className={[
+                      "text-sm",
+                      darkMode
+                        ? "text-[#A6A29B]"
+                        : "text-[#766D65]",
+                    ].join(" ")}
+                  >
+                    {isArabic
+                      ? "لا يوجد محتوى جديد حاليًا."
+                      : "There is no fresh work here yet."}
+                  </p>
+                </div>
+              )}
             </div>
           </section>
 
@@ -1439,68 +1610,76 @@ export default function HomePage() {
                     : "text-[#776E67] hover:text-[#201B18]",
                 ].join(" ")}
               >
-                {isArabic ? "كل البثوث" : "All live"}
-                <ArrowUpRight size={15} strokeWidth={1.8} />
+                {isArabic
+                  ? "كل البثوث"
+                  : "All live"}
+
+                <ArrowUpRight
+                  size={15}
+                  strokeWidth={1.8}
+                />
               </Link>
             </div>
 
             {liveVideos.length > 0 ? (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                {liveVideos.map((video) => (
-                  <Link
-                    key={video.id}
-                    href={`/${locale}/watch/${video.id}`}
-                    className={[
-                      "group relative overflow-hidden border",
-                      darkMode
-                        ? "border-[#C47A52]/20 bg-[#111416]"
-                        : "border-[#C47A52]/20 bg-[#FBF8F2]",
-                    ].join(" ")}
-                  >
-                    <div className="relative aspect-video">
-                      {video.thumbnail_url ? (
-                        <img
-                          src={video.thumbnail_url}
-                          alt={video.title}
-                          className="size-full object-cover"
-                        />
-                      ) : (
+                {liveVideos.map(
+                  (video: VideoRecord) => (
+                    <Link
+                      key={video.id}
+                      href={`/${locale}/watch/${video.id}`}
+                      className={[
+                        "group relative overflow-hidden border",
+                        darkMode
+                          ? "border-[#C47A52]/20 bg-[#111416]"
+                          : "border-[#C47A52]/20 bg-[#FBF8F2]",
+                      ].join(" ")}
+                    >
+                      <div className="relative aspect-video">
+                        {video.thumbnail_url ? (
+                          <img
+                            src={video.thumbnail_url}
+                            alt={video.title}
+                            className="size-full object-cover"
+                          />
+                        ) : (
+                          <div
+                            className={[
+                              "size-full",
+                              darkMode
+                                ? "bg-[#183F46]"
+                                : "bg-[#DDE5E0]",
+                            ].join(" ")}
+                          />
+                        )}
+
+                        <div className="absolute inset-0 bg-black/25" />
+
+                        <span className="absolute start-3 top-3 flex items-center gap-2 bg-[#C47A52] px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[#160F0B]">
+                          <span className="size-1.5 bg-[#160F0B]" />
+                          Live
+                        </span>
+                      </div>
+
+                      <div className="p-4">
+                        <h3 className="line-clamp-2 text-[13px] font-semibold">
+                          {video.title}
+                        </h3>
+
                         <div
                           className={[
-                            "size-full",
+                            "mt-2 text-[10px]",
                             darkMode
-                              ? "bg-[#183F46]"
-                              : "bg-[#DDE5E0]",
+                              ? "text-[#7F8584]"
+                              : "text-[#948A82]",
                           ].join(" ")}
-                        />
-                      )}
-
-                      <div className="absolute inset-0 bg-black/25" />
-
-                      <span className="absolute start-3 top-3 flex items-center gap-2 bg-[#C47A52] px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[#160F0B]">
-                        <span className="size-1.5 bg-[#160F0B]" />
-                        Live
-                      </span>
-                    </div>
-
-                    <div className="p-4">
-                      <h3 className="line-clamp-2 text-[13px] font-semibold">
-                        {video.title}
-                      </h3>
-
-                      <div
-                        className={[
-                          "mt-2 text-[10px]",
-                          darkMode
-                            ? "text-[#7F8584]"
-                            : "text-[#948A82]",
-                        ].join(" ")}
-                      >
-                        {formatViews(video.views)} viewers
+                        >
+                          {formatViews(video.views)} viewers
+                        </div>
                       </div>
-                    </div>
-                  </Link>
-                ))}
+                    </Link>
+                  )
+                )}
               </div>
             ) : (
               <div
@@ -1516,8 +1695,11 @@ export default function HomePage() {
                 <div className="relative max-w-2xl">
                   <div className="mb-4 flex items-center gap-2">
                     <span className="size-2 bg-[#C47A52]" />
+
                     <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-[#C47A52]">
-                      {isArabic ? "البث المباشر" : "Live channel"}
+                      {isArabic
+                        ? "البث المباشر"
+                        : "Live channel"}
                     </span>
                   </div>
 
@@ -1556,9 +1738,16 @@ export default function HomePage() {
             >
               <div className="p-7 sm:p-10">
                 <div className="mb-3 flex items-center gap-2">
-                  <Users size={16} className="text-[#C47A52]" strokeWidth={1.7} />
+                  <Users
+                    size={16}
+                    className="text-[#C47A52]"
+                    strokeWidth={1.7}
+                  />
+
                   <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-[#C47A52]">
-                    {isArabic ? "المجتمع" : "Community"}
+                    {isArabic
+                      ? "المجتمع"
+                      : "Community"}
                   </span>
                 </div>
 
@@ -1586,8 +1775,14 @@ export default function HomePage() {
                     href={`/${locale}/community`}
                     className="inline-flex min-h-11 items-center gap-2 border border-[#C47A52]/30 bg-[#C47A52]/10 px-4 text-[11px] font-semibold transition hover:bg-[#C47A52]/15"
                   >
-                    {isArabic ? "ادخل المجتمع" : "Enter community"}
-                    <ArrowUpRight size={15} strokeWidth={1.8} />
+                    {isArabic
+                      ? "ادخل المجتمع"
+                      : "Enter community"}
+
+                    <ArrowUpRight
+                      size={15}
+                      strokeWidth={1.8}
+                    />
                   </Link>
                 </div>
               </div>
@@ -1628,7 +1823,12 @@ export default function HomePage() {
               ].join(" ")}
             >
               <div className="flex items-center gap-3">
-                <Palette size={16} className="text-[#C47A52]" strokeWidth={1.7} />
+                <Palette
+                  size={16}
+                  className="text-[#C47A52]"
+                  strokeWidth={1.7}
+                />
+
                 <span
                   className={[
                     "text-[11px]",
@@ -1637,7 +1837,9 @@ export default function HomePage() {
                       : "text-[#81776F]",
                   ].join(" ")}
                 >
-                  {isArabic ? "ترتيب المحتوى" : "Content range"}
+                  {isArabic
+                    ? "ترتيب المحتوى"
+                    : "Content range"}
                 </span>
               </div>
 
@@ -1646,7 +1848,9 @@ export default function HomePage() {
                   <button
                     key={label}
                     type="button"
-                    onClick={() => setActiveRange(label)}
+                    onClick={() =>
+                      setActiveRange(label)
+                    }
                     className={[
                       "border px-3 py-2 text-[10px] font-medium transition",
                       activeRange === label
@@ -1722,7 +1926,9 @@ export default function HomePage() {
                       : "text-[#91877F] hover:text-[#201B18]",
                   ].join(" ")}
                 >
-                  {isArabic ? "عن RAVINE" : "About RAVINE"}
+                  {isArabic
+                    ? "عن RAVINE"
+                    : "About RAVINE"}
                 </Link>
 
                 <Link
@@ -1734,7 +1940,9 @@ export default function HomePage() {
                       : "text-[#91877F] hover:text-[#201B18]",
                   ].join(" ")}
                 >
-                  {isArabic ? "الخصوصية" : "Privacy"}
+                  {isArabic
+                    ? "الخصوصية"
+                    : "Privacy"}
                 </Link>
 
                 <Link
@@ -1746,14 +1954,18 @@ export default function HomePage() {
                       : "text-[#91877F] hover:text-[#201B18]",
                   ].join(" ")}
                 >
-                  {isArabic ? "الشروط" : "Terms"}
+                  {isArabic
+                    ? "الشروط"
+                    : "Terms"}
                 </Link>
               </div>
 
               <div
                 className={[
                   "text-[9px] uppercase tracking-[0.14em]",
-                  darkMode ? "text-[#575D5C]" : "text-[#9A9189]",
+                  darkMode
+                    ? "text-[#575D5C]"
+                    : "text-[#9A9189]",
                 ].join(" ")}
               >
                 © {new Date().getFullYear()} RAVINE
@@ -1770,3 +1982,4 @@ export default function HomePage() {
     </main>
   );
 }
+```
