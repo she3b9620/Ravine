@@ -1,8 +1,9 @@
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
+import GuestHomeGate from "@/components/GuestHomeGate";
 
 export default async function LocaleLayout({
-  children
+  children,
 }: {
   children: React.ReactNode;
 }) {
@@ -10,7 +11,7 @@ export default async function LocaleLayout({
 
   return (
     <NextIntlClientProvider messages={messages}>
-      {children}
+      <GuestHomeGate>{children}</GuestHomeGate>
     </NextIntlClientProvider>
   );
 }
