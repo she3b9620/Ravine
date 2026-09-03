@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useLocale } from "next-intl";
 import { usePathname } from "next/navigation";
-import { ArrowDown, ArrowUpRight, Camera, Clapperboard, Layers3, Menu, Moon, PenLine, Play, Search, Sparkles, Star, Sun, UserRound, UsersRound, X } from "lucide-react";
+import { ArrowDown, ArrowUpRight, Camera, Clapperboard, Layers3, Menu, Moon, PenLine, Play, Search, Sparkles, Sun, UserRound, UsersRound, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import AuthModal from "@/components/AuthModal";
 import HomeLowerSections from "@/components/HomeLowerSections";
@@ -91,14 +91,11 @@ export default function GuestHomeGate({ children }: Props) {
   }, [authenticated, isHome, locale, resolved]);
 
   useEffect(() => {
-    if (!isHome || !resolved || authenticated) {
+    document.body.style.overflow = "";
+    return () => {
       document.body.style.overflow = "";
-      return;
-    }
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = previous; };
-  }, [authenticated, isHome, resolved]);
+    };
+  }, []);
 
   useEffect(() => {
     if (isHome || !resolved || authenticated || authPath) {
