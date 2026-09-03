@@ -20,7 +20,6 @@ type Video = {
 };
 
 type Category = { id: number; name: string; slug: string };
-
 type Sort = "latest" | "views" | "likes";
 type Range = "all" | "today" | "week" | "month" | "year";
 
@@ -53,7 +52,7 @@ function since(range: Range) {
 export default function DiscoverPage() {
   const locale = useLocale();
   const isArabic = locale === "ar";
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   const [videos, setVideos] = useState<Video[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -80,29 +79,49 @@ export default function DiscoverPage() {
 
       const createdAfter = since(range);
       if (createdAfter) request = request.gte("created_at", createdAfter);
-      if (category !== "all") request = request.eq("category", category);
+      if (category !== "all") request = request.eq("category_id", Number(category));
       if (type !== "all") request = request.eq("content_type", type);
-      if (query.trim()) {
-        const clean = query.trim().replace(/[,()]/g, " ");
-        request = request.or(`title.ilike.%${clean}%,description.ilike.%${clean}%`);
+
+      const term = query.trim();
+      if (term) {
+        const [titleResult, descriptionResult] = await Promise.all([
+          request.ilike("title", `%${term}%`),
+          request.ilike("description", `%${term}%`),
+        ]);
+        if (!mounted) return;
+        if (titleResult.error || descriptionResult.error) {
+          setError(titleResult.error?.message || descriptionResult.error?.message || "Search failed.");
+          setVideos([]);
+        } else {
+          const merged = [...(titleResult.data ?? []), ...(descriptionResult.data ?? [])];
+          const unique = Array.from(new Map(merged.map((item) => [item.id, item])).values());
+          const sorted = [...unique].sort((a, b) => {
+            if (sort === "views") return Number(b.views ?? 0) - Number(a.views ?? 0);
+            if (sort === "likes") return Number(b.likes ?? 0) - Number(a.likes ?? 0);
+            return new Date(b.created_at ?? 0).getTime() - new Date(a.created_at ?? 0).getTime();
+          });
+          setVideos(sorted.slice(0, 60) as Video[]);
+        }
+      } else {
+        request = sort === "views"
+          ? request.order("views", { ascending: false })
+          : sort === "likes"
+            ? request.order("likes", { ascending: false })
+            : request.order("created_at", { ascending: false });
+        const videoResult = await request.limit(60);
+        if (!mounted) return;
+        if (videoResult.error) {
+          setError(videoResult.error.message);
+          setVideos([]);
+        } else {
+          setVideos((videoResult.data ?? []) as Video[]);
+        }
       }
 
-      request = sort === "views"
-        ? request.order("views", { ascending: false })
-        : sort === "likes"
-          ? request.order("likes", { ascending: false })
-          : request.order("created_at", { ascending: false });
-
-      const [videoResult, categoryResult] = await Promise.all([
-        request.limit(60),
-        supabase.from("categories").select("id,name,slug").order("name", { ascending: true }),
-      ]);
-
+      const categoryResult = await supabase.from("categories").select("id,name,slug").order("name", { ascending: true });
       if (!mounted) return;
-      if (videoResult.error) setError(videoResult.error.message);
-      if (categoryResult.error && !videoResult.error) setError(categoryResult.error.message);
-      setVideos(videoResult.data ?? []);
-      setCategories(categoryResult.data ?? []);
+      if (categoryResult.error) setError((current) => current || categoryResult.error.message);
+      setCategories((categoryResult.data ?? []) as Category[]);
       setLoading(false);
     }
     void load();
@@ -115,12 +134,12 @@ export default function DiscoverPage() {
     description: isArabic ? "ابحث وفلتر وتصفح أعمال RAVINE بالطريقة التي تناسب ذوقك." : "Search, filter, and explore RAVINE by the things that matter to you.",
   }), [isArabic]);
 
-  const rangeItems: [Range, string, string][] = [
-    ["all", isArabic ? "الكل" : "All", ""],
-    ["today", isArabic ? "اليوم" : "Today", ""],
-    ["week", isArabic ? "هذا الأسبوع" : "This week", ""],
-    ["month", isArabic ? "هذا الشهر" : "This month", ""],
-    ["year", isArabic ? "هذا العام" : "This year", ""],
+  const rangeItems: [Range, string][] = [
+    ["all", isArabic ? "الكل" : "All"],
+    ["today", isArabic ? "اليوم" : "Today"],
+    ["week", isArabic ? "هذا الأسبوع" : "This week"],
+    ["month", isArabic ? "هذا الشهر" : "This month"],
+    ["year", isArabic ? "هذا العام" : "This year"],
   ];
 
   return (
@@ -141,14 +160,12 @@ export default function DiscoverPage() {
             {rangeItems.map(([value, label]) => <button key={value} onClick={() => setRange(value)} className="whitespace-nowrap rounded-full border px-4 py-2 text-xs font-semibold transition" style={{ borderColor: range === value ? "rgba(196,122,82,.45)" : "rgba(241,233,220,.08)", background: range === value ? "rgba(196,122,82,.14)" : "transparent", color: range === value ? "#C47A52" : "inherit" }}>{label}</button>)}
           </div>
           <div className="mt-3 grid gap-2 md:grid-cols-3">
-            <div className="flex items-center gap-2 rounded-2xl border px-3" style={{ borderColor: "rgba(241,233,220,.08)" }}><SlidersHorizontal size={15} className="opacity-50" /><select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full bg-transparent py-3 text-sm outline-none"><option value="all">{isArabic ? "كل التصنيفات" : "All categories"}</option>{visibleCategories.map((item) => <option key={item.id} value={item.name}>{item.name}</option>)}</select></div>
+            <div className="flex items-center gap-2 rounded-2xl border px-3" style={{ borderColor: "rgba(241,233,220,.08)" }}><SlidersHorizontal size={15} className="opacity-50" /><select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full bg-transparent py-3 text-sm outline-none"><option value="all">{isArabic ? "كل التصنيفات" : "All categories"}</option>{visibleCategories.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></div>
             <select value={type} onChange={(e) => setType(e.target.value)} className="rounded-2xl border bg-transparent px-3 py-3 text-sm outline-none" style={{ borderColor: "rgba(241,233,220,.08)" }}><option value="all">{isArabic ? "كل أنواع المحتوى" : "All content"}</option><option value="short">{isArabic ? "شورتس" : "Cuts"}</option><option value="video">{isArabic ? "فيديوهات" : "Videos"}</option><option value="podcast">{isArabic ? "بودكاست" : "Podcasts"}</option></select>
             <select value={sort} onChange={(e) => setSort(e.target.value as Sort)} className="rounded-2xl border bg-transparent px-3 py-3 text-sm outline-none" style={{ borderColor: "rgba(241,233,220,.08)" }}><option value="latest">{isArabic ? "الأحدث" : "Latest"}</option><option value="views">{isArabic ? "الأكثر مشاهدة" : "Most viewed"}</option><option value="likes">{isArabic ? "الأكثر إعجاباً" : "Most liked"}</option></select>
           </div>
         </div>
-
         {error && <div className="mt-6 rounded-3xl border border-red-500/20 bg-red-500/10 p-5 text-sm text-red-100">{error}</div>}
-
         {loading ? (
           <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3"><div className="h-72 animate-pulse rounded-3xl bg-white/5" /><div className="h-72 animate-pulse rounded-3xl bg-white/5" /><div className="h-72 animate-pulse rounded-3xl bg-white/5" /></div>
         ) : videos.length === 0 ? (
