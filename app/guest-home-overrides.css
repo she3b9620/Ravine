@@ -1,0 +1,18 @@
+/* Guest-home behavior overrides. Keep the cinematic hero scrollable. */
+body:has(main.relative.z-10:has(> section.mx-auto)) {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+html:has(main.relative.z-10:has(> section.mx-auto)) {
+  overflow-y: auto !important;
+}
+
+/* Make the guest landing continue naturally into the sections below the first fold. */
+main.relative.z-10:has(> section.mx-auto) {
+  min-height: 100dvh;
+}
+
+main.relative.z-10:has(> section.mx-auto) > section.mx-auto {
+  scroll-margin-top: 96px;
+}
