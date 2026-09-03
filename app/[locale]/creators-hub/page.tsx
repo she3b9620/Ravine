@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useLocale } from "next-intl";
-import { ArrowUpRight, BarChart3, Clapperboard, FileVideo2, Heart, MessageCircle, Plus, Sparkles, Users, Video } from "lucide-react";
+import { ArrowUpRight, BarChart3, Clapperboard, FileVideo2, Heart, MessageCircle, Plus, Sparkles, Users, Video, type LucideIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import PlatformShell from "@/components/PlatformShell";
 
@@ -30,6 +30,12 @@ type Comment = {
   content: string;
   created_at: string | null;
   video_id: number;
+};
+
+type StatCard = {
+  icon: LucideIcon;
+  label: string;
+  value: string;
 };
 
 function compact(value: number | null | undefined) {
@@ -103,6 +109,13 @@ export default function CreatorsHubPage() {
   const totalLikes = videos.reduce((sum, video) => sum + Number(video.likes ?? 0), 0);
   const creatorName = profile?.display_name || profile?.username || (isArabic ? "المبدع" : "Creator");
 
+  const statCards: StatCard[] = [
+    { icon: FileVideo2, label: isArabic ? "الأعمال" : "Works", value: loading ? "—" : compact(videos.length) },
+    { icon: BarChart3, label: isArabic ? "المشاهدات" : "Views", value: loading ? "—" : compact(totalViews) },
+    { icon: Heart, label: isArabic ? "الإعجابات" : "Likes", value: loading ? "—" : compact(totalLikes) },
+    { icon: Sparkles, label: isArabic ? "المنشور" : "Published", value: loading ? "—" : compact(published) },
+  ];
+
   if (!loading && profile && !profile.is_creator) {
     return (
       <PlatformShell active="creators" eyebrow={isArabic ? "للمبدعين" : "For creators"} title={isArabic ? "حوّل حسابك إلى مساحة صناعة." : "Turn your account into a creator space."}>
@@ -128,13 +141,8 @@ export default function CreatorsHubPage() {
         {error && <div className="rounded-3xl border px-5 py-4 text-sm" style={{ borderColor: "rgba(196,122,82,.35)", background: "rgba(196,122,82,.08)" }}>{isArabic ? "تعذر تحميل بعض بيانات مساحة المبدع." : "Some creator data could not be loaded."}</div>}
 
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {[
-            [FileVideo2, isArabic ? "الأعمال" : "Works", loading ? "—" : compact(videos.length)],
-            [BarChart3, isArabic ? "المشاهدات" : "Views", loading ? "—" : compact(totalViews)],
-            [Heart, isArabic ? "الإعجابات" : "Likes", loading ? "—" : compact(totalLikes)],
-            [Sparkles, isArabic ? "المنشور" : "Published", loading ? "—" : compact(published)],
-          ].map(([Icon, label, value]) => (
-            <div key={String(label)} className="rounded-[28px] border p-5" style={{ borderColor: "rgba(241,233,220,.10)", background: "rgba(21,23,25,.76)" }}>
+          {statCards.map(({ icon: Icon, label, value }) => (
+            <div key={label} className="rounded-[28px] border p-5" style={{ borderColor: "rgba(241,233,220,.10)", background: "rgba(21,23,25,.76)" }}>
               <div className="flex items-center justify-between"><span className="flex h-10 w-10 items-center justify-center rounded-2xl" style={{ background: "rgba(196,122,82,.10)", color: "#C47A52" }}><Icon size={18} /></span><span className="text-[10px] uppercase tracking-[.22em]" style={{ color: "rgba(241,233,220,.38)" }}>RAVINE</span></div>
               <div className="mt-5 text-3xl font-black">{value}</div>
               <div className="mt-1 text-xs" style={{ color: "rgba(241,233,220,.50)" }}>{label}</div>
