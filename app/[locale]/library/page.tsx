@@ -36,9 +36,12 @@ export default function LibraryPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    let cancelled = false;
     async function load() {
       setLoading(true);
       setError("");
+      setVideos([]);
+      setHistory([]);
 
       const {
         data: { user }
@@ -65,6 +68,9 @@ export default function LibraryPage() {
           `)
           .eq("user_id", user.id);
 
+        if (cancelled) return;
+        if (cancelled) return;
+        if (cancelled) return;
         if (loadError) {
           setError(loadError.message);
         } else {
@@ -134,11 +140,12 @@ export default function LibraryPage() {
         }
       }
 
-      setLoading(false);
+      if (!cancelled) setLoading(false);
     }
 
-    load();
-  }, [tab]);
+    void load();
+    return () => { cancelled = true; };
+  }, [locale, supabase, tab]);
 
   function duration(seconds: number | null) {
     if (!seconds || seconds <= 0) return "—";
