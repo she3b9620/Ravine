@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocale } from "next-intl";
 import { Headphones } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -11,7 +11,7 @@ type Podcast = { id: number; title: string; thumbnail_url: string | null; durati
 export default function PodcastsPage() {
   const locale = useLocale();
   const ar = locale === "ar";
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const [podcasts, setPodcasts] = useState<Podcast[]>([]);
   const [loading, setLoading] = useState(true);
 
