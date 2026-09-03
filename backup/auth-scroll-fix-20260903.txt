@@ -1,0 +1,1 @@
+Backup marker after auth client/server cookie synchronization, Next.js 16 proxy cleanup, and restoring guest home scrolling. Latest main commit: c51ca6fae8f6895a35a3396bebb9a57afdb9b3ba.
