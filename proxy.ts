@@ -20,78 +20,54 @@ function isProtectedPath(pathname: string) {
   const segments = pathname.split("/").filter(Boolean);
   const locale = segments[0];
 
-  if (!routing.locales.includes(locale as "ar" | "en")) {
-    return false;
-  }
+  if (!routing.locales.includes(locale as "ar" | "en")) return false;
 
   const appPath = `/${segments.slice(1).join("/")}` || "/";
-
-  return protectedRoutes.some(
-    (route) => appPath === route || appPath.startsWith(`${route}/`)
-  );
+  return protectedRoutes.some((route) => appPath === route || appPath.startsWith(`${route}/`));
 }
 
 function copyCookies(from: NextResponse, to: NextResponse) {
-  from.cookies.getAll().forEach((cookie) => {
-    to.cookies.set(cookie);
-  });
+  from.cookies.getAll().forEach((cookie) => to.cookies.set(cookie));
 }
 
 export default async function proxy(request: NextRequest) {
   const response = intlMiddleware(request);
 
-  // Public routes do not need a Supabase server client. Keeping auth work out of
-  // the public request path prevents a missing/invalid runtime Supabase variable
-  // from taking down the entire site before the page can render.
-  if (!isProtectedPath(request.nextUrl.pathname)) {
-    return response;
-  }
+  if (!isProtectedPath(request.nextUrl.pathname)) return response;
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-
-  if (!supabaseUrl || !supabaseKey) {
-    return response;
-  }
+  if (!supabaseUrl || !supabaseKey) return response;
 
   const supabase = createServerClient(supabaseUrl, supabaseKey, {
     cookies: {
       getAll() {
         return request.cookies.getAll();
       },
-      setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value }) => {
-          request.cookies.set(name, value);
-        });
-
-        cookiesToSet.forEach(({ name, value, options }) => {
-          response.cookies.set(name, value, options);
-        });
+      setAll(cookiesToSet, headers) {
+        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+        cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
+        Object.entries(headers ?? {}).forEach(([key, value]) => response.headers.set(key, value));
       },
     },
   });
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data, error } = await supabase.auth.getClaims();
 
-  if (user) {
+  if (!error && data?.claims) {
     return response;
   }
 
-  const locale = routing.locales.includes(
-    request.nextUrl.pathname.split("/")[1] as "ar" | "en"
-  )
-    ? request.nextUrl.pathname.split("/")[1]
+  const localeCandidate = request.nextUrl.pathname.split("/")[1];
+  const locale = routing.locales.includes(localeCandidate as (typeof routing.locales)[number])
+    ? localeCandidate
     : routing.defaultLocale;
 
   const loginUrl = new URL(`/${locale}/auth`, request.url);
-  loginUrl.searchParams.set(
-    "next",
-    `${request.nextUrl.pathname}${request.nextUrl.search}`
-  );
+  loginUrl.searchParams.set("next", `${request.nextUrl.pathname}${request.nextUrl.search}`);
 
   const redirectResponse = NextResponse.redirect(loginUrl);
+  redirectResponse.headers.set("Cache-Control", "private, no-store, max-age=0");
   copyCookies(response, redirectResponse);
   return redirectResponse;
 }
