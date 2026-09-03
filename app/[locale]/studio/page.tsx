@@ -2,8 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useLocale } from "next-intl";
-import { ArrowUpRight, BarChart3, FileVideo2, Heart, LayoutDashboard, MessageCircle, Plus, Settings2, Sparkles, Users } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { ArrowUpRight, BarChart3, FileVideo2, Heart, LayoutDashboard, MessageCircle, Plus, Settings2, Sparkles, Users, type LucideIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import PlatformShell from "@/components/PlatformShell";
 
@@ -29,6 +28,12 @@ type StudioCard = {
   title: string;
   description: string;
   href: string;
+};
+
+type StatCard = {
+  icon: LucideIcon;
+  label: string;
+  value: string;
 };
 
 function compact(value: number | null | undefined) {
@@ -117,19 +122,21 @@ export default function StudioPage() {
     { icon: Users, title: isArabic ? "الملف" : "Profile", description: isArabic ? "طوّر هويتك المهنية وروابطك ومعلوماتك." : "Shape your professional identity, links and details.", href: `/${locale}/studio/profile` },
   ];
 
+  const statCards: StatCard[] = [
+    { icon: LayoutDashboard, label: isArabic ? "الأعمال" : "Works", value: loading ? "—" : compact(videos.length) },
+    { icon: BarChart3, label: isArabic ? "المشاهدات" : "Views", value: loading ? "—" : compact(totalViews) },
+    { icon: Heart, label: isArabic ? "الإعجابات" : "Likes", value: loading ? "—" : compact(totalLikes) },
+    { icon: Sparkles, label: isArabic ? "المنشور" : "Published", value: loading ? "—" : compact(published) },
+  ];
+
   return (
     <PlatformShell active="creators" eyebrow="RAVINE Studio" title={isArabic ? `استوديو ${creatorName}` : `${creatorName}'s Studio`} description={isArabic ? "المكان الذي تتحول فيه الصفحة إلى عملية صناعة ونشر وإدارة." : "The place where your profile becomes a system for making, publishing and managing work."}>
       <div className="mx-auto max-w-[1440px] space-y-8 px-5 pb-16 pt-8 md:px-8 lg:px-10">
         {error && <div className="rounded-3xl border px-5 py-4 text-sm" style={{ borderColor: "rgba(196,122,82,.35)", background: "rgba(196,122,82,.08)" }}>{isArabic ? "تعذر تحميل بعض بيانات الاستوديو." : "Some studio data could not be loaded."}</div>}
 
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {[
-            [LayoutDashboard, isArabic ? "الأعمال" : "Works", loading ? "—" : compact(videos.length)],
-            [BarChart3, isArabic ? "المشاهدات" : "Views", loading ? "—" : compact(totalViews)],
-            [Heart, isArabic ? "الإعجابات" : "Likes", loading ? "—" : compact(totalLikes)],
-            [Sparkles, isArabic ? "المنشور" : "Published", loading ? "—" : compact(published)],
-          ].map(([Icon, label, value]) => (
-            <div key={String(label)} className="rounded-[28px] border p-5" style={{ borderColor: "rgba(241,233,220,.10)", background: "rgba(21,23,25,.76)" }}>
+          {statCards.map(({ icon: Icon, label, value }) => (
+            <div key={label} className="rounded-[28px] border p-5" style={{ borderColor: "rgba(241,233,220,.10)", background: "rgba(21,23,25,.76)" }}>
               <div className="flex items-center justify-between"><span className="flex h-10 w-10 items-center justify-center rounded-2xl" style={{ background: "rgba(196,122,82,.10)", color: "#C47A52" }}><Icon size={18} /></span><span className="text-[10px] uppercase tracking-[.22em]" style={{ color: "rgba(241,233,220,.38)" }}>STUDIO</span></div>
               <div className="mt-5 text-3xl font-black">{value}</div>
               <div className="mt-1 text-xs" style={{ color: "rgba(241,233,220,.50)" }}>{label}</div>
