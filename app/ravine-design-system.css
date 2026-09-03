@@ -1,0 +1,128 @@
+/* =========================================================
+   RAVINE DESIGN SYSTEM REFINEMENT
+   Preserve the existing identity; refine hierarchy, density,
+   surfaces, radii, controls and motion restraint.
+   ========================================================= */
+
+:root {
+  --ravine-radius-sm: 0.75rem;
+  --ravine-radius-md: 1rem;
+  --ravine-radius-lg: 1.25rem;
+  --ravine-radius-xl: 1.5rem;
+  --ravine-border-soft: rgba(241, 233, 220, 0.08);
+  --ravine-border: rgba(241, 233, 220, 0.11);
+  --ravine-border-accent: rgba(196, 122, 82, 0.26);
+}
+
+button,
+a,
+input,
+textarea,
+select {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid rgba(196, 122, 82, 0.8);
+  outline-offset: 3px;
+}
+
+select option {
+  background: #111516;
+  color: #f1e9dc;
+}
+
+/* Keep the premium identity, but reduce the rounded/card-heavy SaaS feel. */
+.ravine-page [class*="rounded-3xl"],
+.ravine-page [class*="rounded-[28px]"],
+.ravine-page [class*="rounded-[30px]"],
+.ravine-page [class*="rounded-[32px]"] {
+  border-radius: var(--ravine-radius-xl) !important;
+}
+
+.ravine-page [class*="rounded-2xl"] {
+  border-radius: var(--ravine-radius-lg) !important;
+}
+
+.ravine-page [class*="rounded-xl"] {
+  border-radius: var(--ravine-radius-md) !important;
+}
+
+/* Let visual work dominate UI chrome. */
+.ravine-page img {
+  image-rendering: auto;
+}
+
+.ravine-page section > .grid > * {
+  min-width: 0;
+}
+
+/* Restrain generic surface repetition. */
+.ravine-page .border,
+.ravine-page [class*="border-["] {
+  border-color: var(--ravine-border-soft) !important;
+}
+
+/* Preserve explicit copper/teal accent borders when they are intentional. */
+.ravine-page [style*="rgba(196,122,82,.30)"],
+.ravine-page [style*="rgba(196,122,82,.28)"],
+.ravine-page [style*="rgba(196,122,82,.25)"] {
+  border-color: var(--ravine-border-accent) !important;
+}
+
+/* Shared platform chrome: quieter, more editorial, less dashboard-like. */
+main.min-h-screen[dir] header {
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
+}
+
+main.min-h-screen[dir] header nav,
+main.min-h-screen[dir] aside > div {
+  min-width: 0;
+}
+
+/* Desktop sidebar navigation reads as one continuous rail rather than cards. */
+main.min-h-screen[dir] aside a {
+  transition:
+    color 220ms ease,
+    background-color 220ms ease,
+    transform 220ms cubic-bezier(.22, 1, .36, 1);
+}
+
+/* Mobile overlay spacing. */
+@media (max-width: 1023px) {
+  main.min-h-screen[dir] header {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  }
+}
+
+/* Typography hierarchy: editorial headings carry more weight than utility labels. */
+.ravine-page h1,
+.ravine-page h2,
+.ravine-page h3 {
+  text-wrap: balance;
+}
+
+.ravine-page p,
+.ravine-page li {
+  text-wrap: pretty;
+}
+
+/* Reduce blanket motion; important hero/feature motion remains intact. */
+.ravine-page a,
+.ravine-page button {
+  transition-timing-function: cubic-bezier(.22, 1, .36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ravine-page *,
+  .ravine-page *::before,
+  .ravine-page *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
