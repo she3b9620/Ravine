@@ -68,6 +68,7 @@ export default function VideoHoverPreview() {
       abortRef.current?.abort();
       const controller = new AbortController();
       abortRef.current = controller;
+      anchor.classList.add("ravine-video-card");
       target.classList.add("ravine-video-hover-target");
       enterTimer.current = window.setTimeout(async () => {
         const videoUrl = await loadVideoUrl(id);
