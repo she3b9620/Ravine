@@ -1,6 +1,7 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
+import { useLocale } from "next-intl";
 import { useParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -12,10 +13,11 @@ type Video = {
 };
 
 export default function VideoThumbnailPage() {
+  const locale = useLocale();
   const params = useParams();
   const id = String(params.id);
 
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   const [video, setVideo] = useState<Video | null>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -31,7 +33,7 @@ export default function VideoThumbnailPage() {
       } = await supabase.auth.getUser();
 
       if (!user) {
-        window.location.href = "/ar/auth";
+        window.location.href = `/${locale}/auth?next=/${locale}/creator/video/${id}/thumbnail`;
         return;
       }
 
@@ -66,7 +68,7 @@ export default function VideoThumbnailPage() {
     }
 
     void loadVideo();
-  }, [id]);
+  }, [id, locale, supabase]);
 
   async function handleSubmit(
     event: FormEvent<HTMLFormElement>
@@ -77,7 +79,17 @@ export default function VideoThumbnailPage() {
     setError("");
 
     if (!file) {
-      setError("Choose a thumbnail image.");
+      setError(locale === "ar" ? "اختر صورة مصغرة." : "Choose a thumbnail image.");
+      return;
+    }
+
+    if (!/^image\/(jpeg|png|webp)$/.test(file.type)) {
+      setError(locale === "ar" ? "الصورة يجب أن تكون JPG أو PNG أو WebP." : "The image must be JPG, PNG, or WebP.");
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      setError(locale === "ar" ? "الصورة أكبر من 10MB." : "The image is larger than 10 MB.");
       return;
     }
 
@@ -184,7 +196,7 @@ export default function VideoThumbnailPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-[#090909] px-5 py-20 text-[#F1E9DC]">
+      <main dir={locale === "ar" ? "rtl" : "ltr"} className="min-h-screen bg-[#090909 px-5 py-20 text-[#F1E9DC]">
         <div className="mx-auto max-w-3xl text-center">
           Loading...
         </div>
@@ -198,7 +210,7 @@ export default function VideoThumbnailPage() {
         <div className="mx-auto max-w-3xl">
 
           <a
-            href="/ar/creator"
+            href={`/${locale}/creator`}
             className="text-sm text-[#F1E9DC]/50 hover:text-[#C47A52]"
           >
             ← Creator Dashboard
