@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useLocale } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 
 type Factor = {
@@ -11,7 +12,8 @@ type Factor = {
 };
 
 export default function SecurityPage() {
-  const supabase = createClient();
+  const locale = useLocale();
+  const supabase = useMemo(() => createClient(), []);
 
   const [email, setEmail] = useState("");
   const [verifiedFactor, setVerifiedFactor] = useState<Factor | null>(null);
@@ -37,7 +39,7 @@ export default function SecurityPage() {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      window.location.href = "/ar/auth";
+      window.location.href = `/${locale}/auth?next=/${locale}/account/security`;
       return;
     }
 
@@ -60,8 +62,8 @@ export default function SecurityPage() {
   }
 
   useEffect(() => {
-    loadSecurity();
-  }, []);
+    void loadSecurity();
+  }, [locale, supabase]);
 
   async function startEnrollment() {
     setStarting(true);
@@ -226,7 +228,7 @@ export default function SecurityPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-[#090909] px-5 py-20 text-[#F1E9DC]">
+      <main dir={locale === "ar" ? "rtl" : "ltr"} className="min-h-screen bg-[#090909" px-5 py-20 text-[#F1E9DC]">
         <div className="mx-auto max-w-3xl text-center text-sm text-[#F1E9DC]/60">
           Loading security settings...
         </div>
