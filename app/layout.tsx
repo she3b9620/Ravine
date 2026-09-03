@@ -3,8 +3,10 @@ import { getLocale } from "next-intl/server";
 import "./globals.css";
 import "./typography-overrides.css";
 import "./ravine-motion.css";
+import "./ravine-motion-overrides.css";
 import LocaleTypography from "../components/LocaleTypography";
 import VideoHoverPreview from "../components/VideoHoverPreview";
+import GuestMenuMotion from "../components/GuestMenuMotion";
 
 export const metadata: Metadata = {
   title: "RAVINE — Platform",
@@ -25,6 +27,7 @@ export default async function RootLayout({
         <LocaleTypography />
         {children}
         <VideoHoverPreview />
+        <GuestMenuMotion />
       </body>
     </html>
   );
