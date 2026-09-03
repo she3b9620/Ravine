@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocale } from "next-intl";
 import { Play, Volume2, VolumeX } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -11,7 +11,7 @@ type Video = { id: number; title: string; thumbnail_url: string | null; views: n
 export default function ShortsPage() {
   const locale = useLocale();
   const ar = locale === "ar";
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const [tab, setTab] = useState<"creators" | "community">("creators");
   const [videos, setVideos] = useState<Video[]>([]);
   const [muted, setMuted] = useState(true);
@@ -25,7 +25,7 @@ export default function ShortsPage() {
       setLoading(false);
     });
     return () => { mounted = false; };
-  }, [tab, supabase]);
+  }, [supabase]);
 
   return <PlatformShell active="shorts" eyebrow={ar ? "RAVINE Cuts" : "RAVINE Cuts"} title={ar ? "شورتس، لكن بروح سينمائية." : "Short-form with a cinematic point of view."} description={ar ? "حتى 3 دقائق. أولوية للمبدعين، ومساحة مفتوحة للمجتمع." : "Up to 3 minutes. Creator-first, community-open."}>
     <div className="mx-auto max-w-[1440px] px-5 pb-20 pt-7 md:px-8 lg:px-10">
