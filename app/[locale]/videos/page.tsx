@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocale } from "next-intl";
 import { Clapperboard } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -11,7 +11,7 @@ type Video = { id: number; title: string; thumbnail_url: string | null; duration
 export default function VideosPage() {
   const locale = useLocale();
   const ar = locale === "ar";
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const [tab, setTab] = useState<"creators" | "community">("creators");
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
@@ -24,7 +24,7 @@ export default function VideosPage() {
       setLoading(false);
     });
     return () => { mounted = false; };
-  }, [tab, supabase]);
+  }, [supabase]);
 
   return <PlatformShell active="videos" eyebrow={ar ? "الأعمال" : "WORKS"} title={ar ? "فيديوهات كاملة، مقدمة كأعمال." : "Long-form videos, presented as works."} description={ar ? "من 3 إلى 30 دقيقة، مع أولوية واضحة لأعمال المبدعين." : "From 3 to 30 minutes, with a clear creator-first presentation."}>
     <div className="mx-auto max-w-[1440px] px-5 pb-20 pt-7 md:px-8 lg:px-10">
