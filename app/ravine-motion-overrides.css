@@ -1,4 +1,4 @@
-/* Guest home hero + menu motion overrides */
+/* Guest home motion refinement. Preserve the cinematic identity without positional hacks. */
 @keyframes ravine-guest-menu-open {
   from { opacity: 0; transform: translateY(-18px) scaleY(.97); filter: blur(4px); }
   to { opacity: 1; transform: translateY(0) scaleY(1); filter: blur(0); }
@@ -7,24 +7,6 @@
 @keyframes ravine-guest-menu-close {
   from { opacity: 1; transform: translateY(0) scaleY(1); filter: blur(0); }
   to { opacity: 0; transform: translateY(-18px) scaleY(.97); filter: blur(4px); }
-}
-
-/* The guest hero is structurally different from the authenticated hero. */
-main.relative.z-10:has(> section.mx-auto) > section.mx-auto > div.grid > div:first-child {
-  position: relative;
-  top: -165px;
-  transform: none;
-}
-
-main.relative.z-10:has(> section.mx-auto) > section.mx-auto > div.grid > div:first-child > img[src="/RAVINE.png"] {
-  transform: translateY(-12px) scale(1.08);
-  transform-origin: center left;
-  transition: transform 700ms cubic-bezier(.22,1,.36,1), filter 500ms ease;
-}
-
-main.relative.z-10:has(> section.mx-auto) > section.mx-auto > div.grid > div:first-child > h1 {
-  position: relative;
-  top: -10px;
 }
 
 .ravine-menu-shell {
@@ -41,18 +23,27 @@ main.relative.z-10:has(> section.mx-auto) > section.mx-auto > div.grid > div:fir
   pointer-events: none;
 }
 
+/* Keep Hero spacing fluid instead of forcing it above the viewport. */
+main.relative.z-10:has(> section.mx-auto) > section.mx-auto > div.grid > div:first-child {
+  position: relative;
+  top: 0;
+  transform: none;
+}
+
+main.relative.z-10:has(> section.mx-auto) > section.mx-auto > div.grid > div:first-child > img[src="/RAVINE.png"] {
+  transform: translateY(-4px) scale(1.03);
+  transform-origin: center;
+  transition: transform 700ms cubic-bezier(.22,1,.36,1), filter 500ms ease;
+}
+
+main.relative.z-10:has(> section.mx-auto) > section.mx-auto > div.grid > div:first-child > h1 {
+  position: relative;
+  top: 0;
+}
+
 @media (max-width: 1023px) {
-  main.relative.z-10:has(> section.mx-auto) > section.mx-auto > div.grid > div:first-child {
-    top: -105px;
-  }
-
   main.relative.z-10:has(> section.mx-auto) > section.mx-auto > div.grid > div:first-child > img[src="/RAVINE.png"] {
-    transform: translateY(-8px) scale(1.05);
-    transform-origin: center;
-  }
-
-  main.relative.z-10:has(> section.mx-auto) > section.mx-auto > div.grid > div:first-child > h1 {
-    top: -6px;
+    transform: translateY(-2px) scale(1.02);
   }
 }
 
