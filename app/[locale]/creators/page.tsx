@@ -27,6 +27,7 @@ export default function CreatorsPage() {
     let mounted = true;
     setLoading(true);
     setError("");
+
     void supabase
       .from("creators")
       .select("id,name,username,avatar_url,bio")
@@ -36,11 +37,6 @@ export default function CreatorsPage() {
         if (!mounted) return;
         if (requestError) setError(requestError.message);
         setCreators((data ?? []) as Creator[]);
-        setLoading(false);
-      })
-      .catch((requestError: unknown) => {
-        if (!mounted) return;
-        setError(requestError instanceof Error ? requestError.message : "Unable to load creators.");
         setLoading(false);
       });
 
