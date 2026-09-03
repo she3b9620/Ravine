@@ -101,7 +101,7 @@ export default function WatchPage() {
   const [video, setVideo] = useState<Video | null>(null);
   const [signedUrl, setSignedUrl] = useState("");
 
-  const [comments, set{locale === "ar" ? "التعليقات" : "Comments"}] = useState<Comment[]>([]);
+  const [comments, setComments] = useState<Comment[]>([]);
   const [profiles, setProfiles] = useState<Record<string, Profile>>({});
 
   const [commentText, setCommentText] = useState("");
