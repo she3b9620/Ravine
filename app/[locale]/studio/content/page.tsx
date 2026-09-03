@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useLocale } from "next-intl";
-import { ArrowUpRight, FileVideo2, Filter, Loader2, Plus, Search, Sparkles } from "lucide-react";
+import { ArrowUpRight, Edit3, FileVideo2, Filter, Loader2, Plus, Search, Sparkles } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import PlatformShell from "@/components/PlatformShell";
 
@@ -66,7 +66,6 @@ export default function StudioContentPage() {
   async function togglePublished(video: Video) {
     setUpdatingId(video.id);
     setError("");
-
     const nextPublished = !video.published;
     const { error: updateError } = await supabase
       .from("videos")
@@ -74,14 +73,12 @@ export default function StudioContentPage() {
       .eq("id", video.id);
 
     if (updateError) {
-      setError(isArabic ? "تعذر تغيير حالة النشر." : "Could not change publishing status.");
+      setError(updateError.message);
       setUpdatingId(null);
       return;
     }
 
-    setVideos((current) =>
-      current.map((item) => item.id === video.id ? { ...item, published: nextPublished } : item)
-    );
+    setVideos((current) => current.map((item) => item.id === video.id ? { ...item, published: nextPublished } : item));
     setUpdatingId(null);
   }
 
@@ -114,7 +111,7 @@ export default function StudioContentPage() {
           <div className="flex items-center gap-2 overflow-x-auto">
             <Filter size={16} className="shrink-0" style={{ color: "rgba(241,233,220,.4)" }}/>
             {(["all", "published", "drafts"] as const).map((item) => (
-              <button key={item} type="button" onClick={() => setFilter(item)} className="rounded-full px-4 py-2 text-xs font-bold whitespace-nowrap" style={{ background: filter === item ? "#C47A52" : "rgba(241,233,220,.05)", color: filter === item ? "#090909" : "rgba(241,233,220,.65)" }}>
+              <button key={item} type="button" onClick={() => setFilter(item)} className="whitespace-nowrap rounded-full px-4 py-2 text-xs font-bold" style={{ background: filter === item ? "#C47A52" : "rgba(241,233,220,.05)", color: filter === item ? "#090909" : "rgba(241,233,220,.65)" }}>
                 {item === "all" ? (isArabic ? "الكل" : "All") : item === "published" ? (isArabic ? "منشور" : "Published") : (isArabic ? "مسودات" : "Drafts")}
               </button>
             ))}
@@ -146,7 +143,10 @@ export default function StudioContentPage() {
                       {updatingId === video.id && <Loader2 size={13} className="animate-spin" />}
                       {video.published ? (isArabic ? "تحويل لمسودة" : "Move to draft") : (isArabic ? "نشر العمل" : "Publish work")}
                     </button>
-                    <a href={`/${locale}/watch/${video.id}`} className="inline-flex items-center gap-1.5 text-xs font-bold" style={{color:"#C47A52"}}>{isArabic ? "فتح العمل" : "Open work"}<ArrowUpRight size={14}/></a>
+                    <div className="flex items-center gap-4">
+                      <a href={`/${locale}/studio/content/${video.id}`} className="inline-flex items-center gap-1.5 text-xs font-bold" style={{color:"#C47A52"}}>{isArabic ? "تحرير" : "Edit"}<Edit3 size={14}/></a>
+                      <a href={`/${locale}/watch/${video.id}`} className="inline-flex items-center gap-1.5 text-xs font-bold" style={{color:"rgba(241,233,220,.58)"}}>{isArabic ? "فتح" : "Open"}<ArrowUpRight size={14}/></a>
+                    </div>
                   </div>
                 </article>
               ))}
