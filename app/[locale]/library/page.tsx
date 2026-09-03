@@ -69,8 +69,6 @@ export default function LibraryPage() {
           .eq("user_id", user.id);
 
         if (cancelled) return;
-        if (cancelled) return;
-        if (cancelled) return;
         if (loadError) {
           setError(loadError.message);
         } else {
@@ -263,8 +261,8 @@ export default function LibraryPage() {
 
                       <p className="mt-2 text-xs text-[#F1E9DC]/40">
                         {row.completed
-                          ? {isArabic ? "مكتمل" : "Completed"}
-                          : `{isArabic ? "استئناف من" : "Resume at"} ${duration(
+                          ? (isArabic ? "مكتمل" : "Completed")
+                          : `${isArabic ? "استئناف من" : "Resume at"} ${duration(
                               row.progress_seconds
                             )}`}
                       </p>
