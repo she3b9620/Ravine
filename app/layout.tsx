@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { getLocale } from "next-intl/server";
 import "./globals.css";
+import "./typography-overrides.css";
+import LocaleTypography from "../components/LocaleTypography";
 
 export const metadata: Metadata = {
   title: "RAVINE — Platform",
@@ -17,7 +19,10 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} dir={dir}>
-      <body>{children}</body>
+      <body>
+        <LocaleTypography />
+        {children}
+      </body>
     </html>
   );
 }
