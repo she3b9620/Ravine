@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 type PreviewState = {
   anchor: HTMLAnchorElement;
   target: HTMLElement;
-  videoUrl: string | null;
+  videoUrl: string;
 };
 
 const videoCache = new Map<number, string | null>();
@@ -18,7 +18,7 @@ function getWatchId(anchor: HTMLAnchorElement) {
 }
 
 function findPreviewTarget(anchor: HTMLAnchorElement) {
-  return anchor.querySelector<HTMLElement>(".aspect-video") ?? anchor.querySelector<HTMLElement>("[data-video-preview-target]");
+  return anchor.querySelector<HTMLElement>("[data-video-preview-target]") ?? anchor.querySelector<HTMLElement>(".aspect-video");
 }
 
 async function loadVideoUrl(id: number) {
@@ -32,10 +32,11 @@ async function loadVideoUrl(id: number) {
 
 export default function VideoHoverPreview() {
   const [preview, setPreview] = useState<PreviewState | null>(null);
-  const [playing, setPlaying] = useState(false);
+  const [phase, setPhase] = useState<"in" | "playing">("in");
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const hideTimer = useRef<number | null>(null);
   const enterTimer = useRef<number | null>(null);
+  const sequenceTimers = useRef<number[]>([]);
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -44,13 +45,15 @@ export default function VideoHoverPreview() {
       if (hideTimer.current) window.clearTimeout(hideTimer.current);
       enterTimer.current = null;
       hideTimer.current = null;
+      sequenceTimers.current.forEach((timer) => window.clearTimeout(timer));
+      sequenceTimers.current = [];
     };
 
     const hide = () => {
       clearTimers();
       abortRef.current?.abort();
       abortRef.current = null;
-      setPlaying(false);
+      setPhase("in");
       setPreview(null);
     };
 
@@ -68,10 +71,9 @@ export default function VideoHoverPreview() {
       target.classList.add("ravine-video-hover-target");
       enterTimer.current = window.setTimeout(async () => {
         const videoUrl = await loadVideoUrl(id);
-        if (controller.signal.aborted) return;
-        if (!videoUrl) return;
+        if (controller.signal.aborted || !videoUrl) return;
         setPreview({ anchor, target, videoUrl });
-        setPlaying(false);
+        setPhase("in");
       }, 850);
     };
 
@@ -79,7 +81,7 @@ export default function VideoHoverPreview() {
       const anchor = (event.target as Element | null)?.closest<HTMLAnchorElement>("a[href]");
       if (!anchor || !getWatchId(anchor)) return;
       if (anchor.contains(event.relatedTarget as Node | null)) return;
-      hideTimer.current = window.setTimeout(hide, 90);
+      hideTimer.current = window.setTimeout(hide, 100);
     };
 
     document.addEventListener("mouseover", onOver);
@@ -94,65 +96,77 @@ export default function VideoHoverPreview() {
 
   useEffect(() => {
     const target = preview?.target;
-    if (!target || !videoRef.current) return;
     const video = videoRef.current;
+    if (!target || !video || !preview) return;
+
+    target.style.position = "relative";
     let active = true;
-    let sequenceTimer = 0;
-    let startTimer = 0;
+    const timers: number[] = [];
 
     const seekTo = (ratio: number) => {
       if (!active || !Number.isFinite(video.duration) || video.duration <= 0) return;
       video.currentTime = Math.min(Math.max(video.duration * ratio, 0.1), Math.max(video.duration - 0.15, 0.1));
     };
 
-    const playSequence = () => {
+    const swapTo = (ratio: number) => {
       if (!active) return;
-      setPlaying(true);
+      target.classList.add("ravine-preview-swap");
+      const timer = window.setTimeout(() => {
+        if (!active) return;
+        seekTo(ratio);
+        target.classList.remove("ravine-preview-swap");
+      }, 280);
+      timers.push(timer);
+    };
+
+    const finish = () => {
+      if (!active) return;
+      setPhase("playing");
+      timers.push(window.setTimeout(() => swapTo(0.46), 2100));
+      timers.push(window.setTimeout(() => swapTo(0.76), 4400));
+      timers.push(window.setTimeout(() => {
+        target.classList.add("ravine-preview-out");
+        timers.push(window.setTimeout(() => {
+          if (!active) return;
+          setPhase("in");
+          setPreview(null);
+          target.classList.remove("ravine-preview-out", "ravine-preview-swap");
+        }, 440));
+      }, 6700));
+    };
+
+    const start = () => {
+      if (!active) return;
       seekTo(0.12);
       void video.play().catch(() => undefined);
-      sequenceTimer = window.setTimeout(() => {
-        target.classList.add("ravine-preview-swap");
-        window.setTimeout(() => {
-          seekTo(0.46);
-          target.classList.remove("ravine-preview-swap");
-        }, 260);
-        sequenceTimer = window.setTimeout(() => {
-          target.classList.add("ravine-preview-swap");
-          window.setTimeout(() => {
-            seekTo(0.76);
-            target.classList.remove("ravine-preview-swap");
-          }, 260);
-          sequenceTimer = window.setTimeout(() => {
-            target.classList.add("ravine-preview-out");
-            window.setTimeout(() => {
-              if (!active) return;
-              setPlaying(false);
-              setPreview(null);
-              target.classList.remove("ravine-preview-out");
-            }, 420);
-          }, 2200);
-        }, 2200);
-      }, 2200);
+      finish();
     };
 
     if (video.readyState >= 1) {
-      startTimer = window.setTimeout(playSequence, 80);
+      const timer = window.setTimeout(start, 70);
+      timers.push(timer);
     } else {
-      video.onloadedmetadata = () => {
-        startTimer = window.setTimeout(playSequence, 80);
-      };
+      video.onloadedmetadata = () => window.setTimeout(start, 70);
     }
 
+    sequenceTimers.current = timers;
     return () => {
       active = false;
-      window.clearTimeout(sequenceTimer);
-      window.clearTimeout(startTimer);
+      timers.forEach((timer) => window.clearTimeout(timer));
       video.onloadedmetadata = null;
       video.pause();
+      target.classList.remove("ravine-preview-out", "ravine-preview-swap");
     };
   }, [preview]);
 
-  if (!preview || !playing) return null;
+  useEffect(() => {
+    const target = preview?.target;
+    if (!target) return;
+    target.classList.toggle("ravine-preview-visible", phase === "playing");
+    return () => target.classList.remove("ravine-preview-visible");
+  }, [phase, preview]);
+
+  if (!preview) return null;
 
   const style = {
     position: "absolute",
@@ -162,15 +176,14 @@ export default function VideoHoverPreview() {
     objectFit: "cover" as const,
     pointerEvents: "none" as const,
     zIndex: 8,
+    opacity: 0,
   };
-
-  if (getComputedStyle(preview.target).position === "static") preview.target.style.position = "relative";
 
   return createPortal(
     <>
-      <video ref={videoRef} src={preview.videoUrl!} muted playsInline preload="metadata" style={style} aria-hidden="true" />
-      <div className="pointer-events-none absolute inset-0 z-[9]" style={{ background: "linear-gradient(to top, rgba(0,0,0,.38), transparent 52%)" }} />
-      <div className="pointer-events-none absolute left-3 top-3 z-[10] rounded-full border border-white/15 bg-black/50 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[.16em] text-white/85 backdrop-blur-md">Preview</div>
+      <video ref={videoRef} src={preview.videoUrl} muted playsInline preload="metadata" style={style} aria-hidden="true" className="ravine-preview-video" />
+      <div className="pointer-events-none absolute inset-0 z-[9] ravine-preview-shade" />
+      <div className="pointer-events-none absolute left-3 top-3 z-[10] rounded-full border border-white/15 bg-black/45 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[.16em] text-white/85 backdrop-blur-md">Preview</div>
     </>,
     preview.target,
   );
