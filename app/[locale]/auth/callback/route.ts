@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { routing } from "@/i18n/routing";
 
@@ -11,8 +11,8 @@ function getSafeDestination(locale: string, next: string | null) {
   return next;
 }
 
-export async function GET(request: Request) {
-  const url = new URL(request.url);
+export async function GET(request: NextRequest) {
+  const url = request.nextUrl;
   const code = url.searchParams.get("code");
   const localeCandidate = url.pathname.split("/")[1];
   const locale = routing.locales.includes(
@@ -25,13 +25,10 @@ export async function GET(request: Request) {
 
   if (!code) {
     destination.pathname = `/${locale}/auth`;
+    destination.search = "";
     destination.searchParams.set("oauth", "missing_code");
-    destination.searchParams.delete("next");
     return NextResponse.redirect(destination);
   }
-
-  const response = NextResponse.redirect(destination);
-  response.headers.set("Cache-Control", "no-store, max-age=0");
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
@@ -43,18 +40,13 @@ export async function GET(request: Request) {
     return NextResponse.redirect(destination);
   }
 
+  const response = NextResponse.redirect(destination);
+  response.headers.set("Cache-Control", "no-store, max-age=0");
+
   const supabase = createServerClient(supabaseUrl, supabaseKey, {
     cookies: {
       getAll() {
-        return request.headers.get("cookie")
-          ? request.headers.get("cookie")!.split("; ").map((cookie) => {
-              const separator = cookie.indexOf("=");
-              return {
-                name: separator >= 0 ? cookie.slice(0, separator) : cookie,
-                value: separator >= 0 ? cookie.slice(separator + 1) : "",
-              };
-            })
-          : [];
+        return request.cookies.getAll();
       },
       setAll(cookiesToSet) {
         cookiesToSet.forEach(({ name, value, options }) => {
