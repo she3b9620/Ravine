@@ -1,0 +1,3 @@
+Checkpoint after browser OAuth recovery and guest-home scroll fix.
+Relevant commits: 24f4341421a8d50d3224efeb5945f6b016571527, 8728da11cd6b72aa956f3fafcfc94c90020638fb
+Date: 2026-09-03
