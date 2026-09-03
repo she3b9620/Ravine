@@ -11,11 +11,18 @@ type Props = {
   mode?: "signin" | "signup";
   onClose: () => void;
   startInMfa?: boolean;
+  dismissible?: boolean;
 };
 
 type SignupStep = "form" | "email" | "mfa";
 
-export default function AuthModal({ open, mode: initialMode = "signin", onClose, startInMfa = false }: Props) {
+export default function AuthModal({
+  open,
+  mode: initialMode = "signin",
+  onClose,
+  startInMfa = false,
+  dismissible = true,
+}: Props) {
   const locale = useLocale();
   const isArabic = locale === "ar";
   const supabase = useMemo(() => createClient(), []);
@@ -57,13 +64,13 @@ export default function AuthModal({ open, mode: initialMode = "signin", onClose,
   }, [open]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || dismissible === false) return;
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
     };
     document.addEventListener("keydown", handleEscape);
     return () => document.removeEventListener("keydown", handleEscape);
-  }, [open, onClose]);
+  }, [open, onClose, dismissible]);
 
   useEffect(() => {
     if (!open || !startInMfa || !mounted) return;
@@ -123,7 +130,6 @@ export default function AuthModal({ open, mode: initialMode = "signin", onClose,
     try {
       const { error } = await supabase.auth.mfa.verify({ factorId: mfaFactorId, challengeId: mfaChallengeId, code: mfaCode.trim() });
       if (error) throw error;
-      setMessage(isArabic ? "تم تفعيل التحقق بخطوتين بنجاح." : "Two-step verification is now enabled.");
       window.location.href = `/${locale}`;
     } catch (err) {
       setError(err instanceof Error ? err.message : (isArabic ? "رمز التحقق غير صحيح." : "The verification code is incorrect."));
@@ -161,7 +167,7 @@ export default function AuthModal({ open, mode: initialMode = "signin", onClose,
           await startMfaEnrollment(true);
         } else {
           setSignupStep("email");
-          setMessage(isArabic ? "أرسلنا رسالة تأكيد إلى بريدك الإلكتروني. بعد التأكيد سيظهر لك طلب اختياري لتفعيل التحقق بخطوتين." : "We sent a confirmation email. After confirming it, you will see an optional prompt to enable two-step verification.");
+          setMessage(isArabic ? "أرسلنا رسالة تأكيد إلى بريدك الإلكتروني. بعد التأكيد ستعود إلى RAVINE لإكمال الدخول، ويمكنك عندها تفعيل التحقق بخطوتين اختياريًا." : "We sent a confirmation email. After confirming it, you will return to RAVINE to finish signing in, with optional two-step verification.");
         }
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -202,7 +208,7 @@ export default function AuthModal({ open, mode: initialMode = "signin", onClose,
 
   function renderAuthForm() {
     if (signupStep === "email" && mode === "signup") {
-      return <div className="mt-6 rounded-3xl border p-5 text-center" style={{ borderColor: "rgba(241,233,220,.12)", background: "rgba(241,233,220,.035)" }}><div className="mx-auto grid h-12 w-12 place-items-center rounded-full" style={{ background: "rgba(196,122,82,.14)", color: "#C47A52" }}><Check size={22} /></div><h3 className="mt-4 text-lg font-black">{isArabic ? "تحقق من بريدك" : "Verify your email"}</h3><p className="mt-2 text-sm leading-6" style={{ color: "rgba(241,233,220,.58)" }}>{message}</p><button type="button" onClick={onClose} className="mt-5 w-full rounded-2xl px-4 py-3 text-sm font-black" style={{ background: "#C47A52", color: "#090909" }}>{isArabic ? "تم" : "Done"}</button></div>;
+      return <div className="mt-6 rounded-3xl border p-5 text-center" style={{ borderColor: "rgba(241,233,220,.12)", background: "rgba(241,233,220,.035)" }}><div className="mx-auto grid h-12 w-12 place-items-center rounded-full" style={{ background: "rgba(196,122,82,.14)", color: "#C47A52" }}><Check size={22} /></div><h3 className="mt-4 text-lg font-black">{isArabic ? "تحقق من بريدك" : "Verify your email"}</h3><p className="mt-2 text-sm leading-6" style={{ color: "rgba(241,233,220,.58)" }}>{message}</p>{dismissible && <button type="button" onClick={onClose} className="mt-5 w-full rounded-2xl px-4 py-3 text-sm font-black" style={{ background: "#C47A52", color: "#090909" }}>{isArabic ? "تم" : "Done"}</button>}</div>;
     }
 
     if (signupStep === "mfa") {
@@ -224,12 +230,31 @@ export default function AuthModal({ open, mode: initialMode = "signin", onClose,
         <label className="mt-4 block text-sm font-semibold">{isArabic ? "البريد الإلكتروني" : "Email"}<input type="email" required value={email} onChange={(event) => setEmail(event.target.value)} className="mt-2 w-full rounded-2xl border px-4 py-3 outline-none" style={{ borderColor: "rgba(241,233,220,.12)", background: "rgba(241,233,220,.035)", color: "#F1E9DC" }} /></label>
         <label className="mt-4 block text-sm font-semibold">{isArabic ? "كلمة المرور" : "Password"}<input type="password" required minLength={6} value={password} onChange={(event) => setPassword(event.target.value)} className="mt-2 w-full rounded-2xl border px-4 py-3 outline-none" style={{ borderColor: "rgba(241,233,220,.12)", background: "rgba(241,233,220,.035)", color: "#F1E9DC" }} /></label>
         {mode === "signup" && <label className="mt-4 block text-sm font-semibold">{isArabic ? "تأكيد كلمة المرور" : "Confirm password"}<input type="password" required minLength={6} value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} className="mt-2 w-full rounded-2xl border px-4 py-3 outline-none" style={{ borderColor: "rgba(241,233,220,.12)", background: "rgba(241,233,220,.035)", color: "#F1E9DC" }} /></label>}
-        <button type="submit" disabled={loading} className="mt-5 w-full rounded-2xl px-4 py-3 text-sm font-black disabled:opacity-50" style={{ background: "#C47A52", color: "#090909" }}>{loading ? (isArabic ? "جارٍ التنفيذ..." : "Please wait...") : mode === "signin" ? (isArabic ? "تسجيل الدخول" : "Sign in") : (isArabic ? "إنشاء الحساب" : "Create account")}</button>
+        <button type="submit" disabled={loading} className="mt-5 w-full rounded-2xl px-4 py-3 text-sm font-black disabled:opacity-50" style={{ background: "#C89A52", color: "#0B0B0B" }}>{loading ? (isArabic ? "جارٍ التنفيذ..." : "Please wait...") : mode === "signin" ? (isArabic ? "تسجيل الدخول" : "Sign in") : (isArabic ? "إنشاء الحساب" : "Create account")}</button>
       </form>
       {error && <div className="mt-4 rounded-2xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200">{error}</div>}
-      {message && <div className="mt-4 rounded-2xl border p-3 text-sm" style={{ borderColor: "#183F46", background: "rgba(24,63,70,.18)" }}>{message}</div>}
+      {message && signupStep !== "email" && <div className="mt-4 rounded-2xl border p-3 text-sm" style={{ borderColor: "#31405F", background: "rgba(49,64,95,.18)" }}>{message}</div>}
       <button type="button" onClick={() => { setMode(mode === "signin" ? "signup" : "signin"); setSignupStep("form"); setMfaOptional(false); clearFeedback(); }} className="mt-5 w-full text-sm" style={{ color: "rgba(241,233,220,.58)" }}>{mode === "signin" ? (isArabic ? "ليس لديك حساب؟ أنشئ حسابًا" : "Don't have an account? Create one") : (isArabic ? "لديك حساب بالفعل؟ سجل الدخول" : "Already have an account? Sign in")}</button></>;
   }
 
-  return createPortal(<div className="fixed inset-0 z-[99999] grid min-h-[100dvh] w-screen place-items-center overscroll-contain overflow-y-auto bg-black/70 p-4 backdrop-blur-md" style={{ position: "fixed", inset: 0, width: "100vw", height: "100dvh" }} role="dialog" aria-modal="true" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}><div className="relative my-auto max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto rounded-[32px] border p-6 shadow-2xl" style={{ background: "#111516", borderColor: "rgba(241,233,220,.12)", color: "#F1E9DC" }} onMouseDown={(event) => event.stopPropagation()}><div className="flex items-center justify-between"><div><p className="text-[10px] font-bold uppercase tracking-[.28em]" style={{ color: "#C47A52" }}>RAVINE</p><h2 className="mt-2 text-2xl font-black">{signupStep === "mfa" ? (isArabic ? "حماية الحساب" : "Secure your account") : mode === "signin" ? (isArabic ? "مرحبًا بعودتك" : "Welcome back") : (isArabic ? "أنشئ حسابك" : "Create your account")}</h2></div><button type="button" onClick={onClose} className="rounded-full border p-2" style={{ borderColor: "rgba(241,233,220,.12)" }} aria-label={isArabic ? "إغلاق" : "Close"}><X size={17} /></button></div>{renderAuthForm()}</div></div>, document.body);
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[99999] grid min-h-[100dvh] w-screen place-items-center overscroll-contain overflow-y-auto bg-black/75 p-4 backdrop-blur-md"
+      style={{ position: "fixed", inset: 0, width: "100vw", height: "100dvh" }}
+      role="dialog"
+      aria-modal="true"
+      aria-label={isArabic ? "نافذة الدخول إلى RAVINE" : "RAVINE authentication dialog"}
+      onMouseDown={(event) => { if (dismissible && event.target === event.currentTarget) onClose(); }}
+    >
+      <div className="relative my-auto max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto rounded-[32px] border p-6 shadow-2xl shadow-black/40" style={{ background: "linear-gradient(145deg,#131718 0%,#0E1112 100%)", borderColor: "rgba(200,154,82,.18)", color: "#F1E9DC" }} onMouseDown={(event) => event.stopPropagation()}>
+        <div className="mb-5 flex items-center justify-between">
+          <div><p className="text-[10px] font-bold uppercase tracking-[.28em]" style={{ color: "#C89A52" }}>RAVINE</p><h2 className="mt-2 text-2xl font-black">{signupStep === "mfa" ? (isArabic ? "حماية الحساب" : "Secure your account") : mode === "signin" ? (isArabic ? "مرحبًا بعودتك" : "Welcome back") : (isArabic ? "أنشئ حسابك" : "Create your account")}</h2></div>
+          {dismissible && <button type="button" onClick={onClose} className="rounded-full border p-2 transition hover:-translate-y-0.5" style={{ borderColor: "rgba(241,233,220,.12)" }} aria-label={isArabic ? "إغلاق" : "Close"}><X size={17} /></button>}
+        </div>
+        {!dismissible && <div className="mb-4 rounded-2xl border px-4 py-3 text-center text-xs" style={{ borderColor: "rgba(200,154,82,.22)", background: "rgba(200,154,82,.07)", color: "rgba(241,233,220,.72)" }}>{isArabic ? "هذه الخطوة مطلوبة للدخول إلى هذه الواجهة." : "Sign in or create an account to continue to this page."}</div>}
+        {renderAuthForm()}
+      </div>
+    </div>,
+    document.body,
+  );
 }
