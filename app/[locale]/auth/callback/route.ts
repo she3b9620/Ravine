@@ -1,6 +1,4 @@
 import { NextResponse } from "next/server";
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
 import { routing } from "@/i18n/routing";
 
 function getSafeDestination(locale: string, next: string | null) {
@@ -23,44 +21,16 @@ export async function GET(request: Request) {
     : routing.defaultLocale;
   const next = url.searchParams.get("next");
 
+  const destination = new URL(getSafeDestination(locale, next), request.url);
+
   if (code) {
-    const cookieStore = await cookies();
-
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return cookieStore.getAll();
-          },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              cookieStore.set(name, value, options);
-            });
-          },
-        },
-      }
-    );
-
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-
-    if (!error) {
-      const destination = new URL(getSafeDestination(locale, next), request.url);
-      destination.searchParams.set("ravine_auth", "fresh");
-      destination.searchParams.set("t", Date.now().toString());
-      const response = NextResponse.redirect(destination);
-      response.headers.set("Cache-Control", "no-store, max-age=0");
-      return response;
-    }
+    destination.searchParams.set("code", code);
   }
 
-  // Never expose the legacy auth error page after an OAuth callback fails.
-  // Return to the home shell so the client can restore any valid session itself.
-  const fallback = new URL(`/${locale}`, request.url);
-  fallback.searchParams.set("ravine_auth", "callback_failed");
-  fallback.searchParams.set("t", Date.now().toString());
-  const response = NextResponse.redirect(fallback);
+  destination.searchParams.set("ravine_auth", "oauth_return");
+  destination.searchParams.set("t", Date.now().toString());
+
+  const response = NextResponse.redirect(destination);
   response.headers.set("Cache-Control", "no-store, max-age=0");
   return response;
 }
