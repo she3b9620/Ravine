@@ -147,7 +147,7 @@ export default function CreatorDashboard() {
             <div className="flex items-center gap-3"><Plus size={18} style={{ color: "#C47A52" }} /><h2 className="text-lg font-black">{isArabic ? "رفع عمل" : "Upload work"}</h2><ArrowUpRight size={15} className="opacity-35" /></div>
             <p className="mt-2 text-sm leading-6 opacity-50">{isArabic ? "أضف فيديو أو Short أو Podcast كمسودة جديدة." : "Add a video, Short or Podcast as a new draft."}</p>
           </a>
-          <a href={`/${locale}/creator/${creator?.username || ""}`} className="group border-s-2 border-transparent ps-5 transition hover:border-[#C47A52]">
+          <a href={`/${locale}/creator/${creator?.username || creator?.id || ""}`} className="group border-s-2 border-transparent ps-5 transition hover:border-[#C47A52]">
             <div className="flex items-center gap-3"><Users size={18} style={{ color: "#C47A52" }} /><h2 className="text-lg font-black">{isArabic ? "الملف العام" : "Public profile"}</h2><ArrowUpRight size={15} className="opacity-35" /></div>
             <p className="mt-2 text-sm leading-6 opacity-50">{isArabic ? "اعرض هويتك وأعمالك كما يراها الجمهور." : "See your identity and work as the audience sees it."}</p>
           </a>
