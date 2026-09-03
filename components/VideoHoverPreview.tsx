@@ -41,8 +41,8 @@ export default function VideoHoverPreview() {
 
   useEffect(() => {
     const clearTimers = () => {
-      if (enterTimer.current) window.clearTimeout(enterTimer.current);
-      if (hideTimer.current) window.clearTimeout(hideTimer.current);
+      if (enterTimer.current !== null) window.clearTimeout(enterTimer.current);
+      if (hideTimer.current !== null) window.clearTimeout(hideTimer.current);
       enterTimer.current = null;
       hideTimer.current = null;
       sequenceTimers.current.forEach((timer) => window.clearTimeout(timer));
@@ -58,18 +58,21 @@ export default function VideoHoverPreview() {
     };
 
     const onOver = (event: MouseEvent) => {
-      const anchor = (event.target as Element | null)?.closest<HTMLAnchorElement>("a[href]");
+      const targetElement = event.target instanceof Element ? event.target : null;
+      const anchor = targetElement?.closest<HTMLAnchorElement>("a[href]");
       if (!anchor) return;
       const id = getWatchId(anchor);
       const target = findPreviewTarget(anchor);
-      if (!id || !target) return;
-      if (anchor.contains(event.relatedTarget as Node | null)) return;
+      if (id === null || !target) return;
+      if (event.relatedTarget instanceof Node && anchor.contains(event.relatedTarget)) return;
+
       clearTimers();
       abortRef.current?.abort();
       const controller = new AbortController();
       abortRef.current = controller;
       anchor.classList.add("ravine-video-card");
       target.classList.add("ravine-video-hover-target");
+
       enterTimer.current = window.setTimeout(async () => {
         const videoUrl = await loadVideoUrl(id);
         if (controller.signal.aborted || !videoUrl) return;
@@ -79,9 +82,10 @@ export default function VideoHoverPreview() {
     };
 
     const onOut = (event: MouseEvent) => {
-      const anchor = (event.target as Element | null)?.closest<HTMLAnchorElement>("a[href]");
-      if (!anchor || !getWatchId(anchor)) return;
-      if (anchor.contains(event.relatedTarget as Node | null)) return;
+      const targetElement = event.target instanceof Element ? event.target : null;
+      const anchor = targetElement?.closest<HTMLAnchorElement>("a[href]");
+      if (!anchor || getWatchId(anchor) === null) return;
+      if (event.relatedTarget instanceof Node && anchor.contains(event.relatedTarget)) return;
       hideTimer.current = window.setTimeout(hide, 100);
     };
 
@@ -147,7 +151,11 @@ export default function VideoHoverPreview() {
       const timer = window.setTimeout(start, 70);
       timers.push(timer);
     } else {
-      video.onloadedmetadata = () => window.setTimeout(start, 70);
+      video.onloadedmetadata = () => {
+        if (!active) return;
+        const timer = window.setTimeout(start, 70);
+        timers.push(timer);
+      };
     }
 
     sequenceTimers.current = timers;
@@ -170,7 +178,7 @@ export default function VideoHoverPreview() {
   if (!preview) return null;
 
   const style = {
-    position: "absolute",
+    position: "absolute" as const,
     inset: 0,
     width: "100%",
     height: "100%",
