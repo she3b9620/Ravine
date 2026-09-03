@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useLocale } from "next-intl";
-import { ArrowUpRight, Globe2, Instagram, Link2, Save, UserRound } from "lucide-react";
+import { ArrowUpRight, Globe2, Link2, Save, UserRound } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import PlatformShell from "@/components/PlatformShell";
 
@@ -91,7 +91,7 @@ export default function StudioProfilePage() {
               {message && <div className="mt-4 rounded-2xl border p-4 text-sm" style={{borderColor:"rgba(24,63,70,.7)",background:"rgba(24,63,70,.16)"}}>{message}</div>}
               {error && <div className="mt-4 rounded-2xl border p-4 text-sm" style={{borderColor:"rgba(196,122,82,.30)",background:"rgba(196,122,82,.08)"}}>{isArabic ? "تعذر حفظ التعديلات." : "Could not save your changes."}</div>}
             </form>
-            <section className="grid gap-3 md:grid-cols-3"><div className="rounded-2xl border p-5" style={{borderColor:"rgba(241,233,220,.08)",background:"rgba(21,23,25,.68)"}}><Instagram size={17} style={{color:"#C47A52"}}/><h3 className="mt-3 text-sm font-bold">{isArabic ? "الروابط الاجتماعية" : "Social links"}</h3><p className="mt-1 text-xs" style={{color:"rgba(241,233,220,.4)"}}>{isArabic ? "قريبًا" : "Next layer"}</p></div><div className="rounded-2xl border p-5" style={{borderColor:"rgba(241,233,220,.08)",background:"rgba(21,23,25,.68)"}}><UserRound size={17} style={{color:"#C47A52"}}/><h3 className="mt-3 text-sm font-bold">{isArabic ? "الصورة الشخصية" : "Avatar"}</h3><p className="mt-1 text-xs" style={{color:"rgba(241,233,220,.4)"}}>{isArabic ? "تطوير قادم" : "Upgrade next"}</p></div><div className="rounded-2xl border p-5" style={{borderColor:"rgba(241,233,220,.08)",background:"rgba(21,23,25,.68)"}}><Globe2 size={17} style={{color:"#C47A52"}}/><h3 className="mt-3 text-sm font-bold">{isArabic ? "الظهور العام" : "Public presence"}</h3><p className="mt-1 text-xs" style={{color:"rgba(241,233,220,.4)"}}>{profile?.is_verified ? (isArabic ? "موثق" : "Verified") : (isArabic ? "غير موثق حاليًا" : "Not verified yet")}</p></div></section>
+            <section className="grid gap-3 md:grid-cols-3"><div className="rounded-2xl border p-5" style={{borderColor:"rgba(241,233,220,.08)",background:"rgba(21,23,25,.68)"}}><Link2 size={17} style={{color:"#C47A52"}}/><h3 className="mt-3 text-sm font-bold">{isArabic ? "الروابط الاجتماعية" : "Social links"}</h3><p className="mt-1 text-xs" style={{color:"rgba(241,233,220,.4)"}}>{isArabic ? "قريبًا" : "Next layer"}</p></div><div className="rounded-2xl border p-5" style={{borderColor:"rgba(241,233,220,.08)",background:"rgba(21,23,25,.68)"}}><UserRound size={17} style={{color:"#C47A52"}}/><h3 className="mt-3 text-sm font-bold">{isArabic ? "الصورة الشخصية" : "Avatar"}</h3><p className="mt-1 text-xs" style={{color:"rgba(241,233,220,.4)"}}>{isArabic ? "تطوير قادم" : "Upgrade next"}</p></div><div className="rounded-2xl border p-5" style={{borderColor:"rgba(241,233,220,.08)",background:"rgba(21,23,25,.68)"}}><Globe2 size={17} style={{color:"#C47A52"}}/><h3 className="mt-3 text-sm font-bold">{isArabic ? "الظهور العام" : "Public presence"}</h3><p className="mt-1 text-xs" style={{color:"rgba(241,233,220,.4)"}}>{profile?.is_verified ? (isArabic ? "موثق" : "Verified") : (isArabic ? "غير موثق حاليًا" : "Not verified yet")}</p></div></section>
           </>
         )}
       </div>
