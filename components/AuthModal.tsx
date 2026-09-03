@@ -103,7 +103,8 @@ export default function AuthModal({ open, mode: initialMode = "signin", onClose 
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[9999] flex min-h-dvh items-center justify-center overflow-y-auto bg-black/70 p-4 backdrop-blur-md"
+      className="fixed inset-0 z-[99999] grid min-h-[100dvh] w-screen place-items-center overscroll-contain overflow-y-auto bg-black/70 p-4 backdrop-blur-md"
+      style={{ position: "fixed", inset: 0, width: "100vw", height: "100dvh" }}
       role="dialog"
       aria-modal="true"
       onMouseDown={(event) => {
@@ -111,7 +112,7 @@ export default function AuthModal({ open, mode: initialMode = "signin", onClose 
       }}
     >
       <div
-        className="relative my-auto w-full max-w-md rounded-[32px] border p-6 shadow-2xl"
+        className="relative my-auto max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto rounded-[32px] border p-6 shadow-2xl"
         style={{ background: "#111516", borderColor: "rgba(241,233,220,.12)", color: "#F1E9DC" }}
         onMouseDown={(event) => event.stopPropagation()}
       >
@@ -125,13 +126,7 @@ export default function AuthModal({ open, mode: initialMode = "signin", onClose 
           </button>
         </div>
 
-        <button
-          type="button"
-          disabled={loading}
-          onClick={() => void google()}
-          className="mt-6 flex w-full items-center justify-center gap-3 rounded-2xl border px-4 py-3 text-sm font-bold disabled:opacity-50"
-          style={{ borderColor: "rgba(241,233,220,.12)", background: "rgba(241,233,220,.035)" }}
-        >
+        <button type="button" disabled={loading} onClick={() => void google()} className="mt-6 flex w-full items-center justify-center gap-3 rounded-2xl border px-4 py-3 text-sm font-bold disabled:opacity-50" style={{ borderColor: "rgba(241,233,220,.12)", background: "rgba(241,233,220,.035)" }}>
           <span className="grid h-6 w-6 place-items-center rounded-full bg-white text-xs font-black text-[#4285F4]">G</span>
           {isArabic ? "المتابعة باستخدام Google" : "Continue with Google"}
         </button>
@@ -145,63 +140,24 @@ export default function AuthModal({ open, mode: initialMode = "signin", onClose 
         <form onSubmit={submit}>
           <label className="block text-sm font-semibold">
             {isArabic ? "البريد الإلكتروني" : "Email"}
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              className="mt-2 w-full rounded-2xl border px-4 py-3 outline-none"
-              style={{ borderColor: "rgba(241,233,220,.12)", background: "rgba(241,233,220,.035)", color: "#F1E9DC" }}
-            />
+            <input type="email" required value={email} onChange={(event) => setEmail(event.target.value)} className="mt-2 w-full rounded-2xl border px-4 py-3 outline-none" style={{ borderColor: "rgba(241,233,220,.12)", background: "rgba(241,233,220,.035)", color: "#F1E9DC" }} />
           </label>
 
           <label className="mt-4 block text-sm font-semibold">
             {isArabic ? "كلمة المرور" : "Password"}
-            <input
-              type="password"
-              required
-              minLength={6}
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              className="mt-2 w-full rounded-2xl border px-4 py-3 outline-none"
-              style={{ borderColor: "rgba(241,233,220,.12)", background: "rgba(241,233,220,.035)", color: "#F1E9DC" }}
-            />
+            <input type="password" required minLength={6} value={password} onChange={(event) => setPassword(event.target.value)} className="mt-2 w-full rounded-2xl border px-4 py-3 outline-none" style={{ borderColor: "rgba(241,233,220,.12)", background: "rgba(241,233,220,.035)", color: "#F1E9DC" }} />
           </label>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="mt-5 w-full rounded-2xl px-4 py-3 text-sm font-black disabled:opacity-50"
-            style={{ background: "#C47A52", color: "#090909" }}
-          >
-            {loading
-              ? (isArabic ? "جارٍ التنفيذ..." : "Please wait...")
-              : mode === "signin"
-                ? (isArabic ? "تسجيل الدخول" : "Sign in")
-                : (isArabic ? "إنشاء الحساب" : "Create account")}
+          <button type="submit" disabled={loading} className="mt-5 w-full rounded-2xl px-4 py-3 text-sm font-black disabled:opacity-50" style={{ background: "#C47A52", color: "#090909" }}>
+            {loading ? (isArabic ? "جارٍ التنفيذ..." : "Please wait...") : mode === "signin" ? (isArabic ? "تسجيل الدخول" : "Sign in") : (isArabic ? "إنشاء الحساب" : "Create account")}
           </button>
         </form>
 
-        {message && (
-          <div className="mt-4 rounded-2xl border p-3 text-sm" style={{ borderColor: "#183F46", background: "rgba(24,63,70,.18)" }}>
-            {message}
-          </div>
-        )}
+        {message && <div className="mt-4 rounded-2xl border p-3 text-sm" style={{ borderColor: "#183F46", background: "rgba(24,63,70,.18)" }}>{message}</div>}
         {error && <div className="mt-4 rounded-2xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200">{error}</div>}
 
-        <button
-          type="button"
-          onClick={() => {
-            setMode(mode === "signin" ? "signup" : "signin");
-            setError("");
-            setMessage("");
-          }}
-          className="mt-5 w-full text-sm"
-          style={{ color: "rgba(241,233,220,.58)" }}
-        >
-          {mode === "signin"
-            ? (isArabic ? "ليس لديك حساب؟ أنشئ حسابًا" : "Don't have an account? Create one")
-            : (isArabic ? "لديك حساب بالفعل؟ سجل الدخول" : "Already have an account? Sign in")}
+        <button type="button" onClick={() => { setMode(mode === "signin" ? "signup" : "signin"); setError(""); setMessage(""); }} className="mt-5 w-full text-sm" style={{ color: "rgba(241,233,220,.58)" }}>
+          {mode === "signin" ? (isArabic ? "ليس لديك حساب؟ أنشئ حسابًا" : "Don't have an account? Create one") : (isArabic ? "لديك حساب بالفعل؟ سجل الدخول" : "Already have an account? Sign in")}
         </button>
       </div>
     </div>,
