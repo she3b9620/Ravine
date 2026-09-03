@@ -1,10 +1,12 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
+import { useLocale } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 
 export default function UpdatePasswordPage() {
-  const supabase = createClient();
+  const locale = useLocale();
+  const supabase = useMemo(() => createClient(), []);
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -58,7 +60,7 @@ export default function UpdatePasswordPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#090909] px-5 py-20 text-[#F1E9DC]">
+    <main dir={locale === "ar" ? "rtl" : "ltr"} className="min-h-screen bg-[#090909 px-5 py-20 text-[#F1E9DC]">
       <div className="mx-auto w-full max-w-md">
         <div className="mb-10 text-center">
           <div className="mb-6 text-3xl font-black tracking-[0.18em] text-[#C47A52]">
