@@ -1,4 +1,3 @@
-```tsx
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -234,8 +233,9 @@ export default function HomePage() {
         const loadedVideos = (videosResponse.data ??
           []) as VideoRecord[];
 
-        const loadedCategories = (categoriesResponse.data ??
-          []) as Category[];
+        const loadedCategories =
+          (categoriesResponse.data ??
+            []) as Category[];
 
         setVideos(loadedVideos);
 
@@ -248,17 +248,19 @@ export default function HomePage() {
         const user = profileResponse.data.user;
 
         if (user?.id) {
-          const { data: currentProfile } = await supabase
-            .from("profiles")
-            .select(
-              "id,username,display_name,avatar_url"
-            )
-            .eq("id", user.id)
-            .maybeSingle();
+          const { data: currentProfile } =
+            await supabase
+              .from("profiles")
+              .select(
+                "id,username,display_name,avatar_url"
+              )
+              .eq("id", user.id)
+              .maybeSingle();
 
           if (mounted) {
             setProfile(
-              (currentProfile ?? null) as Profile | null
+              (currentProfile ??
+                null) as Profile | null
             );
           }
         }
@@ -266,18 +268,19 @@ export default function HomePage() {
         const creatorIds = Array.from(
           new Set(
             loadedVideos
-              .map((video) => video.creator_id)
+              .map((video: VideoRecord) => video.creator_id)
               .filter(Boolean) as string[]
           )
         ).slice(0, 16);
 
         if (creatorIds.length > 0) {
-          const { data: loadedCreators } = await supabase
-            .from("profiles")
-            .select(
-              "id,username,display_name,avatar_url,bio"
-            )
-            .in("id", creatorIds);
+          const { data: loadedCreators } =
+            await supabase
+              .from("profiles")
+              .select(
+                "id,username,display_name,avatar_url,bio"
+              )
+              .in("id", creatorIds);
 
           if (mounted) {
             setCreators(
@@ -354,52 +357,60 @@ export default function HomePage() {
     },
   ];
 
-  const filteredVideos = useMemo<VideoRecord[]>(() => {
-    let result: VideoRecord[] = [...videos];
+  const filteredVideos = useMemo<VideoRecord[]>(
+    () => {
+      let result: VideoRecord[] = [...videos];
 
-    if (searchQuery.trim()) {
-      const query = searchQuery.trim().toLowerCase();
+      if (searchQuery.trim()) {
+        const query =
+          searchQuery.trim().toLowerCase();
 
-      result = result.filter((video: VideoRecord) => {
-        const title = video.title?.toLowerCase() ?? "";
-        const description =
-          video.description?.toLowerCase() ?? "";
+        result = result.filter(
+          (video: VideoRecord) => {
+            const title =
+              video.title?.toLowerCase() ?? "";
 
-        return (
-          title.includes(query) ||
-          description.includes(query)
+            const description =
+              video.description?.toLowerCase() ?? "";
+
+            return (
+              title.includes(query) ||
+              description.includes(query)
+            );
+          }
         );
-      });
-    }
+      }
 
-    if (activeRange !== "All") {
-      const now = Date.now();
+      if (activeRange !== "All") {
+        const now = Date.now();
 
-      const days =
-        activeRange === "Today"
-          ? 1
-          : activeRange === "This week"
-            ? 7
-            : 30;
+        const days =
+          activeRange === "Today"
+            ? 1
+            : activeRange === "This week"
+              ? 7
+              : 30;
 
-      const threshold =
-        now - days * 24 * 60 * 60 * 1000;
+        const threshold =
+          now - days * 24 * 60 * 60 * 1000;
 
-      result = result.filter(
-        (video: VideoRecord) => {
-          if (!video.created_at) return true;
+        result = result.filter(
+          (video: VideoRecord) => {
+            if (!video.created_at) return true;
 
-          const timestamp = new Date(
-            video.created_at
-          ).getTime();
+            const timestamp = new Date(
+              video.created_at
+            ).getTime();
 
-          return timestamp >= threshold;
-        }
-      );
-    }
+            return timestamp >= threshold;
+          }
+        );
+      }
 
-    return result;
-  }, [videos, searchQuery, activeRange]);
+      return result;
+    },
+    [videos, searchQuery, activeRange]
+  );
 
   const trendingVideos: VideoRecord[] =
     filteredVideos.slice(0, 6);
@@ -410,7 +421,8 @@ export default function HomePage() {
   const liveVideos: VideoRecord[] =
     filteredVideos
       .filter(
-        (video: VideoRecord) => video.status === "live"
+        (video: VideoRecord) =>
+          video.status === "live"
       )
       .slice(0, 4);
 
@@ -436,9 +448,6 @@ export default function HomePage() {
       dir={isArabic ? "rtl" : "ltr"}
       className={`min-h-screen overflow-x-hidden ${pageBg} ${textPrimary}`}
     >
-      {/* =========================================================
-          SIDEBAR
-         ========================================================= */}
       <aside
         id="ravine-home-sidebar"
         className={[
@@ -456,7 +465,6 @@ export default function HomePage() {
         ].join(" ")}
       >
         <div className="flex min-h-0 flex-1 flex-col">
-          {/* Brand */}
           <div
             className={`border-b px-5 pb-5 pt-5 ${borderColor}`}
           >
@@ -504,7 +512,9 @@ export default function HomePage() {
                 type="button"
                 onClick={closeSidebar}
                 aria-label={
-                  isArabic ? "إغلاق القائمة" : "Close menu"
+                  isArabic
+                    ? "إغلاق القائمة"
+                    : "Close menu"
                 }
                 className={[
                   "grid size-9 shrink-0 place-items-center border transition",
@@ -518,7 +528,6 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Main navigation */}
           <div className="min-h-0 flex-1 overflow-y-auto px-3 py-5">
             <div className="mb-3 px-3">
               <span
@@ -529,7 +538,9 @@ export default function HomePage() {
                     : "text-[#9B9188]",
                 ].join(" ")}
               >
-                {isArabic ? "التنقل" : "Navigation"}
+                {isArabic
+                  ? "التنقل"
+                  : "Navigation"}
               </span>
             </div>
 
@@ -539,7 +550,9 @@ export default function HomePage() {
 
                 const active =
                   item.label ===
-                  (isArabic ? "الرئيسية" : "Home");
+                  (isArabic
+                    ? "الرئيسية"
+                    : "Home");
 
                 return (
                   <Link
@@ -578,7 +591,10 @@ export default function HomePage() {
                             : "border-[#241F1B]/[0.07] bg-black/[0.018]",
                       ].join(" ")}
                     >
-                      <Icon size={18} strokeWidth={1.8} />
+                      <Icon
+                        size={18}
+                        strokeWidth={1.8}
+                      />
                     </span>
 
                     <span className="flex-1 text-[13px] font-medium">
@@ -606,7 +622,9 @@ export default function HomePage() {
                     : "text-[#9B9188]",
                 ].join(" ")}
               >
-                {isArabic ? "مساحتك" : "Your space"}
+                {isArabic
+                  ? "مساحتك"
+                  : "Your space"}
               </span>
             </div>
 
@@ -623,7 +641,7 @@ export default function HomePage() {
                       "group flex min-h-[44px] items-center gap-3 px-3 transition",
                       darkMode
                         ? "text-[#969B9A] hover:bg-white/[0.03] hover:text-[#F1E9DC]"
-                        : "text-[#766D65] hover:bg-black/[0.025] hover:text-[#201A16]",
+                        : "text-[#766D65] hover:bg-black/[0.025] hover:text-[#201B18]",
                     ].join(" ")}
                   >
                     <span
@@ -634,7 +652,10 @@ export default function HomePage() {
                           : "border-[#241F1B]/[0.07] bg-black/[0.015] group-hover:border-[#C47A52]/20 group-hover:bg-[#C47A52]/[0.07] group-hover:text-[#A95F39]",
                       ].join(" ")}
                     >
-                      <Icon size={16} strokeWidth={1.7} />
+                      <Icon
+                        size={16}
+                        strokeWidth={1.7}
+                      />
                     </span>
 
                     <span className="text-[12px] font-medium">
@@ -645,7 +666,6 @@ export default function HomePage() {
               })}
             </nav>
 
-            {/* Creator space */}
             <div
               className={[
                 "mt-7 border p-4",
@@ -716,7 +736,6 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Bottom controls */}
           <div
             className={`border-t p-3 ${borderColor}`}
           >
@@ -770,7 +789,6 @@ export default function HomePage() {
         </div>
       </aside>
 
-      {/* Sidebar overlay */}
       {sidebarOpen && (
         <button
           type="button"
@@ -784,11 +802,7 @@ export default function HomePage() {
         />
       )}
 
-      {/* =========================================================
-          MAIN CONTENT
-         ========================================================= */}
       <div className="relative z-10 min-h-screen">
-        {/* Header */}
         <header
           className={[
             "sticky top-0 z-[60] border-b backdrop-blur-xl",
@@ -818,7 +832,10 @@ export default function HomePage() {
               ].join(" ")}
             >
               {sidebarOpen ? (
-                <X size={19} strokeWidth={1.8} />
+                <X
+                  size={19}
+                  strokeWidth={1.8}
+                />
               ) : (
                 <Menu
                   size={19}
@@ -873,7 +890,9 @@ export default function HomePage() {
                 <input
                   value={searchQuery}
                   onChange={(event) =>
-                    setSearchQuery(event.target.value)
+                    setSearchQuery(
+                      event.target.value
+                    )
                   }
                   placeholder={
                     isArabic
@@ -950,15 +969,15 @@ export default function HomePage() {
                 onClick={() => setAuthOpen(true)}
                 className="hidden h-11 border border-[#C47A52]/40 bg-[#C47A52] px-4 text-[11px] font-semibold tracking-[0.08em] text-[#160F0B] transition hover:bg-[#D38A60] sm:block"
               >
-                {isArabic ? "دخول" : "Sign in"}
+                {isArabic
+                  ? "دخول"
+                  : "Sign in"}
               </button>
             )}
           </div>
         </header>
 
-        {/* Content */}
         <div className="mx-auto max-w-[1600px] px-4 pb-16 sm:px-6 xl:px-8">
-          {/* Hero */}
           <section className="pt-7 lg:pt-10">
             <div
               className={[
@@ -1060,19 +1079,19 @@ export default function HomePage() {
                   />
 
                   <div className="absolute inset-0 grid grid-cols-6 opacity-[0.14]">
-                    {Array.from({ length: 36 }).map(
-                      (_, index) => (
-                        <span
-                          key={index}
-                          className={[
-                            "border-e border-b",
-                            darkMode
-                              ? "border-white/[0.09]"
-                              : "border-[#1C1814]/[0.12]",
-                          ].join(" ")}
-                        />
-                      )
-                    )}
+                    {Array.from({
+                      length: 36,
+                    }).map((_, index) => (
+                      <span
+                        key={index}
+                        className={[
+                          "border-e border-b",
+                          darkMode
+                            ? "border-white/[0.09]"
+                            : "border-[#1C1814]/[0.12]",
+                        ].join(" ")}
+                      />
+                    ))}
                   </div>
 
                   <div className="absolute inset-x-8 bottom-8 top-8 border border-[#C47A52]/20" />
@@ -1104,7 +1123,6 @@ export default function HomePage() {
             </div>
           </section>
 
-          {/* Trending */}
           <section className="pt-14">
             <div className="mb-6 flex items-end justify-between gap-4">
               <div>
@@ -1130,7 +1148,9 @@ export default function HomePage() {
                     : "text-[#776E67] hover:text-[#201B18]",
                 ].join(" ")}
               >
-                {isArabic ? "عرض الكل" : "View all"}
+                {isArabic
+                  ? "عرض الكل"
+                  : "View all"}
 
                 <ArrowUpRight
                   size={15}
@@ -1141,26 +1161,26 @@ export default function HomePage() {
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {loading
-                ? Array.from({ length: 6 }).map(
-                    (_, index) => (
-                      <div
-                        key={`skeleton-${index}`}
-                        className={[
-                          "overflow-hidden border animate-pulse",
-                          darkMode
-                            ? "border-white/[0.06] bg-white/[0.02]"
-                            : "border-[#241F1B]/[0.08] bg-black/[0.018]",
-                        ].join(" ")}
-                      >
-                        <div className="aspect-video bg-black/10" />
+                ? Array.from({
+                    length: 6,
+                  }).map((_, index) => (
+                    <div
+                      key={`skeleton-${index}`}
+                      className={[
+                        "overflow-hidden border animate-pulse",
+                        darkMode
+                          ? "border-white/[0.06] bg-white/[0.02]"
+                          : "border-[#241F1B]/[0.08] bg-black/[0.018]",
+                      ].join(" ")}
+                    >
+                      <div className="aspect-video bg-black/10" />
 
-                        <div className="space-y-3 p-4">
-                          <div className="h-4 w-4/5 bg-current opacity-[0.06]" />
-                          <div className="h-3 w-2/5 bg-current opacity-[0.05]" />
-                        </div>
+                      <div className="space-y-3 p-4">
+                        <div className="h-4 w-4/5 bg-current opacity-[0.06]" />
+                        <div className="h-3 w-2/5 bg-current opacity-[0.05]" />
                       </div>
-                    )
-                  )
+                    </div>
+                  ))
                 : trendingVideos.map(
                     (video: VideoRecord) => (
                       <Link
@@ -1244,11 +1264,12 @@ export default function HomePage() {
             </div>
           </section>
 
-          {/* Categories */}
           <section className="pt-14">
             <div className="mb-6">
               <span className="mb-2 block text-[9px] font-semibold uppercase tracking-[0.23em] text-[#C47A52]">
-                {isArabic ? "المشهد" : "The scene"}
+                {isArabic
+                  ? "المشهد"
+                  : "The scene"}
               </span>
 
               <h2 className="text-2xl font-semibold tracking-[-0.035em] sm:text-3xl">
@@ -1306,7 +1327,8 @@ export default function HomePage() {
 
                       <div className="flex items-end justify-between gap-2">
                         <span className="text-[12px] font-semibold">
-                          {category.name ?? category.id}
+                          {category.name ??
+                            category.id}
                         </span>
 
                         <ArrowUpRight
@@ -1322,12 +1344,13 @@ export default function HomePage() {
             </div>
           </section>
 
-          {/* Creators */}
           <section className="pt-14">
             <div className="mb-6 flex items-end justify-between gap-4">
               <div>
                 <span className="mb-2 block text-[9px] font-semibold uppercase tracking-[0.23em] text-[#C47A52]">
-                  {isArabic ? "صناع" : "Creators"}
+                  {isArabic
+                    ? "صناع"
+                    : "Creators"}
                 </span>
 
                 <h2 className="text-2xl font-semibold tracking-[-0.035em] sm:text-3xl">
@@ -1364,7 +1387,8 @@ export default function HomePage() {
                       <Link
                         key={creator.id}
                         href={`/${locale}/creator/${
-                          creator.username ?? creator.id
+                          creator.username ??
+                          creator.id
                         }`}
                         className={[
                           "group flex items-center gap-4 border p-4 transition",
@@ -1416,7 +1440,8 @@ export default function HomePage() {
                                 : "text-[#948A82]",
                             ].join(" ")}
                           >
-                            @{creator.username ?? "creator"}
+                            @{creator.username ??
+                              "creator"}
                           </div>
                         </div>
 
@@ -1428,56 +1453,57 @@ export default function HomePage() {
                       </Link>
                     )
                   )
-                : Array.from({ length: 4 }).map(
-                    (_, index) => (
+                : Array.from({
+                    length: 4,
+                  }).map((_, index) => (
+                    <div
+                      key={`creator-placeholder-${index}`}
+                      className={[
+                        "flex items-center gap-4 border p-4",
+                        darkMode
+                          ? "border-white/[0.06] bg-[#111416]"
+                          : "border-[#241F1B]/[0.08] bg-[#FBF8F2]",
+                      ].join(" ")}
+                    >
                       <div
-                        key={`creator-placeholder-${index}`}
                         className={[
-                          "flex items-center gap-4 border p-4",
+                          "size-12 shrink-0",
                           darkMode
-                            ? "border-white/[0.06] bg-[#111416]"
-                            : "border-[#241F1B]/[0.08] bg-[#FBF8F2]",
+                            ? "bg-white/[0.04]"
+                            : "bg-black/[0.04]",
                         ].join(" ")}
-                      >
+                      />
+
+                      <div className="min-w-0 flex-1 space-y-2">
                         <div
                           className={[
-                            "size-12 shrink-0",
+                            "h-3 w-3/5",
                             darkMode
-                              ? "bg-white/[0.04]"
-                              : "bg-black/[0.04]",
+                              ? "bg-white/[0.05]"
+                              : "bg-black/[0.05]",
                           ].join(" ")}
                         />
 
-                        <div className="min-w-0 flex-1 space-y-2">
-                          <div
-                            className={[
-                              "h-3 w-3/5",
-                              darkMode
-                                ? "bg-white/[0.05]"
-                                : "bg-black/[0.05]",
-                            ].join(" ")}
-                          />
-
-                          <div
-                            className={[
-                              "h-2 w-2/5",
-                              darkMode
-                                ? "bg-white/[0.035]"
-                                : "bg-black/[0.035]",
-                            ].join(" ")}
-                          />
-                        </div>
+                        <div
+                          className={[
+                            "h-2 w-2/5",
+                            darkMode
+                              ? "bg-white/[0.035]"
+                              : "bg-black/[0.035]",
+                          ].join(" ")}
+                        />
                       </div>
-                    )
-                  )}
+                    </div>
+                  ))}
             </div>
           </section>
 
-          {/* Fresh work */}
           <section className="pt-14">
             <div className="mb-6">
               <span className="mb-2 block text-[9px] font-semibold uppercase tracking-[0.23em] text-[#C47A52]">
-                {isArabic ? "جديد" : "Fresh work"}
+                {isArabic
+                  ? "جديد"
+                  : "Fresh work"}
               </span>
 
               <h2 className="text-2xl font-semibold tracking-[-0.035em] sm:text-3xl">
@@ -1548,7 +1574,10 @@ export default function HomePage() {
                               : "text-[#948A82]",
                           ].join(" ")}
                         >
-                          {formatViews(video.views)} views
+                          {formatViews(
+                            video.views
+                          )}{" "}
+                          views
                         </div>
                       </div>
                     </Link>
@@ -1586,12 +1615,13 @@ export default function HomePage() {
             </div>
           </section>
 
-          {/* Live */}
           <section className="pt-14">
             <div className="mb-6 flex items-end justify-between gap-4">
               <div>
                 <span className="mb-2 block text-[9px] font-semibold uppercase tracking-[0.23em] text-[#C47A52]">
-                  {isArabic ? "مباشر" : "Live"}
+                  {isArabic
+                    ? "مباشر"
+                    : "Live"}
                 </span>
 
                 <h2 className="text-2xl font-semibold tracking-[-0.035em] sm:text-3xl">
@@ -1674,7 +1704,10 @@ export default function HomePage() {
                               : "text-[#948A82]",
                           ].join(" ")}
                         >
-                          {formatViews(video.views)} viewers
+                          {formatViews(
+                            video.views
+                          )}{" "}
+                          viewers
                         </div>
                       </div>
                     </Link>
@@ -1726,7 +1759,6 @@ export default function HomePage() {
             )}
           </section>
 
-          {/* Community */}
           <section className="pt-14">
             <div
               className={[
@@ -1814,7 +1846,6 @@ export default function HomePage() {
             </div>
           </section>
 
-          {/* Filter line */}
           <section className="pt-14">
             <div
               className={[
@@ -1881,7 +1912,6 @@ export default function HomePage() {
             </div>
           </section>
 
-          {/* Footer */}
           <footer className="pt-16">
             <div
               className={[
@@ -1982,4 +2012,3 @@ export default function HomePage() {
     </main>
   );
 }
-```
