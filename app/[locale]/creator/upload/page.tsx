@@ -134,8 +134,19 @@ export default function UploadVideoPage() {
       return;
     }
 
+    if (!thumbnailFile.type.match(/^image\/(jpeg|png|webp)$/)) {
+      setError(isArabic ? "الصورة المصغرة يجب أن تكون JPG أو PNG أو WebP." : "Thumbnail must be JPG, PNG, or WebP.");
+      return;
+    }
+
     if (thumbnailFile.size > 10 * 1024 * 1024) {
       setError(isArabic ? "الصورة المصغرة أكبر من 10MB." : "The thumbnail is larger than 10MB.");
+      return;
+    }
+
+    const maxMediaSize = 2 * 1024 * 1024 * 1024;
+    if (mediaFile.size > maxMediaSize) {
+      setError(isArabic ? "حجم ملف العمل يجب ألا يتجاوز 2 جيجابايت." : "Work files must not exceed 2 GB.");
       return;
     }
 
