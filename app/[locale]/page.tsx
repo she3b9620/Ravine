@@ -155,7 +155,9 @@ export default function HomePage() {
   const [currentProfile, setCurrentProfile] = useState<Profile | null>(null);
   const [search, setSearch] = useState("");
   const [dark, setDark] = useState(true);
-  const [range, setRange] = useState<(typeof rangeLabels)[number]["key"]>("week");
+  const [range, setRange] = useState<(typeof rangeLabels)[number]["key"]>(
+    "week",
+  );
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -206,13 +208,11 @@ export default function HomePage() {
           .eq("published", true)
           .order("created_at", { ascending: false })
           .limit(18),
-
         supabase
           .from("creators")
           .select("id,name,username,avatar_url,bio,followers")
           .order("followers", { ascending: false })
           .limit(8),
-
         supabase
           .from("categories")
           .select("id,name,slug")
@@ -222,9 +222,7 @@ export default function HomePage() {
       if (!mounted) return;
 
       const firstError =
-        videoResult.error ||
-        creatorResult.error ||
-        categoryResult.error;
+        videoResult.error || creatorResult.error || categoryResult.error;
 
       if (firstError) {
         setError(firstError.message);
@@ -262,7 +260,7 @@ export default function HomePage() {
   const palette = dark
     ? {
         bg: "#080909",
-        surface: "rgba(19, 22, 23, 0.78)",
+        surface: "rgba(19,22,23,.78)",
         surfaceStrong: "#111516",
         text: "#F1E9DC",
         muted: "rgba(241,233,220,.58)",
@@ -274,7 +272,7 @@ export default function HomePage() {
       }
     : {
         bg: "#F4EFE7",
-        surface: "rgba(255, 252, 246, .80)",
+        surface: "rgba(255,252,246,.80)",
         surfaceStrong: "#FFFDF8",
         text: "#191716",
         muted: "rgba(25,23,22,.56)",
@@ -287,13 +285,8 @@ export default function HomePage() {
 
   function toggleTheme() {
     const next = !dark;
-
     setDark(next);
-
-    window.localStorage.setItem(
-      "ravine-theme",
-      next ? "dark" : "light",
-    );
+    window.localStorage.setItem("ravine-theme", next ? "dark" : "light");
   }
 
   function doSearch(event: FormEvent<HTMLFormElement>) {
@@ -376,18 +369,17 @@ export default function HomePage() {
           className="ravine-ambient ravine-ambient-one"
           style={{ background: palette.indigo }}
         />
-
         <div
           className="ravine-ambient ravine-ambient-two"
           style={{ background: palette.copper }}
         />
-
         <div className="ravine-grain" />
       </div>
 
+      {/* RAVINE HOME SIDEBAR */}
       <aside
         id="ravine-home-sidebar"
-        className={`fixed inset-y-0 start-0 z-[90] w-[min(86vw,320px)] transform border-e backdrop-blur-2xl transition-transform duration-500 ${
+        className={`fixed inset-y-0 start-0 z-[100] w-[min(88vw,340px)] transform border-e transition-transform duration-500 ease-[cubic-bezier(.22,1,.36,1)] ${
           sidebarOpen
             ? "translate-x-0"
             : isArabic
@@ -395,132 +387,236 @@ export default function HomePage() {
               : "-translate-x-full"
         }`}
         style={{
-          backgroundColor: dark
-            ? "rgba(9,10,10,.90)"
-            : "rgba(244,239,231,.94)",
+          background: dark
+            ? "linear-gradient(180deg, rgba(10,12,12,.98) 0%, rgba(7,8,8,.96) 100%)"
+            : "linear-gradient(180deg, rgba(248,244,237,.98) 0%, rgba(241,235,226,.98) 100%)",
           borderColor: palette.line,
+          boxShadow: dark
+            ? "0 0 80px rgba(0,0,0,.42), 20px 0 50px rgba(0,0,0,.18)"
+            : "0 0 60px rgba(45,35,25,.12), 20px 0 40px rgba(45,35,25,.06)",
         }}
         aria-hidden={!sidebarOpen}
       >
-        <div className="flex h-full flex-col px-5 py-6">
-          <div className="flex items-center justify-between">
+        <div className="flex h-full flex-col">
+          <div
+            className="flex items-center justify-between border-b px-5 py-5"
+            style={{ borderColor: palette.line }}
+          >
             <a
               href={`/${locale}`}
-              aria-label="RAVINE home"
               onClick={() => setSidebarOpen(false)}
+              className="group flex items-center gap-3"
+              aria-label="RAVINE home"
             >
-              <img
-                src="/RAVINE.png"
-                alt="RAVINE"
-                className={`h-12 w-auto object-contain ${
-                  !dark ? "invert" : ""
-                }`}
-              />
+              <div
+                className="flex h-10 w-10 items-center justify-center rounded-xl border"
+                style={{
+                  borderColor: `${palette.copper}44`,
+                  backgroundColor: `${palette.copper}10`,
+                }}
+              >
+                <img
+                  src="/RAVINE.png"
+                  alt=""
+                  className={`h-7 w-auto object-contain ${
+                    !dark ? "invert" : ""
+                  }`}
+                />
+              </div>
+
+              <div>
+                <p className="text-sm font-black tracking-[.08em]">RAVINE</p>
+                <p
+                  className="mt-0.5 text-[9px] font-bold uppercase tracking-[.28em]"
+                  style={{ color: palette.muted }}
+                >
+                  Creative Platform
+                </p>
+              </div>
             </a>
 
             <button
               type="button"
               onClick={() => setSidebarOpen(false)}
-              className="rounded-full p-2"
+              className="flex h-9 w-9 items-center justify-center rounded-xl border transition"
               style={{
+                borderColor: palette.line,
                 backgroundColor: palette.soft,
                 color: palette.muted,
               }}
               aria-label={isArabic ? "إغلاق القائمة" : "Close menu"}
             >
-              <X size={18} />
+              <X size={17} strokeWidth={1.8} />
             </button>
           </div>
 
-          <nav
-            className="mt-9 space-y-2"
-            aria-label={isArabic ? "التنقل" : "Navigation"}
-          >
-            {primaryNav.map(({ icon: Icon, label, href }) => (
-              <a
-                key={label}
-                href={href}
-                onClick={() => setSidebarOpen(false)}
-                className="ravine-nav-item flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition"
-                style={{ color: palette.muted }}
+          <div className="flex-1 overflow-y-auto px-4 py-6">
+            <div className="mb-4 px-2">
+              <p
+                className="text-[9px] font-bold uppercase tracking-[.30em]"
+                style={{ color: palette.copper }}
               >
-                <Icon size={18} strokeWidth={1.8} />
-                <span>{label}</span>
-              </a>
-            ))}
-          </nav>
+                {isArabic ? "التنقل" : "Navigation"}
+              </p>
+            </div>
+
+            <nav
+              className="space-y-1"
+              aria-label={isArabic ? "التنقل" : "Navigation"}
+            >
+              {primaryNav.map(({ icon: Icon, label, href }, index) => {
+                const active = index === 0;
+
+                return (
+                  <a
+                    key={label}
+                    href={href}
+                    onClick={() => setSidebarOpen(false)}
+                    className="group relative flex items-center gap-3 rounded-xl px-3.5 py-3 transition-all duration-200"
+                    style={{
+                      backgroundColor: active
+                        ? dark
+                          ? "rgba(196,122,82,.10)"
+                          : "rgba(168,99,66,.09)"
+                        : "transparent",
+                      color: active ? palette.text : palette.muted,
+                    }}
+                  >
+                    <span
+                      className="absolute start-0 top-1/2 h-6 w-[2px] -translate-y-1/2 rounded-full"
+                      style={{
+                        backgroundColor: active
+                          ? palette.copper
+                          : "transparent",
+                      }}
+                    />
+
+                    <span
+                      className="flex h-9 w-9 items-center justify-center rounded-lg border transition"
+                      style={{
+                        borderColor: active
+                          ? `${palette.copper}38`
+                          : palette.line,
+                        backgroundColor: active
+                          ? `${palette.copper}12`
+                          : palette.soft,
+                        color: active
+                          ? palette.copper
+                          : palette.muted,
+                      }}
+                    >
+                      <Icon size={17} strokeWidth={1.8} />
+                    </span>
+
+                    <span className="flex-1 text-[13px] font-semibold">
+                      {label}
+                    </span>
+
+                    {active && (
+                      <span
+                        className="h-1.5 w-1.5 rounded-full"
+                        style={{
+                          backgroundColor: palette.copper,
+                        }}
+                      />
+                    )}
+                  </a>
+                );
+              })}
+            </nav>
+
+            <div
+              className="my-7 h-px"
+              style={{ backgroundColor: palette.line }}
+            />
+
+            <div className="mb-4 px-2">
+              <p
+                className="text-[9px] font-bold uppercase tracking-[.30em]"
+                style={{ color: palette.copper }}
+              >
+                {isArabic ? "مساحتك" : "Your space"}
+              </p>
+            </div>
+
+            <nav
+              className="space-y-1"
+              aria-label={isArabic ? "مساحتك" : "Your space"}
+            >
+              {secondaryNav.map(({ icon: Icon, label, href }) => (
+                <a
+                  key={label}
+                  href={href}
+                  onClick={() => setSidebarOpen(false)}
+                  className="group flex items-center gap-3 rounded-xl px-3.5 py-3 transition-all duration-200"
+                  style={{
+                    color: palette.muted,
+                  }}
+                >
+                  <span
+                    className="flex h-9 w-9 items-center justify-center rounded-lg border"
+                    style={{
+                      borderColor: palette.line,
+                      backgroundColor: palette.soft,
+                    }}
+                  >
+                    <Icon size={17} strokeWidth={1.8} />
+                  </span>
+
+                  <span className="text-[13px] font-semibold">
+                    {label}
+                  </span>
+                </a>
+              ))}
+            </nav>
+          </div>
 
           <div
-            className="my-6 h-px"
-            style={{ backgroundColor: palette.line }}
-          />
-
-          <nav
-            className="space-y-2"
-            aria-label={isArabic ? "مساحتك" : "Your space"}
+            className="border-t p-4"
+            style={{ borderColor: palette.line }}
           >
-            <p
-              className="px-4 text-[10px] font-bold uppercase tracking-[.28em]"
-              style={{ color: palette.muted }}
-            >
-              {isArabic ? "مساحتك" : "Your space"}
-            </p>
-
-            {secondaryNav.map(({ icon: Icon, label, href }) => (
-              <a
-                key={label}
-                href={href}
-                onClick={() => setSidebarOpen(false)}
-                className="ravine-nav-item flex items-center gap-3 rounded-2xl px-4 py-3 text-sm"
-                style={{ color: palette.muted }}
-              >
-                <Icon size={18} strokeWidth={1.8} />
-                <span>{label}</span>
-              </a>
-            ))}
-          </nav>
-
-          <div className="mt-auto">
             <div
-              className="mb-3 rounded-3xl border p-4"
+              className="overflow-hidden rounded-2xl border p-4"
               style={{
-                background: palette.soft,
-                borderColor: palette.line,
+                borderColor: `${palette.copper}2d`,
+                background: dark
+                  ? "linear-gradient(145deg, rgba(196,122,82,.11), rgba(24,63,70,.10))"
+                  : "linear-gradient(145deg, rgba(168,99,66,.08), rgba(33,76,85,.06))",
               }}
             >
               <div className="flex items-start gap-3">
                 <div
-                  className="mt-0.5 rounded-xl p-2"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
                   style={{
-                    backgroundColor: `${palette.copper}18`,
+                    backgroundColor: `${palette.copper}15`,
                     color: palette.copper,
                   }}
                 >
                   <Sparkles size={16} />
                 </div>
 
-                <div>
-                  <p className="text-sm font-bold">
-                    {isArabic ? "كن مبدعًا" : "Become a Creator"}
+                <div className="min-w-0">
+                  <p className="text-[12px] font-black">
+                    {isArabic ? "مساحة المبدع" : "Creator space"}
                   </p>
 
                   <p
-                    className="mt-1 text-xs leading-5"
+                    className="mt-1 text-[10px] leading-5"
                     style={{ color: palette.muted }}
                   >
                     {isArabic
-                      ? "حوّل ملفك إلى مساحة إبداعية احترافية."
-                      : "Turn your profile into a professional creative space."}
+                      ? "انشر أعمالك وابنِ حضورك على RAVINE."
+                      : "Publish your work and build your presence on RAVINE."}
                   </p>
 
                   <a
                     href={`/${locale}/creator`}
                     onClick={() => setSidebarOpen(false)}
-                    className="mt-3 inline-flex items-center text-xs font-bold"
+                    className="mt-3 inline-flex items-center gap-1 text-[10px] font-black"
                     style={{ color: palette.copper }}
                   >
-                    {isArabic ? "ابدأ الآن" : "Start now"}
-                    <ArrowUpRight size={13} className="ms-1" />
+                    {isArabic ? "ابدأ الآن" : "Start creating"}
+                    <ArrowUpRight size={12} />
                   </a>
                 </div>
               </div>
@@ -529,10 +625,19 @@ export default function HomePage() {
             <a
               href={`/${locale}/settings`}
               onClick={() => setSidebarOpen(false)}
-              className="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm"
+              className="mt-3 flex items-center gap-3 rounded-xl px-3.5 py-3 text-[12px] font-semibold"
               style={{ color: palette.muted }}
             >
-              <Settings2 size={18} />
+              <span
+                className="flex h-9 w-9 items-center justify-center rounded-lg border"
+                style={{
+                  borderColor: palette.line,
+                  backgroundColor: palette.soft,
+                }}
+              >
+                <Settings2 size={16} />
+              </span>
+
               <span>{isArabic ? "الإعدادات" : "Settings"}</span>
             </a>
           </div>
@@ -543,7 +648,7 @@ export default function HomePage() {
         <button
           type="button"
           onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 z-[80] bg-black/45 backdrop-blur-sm"
+          className="fixed inset-0 z-[80] bg-black/55 backdrop-blur-[2px]"
           aria-label={isArabic ? "إغلاق" : "Close"}
         />
       )}
@@ -564,8 +669,15 @@ export default function HomePage() {
               onClick={() => setSidebarOpen((value) => !value)}
               className="rounded-full border p-2.5"
               style={{
-                borderColor: palette.line,
-                backgroundColor: palette.soft,
+                borderColor: sidebarOpen
+                  ? `${palette.copper}55`
+                  : palette.line,
+                backgroundColor: sidebarOpen
+                  ? `${palette.copper}12`
+                  : palette.soft,
+                color: sidebarOpen
+                  ? palette.copper
+                  : palette.text,
               }}
               aria-expanded={sidebarOpen}
               aria-controls="ravine-home-sidebar"
@@ -786,10 +898,7 @@ export default function HomePage() {
                             "rgba(0,0,0,.14)",
                         }}
                       >
-                        <Play
-                          size={13}
-                          fill="currentColor"
-                        />
+                        <Play size={13} fill="currentColor" />
                       </span>
 
                       {isArabic
@@ -942,149 +1051,127 @@ export default function HomePage() {
 
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               {loading
-                ? Array.from(
-                    { length: 4 },
-                    (_, index) => (
+                ? Array.from({ length: 4 }, (_, index) => (
+                    <div
+                      key={`trend-skeleton-${index}`}
+                      className="overflow-hidden rounded-[26px] border"
+                      style={{
+                        backgroundColor: palette.surface,
+                        borderColor: palette.line,
+                      }}
+                    >
                       <div
-                        key={`trend-skeleton-${index}`}
-                        className="overflow-hidden rounded-[26px] border"
+                        className="aspect-[16/10] animate-pulse"
                         style={{
-                          backgroundColor:
-                            palette.surface,
-                          borderColor: palette.line,
+                          backgroundColor: palette.soft,
                         }}
-                      >
+                      />
+
+                      <div className="space-y-3 p-4">
                         <div
-                          className="aspect-[16/10] animate-pulse"
+                          className="h-4 animate-pulse rounded-full"
                           style={{
-                            backgroundColor:
-                              palette.soft,
+                            backgroundColor: palette.soft,
                           }}
                         />
 
-                        <div className="space-y-3 p-4">
-                          <div
-                            className="h-4 animate-pulse rounded-full"
-                            style={{
-                              backgroundColor:
-                                palette.soft,
-                            }}
-                          />
-
-                          <div
-                            className="h-3 w-2/3 animate-pulse rounded-full"
-                            style={{
-                              backgroundColor:
-                                palette.soft,
-                            }}
-                          />
-                        </div>
+                        <div
+                          className="h-3 w-2/3 animate-pulse rounded-full"
+                          style={{
+                            backgroundColor: palette.soft,
+                          }}
+                        />
                       </div>
-                    ),
-                  )
-                : featured
-                    .slice(0, 4)
-                    .map((video) => (
-                      <article
-                        key={video.id}
-                        className="ravine-card group overflow-hidden rounded-[26px] border"
-                        style={{
-                          backgroundColor:
-                            palette.surface,
-                          borderColor: palette.line,
-                        }}
+                    </div>
+                  ))
+                : featured.slice(0, 4).map((video) => (
+                    <article
+                      key={video.id}
+                      className="ravine-card group overflow-hidden rounded-[26px] border"
+                      style={{
+                        backgroundColor: palette.surface,
+                        borderColor: palette.line,
+                      }}
+                    >
+                      <a
+                        href={`/${locale}/watch/${video.id}`}
                       >
-                        <a
-                          href={`/${locale}/watch/${video.id}`}
+                        <div
+                          className="relative aspect-[16/10] overflow-hidden"
+                          style={{
+                            backgroundColor: palette.soft,
+                          }}
                         >
-                          <div
-                            className="relative aspect-[16/10] overflow-hidden"
+                          {video.thumbnail_url ? (
+                            <img
+                              src={video.thumbnail_url}
+                              alt={video.title}
+                              className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.04]"
+                            />
+                          ) : (
+                            <div
+                              className="flex h-full items-center justify-center"
+                              style={{
+                                color: palette.muted,
+                              }}
+                            >
+                              <Play />
+                            </div>
+                          )}
+
+                          <span
+                            className="absolute bottom-3 start-3 rounded-full px-2 py-1 text-[10px] font-bold"
                             style={{
-                              backgroundColor:
-                                palette.soft,
+                              background: "rgba(0,0,0,.72)",
+                              color: "#fff",
                             }}
                           >
-                            {video.thumbnail_url ? (
-                              <img
-                                src={video.thumbnail_url}
-                                alt={video.title}
-                                className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.04]"
-                              />
-                            ) : (
-                              <div
-                                className="flex h-full items-center justify-center"
-                                style={{
-                                  color:
-                                    palette.muted,
-                                }}
-                              >
-                                <Play />
-                              </div>
+                            {formatDuration(video.duration)}
+                          </span>
+
+                          <span
+                            className="absolute top-3 end-3 rounded-full px-2 py-1 text-[10px] font-bold"
+                            style={{
+                              background: `${palette.bg}cc`,
+                              color: palette.text,
+                            }}
+                          >
+                            {contentLabel(
+                              video.content_type,
+                              isArabic,
                             )}
+                          </span>
+                        </div>
 
-                            <span
-                              className="absolute bottom-3 start-3 rounded-full px-2 py-1 text-[10px] font-bold"
-                              style={{
-                                background:
-                                  "rgba(0,0,0,.72)",
-                                color: "#fff",
-                              }}
-                            >
-                              {formatDuration(
-                                video.duration,
-                              )}
+                        <div className="p-4">
+                          <p className="line-clamp-2 text-sm font-bold leading-6">
+                            {video.title}
+                          </p>
+
+                          <div
+                            className="mt-3 flex items-center justify-between text-[11px]"
+                            style={{
+                              color: palette.muted,
+                            }}
+                          >
+                            <span>
+                              {formatCount(video.views)}{" "}
+                              {isArabic
+                                ? "مشاهدة"
+                                : "views"}
                             </span>
 
-                            <span
-                              className="absolute top-3 end-3 rounded-full px-2 py-1 text-[10px] font-bold"
-                              style={{
-                                background:
-                                  `${palette.bg}cc`,
-                                color:
-                                  palette.text,
-                              }}
-                            >
-                              {contentLabel(
-                                video.content_type,
-                                isArabic,
-                              )}
+                            <span>
+                              {formatCount(video.likes)}{" "}
+                              {isArabic
+                                ? "إعجاب"
+                                : "likes"}
                             </span>
                           </div>
-
-                          <div className="p-4">
-                            <p className="line-clamp-2 text-sm font-bold leading-6">
-                              {video.title}
-                            </p>
-
-                            <div
-                              className="mt-3 flex items-center justify-between text-[11px]"
-                              style={{
-                                color:
-                                  palette.muted,
-                              }}
-                            >
-                              <span>
-                                {formatCount(
-                                  video.views,
-                                )}{" "}
-                                {isArabic
-                                  ? "مشاهدة"
-                                  : "views"}
-                              </span>
-
-                              <span>
-                                {formatCount(
-                                  video.likes,
-                                )}{" "}
-                                {isArabic
-                                  ? "إعجاب"
-                                  : "likes"}
-                              </span>
-                            </div>
-                          </div>
-                        </a>
-                      </article>
-                    ))}
+                        </div>
+                      </a>
+                    </article>
+                  ))}
             </div>
           </section>
 
@@ -1117,8 +1204,7 @@ export default function HomePage() {
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
               {visibleCategories.map((category) => {
                 const Icon =
-                  categoryIcons[category.slug] ??
-                  Sparkles;
+                  categoryIcons[category.slug] ?? Sparkles;
 
                 return (
                   <a
@@ -1128,8 +1214,7 @@ export default function HomePage() {
                     )}`}
                     className="group rounded-3xl border p-4 transition hover:-translate-y-0.5"
                     style={{
-                      backgroundColor:
-                        palette.surface,
+                      backgroundColor: palette.surface,
                       borderColor: palette.line,
                     }}
                   >
