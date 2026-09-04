@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import FollowCreator from "@/components/FollowCreator";
 
 export const dynamic = "force-dynamic";
 
@@ -44,7 +45,11 @@ export default async function CreatorProfilePage({
           <h1>{creator.name}</h1>
           <div className="video-kicker">@{creator.username || `creator-${creator.id}`} · {creator.specialty || "CREATOR"}</div>
           <p className="section-note">{creator.bio || (ar ? "هوية إبداعية من مجتمع RAVINE." : "A creative identity from the RAVINE community.")}</p>
-          <div className="video-stats"><span>{Number(creator.followers || 0).toLocaleString()} {ar ? "متابع" : "followers"}</span><Link className="button secondary" href={`/${locale}/creators`}>{ar ? "كل المبدعين" : "All creators"}</Link></div>
+          <div className="video-stats">
+            <span>{Number(creator.followers || 0).toLocaleString()} {ar ? "متابع" : "followers"}</span>
+            <FollowCreator creatorId={creator.id} creatorUserId={creator.user_id} locale={locale} />
+            <Link className="button secondary" href={`/${locale}/creators`}>{ar ? "كل المبدعين" : "All creators"}</Link>
+          </div>
         </div>
       </div>
 
