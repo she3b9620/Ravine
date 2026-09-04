@@ -1,0 +1,140 @@
+/* RAVINE FONT AUTHORITY
+   Final cascade layer for typography only. No type-size changes.
+   Restores inheritance against legacy locale-wide !important rules. */
+
+/* Descendants inherit first. This defeats legacy .ravine-shell[lang] * font-family rules
+   without forcing one font onto nested spans. */
+html body .ravine-shell[lang="ar"] *,
+html body .ravine-shell[lang="en"] * {
+  font-family: inherit !important;
+}
+
+/* Functional base: Latin glyphs resolve to Satoshi; Arabic glyphs resolve to Thmanyah Sans
+   through the existing RavineSansMixed unicode-range family. */
+html body .ravine-shell[lang="ar"],
+html body .ravine-shell[lang="en"] {
+  font-family: RavineSansMixed, sans-serif !important;
+}
+
+/* Headings: Arabic -> Thmanyah Serif Display; Latin -> Satoshi. */
+html body .ravine-shell[lang="ar"] h1,
+html body .ravine-shell[lang="ar"] h2,
+html body .ravine-shell[lang="ar"] h3,
+html body .ravine-shell[lang="ar"] h4,
+html body .ravine-shell[lang="ar"] h5,
+html body .ravine-shell[lang="ar"] h6,
+html body .ravine-shell[lang="en"] h1,
+html body .ravine-shell[lang="en"] h2,
+html body .ravine-shell[lang="en"] h3,
+html body .ravine-shell[lang="en"] h4,
+html body .ravine-shell[lang="en"] h5,
+html body .ravine-shell[lang="en"] h6 {
+  font-family: RavineDisplayMixed, serif !important;
+}
+
+/* Editorial body: Arabic -> Thmanyah Serif Text; Latin -> Satoshi. */
+html body .ravine-shell[lang="ar"] p,
+html body .ravine-shell[lang="ar"] li,
+html body .ravine-shell[lang="ar"] blockquote,
+html body .ravine-shell[lang="en"] p,
+html body .ravine-shell[lang="en"] li,
+html body .ravine-shell[lang="en"] blockquote {
+  font-family: RavineTextMixed, serif !important;
+}
+
+/* Functional UI: Arabic -> Thmanyah Sans; Latin -> Satoshi. */
+html body .ravine-shell[lang="ar"] button,
+html body .ravine-shell[lang="ar"] input,
+html body .ravine-shell[lang="ar"] textarea,
+html body .ravine-shell[lang="ar"] select,
+html body .ravine-shell[lang="ar"] label,
+html body .ravine-shell[lang="en"] button,
+html body .ravine-shell[lang="en"] input,
+html body .ravine-shell[lang="en"] textarea,
+html body .ravine-shell[lang="en"] select,
+html body .ravine-shell[lang="en"] label {
+  font-family: RavineSansMixed, sans-serif !important;
+}
+
+/* Existing RAVINE semantic classes that are not covered by simple elements. */
+html body .ravine-shell .section-note,
+html body .ravine-shell .video-meta p,
+html body .ravine-shell .watch-copy p,
+html body .ravine-shell .auth-intro,
+html body .ravine-shell .auth-message,
+html body .ravine-shell .home-feed-intro,
+html body .ravine-shell .about-lead {
+  font-family: RavineTextMixed, serif !important;
+}
+
+html body .ravine-shell .eyebrow,
+html body .ravine-shell .home-state-kicker,
+html body .ravine-shell .video-kicker,
+html body .ravine-shell .work-kicker,
+html body .ravine-shell .ravine-nav-link,
+html body .ravine-shell .ravine-minor-link,
+html body .ravine-shell .button,
+html body .ravine-shell .video-stats,
+html body .ravine-shell .duration,
+html body .ravine-shell .empty-state,
+html body .ravine-shell .ravine-footer-meta {
+  font-family: RavineSansMixed, sans-serif !important;
+}
+
+/* Search is portaled to document.body, so it needs an independent authority root. */
+html body .ravine-search-dialog * {
+  font-family: inherit !important;
+}
+html body .ravine-search-dialog {
+  font-family: RavineSansMixed, sans-serif !important;
+}
+html body .ravine-search-dialog h1,
+html body .ravine-search-dialog h2,
+html body .ravine-search-dialog h3 {
+  font-family: RavineDisplayMixed, serif !important;
+}
+html body .ravine-search-dialog p {
+  font-family: RavineTextMixed, serif !important;
+}
+html body .ravine-search-dialog button,
+html body .ravine-search-dialog input,
+html body .ravine-search-dialog label,
+html body .ravine-search-dialog .ravine-search-field-label,
+html body .ravine-search-dialog .ravine-search-select-trigger,
+html body .ravine-search-dialog .ravine-search-select-menu,
+html body .ravine-search-dialog .ravine-advanced-search-toggle {
+  font-family: RavineSansMixed, sans-serif !important;
+}
+
+/* Auth modal can also be rendered through a portal. */
+html body .auth-modal-root *,
+html body .overlay * {
+  font-family: inherit !important;
+}
+html body .auth-modal-root,
+html body .overlay {
+  font-family: RavineSansMixed, sans-serif !important;
+}
+html body .auth-modal-root h1,
+html body .auth-modal-root h2,
+html body .overlay h1,
+html body .overlay h2,
+html body .overlay .dialog h2 {
+  font-family: RavineDisplayMixed, serif !important;
+}
+html body .auth-modal-root p,
+html body .auth-modal-root .auth-intro,
+html body .auth-modal-root .auth-message,
+html body .overlay p,
+html body .overlay .intro,
+html body .overlay .auth-message {
+  font-family: RavineTextMixed, serif !important;
+}
+html body .auth-modal-root button,
+html body .auth-modal-root input,
+html body .auth-modal-root label,
+html body .overlay button,
+html body .overlay input,
+html body .overlay label {
+  font-family: RavineSansMixed, sans-serif !important;
+}
