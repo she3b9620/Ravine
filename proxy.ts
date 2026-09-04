@@ -23,7 +23,9 @@ function isProtectedPath(pathname: string) {
   if (!routing.locales.includes(locale as "ar" | "en")) return false;
 
   const appPath = `/${segments.slice(1).join("/")}` || "/";
-  return protectedRoutes.some((route) => appPath === route || appPath.startsWith(`${route}/`));
+  return protectedRoutes.some(
+    (route) => appPath === route || appPath.startsWith(`${route}/`)
+  );
 }
 
 function copyCookies(from: NextResponse, to: NextResponse) {
@@ -32,6 +34,23 @@ function copyCookies(from: NextResponse, to: NextResponse) {
 
 export default async function proxy(request: NextRequest) {
   const response = intlMiddleware(request);
+
+  const segments = request.nextUrl.pathname.split("/").filter(Boolean);
+  const localeCandidate = segments[0];
+  const appPath = `/${segments.slice(1).join("/")}` || "/";
+
+  // Compatibility alias: the product currently has a concrete /discover route.
+  // Keep /explore reachable while the Master Spec's canonical-name decision remains OPEN.
+  if (
+    routing.locales.includes(
+      localeCandidate as (typeof routing.locales)[number]
+    ) &&
+    appPath === "/explore"
+  ) {
+    const discoverUrl = request.nextUrl.clone();
+    discoverUrl.pathname = `/${localeCandidate}/discover`;
+    return NextResponse.redirect(discoverUrl, 307);
+  }
 
   if (!isProtectedPath(request.nextUrl.pathname)) return response;
 
@@ -45,9 +64,15 @@ export default async function proxy(request: NextRequest) {
         return request.cookies.getAll();
       },
       setAll(cookiesToSet, headers) {
-        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-        cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
-        Object.entries(headers ?? {}).forEach(([key, value]) => response.headers.set(key, value));
+        cookiesToSet.forEach(({ name, value }) =>
+          request.cookies.set(name, value)
+        );
+        cookiesToSet.forEach(({ name, value, options }) =>
+          response.cookies.set(name, value, options)
+        );
+        Object.entries(headers ?? {}).forEach(([key, value]) =>
+          response.headers.set(key, value)
+        );
       },
     },
   });
@@ -58,13 +83,17 @@ export default async function proxy(request: NextRequest) {
     return response;
   }
 
-  const localeCandidate = request.nextUrl.pathname.split("/")[1];
-  const locale = routing.locales.includes(localeCandidate as (typeof routing.locales)[number])
+  const locale = routing.locales.includes(
+    localeCandidate as (typeof routing.locales)[number]
+  )
     ? localeCandidate
     : routing.defaultLocale;
 
   const loginUrl = new URL(`/${locale}/auth`, request.url);
-  loginUrl.searchParams.set("next", `${request.nextUrl.pathname}${request.nextUrl.search}`);
+  loginUrl.searchParams.set(
+    "next",
+    `${request.nextUrl.pathname}${request.nextUrl.search}`
+  );
 
   const redirectResponse = NextResponse.redirect(loginUrl);
   redirectResponse.headers.set("Cache-Control", "private, no-store, max-age=0");
