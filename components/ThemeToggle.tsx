@@ -29,7 +29,7 @@ export default function ThemeToggle({ locale }: { locale: "ar" | "en" }) {
     : locale === "ar" ? "الوضع الداكن" : "Dark mode";
 
   return (
-    <button type="button" className={styles.toggle} onClick={toggleTheme} aria-label={label} title={label}>
+    <button type="button" className={`${styles.toggle} theme-toggle-visual`} onClick={toggleTheme} aria-label={label} title={label}>
       <span className={styles.icon} aria-hidden="true">
         {theme === "dark" ? <Sun size={18} strokeWidth={1.8} /> : <Moon size={18} strokeWidth={1.8} />}
       </span>
