@@ -7,6 +7,7 @@ import AuthTrigger, { AuthModal } from "./AuthTrigger";
 import MobileNav from "./MobileNav";
 import LanguageSwitcher from "./LanguageSwitcher";
 import SearchLauncher from "./SearchLauncher";
+import AccountMenu from "./AccountMenu";
 
 const navigation = [
   ["discover", "Discover", "اكتشف"],
@@ -20,11 +21,13 @@ const navigation = [
 
 type Locale = "ar" | "en";
 type HeaderCategory = { id: number; name: string; slug: string | null };
+type HeaderProfile = { display_name: string | null; username: string | null; avatar_url: string | null; is_creator: boolean | null };
 
 export default async function RavineShell({ locale, children }: { locale: Locale; children: ReactNode }) {
   const isArabic = locale === "ar";
   let user = null;
   let categories: HeaderCategory[] = [];
+  let profile: HeaderProfile | null = null;
 
   try {
     const supabase = await createClient();
@@ -34,10 +37,22 @@ export default async function RavineShell({ locale, children }: { locale: Locale
     ]);
     user = userData.user;
     categories = (categoryData ?? []) as HeaderCategory[];
+
+    if (user) {
+      const { data } = await supabase
+        .from("profiles")
+        .select("display_name,username,avatar_url,is_creator")
+        .eq("id", user.id)
+        .maybeSingle();
+      profile = data as HeaderProfile | null;
+    }
   } catch {
     user = null;
     categories = [];
+    profile = null;
   }
+
+  const displayName = profile?.display_name || profile?.username || user?.email?.split("@")[0] || (isArabic ? "مستخدم RAVINE" : "RAVINE user");
 
   return (
     <div className="ravine-shell" lang={locale} dir={isArabic ? "rtl" : "ltr"}>
@@ -51,10 +66,13 @@ export default async function RavineShell({ locale, children }: { locale: Locale
             <MobileNav locale={locale} authenticated={Boolean(user)} />
             <SearchLauncher locale={locale} categories={categories} />
             {user ? (
-              <>
-                <Link href={`/${locale}/library`} className="ravine-minor-link">{isArabic ? "المكتبة" : "Library"}</Link>
-                <Link href={`/${locale}/account`} className="ravine-minor-link">{isArabic ? "الحساب" : "Account"}</Link>
-              </>
+              <AccountMenu
+                locale={locale}
+                displayName={displayName}
+                username={profile?.username || null}
+                avatarUrl={profile?.avatar_url || null}
+                isCreator={Boolean(profile?.is_creator)}
+              />
             ) : (
               <>
                 <AuthTrigger locale={locale} label={isArabic ? "دخول" : "Sign in"} mode="signin" />
