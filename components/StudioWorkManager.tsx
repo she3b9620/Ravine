@@ -91,24 +91,29 @@ export default function StudioWorkManager({ works: initialWorks, locale }: Props
 
   async function removeWork(work: Work) {
     const confirmed = window.confirm(
-      ar ? `حذف العمل «${work.title}» نهائيًا؟` : `Delete “${work.title}” permanently?`
+      ar ? `حذف العمل «${work.title}» نهائيًا؟` : `Delete “${work.title}” permanently?`,
     );
     if (!confirmed) return;
 
     setBusyId(work.id);
     setError("");
-    const supabase = createClient();
-    const { error: deleteError } = await supabase.from("videos").delete().eq("id", work.id);
 
-    if (deleteError) {
-      setError(deleteError.message);
-    } else {
-      if (work.video_url) {
-        await supabase.storage.from("videos").remove([work.video_url]);
+    try {
+      const response = await fetch("/api/studio/delete-work", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ videoId: work.id }),
+      });
+      const payload = await response.json() as { ok?: boolean; error?: string };
+      if (!response.ok || !payload.ok) {
+        throw new Error(payload.error || (ar ? "تعذر حذف العمل." : "Could not delete work."));
       }
       setWorks((current) => current.filter((item) => item.id !== work.id));
+    } catch (deleteError) {
+      setError(deleteError instanceof Error ? deleteError.message : String(deleteError));
+    } finally {
+      setBusyId(null);
     }
-    setBusyId(null);
   }
 
   if (!works.length) {
