@@ -23,6 +23,15 @@ type Locale = "ar" | "en";
 type HeaderCategory = { id: number; name: string; slug: string | null };
 type HeaderProfile = { display_name: string | null; username: string | null; avatar_url: string | null; is_creator: boolean | null };
 
+function RavineLockup({ compact = false }: { compact?: boolean }) {
+  return (
+    <span className={`ravine-lockup${compact ? " compact" : ""}`} aria-hidden="true">
+      <img src="/ravine-mark.svg" alt="" className="ravine-lockup-mark" />
+      <img src="/ravine-wordmark.svg" alt="" className="ravine-lockup-wordmark" />
+    </span>
+  );
+}
+
 export default async function RavineShell({ locale, children }: { locale: Locale; children: ReactNode }) {
   const isArabic = locale === "ar";
   let user = null;
@@ -58,7 +67,9 @@ export default async function RavineShell({ locale, children }: { locale: Locale
     <div className="ravine-shell" lang={locale} dir={isArabic ? "rtl" : "ltr"}>
       <header className="ravine-header">
         <div className="ravine-header-inner">
-          <Link href={`/${locale}`} className="ravine-brand" aria-label="RAVINE">RAVINE<span>.</span></Link>
+          <Link href={`/${locale}`} className="ravine-brand ravine-brand-lockup" aria-label="RAVINE">
+            <RavineLockup />
+          </Link>
           <nav className="ravine-nav" aria-label={isArabic ? "التنقل الرئيسي" : "Primary navigation"}>
             {navigation.map(([slug, en, ar]) => <Link key={slug} href={`/${locale}/${slug}`} className="ravine-nav-link">{isArabic ? ar : en}</Link>)}
           </nav>
@@ -89,7 +100,7 @@ export default async function RavineShell({ locale, children }: { locale: Locale
       <main className="ravine-main">{children}</main>
       <footer className="ravine-footer">
         <div>
-          <div className="ravine-footer-brand">RAVINE<span>.</span></div>
+          <div className="ravine-footer-brand ravine-brand-lockup"><RavineLockup compact /></div>
           <p>{isArabic ? "منصة إبداعية سينمائية تُقدّر العمل وسياقه ومن يقف خلفه." : "A cinematic creative platform that values the work, its context, and the people behind it."}</p>
         </div>
         <div className="ravine-footer-meta">
