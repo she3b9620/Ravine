@@ -1,10 +1,10 @@
 "use client";
 
+import { Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
 import styles from "./ThemeToggle.module.css";
 
 const STORAGE_KEY = "ravine-theme";
-
 type Theme = "dark" | "light";
 
 export default function ThemeToggle({ locale }: { locale: "ar" | "en" }) {
@@ -30,7 +30,9 @@ export default function ThemeToggle({ locale }: { locale: "ar" | "en" }) {
 
   return (
     <button type="button" className={styles.toggle} onClick={toggleTheme} aria-label={label} title={label}>
-      <span aria-hidden="true">{theme === "dark" ? "☼" : "◐"}</span>
+      <span className={styles.icon} aria-hidden="true">
+        {theme === "dark" ? <Sun size={18} strokeWidth={1.8} /> : <Moon size={18} strokeWidth={1.8} />}
+      </span>
     </button>
   );
 }
