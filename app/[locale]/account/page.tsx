@@ -38,6 +38,18 @@ export default async function AccountPage({ params }: { params: Promise<{ locale
   ]);
 
   const profile = profileData as Profile | null;
+  const settingsProfile = profile
+    ? {
+        display_name: profile.display_name,
+        username: profile.username,
+        bio: profile.bio,
+        avatar_url: profile.avatar_url,
+        cover_url: profile.cover_url,
+        country: profile.country,
+        language: profile.language,
+        website_url: profile.website_url,
+      }
+    : null;
   const roles = (roleRows ?? []).map((row) => row.role).filter(Boolean);
 
   return (
@@ -63,7 +75,7 @@ export default async function AccountPage({ params }: { params: Promise<{ locale
         </article>
       </div>
 
-      <AccountSettings profile={profile} locale={locale} />
+      <AccountSettings profile={settingsProfile} locale={locale} />
     </section>
   );
 }
