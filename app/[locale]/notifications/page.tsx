@@ -24,6 +24,24 @@ export default async function NotificationsPage({ params }: { params: Promise<{ 
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) redirect(`/${locale}/auth?next=/${locale}/notifications`);
 
+  const markAllRead = async () => {
+    "use server";
+    const server = await createClient();
+    const { data: session } = await server.auth.getUser();
+    if (!session.user) return;
+    await server.from("notifications").update({ is_read: true }).eq("user_id", session.user.id).eq("is_read", false);
+  };
+
+  const markRead = async (formData: FormData) => {
+    "use server";
+    const id = String(formData.get("id") || "");
+    if (!id) return;
+    const server = await createClient();
+    const { data: session } = await server.auth.getUser();
+    if (!session.user) return;
+    await server.from("notifications").update({ is_read: true }).eq("id", id).eq("user_id", session.user.id);
+  };
+
   const { data, error } = await supabase
     .from("notifications")
     .select("id,type,title,body,is_read,created_at,video_id")
@@ -32,12 +50,22 @@ export default async function NotificationsPage({ params }: { params: Promise<{ 
     .limit(50);
 
   const notifications = (data ?? []) as Notification[];
+  const unreadCount = notifications.filter((notification) => !notification.is_read).length;
 
   return (
     <section className="section notifications-page">
       <div className="eyebrow">RAVINE / NOTIFICATIONS</div>
-      <h1>{ar ? "ما يستحق انتباهك." : "What deserves your attention."}</h1>
-      <p className="section-note">{ar ? "إشعاراتك المهمة فقط، بدون ضجيج مستمر." : "Important signals only, without a constant stream of noise."}</p>
+      <div className="section-head">
+        <div>
+          <h1>{ar ? "ما يستحق انتباهك." : "What deserves your attention."}</h1>
+          <p className="section-note">{ar ? "إشعاراتك المهمة فقط، بدون ضجيج مستمر." : "Important signals only, without a constant stream of noise."}</p>
+        </div>
+        {unreadCount > 0 ? (
+          <form action={markAllRead}>
+            <button className="button secondary" type="submit">{ar ? `تحديد الكل كمقروء (${unreadCount})` : `Mark all read (${unreadCount})`}</button>
+          </form>
+        ) : null}
+      </div>
       {error ? (
         <div className="empty-state"><strong>{ar ? "تعذر تحميل الإشعارات." : "We could not load notifications."}</strong><span>{error.message}</span></div>
       ) : notifications.length === 0 ? (
@@ -45,8 +73,32 @@ export default async function NotificationsPage({ params }: { params: Promise<{ 
       ) : (
         <div className="notification-list">
           {notifications.map((notification) => {
-            const content = <div className={`notification-item ${notification.is_read ? "" : "unread"}`}><div className="video-kicker">{notification.type || "RAVINE"}</div><strong>{notification.title || (ar ? "تحديث جديد" : "New update")}</strong><p>{notification.body || ""}</p><span>{new Date(notification.created_at).toLocaleString(locale === "ar" ? "ar-EG" : "en-US")}</span></div>;
-            return notification.video_id ? <Link key={notification.id} href={`/${locale}/watch/${notification.video_id}`}>{content}</Link> : <div key={notification.id}>{content}</div>;
+            const content = (
+              <div className={`notification-item ${notification.is_read ? "" : "unread"}`}>
+                <div className="video-kicker">{notification.type || "RAVINE"}</div>
+                <strong>{notification.title || (ar ? "تحديث جديد" : "New update")}</strong>
+                <p>{notification.body || ""}</p>
+                <span>{new Date(notification.created_at).toLocaleString(locale === "ar" ? "ar-EG" : "en-US")}</span>
+              </div>
+            );
+
+            if (notification.video_id) {
+              return (
+                <form action={markRead} key={notification.id}>
+                  <input type="hidden" name="id" value={notification.id} />
+                  <Link href={`/${locale}/watch/${notification.video_id}`} onClick={() => undefined}>
+                    {content}
+                  </Link>
+                </form>
+              );
+            }
+
+            return (
+              <form action={markRead} key={notification.id}>
+                <input type="hidden" name="id" value={notification.id} />
+                <button type="submit" className="notification-action">{content}</button>
+              </form>
+            );
           })}
         </div>
       )}
