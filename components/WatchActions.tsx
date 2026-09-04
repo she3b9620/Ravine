@@ -1,8 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Bookmark, Check, Heart, LogIn } from "lucide-react";
+import { Bookmark, Check, Heart, LogIn, Maximize2, Minimize2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import "./WatchActions.module.css";
 
 export default function WatchActions({ videoId, duration, locale }: { videoId: number; duration: number | null; locale: "ar" | "en" }) {
   const ar = locale === "ar";
@@ -12,6 +13,7 @@ export default function WatchActions({ videoId, duration, locale }: { videoId: n
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
+  const [cinemaMode, setCinemaMode] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -83,6 +85,12 @@ export default function WatchActions({ videoId, duration, locale }: { videoId: n
     }, { onConflict: "user_id,video_id" });
   }, [userId, videoId]);
 
+  function toggleCinemaMode() {
+    const next = !cinemaMode;
+    setCinemaMode(next);
+    document.querySelector(".watch-page")?.classList.toggle("cinema-active", next);
+  }
+
   const percent = duration ? Math.min(100, Math.round((progress / duration) * 100)) : 0;
 
   return (
@@ -93,6 +101,10 @@ export default function WatchActions({ videoId, duration, locale }: { videoId: n
         </button>
         <button className={`watch-action ${saved ? "active" : ""}`} type="button" onClick={() => void toggleSave()} disabled={busy !== null}>
           <Bookmark size={17} fill={saved ? "currentColor" : "none"} />{saved ? (ar ? "محفوظ" : "Saved") : (ar ? "حفظ" : "Save")}
+        </button>
+        <button className={`watch-action ${cinemaMode ? "active" : ""}`} type="button" onClick={toggleCinemaMode} aria-pressed={cinemaMode}>
+          {cinemaMode ? <Minimize2 size={17} /> : <Maximize2 size={17} />}
+          {cinemaMode ? (ar ? "الخروج من السينما" : "Exit Cinema") : (ar ? "وضع السينما" : "Cinema Mode")}
         </button>
         {!userId && <a className="watch-action" href={`/${locale}/auth?next=/${locale}/watch/${videoId}`}><LogIn size={17} />{ar ? "دخول" : "Sign in"}</a>}
       </div>
