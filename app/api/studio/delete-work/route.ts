@@ -11,7 +11,8 @@ function extractCloudinaryPublicId(videoUrl: string) {
 
     const remainder = url.pathname.slice(index + marker.length).replace(/^\/+/, "");
     const parts = remainder.split("/").filter(Boolean);
-    while (parts.length && (/^v\d+$/.test(parts[0]) || parts[0].includes("_"))) {
+    if (parts[0] && /^v\d+$/.test(parts[0])) parts.shift();
+    if (parts[0] && (parts[0].includes(",") || /^(?:w|h|c|q|f|d|g|ar|br|fl|vc|so|du|ac|vs|eo|ki|pg|l|u|t)_/.test(parts[0]))) {
       parts.shift();
     }
     if (!parts.length) return null;
@@ -72,7 +73,11 @@ export async function POST(request: NextRequest) {
 
         const response = await fetch(
           `https://api.cloudinary.com/v1_1/${encodeURIComponent(cloudName)}/video/destroy`,
-          { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, body: formData },
+          {
+            method: "POST",
+            headers: { "content-type": "application/x-www-form-urlencoded" },
+            body: formData,
+          },
         );
         const payload = await response.json() as { result?: string; error?: { message?: string } };
         if (!response.ok || (payload.result && payload.result !== "ok" && payload.result !== "not found")) {
