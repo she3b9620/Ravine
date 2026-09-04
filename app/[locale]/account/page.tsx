@@ -60,7 +60,7 @@ export default async function AccountPage({ params }: { params: Promise<{ locale
           <h1>{profile?.display_name || auth.user.email || (ar ? "حسابك" : "Your account")}</h1>
           <p className="section-note">{profile?.username ? `@${profile.username}` : (ar ? "أكمل هويتك داخل RAVINE." : "Complete your identity inside RAVINE.")}</p>
         </div>
-        <Link className="button secondary" href={`/${locale}/studio`}>Studio</Link>
+        {profile?.is_creator ? <Link className="button primary" href={`/${locale}/studio`}>{ar ? "استوديو المبدع" : "Creator Studio"}</Link> : null}
       </div>
 
       <div className="work-grid">
