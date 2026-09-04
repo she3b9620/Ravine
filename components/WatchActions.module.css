@@ -1,0 +1,9 @@
+:global(.watch-page){transition:background-color .35s ease}
+:global(.watch-page .watch-video){transition:transform .35s ease, border-radius .35s ease}
+:global(.watch-page .watch-copy){transition:opacity .3s ease, transform .35s ease, max-height .4s ease}
+:global(.watch-page.cinema-active){background:#000}
+:global(.watch-page.cinema-active .watch-frame){max-width:1700px;padding-top:18px}
+:global(.watch-page.cinema-active .watch-video){border-radius:10px;box-shadow:0 28px 90px rgba(0,0,0,.5)}
+:global(.watch-page.cinema-active .watch-copy){opacity:.82;transform:translateY(-4px)}
+@media(max-width:820px){:global(.watch-page.cinema-active .watch-frame){padding-top:8px}:global(.watch-page.cinema-active .watch-video){border-radius:6px}}
+@media(prefers-reduced-motion:reduce){:global(.watch-page),:global(.watch-page .watch-video),:global(.watch-page .watch-copy){transition:none}}
