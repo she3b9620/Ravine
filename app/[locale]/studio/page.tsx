@@ -2,10 +2,24 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import StudioUpload from "@/components/StudioUpload";
+import StudioWorkManager from "@/components/StudioWorkManager";
 
 export const dynamic = "force-dynamic";
 
 type Locale = "ar" | "en";
+
+type Work = {
+  id: number;
+  title: string;
+  description: string | null;
+  content_type: string | null;
+  quality: string | null;
+  published: boolean | null;
+  video_url: string | null;
+  views: number | null;
+  likes: number | null;
+  created_at: string | null;
+};
 
 export default async function StudioPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: rawLocale } = await params;
@@ -20,10 +34,6 @@ export default async function StudioPage({ params }: { params: Promise<{ locale:
     supabase.from("creators").select("id,name,username,specialty,followers").eq("user_id", auth.user.id).maybeSingle(),
     supabase.from("creator_applications").select("status,created_at,reviewer_notes,reviewed_at").eq("user_id", auth.user.id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
   ]);
-
-  const { count: workCount } = creator
-    ? await supabase.from("videos").select("id", { count: "exact", head: true }).eq("creator_id", creator.id)
-    : { count: 0 };
 
   if (!creator) {
     return (
@@ -42,6 +52,17 @@ export default async function StudioPage({ params }: { params: Promise<{ locale:
     );
   }
 
+  const { data: worksData } = await supabase
+    .from("videos")
+    .select("id,title,description,content_type,quality,published,video_url,views,likes,created_at")
+    .eq("creator_id", creator.id)
+    .order("created_at", { ascending: false })
+    .limit(50);
+
+  const works = (worksData ?? []) as Work[];
+  const publishedCount = works.filter((work) => work.published).length;
+  const draftCount = works.length - publishedCount;
+
   return (
     <section className="section studio-page">
       <div className="eyebrow">RAVINE / STUDIO</div>
@@ -54,10 +75,11 @@ export default async function StudioPage({ params }: { params: Promise<{ locale:
       </div>
       <div className="work-grid">
         <article className="work"><div className="work-art"/><div className="work-body"><div className="work-kicker">PROFILE</div><h3>{creator.specialty || "Creator"}</h3><p>@{creator.username || `creator-${creator.id}`}</p></div></article>
-        <article className="work"><div className="work-art"/><div className="work-body"><div className="work-kicker">WORKS</div><h3>{Number(workCount || 0).toLocaleString()}</h3><p>{ar ? "أعمال مرتبطة بملفك." : "Works connected to your profile."}</p></div></article>
+        <article className="work"><div className="work-art"/><div className="work-body"><div className="work-kicker">WORKS</div><h3>{works.length.toLocaleString()}</h3><p>{ar ? `${publishedCount} منشور · ${draftCount} مسودة` : `${publishedCount} published · ${draftCount} drafts`}</p></div></article>
         <article className="work"><div className="work-art"/><div className="work-body"><div className="work-kicker">AUDIENCE</div><h3>{Number(creator.followers || 0).toLocaleString()}</h3><p>{ar ? "متابع" : "followers"}</p></div></article>
       </div>
       <StudioUpload creatorId={creator.id} locale={locale} />
+      <StudioWorkManager works={works} locale={locale} />
     </section>
   );
 }
