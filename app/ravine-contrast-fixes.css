@@ -1,0 +1,29 @@
+/* RAVINE contrast layer: semantic text must remain legible on every surface in both themes. */
+html[data-theme="light"] .ravine-header-actions .ravine-minor-link,html[data-theme="light"] .ravine-header-actions .ravine-auth-trigger{color:#171717!important}
+html[data-theme="light"] .ravine-header-actions .ravine-auth-trigger-primary{color:#160f0b!important}
+html[data-theme="light"] .discover-page .discover-search,html[data-theme="light"] .discover-page .discover-filter-trigger,html[data-theme="light"] .discover-page .discover-more-trigger{color:#F8F5EF!important}
+html[data-theme="light"] .discover-page .discover-filter-copy small,html[data-theme="light"] .discover-page .discover-filter-copy strong{color:#FFFFFF!important}
+html[data-theme="light"] .discover-page .discover-search input{color:#FFFFFF!important}
+html[data-theme="light"] .discover-page .discover-search input::placeholder{color:rgba(255,255,255,.66)!important}
+html[data-theme="light"] .discover-page .discover-panel-field>small{color:#171717!important}
+html[data-theme="light"] .discover-page .discover-panel-select{color:#171717!important}
+html[data-theme="light"] .discover-page .discover-panel-menu button{color:#171717!important}
+html[data-theme="light"] .discover-page .discover-panel-menu button.is-selected{color:#171717!important}
+html[data-theme="light"] .home-community-teaser{color:#FFFFFF!important;background:radial-gradient(ellipse at 12% 25%,rgba(24,63,70,.92),transparent 48%),radial-gradient(ellipse at 88% 85%,rgba(168,91,57,.34),transparent 40%),linear-gradient(135deg,#183F46,#121819 70%,#0B0D0E)!important;border-color:rgba(241,233,220,.14)!important}
+html[data-theme="light"] .home-community-teaser h2,html[data-theme="light"] .home-community-teaser .section-note,html[data-theme="light"] .home-community-teaser .home-community-loop{color:#FFFFFF!important}
+html[data-theme="light"] .home-community-teaser .eyebrow{color:#D49A78!important}
+html[data-theme="light"] .home-community-path{color:#FFFFFF!important;background:rgba(241,233,220,.10)!important;border-color:rgba(241,233,220,.16)!important}
+html[data-theme="light"] .home-community-path span{background:rgba(241,233,220,.12)!important;color:#FFFFFF!important}
+html[data-theme="light"] .community-page{color:#FFFFFF!important;background:radial-gradient(ellipse at 78% 8%,rgba(24,63,70,.9),transparent 48%),radial-gradient(ellipse at 18% 90%,rgba(168,91,57,.28),transparent 40%),linear-gradient(180deg,#183F46,#101516 72%,#0B0D0E)!important;border-color:rgba(241,233,220,.14)!important}
+html[data-theme="light"] .community-page h1,html[data-theme="light"] .community-page .section-note,html[data-theme="light"] .community-page .community-space-card h2,html[data-theme="light"] .community-page .community-space-card p,html[data-theme="light"] .community-page .community-loop,html[data-theme="light"] .community-page .community-open-note{color:#FFFFFF!important}
+html[data-theme="light"] .community-space-card{background:rgba(255,255,255,.055)!important;border-color:rgba(241,233,220,.14)!important}
+html[data-theme="light"] .community-space-card span{color:#D49A78!important}
+html[data-theme="light"] .community-loop{background:rgba(196,122,82,.12)!important;border-color:rgba(212,154,120,.28)!important}
+html[data-theme="light"] .community-page .button.secondary{background:rgba(241,233,220,.09)!important;color:#FFFFFF!important;border-color:rgba(241,233,220,.2)!important}
+
+/* Search overlay dark controls remain high contrast in Light mode. */
+html[data-theme="light"] .ravine-search-field select,html[data-theme="light"] .ravine-search-input{color:#FFFFFF!important}
+html[data-theme="light"] .ravine-search-field select{background:#183F46!important;border-color:rgba(241,233,220,.18)!important}
+html[data-theme="light"] .ravine-search-field span{color:#171717!important}
+
+@media(max-width:720px){html[data-theme="light"] .ravine-header-actions .ravine-auth-trigger-primary{color:#160f0b!important}}
