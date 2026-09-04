@@ -36,14 +36,18 @@ export default function AuthPage() {
       const supabase = createClient();
       const result = mode === "signin"
         ? await supabase.auth.signInWithPassword({ email, password })
-        : await supabase.auth.signUp({ email, password, options: { emailRedirectTo: `${window.location.origin}/${locale}/auth` } });
+        : await supabase.auth.signUp({
+            email,
+            password,
+            options: { emailRedirectTo: `${window.location.origin}/${locale}/auth/callback?next=/${locale}/onboarding` },
+          });
 
       if (result.error) throw result.error;
       if (mode === "signup" && !result.data.session) {
         setMessage(copy.success);
         return;
       }
-      router.replace(next);
+      router.replace(mode === "signup" ? `/${locale}/onboarding` : next);
       router.refresh();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : String(error));
@@ -57,9 +61,10 @@ export default function AuthPage() {
     setMessage("");
     try {
       const supabase = createClient();
+      const target = mode === "signup" ? `/${locale}/onboarding` : next;
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
-        options: { redirectTo: `${window.location.origin}/${locale}/auth/callback?next=${encodeURIComponent(next)}` },
+        options: { redirectTo: `${window.location.origin}/${locale}/auth/callback?next=${encodeURIComponent(target)}` },
       });
       if (error) throw error;
     } catch (error) {
