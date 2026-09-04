@@ -4,7 +4,7 @@ import { createServerClient } from "@supabase/ssr";
 import { routing } from "./i18n/routing";
 
 const intlMiddleware = createMiddleware(routing);
-const protectedRoutes = ["/account", "/library", "/notifications", "/creator", "/studio"];
+const protectedRoutes = ["/account", "/library", "/notifications", "/creator", "/studio", "/onboarding"];
 
 function isProtectedPath(pathname: string) {
   const segments = pathname.split("/").filter(Boolean);
