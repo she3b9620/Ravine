@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { createClient } from "@/lib/supabase/server";
 import ThemeToggle from "./ThemeToggle";
+import AuthModal from "./AuthModal";
 
 const navigation = [
   ["discover", "Discover", "اكتشف"],
@@ -19,7 +20,10 @@ export default async function RavineShell({ locale, children }: { locale: Locale
   const alternateLocale: Locale = isArabic ? "en" : "ar";
 
   let user = null;
-  const hasSupabaseConfig = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+  const hasSupabaseConfig = Boolean(
+    process.env.NEXT_PUBLIC_SUPABASE_URL &&
+    (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
+  );
 
   if (hasSupabaseConfig) {
     try {
@@ -61,9 +65,13 @@ export default async function RavineShell({ locale, children }: { locale: Locale
                 </Link>
               </>
             ) : (
-              <Link href={`/${locale}/auth`} className="ravine-minor-link">
+              <button
+                type="button"
+                className="ravine-minor-link ravine-auth-trigger"
+                onClick={() => window.dispatchEvent(new CustomEvent("ravine:open-auth", { detail: { next: `/${locale}` } }))}
+              >
                 {isArabic ? "دخول" : "Sign in"}
-              </Link>
+              </button>
             )}
             <ThemeToggle locale={locale} />
             <Link href={`/${alternateLocale}`} className="ravine-language">
@@ -85,6 +93,7 @@ export default async function RavineShell({ locale, children }: { locale: Locale
           <span>© {new Date().getFullYear()} RAVINE</span>
         </div>
       </footer>
+      <AuthModal locale={locale} />
     </div>
   );
 }
