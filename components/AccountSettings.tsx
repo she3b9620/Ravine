@@ -60,11 +60,20 @@ export default function AccountSettings({ profile, locale }: Props) {
       return;
     }
 
+    const uploadedPaths: Array<{ bucket: "avatars" | "covers"; path: string }> = [];
+
     try {
       let avatarUrl = profile?.avatar_url || null;
-      let coverUrl = profile?.avatar_url ? null : null;
-      if (avatar) avatarUrl = await uploadAsset(auth.user.id, "avatars", avatar);
-      if (cover) coverUrl = await uploadAsset(auth.user.id, "covers", cover);
+      let coverUrl: string | null = null;
+
+      if (avatar) {
+        avatarUrl = await uploadAsset(auth.user.id, "avatars", avatar);
+        uploadedPaths.push({ bucket: "avatars", path: new URL(avatarUrl).pathname.split("/storage/v1/object/public/avatars/")[1] || "" });
+      }
+      if (cover) {
+        coverUrl = await uploadAsset(auth.user.id, "covers", cover);
+        uploadedPaths.push({ bucket: "covers", path: new URL(coverUrl).pathname.split("/storage/v1/object/public/covers/")[1] || "" });
+      }
 
       const patch: Record<string, string | null> = {
         display_name: displayName.trim() || null,
@@ -74,8 +83,8 @@ export default function AccountSettings({ profile, locale }: Props) {
         language,
         website_url: website.trim() || null,
       };
-      if (avatarUrl) patch.avatar_url = avatarUrl;
-      if (coverUrl) patch.cover_url = coverUrl;
+      if (avatar) patch.avatar_url = avatarUrl;
+      if (cover) patch.cover_url = coverUrl;
 
       const { error: updateError } = await supabase.from("profiles").update(patch).eq("id", auth.user.id);
       if (updateError) throw updateError;
@@ -85,6 +94,9 @@ export default function AccountSettings({ profile, locale }: Props) {
       setMessage(ar ? "تم حفظ بيانات الحساب." : "Account details saved.");
       router.refresh();
     } catch (saveError) {
+      for (const item of uploadedPaths) {
+        if (item.path) await supabase.storage.from(item.bucket).remove([item.path]);
+      }
       setError(saveError instanceof Error ? saveError.message : String(saveError));
     } finally {
       setBusy(false);
