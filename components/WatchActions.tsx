@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { Bookmark, Check, Heart, LogIn, Maximize2, Minimize2 } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Bookmark, Check, Heart, LogIn, Maximize2, Minimize2, Share2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { requestRavineAuth } from "./AuthModal";
 import "./WatchActions.module.css";
@@ -22,7 +22,6 @@ export default function WatchActions({ videoId, duration, locale }: { videoId: n
 
     void supabase.auth.getUser().then(async ({ data }) => {
       if (!mounted || !data.user) return;
-
       setUserId(data.user.id);
 
       const [like, save, history] = await Promise.all([
@@ -37,9 +36,7 @@ export default function WatchActions({ videoId, duration, locale }: { videoId: n
       setProgress(Number(history.data?.progress_seconds || 0));
     }).catch(() => undefined);
 
-    return () => {
-      mounted = false;
-    };
+    return () => { mounted = false; };
   }, [videoId]);
 
   function requireAuth() {
@@ -69,6 +66,20 @@ export default function WatchActions({ videoId, duration, locale }: { videoId: n
       : await supabase.from("video_saves").insert({ user_id: userId!, video_id: videoId });
     if (result.error) setMessage(result.error.message); else setSaved(!saved);
     setBusy(null);
+  }
+
+  async function share() {
+    const url = window.location.href;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: document.title, url });
+        return;
+      }
+      await navigator.clipboard.writeText(url);
+      setMessage(ar ? "تم نسخ رابط العمل." : "Work link copied.");
+    } catch {
+      setMessage(ar ? "تعذر مشاركة الرابط حاليًا." : "Unable to share the link right now.");
+    }
   }
 
   const markProgress = useCallback(async (seconds: number, completed = false) => {
@@ -102,6 +113,9 @@ export default function WatchActions({ videoId, duration, locale }: { videoId: n
         <button className={`watch-action ${saved ? "active" : ""}`} type="button" onClick={() => void toggleSave()} disabled={busy !== null}>
           <Bookmark size={17} fill={saved ? "currentColor" : "none"} />{saved ? (ar ? "محفوظ" : "Saved") : (ar ? "حفظ" : "Save")}
         </button>
+        <button className="watch-action" type="button" onClick={() => void share()}>
+          <Share2 size={17} />{ar ? "مشاركة" : "Share"}
+        </button>
         <button className={`watch-action ${cinemaMode ? "active" : ""}`} type="button" onClick={toggleCinemaMode} aria-pressed={cinemaMode}>
           {cinemaMode ? <Minimize2 size={17} /> : <Maximize2 size={17} />}
           {cinemaMode ? (ar ? "الخروج من السينما" : "Exit Cinema") : (ar ? "وضع السينما" : "Cinema Mode")}
@@ -127,6 +141,8 @@ export default function WatchActions({ videoId, duration, locale }: { videoId: n
 }
 
 function WatchVideoBridge({ onTimeUpdate, resumeSeconds, duration }: { onTimeUpdate: (seconds: number, completed?: boolean) => void; resumeSeconds: number; duration: number | null }) {
+  const lastSavedAt = useRef(0);
+
   useEffect(() => {
     const video = document.querySelector<HTMLVideoElement>(".watch-video");
     if (!video) return;
@@ -145,9 +161,17 @@ function WatchVideoBridge({ onTimeUpdate, resumeSeconds, duration }: { onTimeUpd
   useEffect(() => {
     const video = document.querySelector<HTMLVideoElement>(".watch-video");
     if (!video) return;
-    const onTime = () => onTimeUpdate(video.currentTime, false);
+
+    const onTime = () => {
+      const current = video.currentTime;
+      if (current - lastSavedAt.current >= 10) {
+        lastSavedAt.current = current;
+        onTimeUpdate(current, false);
+      }
+    };
     const onPause = () => onTimeUpdate(video.currentTime, false);
     const onEnded = () => onTimeUpdate(video.duration || duration || 0, true);
+
     video.addEventListener("timeupdate", onTime);
     video.addEventListener("pause", onPause);
     video.addEventListener("ended", onEnded);
