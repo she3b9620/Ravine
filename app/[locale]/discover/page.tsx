@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import DiscoverFilters from "@/components/DiscoverFilters";
+import "./discover-enhancements.module.css";
 
 export const dynamic = "force-dynamic";
 
