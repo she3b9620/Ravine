@@ -29,6 +29,16 @@ function extractCloudinaryPublicId(videoUrl: string) {
   }
 }
 
+type CreatorOwnership = { user_id: string | null };
+
+type WorkWithCreator = {
+  id: number;
+  creator_id: number | null;
+  user_id: string | null;
+  video_url: string | null;
+  creators?: CreatorOwnership | CreatorOwnership[] | null;
+};
+
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as { videoId?: number };
@@ -45,17 +55,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Authentication required." }, { status: 401 });
     }
 
-    const { data: work, error: workError } = await supabase
+    const { data: rawWork, error: workError } = await supabase
       .from("videos")
       .select("id,creator_id,user_id,video_url,creators!inner(user_id)")
       .eq("id", videoId)
       .single();
 
-    if (workError || !work) {
+    if (workError || !rawWork) {
       return NextResponse.json({ error: workError?.message || "Work not found." }, { status: 404 });
     }
 
-    const creatorOwner = Array.isArray(work.creators) ? work.creators[0]?.user_id : work.creators?.user_id;
+    const work = rawWork as unknown as WorkWithCreator;
+    const creatorOwner = Array.isArray(work.creators)
+      ? work.creators[0]?.user_id ?? null
+      : work.creators?.user_id ?? null;
     const ownsViaCreator = creatorOwner === auth.user.id;
     const ownsViaWork = work.user_id === auth.user.id;
 
