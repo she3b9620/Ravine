@@ -1,0 +1,199 @@
+/* RAVINE final visual corrections: search modal stability + script-aware typography + exact logo proportions. */
+
+/* Search: the backdrop owns the viewport; the document behind it never scrolls while open. */
+.ravine-search-overlay{
+  position:fixed!important;
+  inset:0!important;
+  z-index:120!important;
+  display:block!important;
+  overflow:hidden!important;
+  padding:88px 24px 24px!important;
+  background:rgba(3,5,6,.72)!important;
+  -webkit-backdrop-filter:blur(14px);
+  backdrop-filter:blur(14px);
+}
+
+.ravine-search-dialog{
+  position:relative!important;
+  width:min(760px,calc(100vw - 24px))!important;
+  max-width:760px!important;
+  max-height:calc(100dvh - 112px)!important;
+  margin:0 auto!important;
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+  overscroll-behavior:contain;
+  scrollbar-gutter:stable;
+  -webkit-overflow-scrolling:touch;
+  touch-action:pan-y;
+}
+
+/* Keep the dialog heading and close control visible while the dialog itself scrolls. */
+.ravine-search-dialog-head{
+  position:sticky!important;
+  top:-34px!important;
+  z-index:10!important;
+  margin:-34px -34px 0!important;
+  padding:34px 34px 18px!important;
+  background:linear-gradient(180deg,rgba(21,23,25,.995) 72%,rgba(21,23,25,.94) 88%,rgba(21,23,25,0) 100%)!important;
+}
+
+/* Semantic RAVINE type roles. Typography.css has global !important input rules, so these are intentionally explicit. */
+html[lang="ar"] .ravine-search-dialog{
+  direction:rtl;
+  font-family:var(--ravine-font-text)!important;
+}
+html[lang="en"] .ravine-search-dialog{
+  direction:ltr;
+  font-family:var(--ravine-font-text)!important;
+}
+
+html[lang="ar"] .ravine-search-dialog-head h2{
+  font-family:var(--ravine-font-display)!important;
+  letter-spacing:normal!important;
+  line-height:1.12!important;
+}
+html[lang="en"] .ravine-search-dialog-head h2{
+  font-family:var(--ravine-font-display)!important;
+}
+
+html[lang="ar"] .ravine-search-input input{
+  font-family:var(--ravine-font-text)!important;
+  font-size:16px!important;
+  line-height:1.7!important;
+}
+html[lang="en"] .ravine-search-input input{
+  font-family:var(--ravine-font-text)!important;
+}
+
+html[lang="ar"] .ravine-search-field-label,
+html[lang="ar"] .ravine-search-select-trigger,
+html[lang="ar"] .ravine-search-select-menu button,
+html[lang="ar"] .ravine-advanced-search-toggle,
+html[lang="ar"] .ravine-search-actions .button{
+  font-family:var(--ravine-font-ui)!important;
+}
+html[lang="en"] .ravine-search-field-label,
+html[lang="en"] .ravine-search-select-trigger,
+html[lang="en"] .ravine-search-select-menu button,
+html[lang="en"] .ravine-advanced-search-toggle,
+html[lang="en"] .ravine-search-actions .button{
+  font-family:var(--ravine-font-ui)!important;
+}
+
+.ravine-search-dialog input,
+.ravine-search-dialog button,
+.ravine-search-dialog label{
+  -webkit-font-smoothing:antialiased;
+}
+
+.ravine-search-select-menu{
+  z-index:30!important;
+  max-height:min(260px,34dvh)!important;
+  overflow-y:auto!important;
+  overscroll-behavior:contain;
+}
+
+.ravine-search-dialog::-webkit-scrollbar{width:8px}
+.ravine-search-dialog::-webkit-scrollbar-track{background:transparent}
+.ravine-search-dialog::-webkit-scrollbar-thumb{background:rgba(241,233,220,.18);border-radius:999px}
+.ravine-search-dialog::-webkit-scrollbar-thumb:hover{background:rgba(196,122,82,.45)}
+
+/* Exact supplied mark/wordmark aspect handling. No stretching or traced-path distortion. */
+.ravine-lockup{
+  align-items:center!important;
+  gap:8px!important;
+  height:38px!important;
+  line-height:0!important;
+}
+.ravine-lockup-mark{
+  width:32px!important;
+  height:34px!important;
+  flex:0 0 auto!important;
+  aspect-ratio:373 / 397;
+  object-fit:contain!important;
+  object-position:center;
+}
+.ravine-lockup-wordmark{
+  width:94px!important;
+  height:auto!important;
+  flex:0 0 auto!important;
+  aspect-ratio:716 / 98;
+  object-fit:contain!important;
+  object-position:center;
+}
+.ravine-lockup.compact{
+  height:30px!important;
+}
+.ravine-lockup.compact .ravine-lockup-mark{
+  width:25px!important;
+  height:27px!important;
+}
+.ravine-lockup.compact .ravine-lockup-wordmark{
+  width:74px!important;
+}
+
+@media(max-width:720px){
+  .ravine-search-overlay{
+    padding:76px 10px 12px!important;
+  }
+  .ravine-search-dialog{
+    width:100%!important;
+    max-height:calc(100dvh - 88px)!important;
+    border-radius:26px!important;
+    padding:22px!important;
+  }
+  .ravine-search-dialog-head{
+    top:-22px!important;
+    margin:-22px -22px 0!important;
+    padding:22px 22px 16px!important;
+  }
+  .ravine-search-field-grid.two,
+  .ravine-search-field-grid.three{
+    grid-template-columns:1fr!important;
+  }
+  .ravine-lockup{
+    height:34px!important;
+  }
+  .ravine-lockup-mark{
+    width:28px!important;
+    height:30px!important;
+  }
+  .ravine-lockup-wordmark{
+    width:82px!important;
+  }
+}
+
+@media(max-height:720px){
+  .ravine-search-overlay{
+    padding-top:64px!important;
+  }
+  .ravine-search-dialog{
+    max-height:calc(100dvh - 76px)!important;
+  }
+}
+
+@media(max-width:420px){
+  .ravine-search-overlay{
+    padding-inline:8px!important;
+  }
+  .ravine-search-dialog{
+    padding:18px!important;
+  }
+  .ravine-search-dialog-head{
+    top:-18px!important;
+    margin:-18px -18px 0!important;
+    padding:18px 18px 14px!important;
+  }
+  .ravine-lockup-wordmark{
+    width:72px!important;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .ravine-search-overlay,
+  .ravine-search-dialog,
+  .ravine-search-select-menu{
+    animation:none!important;
+    transition:none!important;
+  }
+}
