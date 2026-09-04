@@ -90,10 +90,11 @@ export default async function DiscoverPage({
 
   const videos = (data ?? []) as Video[];
   const normalizedCategories = (categories ?? []) as Category[];
+  const errorDetail = error ? (isArabic ? "تعذر تحميل الأعمال في الوقت الحالي. يرجى المحاولة مرة أخرى." : error.message) : null;
 
   return (
     <section className="section discover-page">
-      <div className="eyebrow">{isArabic ? "RAVINE / اكتشف" : "RAVINE / DISCOVER"}</div>
+      <div className="eyebrow">{isArabic ? "رَافِين / اكتشف" : "RAVINE / DISCOVER"}</div>
       <h1>{isArabic ? "اكتشف أعمالًا تستحق المشاهدة." : "Discover work worth watching."}</h1>
       <p className="section-note">{isArabic ? "الأعمال أولًا، والسياق والناس خلفها قريبًا." : "Work first, with context and the people behind it close at hand."}</p>
       <DiscoverFilters
@@ -110,7 +111,7 @@ export default async function DiscoverPage({
       {error ? (
         <div className="empty-state">
           <strong>{isArabic ? "تعذر تحميل الأعمال." : "We could not load the work."}</strong>
-          <span>{error.message}</span>
+          <span>{errorDetail}</span>
         </div>
       ) : videos.length === 0 ? (
         <div className="empty-state">
@@ -131,7 +132,7 @@ export default async function DiscoverPage({
                   {video.quality ? ` · ${video.quality}` : ""}
                 </div>
                 <h2>{video.title || (isArabic ? "بدون عنوان" : "Untitled")}</h2>
-                <p>{video.description || (isArabic ? "عمل إبداعي من مجتمع RAVINE." : "A creative work from the RAVINE community.")}</p>
+                <p>{video.description || (isArabic ? "عمل إبداعي من مجتمع رَافِين." : "A creative work from the RAVINE community.")}</p>
                 <div className="video-stats">
                   <span>{Number(video.views || 0).toLocaleString()} {isArabic ? "مشاهدة" : "views"}</span>
                   <span>{Number(video.likes || 0).toLocaleString()} {isArabic ? "إعجاب" : "likes"}</span>
