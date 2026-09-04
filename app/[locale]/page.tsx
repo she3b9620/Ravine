@@ -32,6 +32,11 @@ const copy = {
 
 type Locale = "ar" | "en";
 
+type Creator = {
+  name: string | null;
+  username: string | null;
+};
+
 type Work = {
   id: number;
   title: string | null;
@@ -42,7 +47,7 @@ type Work = {
   likes: number | null;
   content_type: string | null;
   quality: string | null;
-  creators: { name: string | null; username: string | null } | null;
+  creators: Creator[] | Creator | null;
 };
 
 export const dynamic = "force-dynamic";
@@ -53,6 +58,11 @@ function formatDuration(seconds: number | null) {
   const minutes = Math.floor(total / 60);
   const remaining = total % 60;
   return `${minutes}:${String(remaining).padStart(2, "0")}`;
+}
+
+function getCreatorLabel(creator: Work["creators"], locale: Locale) {
+  const normalized = Array.isArray(creator) ? creator[0] ?? null : creator;
+  return normalized?.name || (normalized?.username ? `@${normalized.username}` : locale === "ar" ? "مبدع" : "Creator");
 }
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
@@ -100,7 +110,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         ) : (
           <div className="video-grid">
             {works.map((work) => {
-              const creatorLabel = work.creators?.name || (work.creators?.username ? `@${work.creators.username}` : locale === "ar" ? "مبدع" : "Creator");
+              const creatorLabel = getCreatorLabel(work.creators, locale);
               return (
                 <Link href={`/${locale}/watch/${work.id}`} className="video-card" key={work.id}>
                   <div className="video-thumb">
