@@ -9,6 +9,7 @@ import LanguageSwitcher from "./LanguageSwitcher";
 import SearchLauncher from "./SearchLauncher";
 import AccountMenu from "./AccountMenu";
 import NotificationBell from "./NotificationBell";
+import ChatLauncher from "./ChatLauncher";
 
 const navigation = [
   ["discover", "Discover", "اكتشف"],
@@ -80,6 +81,7 @@ export default async function RavineShell({ locale, children }: { locale: Locale
             {user ? (
               <>
                 <NotificationBell locale={locale} />
+                <ChatLauncher locale={locale} />
                 <AccountMenu
                   locale={locale}
                   displayName={displayName}
