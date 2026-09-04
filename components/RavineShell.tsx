@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { createClient } from "@/lib/supabase/server";
+import ThemeToggle from "./ThemeToggle";
 
 const navigation = [
   ["discover", "Discover", "اكتشف"],
@@ -64,6 +65,7 @@ export default async function RavineShell({ locale, children }: { locale: Locale
                 {isArabic ? "دخول" : "Sign in"}
               </Link>
             )}
+            <ThemeToggle locale={locale} />
             <Link href={`/${alternateLocale}`} className="ravine-language">
               {isArabic ? "EN" : "عربي"}
             </Link>
