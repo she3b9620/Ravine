@@ -12,6 +12,7 @@ type Profile = {
   username: string | null;
   bio: string | null;
   avatar_url: string | null;
+  cover_url: string | null;
   country: string | null;
   is_verified: boolean | null;
   is_creator: boolean | null;
@@ -28,7 +29,11 @@ export default async function AccountPage({ params }: { params: Promise<{ locale
   if (!auth.user) redirect(`/${locale}/auth?next=/${locale}/account`);
 
   const [{ data: profileData }, { data: roleRows }] = await Promise.all([
-    supabase.from("profiles").select("display_name,username,bio,avatar_url,country,is_verified,is_creator,language,website_url").eq("id", auth.user.id).maybeSingle(),
+    supabase
+      .from("profiles")
+      .select("display_name,username,bio,avatar_url,cover_url,country,is_verified,is_creator,language,website_url")
+      .eq("id", auth.user.id)
+      .maybeSingle(),
     supabase.from("user_roles").select("role").eq("user_id", auth.user.id),
   ]);
 
@@ -43,7 +48,7 @@ export default async function AccountPage({ params }: { params: Promise<{ locale
           <h1>{profile?.display_name || auth.user.email || (ar ? "حسابك" : "Your account")}</h1>
           <p className="section-note">{profile?.username ? `@${profile.username}` : (ar ? "أكمل هويتك داخل RAVINE." : "Complete your identity inside RAVINE.")}</p>
         </div>
-        <Link className="button secondary" href={`/${locale}/studio`}>{ar ? "Studio" : "Studio"}</Link>
+        <Link className="button secondary" href={`/${locale}/studio`}>Studio</Link>
       </div>
 
       <div className="work-grid">
