@@ -1,7 +1,92 @@
 /* RAVINE Typography — script-aware, independent of /ar and /en. */
-@import url("https://cdn.jsdelivr.net/npm/@dawod/thmanyah-font-web@1.0.0/sans.css");
-@import url("https://cdn.jsdelivr.net/npm/@dawod/thmanyah-font-web@1.0.0/serif-display.css");
-@import url("https://cdn.jsdelivr.net/npm/@dawod/thmanyah-font-web@1.0.0/serif-text.css");
+
+/* Thmanyah webfont files, pinned to a known community-package commit. */
+@font-face {
+  font-family: "Thmanyah Sans";
+  src: url("https://cdn.jsdelivr.net/gh/engdawood/thmanyah-font-web@4266a9d/fonts/thmanyah-sans/woff2/thmanyah-sans-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Thmanyah Sans";
+  src: url("https://cdn.jsdelivr.net/gh/engdawood/thmanyah-font-web@4266a9d/fonts/thmanyah-sans/woff2/thmanyah-sans-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Thmanyah Sans";
+  src: url("https://cdn.jsdelivr.net/gh/engdawood/thmanyah-font-web@4266a9d/fonts/thmanyah-sans/woff2/thmanyah-sans-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Thmanyah Sans";
+  src: url("https://cdn.jsdelivr.net/gh/engdawood/thmanyah-font-web@4266a9d/fonts/thmanyah-sans/woff2/thmanyah-sans-Black.woff2") format("woff2");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Thmanyah Serif Display";
+  src: url("https://cdn.jsdelivr.net/gh/engdawood/thmanyah-font-web@4266a9d/fonts/thmanyah-serif-display/woff2/thmanyah-serif-display-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Thmanyah Serif Display";
+  src: url("https://cdn.jsdelivr.net/gh/engdawood/thmanyah-font-web@4266a9d/fonts/thmanyah-serif-display/woff2/thmanyah-serif-display-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Thmanyah Serif Display";
+  src: url("https://cdn.jsdelivr.net/gh/engdawood/thmanyah-font-web@4266a9d/fonts/thmanyah-serif-display/woff2/thmanyah-serif-display-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Thmanyah Serif Display";
+  src: url("https://cdn.jsdelivr.net/gh/engdawood/thmanyah-font-web@4266a9d/fonts/thmanyah-serif-display/woff2/thmanyah-serif-display-Black.woff2") format("woff2");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Thmanyah Serif Text";
+  src: url("https://cdn.jsdelivr.net/gh/engdawood/thmanyah-font-web@4266a9d/fonts/thmanyah-serif-text/woff2/thmanyah-serif-text-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Thmanyah Serif Text";
+  src: url("https://cdn.jsdelivr.net/gh/engdawood/thmanyah-font-web@4266a9d/fonts/thmanyah-serif-text/woff2/thmanyah-serif-text-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Thmanyah Serif Text";
+  src: url("https://cdn.jsdelivr.net/gh/engdawood/thmanyah-font-web@4266a9d/fonts/thmanyah-serif-text/woff2/thmanyah-serif-text-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Thmanyah Serif Text";
+  src: url("https://cdn.jsdelivr.net/gh/engdawood/thmanyah-font-web@4266a9d/fonts/thmanyah-serif-text/woff2/thmanyah-serif-text-Black.woff2") format("woff2");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
   --ravine-font-latin: "Satoshi", Arial, sans-serif;
@@ -10,12 +95,14 @@
   --ravine-font-ar-ui: "Thmanyah Sans", Arial, sans-serif;
 }
 
-/* Mixed-script text: Latin glyphs resolve to Satoshi, Arabic glyphs to the assigned Thmanyah family. */
+/* Mixed-script rule: Latin glyphs use Satoshi; Arabic glyphs fall through to Thmanyah. */
 body,
+html[lang="ar"] body,
+html[lang="en"] body,
 .ravine-language,
-.button,
 .ravine-nav-link,
 .ravine-minor-link,
+.button,
 .eyebrow,
 .work-kicker,
 .video-kicker,
@@ -29,10 +116,9 @@ body,
 .watch-pill,
 .watch-action,
 .watch-progress-note {
-  font-family: var(--ravine-font-latin), var(--ravine-font-ar-ui);
+  font-family: var(--ravine-font-latin), var(--ravine-font-ar-ui) !important;
 }
 
-/* Display roles: Arabic uses Serif Display while English remains Satoshi in the exact same element. */
 .hero h1,
 .section h2,
 .discover-page h1,
@@ -41,10 +127,9 @@ body,
 .auth-card h1,
 .watch-copy h1,
 .about-grid h2 {
-  font-family: var(--ravine-font-latin), var(--ravine-font-ar-display);
+  font-family: var(--ravine-font-latin), var(--ravine-font-ar-display) !important;
 }
 
-/* Reading roles: Arabic uses Serif Text while English remains Satoshi in the exact same element. */
 .hero p,
 .section-note,
 .work p,
@@ -56,36 +141,49 @@ body,
 .ravine-footer p,
 .about-lead,
 .about-principles span {
-  font-family: var(--ravine-font-latin), var(--ravine-font-ar-text);
+  font-family: var(--ravine-font-latin), var(--ravine-font-ar-text) !important;
 }
 
-/* Arabic UI roles. */
 .ravine-footer-meta,
 .auth-form label,
 .empty-state,
 .about-principles strong {
-  font-family: var(--ravine-font-latin), var(--ravine-font-ar-ui);
-}
-
-/* Never let the page locale replace the per-script font roles. */
-html[lang="ar"] body,
-html[lang="en"] body {
-  font-family: var(--ravine-font-latin), var(--ravine-font-ar-ui);
+  font-family: var(--ravine-font-latin), var(--ravine-font-ar-ui) !important;
 }
 
 /* Comfortable editorial rhythm for the About principles. */
+.about-lead {
+  margin-bottom: 34px !important;
+}
+
 .about-principles {
-  gap: 18px;
+  gap: 22px !important;
 }
 
 .about-principles > div {
-  padding-top: 18px;
+  gap: 28px !important;
+  padding-top: 20px !important;
 }
 
 .about-principles strong {
-  line-height: 1.35;
+  line-height: 1.4 !important;
 }
 
 .about-principles span {
-  line-height: 1.8;
+  line-height: 1.9 !important;
+}
+
+@media (max-width: 820px) {
+  .about-lead {
+    margin-bottom: 26px !important;
+  }
+
+  .about-principles {
+    gap: 18px !important;
+  }
+
+  .about-principles > div {
+    gap: 8px !important;
+    padding-top: 18px !important;
+  }
 }
