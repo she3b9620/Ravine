@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import type { ReactNode } from "react";
 import { createClient } from "@/lib/supabase/server";
 import ThemeToggle from "./ThemeToggle";
@@ -31,50 +32,30 @@ export default async function RavineShell({ locale, children }: { locale: Locale
   }
 
   return (
-    <div
-      className="ravine-shell"
-      lang={locale}
-      dir={isArabic ? "rtl" : "ltr"}
-    >
+    <div className="ravine-shell" lang={locale} dir={isArabic ? "rtl" : "ltr"}>
       <header className="ravine-header">
         <div className="ravine-header-inner">
-          <Link href={`/${locale}`} className="ravine-brand" aria-label="RAVINE">
-            RAVINE<span>.</span>
-          </Link>
-
+          <Link href={`/${locale}`} className="ravine-brand" aria-label="RAVINE">RAVINE<span>.</span></Link>
           <nav className="ravine-nav" aria-label={isArabic ? "التنقل الرئيسي" : "Primary navigation"}>
-            {navigation.map(([slug, en, ar]) => (
-              <Link key={slug} href={`/${locale}/${slug}`} className="ravine-nav-link">
-                {isArabic ? ar : en}
-              </Link>
-            ))}
+            {navigation.map(([slug, en, ar]) => <Link key={slug} href={`/${locale}/${slug}`} className="ravine-nav-link">{isArabic ? ar : en}</Link>)}
           </nav>
-
           <div className="ravine-header-actions">
             <MobileNav locale={locale} authenticated={Boolean(user)} />
-            <Link href={`/${locale}/search`} className="ravine-minor-link">
-              {isArabic ? "بحث" : "Search"}
-            </Link>
+            <Link href={`/${locale}/search`} className="ravine-minor-link">{isArabic ? "بحث" : "Search"}</Link>
             {user ? (
               <>
-                <Link href={`/${locale}/library`} className="ravine-minor-link">
-                  {isArabic ? "المكتبة" : "Library"}
-                </Link>
-                <Link href={`/${locale}/account`} className="ravine-minor-link">
-                  {isArabic ? "الحساب" : "Account"}
-                </Link>
+                <Link href={`/${locale}/library`} className="ravine-minor-link">{isArabic ? "المكتبة" : "Library"}</Link>
+                <Link href={`/${locale}/account`} className="ravine-minor-link">{isArabic ? "الحساب" : "Account"}</Link>
               </>
-            ) : (
-              <AuthTrigger locale={locale} label={isArabic ? "دخول" : "Sign in"} />
-            )}
+            ) : <AuthTrigger locale={locale} label={isArabic ? "دخول" : "Sign in"} />}
             <ThemeToggle locale={locale} />
-            <LanguageSwitcher locale={locale} />
+            <Suspense fallback={<span className="ravine-language" aria-hidden="true">{locale === "ar" ? "EN" : "عربي"}</span>}>
+              <LanguageSwitcher locale={locale} />
+            </Suspense>
           </div>
         </div>
       </header>
-
       <main className="ravine-main">{children}</main>
-
       <footer className="ravine-footer">
         <div>
           <div className="ravine-footer-brand">RAVINE<span>.</span></div>
