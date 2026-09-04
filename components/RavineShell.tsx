@@ -31,7 +31,12 @@ export default async function RavineShell({ locale, children }: { locale: Locale
   }
 
   return (
-    <div className="ravine-shell" lang={locale} dir={isArabic ? "rtl" : "ltr"}>
+    <div
+      className="ravine-shell"
+      lang={locale}
+      dir={isArabic ? "rtl" : "ltr"}
+      style={isArabic ? { fontFamily: "Thmanyah, Satoshi, Arial, sans-serif" } : undefined}
+    >
       <header className="ravine-header">
         <div className="ravine-header-inner">
           <Link href={`/${locale}`} className="ravine-brand" aria-label="RAVINE">
