@@ -1,20 +1,16 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import RAVINEPlayer from "@/components/RAVINEPlayer";
 import WatchActions from "@/components/WatchActions";
 import styles from "./watch-creator.module.css";
 
 export const dynamic = "force-dynamic";
 
 type Locale = "ar" | "en";
-
-type Creator = {
-  id: number;
-  name: string | null;
-  username: string | null;
-  avatar_url: string | null;
-  specialty: string | null;
-};
+type Creator = { id: number; name: string | null; username: string | null; avatar_url: string | null; specialty: string | null };
+type Chapter = { id: number; title: string; start_seconds: number; end_seconds: number | null; thumbnail_url: string | null };
+type Asset = { id: number; kind: string; media_url: string; duration: number | null; label: string | null; language: string | null; mime_type: string | null };
 
 export default async function WatchPage({ params }: { params: Promise<{ locale: string; id: string }> }) {
   const { locale: rawLocale, id } = await params;
@@ -30,12 +26,15 @@ export default async function WatchPage({ params }: { params: Promise<{ locale: 
     .eq("id", videoId)
     .eq("published", true)
     .maybeSingle();
-
   if (error || !video) notFound();
 
-  const { data: creator } = video.creator_id
-    ? await supabase.from("creators").select("id,name,username,avatar_url,specialty").eq("id", video.creator_id).maybeSingle()
-    : { data: null };
+  const [{ data: creator }, { data: chaptersData }, { data: assetsData }] = await Promise.all([
+    video.creator_id
+      ? supabase.from("creators").select("id,name,username,avatar_url,specialty").eq("id", video.creator_id).maybeSingle()
+      : Promise.resolve({ data: null }),
+    supabase.from("work_chapters").select("id,title,start_seconds,end_seconds,thumbnail_url").eq("work_id", videoId).order("sort_order", { ascending: true }),
+    supabase.from("work_media_assets").select("id,kind,media_url,duration,label,language,mime_type").eq("work_id", videoId).order("sort_order", { ascending: true }),
+  ]);
 
   let playbackUrl = video.video_url as string | null;
   if (playbackUrl?.includes("/storage/v1/object/public/")) {
@@ -53,18 +52,13 @@ export default async function WatchPage({ params }: { params: Promise<{ locale: 
   }
 
   const creatorRecord = creator as Creator | null;
+  const chapters = (chaptersData ?? []) as Chapter[];
+  const assets = (assetsData ?? []) as Asset[];
 
   return (
     <main className="watch-page" dir={ar ? "rtl" : "ltr"}>
       <div className="watch-frame">
-        {playbackUrl ? (
-          <video className="watch-video" controls playsInline preload="metadata" poster={video.thumbnail_url || undefined} src={playbackUrl}>
-            {ar ? "متصفحك لا يدعم تشغيل الفيديو." : "Your browser does not support video playback."}
-          </video>
-        ) : (
-          <div className="empty-state" style={{ minHeight: "60vh", justifyContent: "center", alignItems: "center" }}><strong>{ar ? "العمل غير متاح للتشغيل حاليًا." : "This work is not available for playback yet."}</strong></div>
-        )}
-
+        <RAVINEPlayer src={playbackUrl} poster={video.thumbnail_url} title={video.title || "Untitled"} contentType={video.content_type || "video"} duration={video.duration} locale={locale} chapters={chapters} assets={assets} />
         <div className="watch-copy">
           <div className="watch-kicker">{video.content_type || "WORK"}{video.quality ? ` · ${video.quality}` : ""}</div>
           <h1>{video.title || (ar ? "بدون عنوان" : "Untitled")}</h1>
@@ -75,7 +69,6 @@ export default async function WatchPage({ params }: { params: Promise<{ locale: 
             {video.category && <span className="watch-pill">{video.category}</span>}
             {video.duration && <span className="watch-pill">{Math.floor(video.duration / 60)}:{String(video.duration % 60).padStart(2, "0")}</span>}
           </div>
-
           {creatorRecord && (
             <Link className={styles.creator} href={`/${locale}/creators/${creatorRecord.id}`}>
               <img src={creatorRecord.avatar_url || "/RAVINE.png"} alt="" />
@@ -87,7 +80,6 @@ export default async function WatchPage({ params }: { params: Promise<{ locale: 
             </Link>
           )}
         </div>
-
         <WatchActions videoId={video.id} duration={video.duration} locale={locale} />
       </div>
     </main>
