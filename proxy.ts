@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import createMiddleware from "next-intl/middleware";
 import { createServerClient } from "@supabase/ssr";
 import { routing } from "./i18n/routing";
+import { supabasePublishableKey, supabaseUrl } from "./lib/supabase/config";
 
 const intlMiddleware = createMiddleware(routing);
 const protectedRoutes = ["/account", "/library", "/notifications", "/creator", "/studio", "/onboarding"];
@@ -18,19 +19,7 @@ export default async function proxy(request: NextRequest) {
   const response = intlMiddleware(request);
   if (!isProtectedPath(request.nextUrl.pathname)) return response;
 
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-
-  // Never fail open on protected routes. Missing auth configuration is a
-  // deployment/configuration error, not a reason to bypass authentication.
-  if (!url || !key) {
-    return new NextResponse("RAVINE authentication is temporarily unavailable.", {
-      status: 503,
-      headers: { "content-type": "text/plain; charset=utf-8" },
-    });
-  }
-
-  const supabase = createServerClient(url, key, {
+  const supabase = createServerClient(supabaseUrl, supabasePublishableKey, {
     cookies: {
       getAll: () => request.cookies.getAll(),
       setAll(cookiesToSet) {
