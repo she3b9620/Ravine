@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { createClient } from "@/lib/supabase/server";
 import ThemeToggle from "./ThemeToggle";
 import AuthTrigger, { AuthModal } from "./AuthTrigger";
+import MobileNav from "./MobileNav";
 
 const navigation = [
   ["discover", "Discover", "اكتشف"],
@@ -52,6 +53,7 @@ export default async function RavineShell({ locale, children }: { locale: Locale
           </nav>
 
           <div className="ravine-header-actions">
+            <MobileNav locale={locale} authenticated={Boolean(user)} />
             <Link href={`/${locale}/search`} className="ravine-minor-link">
               {isArabic ? "بحث" : "Search"}
             </Link>
