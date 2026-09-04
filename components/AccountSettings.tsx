@@ -9,6 +9,7 @@ type Profile = {
   username: string | null;
   bio: string | null;
   avatar_url: string | null;
+  cover_url: string | null;
   country: string | null;
   language: string | null;
   website_url: string | null;
