@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import WatchActions from "@/components/WatchActions";
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +32,7 @@ export default async function WatchPage({ params }: { params: Promise<{ locale: 
         if (!signed.error && signed.data?.signedUrl) playbackUrl = signed.data.signedUrl;
       }
     } catch {
-      // Keep the original URL as a fallback for non-standard media hosts.
+      // Keep non-standard media URLs unchanged.
     }
   }
 
@@ -50,6 +51,7 @@ export default async function WatchPage({ params }: { params: Promise<{ locale: 
           <h1>{video.title || (ar ? "بدون عنوان" : "Untitled")}</h1>
           <p>{video.description || (ar ? "عمل إبداعي من مجتمع RAVINE." : "A creative work from the RAVINE community.")}</p>
           <div className="watch-meta"><span className="watch-pill">{Number(video.views || 0).toLocaleString()} {ar ? "مشاهدة" : "views"}</span><span className="watch-pill">{Number(video.likes || 0).toLocaleString()} {ar ? "إعجاب" : "likes"}</span>{video.category && <span className="watch-pill">{video.category}</span>}{video.duration && <span className="watch-pill">{Math.floor(video.duration / 60)}:{String(video.duration % 60).padStart(2, "0")}</span>}</div>
+          <WatchActions videoId={video.id} duration={video.duration} locale={locale} />
         </div>
       </div>
     </main>
