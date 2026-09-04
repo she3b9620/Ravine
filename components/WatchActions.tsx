@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Bookmark, Check, Heart, LogIn } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -16,20 +16,28 @@ export default function WatchActions({ videoId, duration, locale }: { videoId: n
   useEffect(() => {
     let mounted = true;
     const supabase = createClient();
+
     void supabase.auth.getUser().then(async ({ data }) => {
       if (!mounted || !data.user) return;
+
       setUserId(data.user.id);
+
       const [like, save, history] = await Promise.all([
         supabase.from("video_likes").select("video_id").eq("user_id", data.user.id).eq("video_id", videoId).maybeSingle(),
         supabase.from("video_saves").select("video_id").eq("user_id", data.user.id).eq("video_id", videoId).maybeSingle(),
         supabase.from("watch_history").select("progress_seconds,completed").eq("user_id", data.user.id).eq("video_id", videoId).maybeSingle(),
       ]);
+
       if (!mounted) return;
+
       setLiked(Boolean(like.data));
       setSaved(Boolean(save.data));
       setProgress(Number(history.data?.progress_seconds || 0));
     }).catch(() => undefined);
-    return () => { mounted = false; };
+
+    return () => {
+      mounted = false;
+    };
   }, [videoId]);
 
   function requireAuth() {
@@ -60,10 +68,11 @@ export default function WatchActions({ videoId, duration, locale }: { videoId: n
     setBusy(null);
   }
 
-  async function markProgress(seconds: number, completed = false) {
+  const markProgress = useCallback(async (seconds: number, completed = false) => {
     setProgress(seconds);
     if (!userId) return;
     if (seconds < 5 && !completed) return;
+
     const supabase = createClient();
     await supabase.from("watch_history").upsert({
       user_id: userId,
@@ -72,7 +81,7 @@ export default function WatchActions({ videoId, duration, locale }: { videoId: n
       completed,
       last_watched_at: new Date().toISOString(),
     }, { onConflict: "user_id,video_id" });
-  }
+  }, [userId, videoId]);
 
   const percent = duration ? Math.min(100, Math.round((progress / duration) * 100)) : 0;
 
@@ -87,28 +96,70 @@ export default function WatchActions({ videoId, duration, locale }: { videoId: n
         </button>
         {!userId && <a className="watch-action" href={`/${locale}/auth?next=/${locale}/watch/${videoId}`}><LogIn size={17} />{ar ? "دخول" : "Sign in"}</a>}
       </div>
-      {duration && userId && <div className="watch-progress-note"><Check size={14} />{percent > 0 ? (ar ? `استمرار المشاهدة ${percent}%` : `${percent}% watched`) : (ar ? "سيُحفظ تقدمك أثناء المشاهدة" : "Your progress will be saved as you watch")}</div>}
+
+      {duration && userId && (
+        <div className="watch-progress-note">
+          <Check size={14} />
+          {percent > 0
+            ? (ar ? `استمرار المشاهدة ${percent}%` : `${percent}% watched`)
+            : (ar ? "سيُحفظ تقدمك أثناء المشاهدة" : "Your progress will be saved as you watch")}
+        </div>
+      )}
+
       {message && <p className="watch-action-message">{message}</p>}
-      <WatchVideoBridge onTimeUpdate={markProgress} duration={duration} />
+      <WatchVideoBridge onTimeUpdate={markProgress} resumeSeconds={progress} duration={duration} />
     </div>
   );
 }
 
-function WatchVideoBridge({ onTimeUpdate, duration }: { onTimeUpdate: (seconds: number, completed?: boolean) => void; duration: number | null }) {
+function WatchVideoBridge({
+  onTimeUpdate,
+  resumeSeconds,
+  duration,
+}: {
+  onTimeUpdate: (seconds: number, completed?: boolean) => void;
+  resumeSeconds: number;
+  duration: number | null;
+}) {
   useEffect(() => {
     const video = document.querySelector<HTMLVideoElement>(".watch-video");
     if (!video) return;
+
+    if (resumeSeconds > 5 && (!Number.isFinite(video.duration) || resumeSeconds < video.duration - 2)) {
+      const resume = () => {
+        try {
+          video.currentTime = resumeSeconds;
+        } catch {
+          // Metadata may not be ready yet.
+        }
+      };
+      if (video.readyState >= 1) resume();
+      else video.addEventListener("loadedmetadata", resume, { once: true });
+
+      return () => video.removeEventListener("loadedmetadata", resume);
+    }
+
+    return undefined;
+  }, [resumeSeconds]);
+
+  useEffect(() => {
+    const video = document.querySelector<HTMLVideoElement>(".watch-video");
+    if (!video) return;
+
     const onTime = () => onTimeUpdate(video.currentTime, false);
     const onPause = () => onTimeUpdate(video.currentTime, false);
     const onEnded = () => onTimeUpdate(video.duration || duration || 0, true);
+
     video.addEventListener("timeupdate", onTime);
     video.addEventListener("pause", onPause);
     video.addEventListener("ended", onEnded);
+
     return () => {
       video.removeEventListener("timeupdate", onTime);
       video.removeEventListener("pause", onPause);
       video.removeEventListener("ended", onEnded);
     };
   }, [duration, onTimeUpdate]);
+
   return null;
 }
