@@ -11,14 +11,19 @@ function extractCloudinaryPublicId(videoUrl: string) {
 
     const remainder = url.pathname.slice(index + marker.length).replace(/^\/+/, "");
     const parts = remainder.split("/").filter(Boolean);
+
     if (parts[0] && /^v\d+$/.test(parts[0])) parts.shift();
-    if (parts[0] && (parts[0].includes(",") || /^(?:w|h|c|q|f|d|g|ar|br|fl|vc|so|du|ac|vs|eo|ki|pg|l|u|t)_/.test(parts[0]))) {
+    if (
+      parts[0] &&
+      (parts[0].includes(",") ||
+        /^(?:w|h|c|q|f|d|g|ar|br|fl|vc|so|du|ac|vs|eo|ki|pg|l|u|t)_/.test(parts[0]))
+    ) {
       parts.shift();
     }
+
     if (!parts.length) return null;
 
-    const filename = parts.join("/");
-    return filename.replace(/\.[^.]+$/, "");
+    return parts.join("/").replace(/\.[^.]+$/, "");
   } catch {
     return null;
   }
@@ -26,21 +31,23 @@ function extractCloudinaryPublicId(videoUrl: string) {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json() as { videoId?: number };
+    const body = (await request.json()) as { videoId?: number };
     const videoId = Number(body.videoId);
+
     if (!Number.isInteger(videoId) || videoId < 1) {
       return NextResponse.json({ error: "Invalid video id." }, { status: 400 });
     }
 
     const supabase = await createClient();
     const { data: auth, error: authError } = await supabase.auth.getUser();
+
     if (authError || !auth.user) {
       return NextResponse.json({ error: "Authentication required." }, { status: 401 });
     }
 
     const { data: work, error: workError } = await supabase
       .from("videos")
-      .select("id,user_id,video_url")
+      .select("id,creator_id,user_id,video_url,creators!inner(user_id)")
       .eq("id", videoId)
       .single();
 
@@ -48,7 +55,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: workError?.message || "Work not found." }, { status: 404 });
     }
 
-    if (work.user_id !== auth.user.id) {
+    const creatorOwner = Array.isArray(work.creators) ? work.creators[0]?.user_id : work.creators?.user_id;
+    const ownsViaCreator = creatorOwner === auth.user.id;
+    const ownsViaWork = work.user_id === auth.user.id;
+
+    if (!ownsViaCreator && !ownsViaWork) {
       return NextResponse.json({ error: "You are not allowed to delete this work." }, { status: 403 });
     }
 
@@ -58,6 +69,7 @@ export async function POST(request: NextRequest) {
 
     if (work.video_url?.includes("res.cloudinary.com/") && cloudName && apiKey && apiSecret) {
       const publicId = extractCloudinaryPublicId(work.video_url);
+
       if (publicId) {
         const timestamp = Math.floor(Date.now() / 1000).toString();
         const signature = createHash("sha1")
@@ -79,14 +91,23 @@ export async function POST(request: NextRequest) {
             body: formData,
           },
         );
-        const payload = await response.json() as { result?: string; error?: { message?: string } };
+
+        const payload = (await response.json()) as {
+          result?: string;
+          error?: { message?: string };
+        };
+
         if (!response.ok || (payload.result && payload.result !== "ok" && payload.result !== "not found")) {
-          return NextResponse.json({ error: payload.error?.message || "Cloudinary deletion failed." }, { status: 502 });
+          return NextResponse.json(
+            { error: payload.error?.message || "Cloudinary deletion failed." },
+            { status: 502 },
+          );
         }
       }
     }
 
     const { error: deleteError } = await supabase.from("videos").delete().eq("id", videoId);
+
     if (deleteError) {
       return NextResponse.json({ error: deleteError.message }, { status: 500 });
     }
