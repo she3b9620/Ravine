@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import DirectMessages from "@/components/DirectMessages";
+import "./messages.css";
 
 export const dynamic = "force-dynamic";
 
