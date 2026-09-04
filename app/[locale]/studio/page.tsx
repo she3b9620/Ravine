@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import StudioUpload from "@/components/StudioUpload";
 
 export const dynamic = "force-dynamic";
 
@@ -53,10 +54,10 @@ export default async function StudioPage({ params }: { params: Promise<{ locale:
       </div>
       <div className="work-grid">
         <article className="work"><div className="work-art"/><div className="work-body"><div className="work-kicker">PROFILE</div><h3>{creator.specialty || "Creator"}</h3><p>@{creator.username || `creator-${creator.id}`}</p></div></article>
-        <article className="work"><div className="work-art"/><div className="work-body"><div className="work-kicker">WORKS</div><h3>{Number(workCount || 0).toLocaleString()}</h3><p>{ar ? "أعمال مرتبطة بملفك." : "Published works connected to your profile."}</p></div></article>
+        <article className="work"><div className="work-art"/><div className="work-body"><div className="work-kicker">WORKS</div><h3>{Number(workCount || 0).toLocaleString()}</h3><p>{ar ? "أعمال مرتبطة بملفك." : "Works connected to your profile."}</p></div></article>
         <article className="work"><div className="work-art"/><div className="work-body"><div className="work-kicker">AUDIENCE</div><h3>{Number(creator.followers || 0).toLocaleString()}</h3><p>{ar ? "متابع" : "followers"}</p></div></article>
       </div>
-      <div className="empty-state"><strong>{ar ? "الخطوة التالية: نشر العمل." : "Next: publish your work."}</strong><span>{ar ? "رفع الفيديو، البيانات الوصفية، الـcredits، والمراجعة التحريرية ستدخل هنا في طبقة Studio التالية." : "Video upload, metadata, credits, and editorial review will land here in the next Studio layer."}</span></div>
+      <StudioUpload creatorId={creator.id} locale={locale} />
     </section>
   );
 }
