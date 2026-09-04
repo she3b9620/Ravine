@@ -1,1 +1,0 @@
-Backup marker before fixing the client/server Supabase auth session synchronization for Google and email login. Baseline main: 412a9d0bff93fe5470c8df676ecb8ef5246f03d9.

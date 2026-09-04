@@ -1,3 +1,0 @@
-Checkpoint before adding browser-side OAuth recovery.
-Base commit: c51ca6fae8f6895a35a3396bebb9a57afdb9b3ba
-Date: 2026-09-03
