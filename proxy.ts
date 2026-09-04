@@ -20,7 +20,15 @@ export default async function proxy(request: NextRequest) {
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-  if (!url || !key) return response;
+
+  // Never fail open on protected routes. Missing auth configuration is a
+  // deployment/configuration error, not a reason to bypass authentication.
+  if (!url || !key) {
+    return new NextResponse("RAVINE authentication is temporarily unavailable.", {
+      status: 503,
+      headers: { "content-type": "text/plain; charset=utf-8" },
+    });
+  }
 
   const supabase = createServerClient(url, key, {
     cookies: {
