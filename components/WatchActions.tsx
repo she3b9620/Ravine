@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Bookmark, Check, Heart, LogIn, Maximize2, Minimize2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { requestRavineAuth } from "./AuthModal";
 import "./WatchActions.module.css";
 
 export default function WatchActions({ videoId, duration, locale }: { videoId: number; duration: number | null; locale: "ar" | "en" }) {
@@ -31,7 +32,6 @@ export default function WatchActions({ videoId, duration, locale }: { videoId: n
       ]);
 
       if (!mounted) return;
-
       setLiked(Boolean(like.data));
       setSaved(Boolean(save.data));
       setProgress(Number(history.data?.progress_seconds || 0));
@@ -45,6 +45,7 @@ export default function WatchActions({ videoId, duration, locale }: { videoId: n
   function requireAuth() {
     if (userId) return true;
     setMessage(ar ? "سجّل الدخول لاستخدام التفاعل والحفظ." : "Sign in to like, save, and keep your progress.");
+    requestRavineAuth(`/${locale}/watch/${videoId}`);
     return false;
   }
 
@@ -72,8 +73,7 @@ export default function WatchActions({ videoId, duration, locale }: { videoId: n
 
   const markProgress = useCallback(async (seconds: number, completed = false) => {
     setProgress(seconds);
-    if (!userId) return;
-    if (seconds < 5 && !completed) return;
+    if (!userId || (seconds < 5 && !completed)) return;
 
     const supabase = createClient();
     await supabase.from("watch_history").upsert({
@@ -106,15 +106,17 @@ export default function WatchActions({ videoId, duration, locale }: { videoId: n
           {cinemaMode ? <Minimize2 size={17} /> : <Maximize2 size={17} />}
           {cinemaMode ? (ar ? "الخروج من السينما" : "Exit Cinema") : (ar ? "وضع السينما" : "Cinema Mode")}
         </button>
-        {!userId && <a className="watch-action" href={`/${locale}/auth?next=/${locale}/watch/${videoId}`}><LogIn size={17} />{ar ? "دخول" : "Sign in"}</a>}
+        {!userId && (
+          <button className="watch-action" type="button" onClick={() => requestRavineAuth(`/${locale}/watch/${videoId}`)}>
+            <LogIn size={17} />{ar ? "دخول" : "Sign in"}
+          </button>
+        )}
       </div>
 
       {duration && userId && (
         <div className="watch-progress-note">
           <Check size={14} />
-          {percent > 0
-            ? (ar ? `استمرار المشاهدة ${percent}%` : `${percent}% watched`)
-            : (ar ? "سيُحفظ تقدمك أثناء المشاهدة" : "Your progress will be saved as you watch")}
+          {percent > 0 ? (ar ? `استمرار المشاهدة ${percent}%` : `${percent}% watched`) : (ar ? "سيُحفظ تقدمك أثناء المشاهدة" : "Your progress will be saved as you watch")}
         </div>
       )}
 
@@ -124,48 +126,31 @@ export default function WatchActions({ videoId, duration, locale }: { videoId: n
   );
 }
 
-function WatchVideoBridge({
-  onTimeUpdate,
-  resumeSeconds,
-  duration,
-}: {
-  onTimeUpdate: (seconds: number, completed?: boolean) => void;
-  resumeSeconds: number;
-  duration: number | null;
-}) {
+function WatchVideoBridge({ onTimeUpdate, resumeSeconds, duration }: { onTimeUpdate: (seconds: number, completed?: boolean) => void; resumeSeconds: number; duration: number | null }) {
   useEffect(() => {
     const video = document.querySelector<HTMLVideoElement>(".watch-video");
     if (!video) return;
 
     if (resumeSeconds > 5 && (!Number.isFinite(video.duration) || resumeSeconds < video.duration - 2)) {
       const resume = () => {
-        try {
-          video.currentTime = resumeSeconds;
-        } catch {
-          // Metadata may not be ready yet.
-        }
+        try { video.currentTime = resumeSeconds; } catch { /* Metadata may not be ready yet. */ }
       };
       if (video.readyState >= 1) resume();
       else video.addEventListener("loadedmetadata", resume, { once: true });
-
       return () => video.removeEventListener("loadedmetadata", resume);
     }
-
     return undefined;
   }, [resumeSeconds]);
 
   useEffect(() => {
     const video = document.querySelector<HTMLVideoElement>(".watch-video");
     if (!video) return;
-
     const onTime = () => onTimeUpdate(video.currentTime, false);
     const onPause = () => onTimeUpdate(video.currentTime, false);
     const onEnded = () => onTimeUpdate(video.duration || duration || 0, true);
-
     video.addEventListener("timeupdate", onTime);
     video.addEventListener("pause", onPause);
     video.addEventListener("ended", onEnded);
-
     return () => {
       video.removeEventListener("timeupdate", onTime);
       video.removeEventListener("pause", onPause);
