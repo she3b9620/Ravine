@@ -3,6 +3,7 @@ import "./typography.css";
 import "./motion.css";
 import "./ravine-polish.css";
 import "./ravine-arabic-smoothing.css";
+import "./ravine-contrast-fixes.css";
 import type { ReactNode } from "react";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
