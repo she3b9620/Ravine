@@ -31,7 +31,7 @@ export default async function RavineShell({ locale, children }: { locale: Locale
   }
 
   return (
-    <div className="ravine-shell" dir={isArabic ? "rtl" : "ltr"}>
+    <div className="ravine-shell" lang={locale} dir={isArabic ? "rtl" : "ltr"}>
       <header className="ravine-header">
         <div className="ravine-header-inner">
           <Link href={`/${locale}`} className="ravine-brand" aria-label="RAVINE">
