@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { createClient } from "@/lib/supabase/server";
+import { supabasePublishableKey, supabaseUrl } from "@/lib/supabase/config";
 import ThemeToggle from "./ThemeToggle";
 import AuthTrigger, { AuthModal } from "./AuthTrigger";
 import MobileNav from "./MobileNav";
@@ -21,19 +22,13 @@ export default async function RavineShell({ locale, children }: { locale: Locale
   const alternateLocale: Locale = isArabic ? "en" : "ar";
 
   let user = null;
-  const hasSupabaseConfig = Boolean(
-    process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
-  );
 
-  if (hasSupabaseConfig) {
-    try {
-      const supabase = await createClient();
-      const { data } = await supabase.auth.getUser();
-      user = data.user;
-    } catch {
-      user = null;
-    }
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch {
+    user = null;
   }
 
   return (
