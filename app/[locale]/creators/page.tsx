@@ -29,13 +29,20 @@ export default async function CreatorsPage({ params }: { params: Promise<{ local
 
   return (
     <section className="section creators-page">
-      <div className="eyebrow">RAVINE / CREATORS</div>
-      <h1>{ar ? "الأشخاص خلف الأعمال." : "The people behind the work."}</h1>
-      <p className="section-note">
-        {ar
-          ? "ملفات إبداعية احترافية، اعتمادات واضحة، وسمعة مبنية على المساهمة الفعلية."
-          : "Professional creative identities, visible credits, and reputation built on real contribution."}
-      </p>
+      <div className="section-head">
+        <div>
+          <div className="eyebrow">RAVINE / CREATORS</div>
+          <h1>{ar ? "الأشخاص خلف الأعمال." : "The people behind the work."}</h1>
+          <p className="section-note">
+            {ar
+              ? "ملفات إبداعية احترافية، اعتمادات واضحة، وسمعة مبنية على المساهمة الفعلية."
+              : "Professional creative identities, visible credits, and reputation built on real contribution."}
+          </p>
+        </div>
+        <Link className="button primary" href={`/${locale}/creator/apply`}>
+          {ar ? "قدّم كمبدع" : "Apply as a creator"}
+        </Link>
+      </div>
 
       {error ? (
         <div className="empty-state">
