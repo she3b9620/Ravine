@@ -5,6 +5,9 @@ import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 type Locale = "ar" | "en";
+type Category = { id: number; name: string; slug: string | null };
+
+type Props = { locale: Locale; categories: Category[] };
 
 const types = [
   { value: "video", ar: "فيديو", en: "Video" },
@@ -34,12 +37,32 @@ const qualities = [
   { value: "4K", ar: "4K", en: "4K" },
 ] as const;
 
-export default function SearchLauncher({ locale }: { locale: Locale }) {
+const arabicCategoryNames: Record<string, string> = {
+  film: "سينما",
+  cinema: "سينما",
+  photography: "تصوير",
+  editing: "مونتاج",
+  motion: "موشن",
+  vfx: "مؤثرات بصرية",
+  documentary: "وثائقي",
+  music: "موسيقى",
+  podcasts: "برامج صوتية",
+  podcast: "برامج صوتية",
+  gaming: "ألعاب",
+};
+
+function categoryLabel(category: Category, locale: Locale) {
+  if (locale !== "ar") return category.name;
+  return arabicCategoryNames[category.slug?.toLowerCase() || ""] || category.name;
+}
+
+export default function SearchLauncher({ locale, categories }: Props) {
   const ar = locale === "ar";
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [advanced, setAdvanced] = useState(false);
   const [query, setQuery] = useState("");
+  const [category, setCategory] = useState("");
   const [type, setType] = useState("");
   const [duration, setDuration] = useState("");
   const [format, setFormat] = useState("");
@@ -63,6 +86,7 @@ export default function SearchLauncher({ locale }: { locale: Locale }) {
     event.preventDefault();
     const params = new URLSearchParams();
     if (query.trim()) params.set("q", query.trim());
+    if (category) params.set("category", category);
     if (type) params.set("type", type);
     if (advanced && duration) params.set("duration", duration);
     if (advanced && format) params.set("format", format);
@@ -98,7 +122,14 @@ export default function SearchLauncher({ locale }: { locale: Locale }) {
                 <input value={query} onChange={(event) => setQuery(event.target.value)} autoFocus placeholder={ar ? "اسم عمل، فكرة، مبدع، موضوع..." : "A work, idea, creator, topic..."} />
               </label>
 
-              <div className="ravine-search-field-grid">
+              <div className="ravine-search-field-grid two">
+                <label className="ravine-search-field">
+                  <span>{ar ? "التصنيف" : "Category"}</span>
+                  <select value={category} onChange={(event) => setCategory(event.target.value)}>
+                    <option value="">{ar ? "كل التصنيفات" : "All categories"}</option>
+                    {categories.map((item) => <option key={item.id} value={String(item.id)}>{categoryLabel(item, locale)}</option>)}
+                  </select>
+                </label>
                 <label className="ravine-search-field">
                   <span>{ar ? "النوع" : "Type"}</span>
                   <select value={type} onChange={(event) => setType(event.target.value)}>
@@ -106,11 +137,12 @@ export default function SearchLauncher({ locale }: { locale: Locale }) {
                     {types.map((item) => <option key={item.value} value={item.value}>{item[locale]}</option>)}
                   </select>
                 </label>
-                <button type="button" className={`ravine-advanced-search-toggle${advanced ? " active" : ""}`} onClick={() => setAdvanced(!advanced)}>
-                  <SlidersHorizontal size={16} />
-                  <span>{ar ? "بحث متقدم" : "Advanced search"}</span>
-                </button>
               </div>
+
+              <button type="button" className={`ravine-advanced-search-toggle${advanced ? " active" : ""}`} onClick={() => setAdvanced(!advanced)}>
+                <SlidersHorizontal size={16} />
+                <span>{ar ? "بحث متقدم" : "Advanced search"}</span>
+              </button>
 
               <div className={`ravine-search-advanced${advanced ? " open" : ""}`} aria-hidden={!advanced}>
                 <div className="ravine-search-field-grid three">
@@ -121,7 +153,7 @@ export default function SearchLauncher({ locale }: { locale: Locale }) {
               </div>
 
               <div className="ravine-search-actions">
-                <button type="button" className="button secondary" onClick={() => { setQuery(""); setType(""); setDuration(""); setFormat(""); setQuality(""); }}>{ar ? "مسح" : "Clear"}</button>
+                <button type="button" className="button secondary" onClick={() => { setQuery(""); setCategory(""); setType(""); setDuration(""); setFormat(""); setQuality(""); }}>{ar ? "مسح" : "Clear"}</button>
                 <button type="submit" className="button primary">{ar ? "بحث" : "Search"}</button>
               </div>
             </form>
