@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import RavineShell from "../../components/RavineShell";
 import "./ravine-overrides.css";
 import "./home-spacing.css";
+import "./ravine-final-visual-fixes.css";
 
 const locales = ["ar", "en"] as const;
 type Locale = (typeof locales)[number];
