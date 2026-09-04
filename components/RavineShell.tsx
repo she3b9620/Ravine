@@ -8,6 +8,7 @@ import MobileNav from "./MobileNav";
 import LanguageSwitcher from "./LanguageSwitcher";
 import SearchLauncher from "./SearchLauncher";
 import AccountMenu from "./AccountMenu";
+import NotificationBell from "./NotificationBell";
 
 const navigation = [
   ["discover", "Discover", "اكتشف"],
@@ -77,13 +78,16 @@ export default async function RavineShell({ locale, children }: { locale: Locale
             <MobileNav locale={locale} authenticated={Boolean(user)} />
             <SearchLauncher locale={locale} categories={categories} />
             {user ? (
-              <AccountMenu
-                locale={locale}
-                displayName={displayName}
-                username={profile?.username || null}
-                avatarUrl={profile?.avatar_url || null}
-                isCreator={Boolean(profile?.is_creator)}
-              />
+              <>
+                <NotificationBell locale={locale} />
+                <AccountMenu
+                  locale={locale}
+                  displayName={displayName}
+                  username={profile?.username || null}
+                  avatarUrl={profile?.avatar_url || null}
+                  isCreator={Boolean(profile?.is_creator)}
+                />
+              </>
             ) : (
               <>
                 <AuthTrigger locale={locale} label={isArabic ? "دخول" : "Sign in"} mode="signin" />
