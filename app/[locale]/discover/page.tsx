@@ -38,21 +38,13 @@ function durationLabel(seconds: number | null) {
   return hours > 0 ? `${hours}:${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}` : `${mins}:${String(secs).padStart(2, "0")}`;
 }
 
-function applyDurationFilter(request: any, value?: string) {
-  if (value === "under-5") return request.lt("duration", 5 * 60);
-  if (value === "5-20") return request.gte("duration", 5 * 60).lt("duration", 20 * 60);
-  if (value === "20-60") return request.gte("duration", 20 * 60).lt("duration", 60 * 60);
-  if (value === "over-60") return request.gte("duration", 60 * 60);
-  return request;
-}
+const allowedTypes = ["short", "video", "film", "documentary", "podcast", "live"] as const;
 
-function applyFormatFilter(request: any, value?: string) {
-  if (value === "16:9" || value === "9:16" || value === "1:1") return request.eq("aspect_ratio", value);
-  if (value === "other") return request.not("aspect_ratio", "in", "(16:9,9:16,1:1)");
-  return request;
-}
+type AllowedType = (typeof allowedTypes)[number];
 
-const allowedTypes = ["short", "video", "film", "documentary", "podcast", "live"];
+function isAllowedType(value: string | undefined): value is AllowedType {
+  return Boolean(value && allowedTypes.includes(value as AllowedType));
+}
 
 export default async function DiscoverPage({
   params,
@@ -75,17 +67,21 @@ export default async function DiscoverPage({
 
   const query = filters.q?.trim();
   if (query) request = request.or(`title.ilike.%${query}%,description.ilike.%${query}%`);
-  if (filters.type && allowedTypes.includes(filters.type)) request = request.eq("content_type", filters.type);
+  if (isAllowedType(filters.type)) request = request.eq("content_type", filters.type);
 
   const categoryId = Number(filters.category);
   if (Number.isFinite(categoryId) && categoryId > 0) request = request.eq("category_id", categoryId);
 
-  request = applyDurationFilter(request, filters.duration);
-  request = applyFormatFilter(request, filters.format);
+  if (filters.duration === "under-5") request = request.lt("duration", 5 * 60);
+  if (filters.duration === "5-20") request = request.gte("duration", 5 * 60).lt("duration", 20 * 60);
+  if (filters.duration === "20-60") request = request.gte("duration", 20 * 60).lt("duration", 60 * 60);
+  if (filters.duration === "over-60") request = request.gte("duration", 60 * 60);
+
+  if (filters.format === "16:9" || filters.format === "9:16" || filters.format === "1:1") request = request.eq("aspect_ratio", filters.format);
+  if (filters.format === "other") request = request.not("aspect_ratio", "in", "(16:9,9:16,1:1)");
   if (filters.quality) request = request.eq("quality", filters.quality);
 
-  const sortOldest = filters.sort === "oldest";
-  request = request.order("created_at", { ascending: sortOldest });
+  request = request.order("created_at", { ascending: filters.sort === "oldest" });
 
   const [{ data, error }, { data: categories }] = await Promise.all([
     request,
