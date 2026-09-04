@@ -1,0 +1,154 @@
+/* RAVINE UI refinement: search, account access, theme transitions, typography and restrained glow. */
+
+.ravine-header,
+.ravine-header-inner,
+.ravine-nav-link,
+.ravine-minor-link,
+.button,
+.video-card,
+.work,
+.creator-feature,
+.ravine-account-panel,
+.ravine-search-dialog,
+.ravine-search-input,
+.ravine-search-select-trigger,
+.ravine-search-select-menu{transition:background-color .32s ease,border-color .32s ease,color .28s ease,box-shadow .42s ease,transform .28s ease}
+
+/* Header actions: readable as controls without turning the header into a dashboard. */
+.ravine-search-trigger,
+.ravine-auth-trigger,
+.ravine-auth-trigger-primary{
+  min-height:40px;
+  display:inline-flex!important;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  padding:0 13px!important;
+  border:1px solid var(--border);
+  border-radius:999px;
+  background:rgba(241,233,220,.035);
+  color:var(--ivory)!important;
+  cursor:pointer;
+  text-decoration:none;
+}
+.ravine-auth-trigger-primary{background:var(--copper);border-color:var(--copper);color:#160f0b!important;font-weight:700}
+.ravine-search-trigger:hover,
+.ravine-auth-trigger:hover{border-color:rgba(196,122,82,.5);background:rgba(196,122,82,.055);box-shadow:0 0 24px rgba(196,122,82,.09)}
+.ravine-auth-trigger-primary:hover{background:var(--copper);border-color:var(--copper);box-shadow:0 0 26px rgba(196,122,82,.2);transform:translateY(-1px)}
+
+/* Restrained moving header glow. */
+.ravine-header:after{content:"";position:absolute;left:18%;right:18%;bottom:-1px;height:1px;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(24,63,70,.55),rgba(196,122,82,.5),transparent);opacity:.45;animation:ravineHeaderGlow 5.8s ease-in-out infinite}
+.ravine-header{position:sticky}
+@keyframes ravineHeaderGlow{0%,100%{opacity:.25;transform:scaleX(.74)}50%{opacity:.7;transform:scaleX(1)}}
+
+/* Search launcher / discover-style menu system. */
+.ravine-search-overlay{position:fixed;inset:0;z-index:120;display:grid;place-items:center;padding:24px;background:rgba(3,5,6,.68);backdrop-filter:blur(14px);animation:ravineSearchOverlayIn .24s ease both}
+.ravine-search-overlay.is-closing{animation:ravineSearchOverlayOut .22s ease both}
+.ravine-search-dialog{position:relative;width:min(760px,100%);max-height:min(840px,calc(100vh - 48px));overflow:auto;padding:34px;border:1px solid rgba(241,233,220,.12);border-radius:30px;background:linear-gradient(145deg,rgba(21,23,25,.985),rgba(11,14,15,.98));box-shadow:0 36px 120px rgba(0,0,0,.56),0 0 50px rgba(24,63,70,.09);animation:ravineSearchDialogIn .3s cubic-bezier(.22,.61,.36,1) both}
+.ravine-search-dialog.is-closing{animation:ravineSearchDialogOut .22s cubic-bezier(.55,.08,.68,.53) both}
+.ravine-search-dialog-head{display:flex;align-items:flex-start;justify-content:space-between;gap:28px}
+.ravine-search-dialog-head h2{margin:4px 0 0;font-family:var(--font-latin),var(--font-arabic-display);font-size:clamp(32px,5vw,58px);line-height:1;letter-spacing:-.05em}
+.ravine-search-close{width:42px;height:42px;display:grid;place-items:center;flex:0 0 auto;border:1px solid var(--border);border-radius:50%;background:rgba(241,233,220,.035);color:var(--ivory);cursor:pointer}
+.ravine-search-close:hover{border-color:rgba(196,122,82,.58);background:rgba(196,122,82,.07);box-shadow:0 0 24px rgba(196,122,82,.1);transform:rotate(5deg)}
+.ravine-search-form{display:grid;gap:16px;margin-top:28px}
+.ravine-search-input{min-height:58px;display:flex;align-items:center;gap:12px;padding:0 17px;border:1px solid rgba(241,233,220,.12);border-radius:18px;background:rgba(241,233,220,.045);color:var(--stone);box-shadow:inset 0 0 0 1px rgba(24,63,70,.06)}
+.ravine-search-input:focus-within{border-color:rgba(196,122,82,.58);box-shadow:0 0 30px rgba(24,63,70,.1),0 0 22px rgba(196,122,82,.06)}
+.ravine-search-input input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:var(--ivory);font-family:var(--font-latin),var(--font-arabic-text);font-size:16px}
+html[lang="ar"] .ravine-search-input input{font-family:var(--font-arabic-text),var(--font-latin)}
+.ravine-search-input input::placeholder{color:var(--stone);opacity:.92}
+.ravine-search-field-grid{display:grid;gap:12px}
+.ravine-search-field-grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.ravine-search-field-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.ravine-search-select{position:relative;min-width:0}
+.ravine-search-field-label{display:block;margin:0 0 7px;color:var(--stone);font-family:var(--font-arabic-ui),var(--font-latin);font-size:11px;font-weight:700}
+html[lang="ar"] .ravine-search-field-label{font-family:var(--font-arabic-ui),var(--font-latin);font-size:12px;color:#F1E9DC}
+.ravine-search-select-trigger{width:100%;min-height:50px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 14px;border:1px solid rgba(241,233,220,.11);border-radius:16px;background:rgba(21,23,25,.7);color:var(--stone);font-family:var(--font-latin),var(--font-arabic-ui);font-size:13px;text-align:start;cursor:pointer}
+.ravine-search-select.has-value .ravine-search-select-trigger{color:var(--ivory);border-color:rgba(196,122,82,.3)}
+.ravine-search-select.is-open .ravine-search-select-trigger{border-color:rgba(196,122,82,.6);box-shadow:0 0 25px rgba(196,122,82,.08)}
+.ravine-search-select-trigger:disabled{opacity:.48;cursor:not-allowed}
+.ravine-search-select-menu{position:absolute;z-index:8;inset-inline:0;top:calc(100% + 8px);max-height:260px;overflow:auto;padding:7px;border:1px solid rgba(241,233,220,.12);border-radius:18px;background:#151719;box-shadow:0 24px 60px rgba(0,0,0,.38);animation:ravineMenuIn .18s ease both}
+.ravine-search-select-menu button{width:100%;min-height:40px;display:flex;align-items:center;padding:0 11px;border:0;border-radius:12px;background:transparent;color:var(--stone);font-family:var(--font-latin),var(--font-arabic-ui);font-size:12px;text-align:start;cursor:pointer}
+.ravine-search-select-menu button:hover,.ravine-search-select-menu button.is-selected{background:rgba(24,63,70,.28);color:var(--ivory)}
+.ravine-search-select-menu button.is-selected:after{content:"";width:6px;height:6px;margin-inline-start:auto;border-radius:50%;background:var(--copper);box-shadow:0 0 12px rgba(196,122,82,.45)}
+.ravine-advanced-search-toggle{min-height:48px;display:inline-flex;align-items:center;justify-content:center;align-self:start;gap:9px;width:100%;border:1px solid rgba(241,233,220,.1);border-radius:16px;background:rgba(24,63,70,.14);color:var(--ivory);font-family:var(--font-latin),var(--font-arabic-ui);font-size:13px;cursor:pointer}
+.ravine-advanced-search-toggle:hover,.ravine-advanced-search-toggle.active{border-color:rgba(196,122,82,.45);background:rgba(24,63,70,.23);box-shadow:0 0 28px rgba(24,63,70,.1)}
+.ravine-advanced-search-toggle .ravine-advanced-chevron{transition:transform .25s ease}
+.ravine-advanced-search-toggle.active .ravine-advanced-chevron{transform:rotate(180deg)}
+.ravine-search-advanced{display:grid;grid-template-rows:0fr;opacity:0;overflow:visible;transition:grid-template-rows .32s ease,opacity .22s ease}
+.ravine-search-advanced.open{grid-template-rows:1fr;opacity:1}
+.ravine-search-advanced>div{min-height:0;overflow:visible;padding-top:0;transition:padding-top .32s ease}
+.ravine-search-advanced.open>div{padding-top:2px}
+.ravine-search-actions{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-top:3px}
+.ravine-search-actions .button{min-width:110px}
+.ravine-search-clear{color:#F1E9DC!important;border-color:rgba(241,233,220,.2)!important;background:rgba(241,233,220,.055)!important}
+.ravine-search-clear:hover{color:#fff!important;border-color:rgba(241,233,220,.42)!important;background:rgba(241,233,220,.09)!important;box-shadow:0 0 24px rgba(241,233,220,.07)}
+
+/* Account avatar and access panel. */
+.ravine-account-menu{position:relative}
+.ravine-account-trigger{min-width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:3px 7px 3px 3px;border:1px solid var(--border);border-radius:999px;background:rgba(241,233,220,.035);color:var(--stone);cursor:pointer}
+html[dir="rtl"] .ravine-account-trigger{padding:3px 3px 3px 7px}
+.ravine-account-trigger:hover,.ravine-account-menu.is-open .ravine-account-trigger{border-color:rgba(196,122,82,.55);background:rgba(196,122,82,.06);color:var(--ivory);box-shadow:0 0 26px rgba(196,122,82,.09)}
+.ravine-account-avatar{width:36px;height:36px;display:grid;place-items:center;overflow:hidden;border-radius:50%;background:radial-gradient(circle at 30% 25%,rgba(212,154,120,.5),rgba(24,63,70,.85));border:1px solid rgba(241,233,220,.18);box-shadow:0 0 0 3px rgba(241,233,220,.035),0 8px 22px rgba(0,0,0,.2);font-family:var(--font-latin);font-weight:700;color:#fff}
+.ravine-account-avatar img{width:100%;height:100%;display:block;object-fit:cover}
+.ravine-account-panel{position:absolute;z-index:100;top:calc(100% + 12px);inset-inline-end:0;width:min(340px,calc(100vw - 24px));padding:10px;border:1px solid var(--border);border-radius:22px;background:rgba(14,16,17,.985);box-shadow:0 28px 90px rgba(0,0,0,.44),0 0 34px rgba(24,63,70,.08);animation:ravineAccountIn .24s cubic-bezier(.22,.61,.36,1) both}
+.ravine-account-summary{display:flex;align-items:center;gap:12px;padding:10px 9px 13px;margin-bottom:4px;border-bottom:1px solid var(--border)}
+.ravine-account-avatar.large{width:52px;height:52px;flex:0 0 auto}
+.ravine-account-summary-copy{min-width:0;display:grid;gap:4px}
+.ravine-account-summary-copy strong{font-family:var(--font-latin),var(--font-arabic-display);font-size:15px;line-height:1.2;color:var(--ivory)}
+.ravine-account-summary-copy span{color:var(--stone);font-family:var(--font-latin),var(--font-arabic-ui);font-size:11px;overflow:hidden;text-overflow:ellipsis}
+.ravine-account-section-label{padding:12px 9px 6px;color:var(--copper);font-family:var(--font-arabic-ui),var(--font-latin);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+html[lang="ar"] .ravine-account-section-label{letter-spacing:0}
+.ravine-account-panel a,.ravine-account-signout{width:100%;min-height:42px;display:flex;align-items:center;gap:10px;padding:0 10px;border:0;border-radius:12px;background:transparent;color:var(--stone);font-family:var(--font-arabic-ui),var(--font-latin);font-size:12px;text-align:start;text-decoration:none;cursor:pointer}
+.ravine-account-panel a svg,.ravine-account-signout svg{color:var(--copper);flex:0 0 auto}
+.ravine-account-panel a:hover{background:rgba(24,63,70,.22);color:var(--ivory)}
+.ravine-account-divider{height:1px;margin:8px 4px;background:var(--border)}
+.ravine-account-signout{color:#F1E9DC}
+.ravine-account-signout:hover{background:rgba(196,122,82,.08);color:var(--copper)}
+.ravine-account-signout:disabled{opacity:.55;cursor:not-allowed}
+
+/* Creator banner typography follows the locked semantic families. */
+html[lang="en"] [class*="nameRow"] h1,
+html[lang="en"] [class*="identity"] h1{font-family:var(--font-latin)!important}
+html[lang="ar"] [class*="nameRow"] h1,
+html[lang="ar"] [class*="identity"] h1{font-family:var(--font-arabic-display)!important}
+html[lang="ar"] [class*="handleLine"],html[lang="ar"] [class*="bio"]{font-family:var(--font-arabic-text),var(--font-latin)!important}
+
+/* Theme change pulse: noticeable, brief, never a persistent glow. */
+html.theme-switching .ravine-shell{animation:ravineThemePulse .46s ease-out}
+html.theme-switching .ravine-header{box-shadow:0 10px 40px rgba(196,122,82,.1)}
+@keyframes ravineThemePulse{0%{filter:brightness(1)}45%{filter:brightness(1.06)}100%{filter:brightness(1)}}
+
+/* Light-mode surfaces and text hierarchy. */
+html[data-theme="light"] .ravine-search-overlay{background:rgba(50,41,34,.34)}
+html[data-theme="light"] .ravine-search-dialog{background:linear-gradient(145deg,rgba(255,253,249,.985),rgba(245,237,226,.985));border-color:rgba(23,23,23,.13);box-shadow:0 34px 120px rgba(42,31,23,.2),0 0 48px rgba(24,63,70,.06)}
+html[data-theme="light"] .ravine-search-dialog-head h2{color:#171717}
+html[data-theme="light"] .ravine-search-input{background:rgba(255,255,255,.55);border-color:rgba(23,23,23,.13);box-shadow:none}
+html[data-theme="light"] .ravine-search-input input{color:#171717}
+html[data-theme="light"] .ravine-search-input input::placeholder{color:#625D56}
+html[data-theme="light"] .ravine-search-select-trigger{background:rgba(255,255,255,.62);border-color:rgba(23,23,23,.13);color:#625D56}
+html[data-theme="light"] .ravine-search-select.has-value .ravine-search-select-trigger{color:#171717}
+html[data-theme="light"] .ravine-search-select-menu{background:#FBF8F2;border-color:rgba(23,23,23,.13);box-shadow:0 24px 60px rgba(42,31,23,.16)}
+html[data-theme="light"] .ravine-search-select-menu button{color:#625D56}
+html[data-theme="light"] .ravine-search-select-menu button:hover,html[data-theme="light"] .ravine-search-select-menu button.is-selected{background:rgba(24,63,70,.09);color:#171717}
+html[data-theme="light"] .ravine-advanced-search-toggle{background:rgba(24,63,70,.065);border-color:rgba(24,63,70,.18);color:#183F46}
+html[data-theme="light"] .ravine-advanced-search-toggle:hover,html[data-theme="light"] .ravine-advanced-search-toggle.active{background:rgba(24,63,70,.11);border-color:rgba(24,63,70,.3)}
+html[data-theme="light"] .ravine-account-trigger{background:rgba(24,63,70,.055);border-color:rgba(24,63,70,.18);color:#183F46}
+html[data-theme="light"] .ravine-account-panel{background:rgba(255,253,249,.99);border-color:rgba(23,23,23,.13);box-shadow:0 28px 90px rgba(42,31,23,.18),0 0 32px rgba(24,63,70,.05)}
+html[data-theme="light"] .ravine-account-summary{border-bottom-color:rgba(23,23,23,.1)}
+html[data-theme="light"] .ravine-account-summary-copy strong{color:#171717}
+html[data-theme="light"] .ravine-account-panel a,html[data-theme="light"] .ravine-account-signout{color:#625D56}
+html[data-theme="light"] .ravine-account-panel a:hover{background:rgba(24,63,70,.08);color:#171717}
+html[data-theme="light"] .ravine-account-signout{color:#34312d}
+html[data-theme="light"] .ravine-account-signout:hover{background:rgba(168,91,57,.08);color:#A85B39}
+html[data-theme="light"] .ravine-search-clear{color:#171717!important;border-color:rgba(23,23,23,.18)!important;background:rgba(23,23,23,.035)!important}
+html[data-theme="light"] .ravine-search-clear:hover{color:#171717!important;border-color:rgba(23,23,23,.36)!important;background:rgba(23,23,23,.06)!important}
+
+@keyframes ravineSearchOverlayIn{from{opacity:0}to{opacity:1}}
+@keyframes ravineSearchOverlayOut{from{opacity:1}to{opacity:0}}
+@keyframes ravineSearchDialogIn{from{opacity:0;transform:translateY(16px) scale(.985);filter:blur(4px)}to{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}}
+@keyframes ravineSearchDialogOut{from{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}to{opacity:0;transform:translateY(12px) scale(.985);filter:blur(3px)}}
+@keyframes ravineMenuIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+@keyframes ravineAccountIn{from{opacity:0;transform:translateY(-7px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(max-width:980px){.ravine-search-dialog{padding:28px}.ravine-search-field-grid.three{grid-template-columns:1fr}.ravine-account-panel{inset-inline-end:-10px}}
+@media(max-width:640px){.ravine-search-overlay{padding:12px}.ravine-search-dialog{max-height:calc(100vh - 24px);padding:22px;border-radius:24px}.ravine-search-dialog-head h2{font-size:36px}.ravine-search-field-grid.two{grid-template-columns:1fr}.ravine-search-input{min-height:54px}.ravine-account-panel{width:min(330px,calc(100vw - 20px))}.ravine-search-actions{position:sticky;bottom:0;padding-top:12px;padding-bottom:2px;background:linear-gradient(180deg,transparent,var(--obsidian) 32%);z-index:2}}
+@media(prefers-reduced-motion:reduce){.ravine-header:after{animation:none}.ravine-search-overlay,.ravine-search-dialog,.ravine-search-select-menu,.ravine-account-panel,.ravine-account-trigger,.ravine-search-close,.ravine-theme-switching,.ravine-shell{animation:none!important;transition:none!important}.ravine-search-advanced{transition:none}.ravine-search-advanced>div{transition:none}}
