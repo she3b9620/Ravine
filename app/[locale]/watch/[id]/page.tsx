@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import WatchActions from "@/components/WatchActions";
+import styles from "./watch-creator.module.css";
 
 export const dynamic = "force-dynamic";
 
@@ -76,7 +77,7 @@ export default async function WatchPage({ params }: { params: Promise<{ locale: 
           </div>
 
           {creatorRecord && (
-            <Link className="watch-creator" href={`/${locale}/creators/${creatorRecord.id}`}>
+            <Link className={styles.creator} href={`/${locale}/creators/${creatorRecord.id}`}>
               <img src={creatorRecord.avatar_url || "/RAVINE.png"} alt="" />
               <span>
                 <small>{ar ? "المبدع" : "Creator"}</small>
