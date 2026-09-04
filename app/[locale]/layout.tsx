@@ -5,6 +5,7 @@ import "./ravine-overrides.css";
 import "./home-spacing.css";
 import "./ravine-final-visual-fixes.css";
 import "./messaging-header.css";
+import "./ravine-typography-search-final.css";
 
 const locales = ["ar", "en"] as const;
 type Locale = (typeof locales)[number];
