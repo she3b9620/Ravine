@@ -10,6 +10,7 @@ type Work = {
   content_type: string | null;
   quality: string | null;
   published: boolean | null;
+  visibility: string | null;
   video_url: string | null;
   views: number | null;
   likes: number | null;
@@ -22,9 +23,22 @@ type Props = {
 };
 
 const allowedContentTypes = new Set(["video", "short", "documentary", "podcast", "film"]);
+const allowedVisibility = new Set(["public", "followers", "unlisted", "private", "custom"]);
 
 function isPublishable(work: Work) {
   return Boolean(work.title.trim() && work.video_url?.trim() && allowedContentTypes.has(work.content_type || "video"));
+}
+
+function visibilityLabel(value: string | null, ar: boolean) {
+  const labels: Record<string, [string, string]> = {
+    public: ["عام", "PUBLIC"],
+    followers: ["المتابعون", "FOLLOWERS"],
+    unlisted: ["بالرابط", "UNLISTED"],
+    private: ["خاص", "PRIVATE"],
+    custom: ["مخصص", "CUSTOM"],
+  };
+  const pair = labels[value || "public"] || labels.public;
+  return ar ? pair[0] : pair[1];
 }
 
 export default function StudioWorkManager({ works: initialWorks, locale }: Props) {
@@ -36,6 +50,7 @@ export default function StudioWorkManager({ works: initialWorks, locale }: Props
   const [editDescription, setEditDescription] = useState("");
   const [editType, setEditType] = useState("video");
   const [editQuality, setEditQuality] = useState("1080p");
+  const [editVisibility, setEditVisibility] = useState("public");
   const [error, setError] = useState("");
 
   function beginEdit(work: Work) {
@@ -44,6 +59,7 @@ export default function StudioWorkManager({ works: initialWorks, locale }: Props
     setEditDescription(work.description || "");
     setEditType(work.content_type || "video");
     setEditQuality(work.quality || "1080p");
+    setEditVisibility(work.visibility || "public");
     setError("");
   }
 
@@ -54,6 +70,10 @@ export default function StudioWorkManager({ works: initialWorks, locale }: Props
     }
     if (!allowedContentTypes.has(editType)) {
       setError(ar ? "نوع المحتوى غير صالح." : "Invalid content type.");
+      return;
+    }
+    if (!allowedVisibility.has(editVisibility)) {
+      setError(ar ? "إعداد الظهور غير صالح." : "Invalid visibility setting.");
       return;
     }
 
@@ -68,9 +88,10 @@ export default function StudioWorkManager({ works: initialWorks, locale }: Props
           description: editDescription.trim() || null,
           content_type: editType,
           quality: editQuality,
+          visibility: editVisibility,
         })
         .eq("id", id)
-        .select("id,title,description,content_type,quality,published,video_url,views,likes,created_at")
+        .select("id,title,description,content_type,quality,published,visibility,video_url,views,likes,created_at")
         .single();
 
       if (updateError || !data) {
@@ -91,8 +112,8 @@ export default function StudioWorkManager({ works: initialWorks, locale }: Props
     if (nextPublished && !isPublishable(work)) {
       setError(
         ar
-          ? "لا يمكن نشر العمل قبل التأكد من وجود عنوان وملف فيديو صالح ونوع محتوى صحيح."
-          : "This work cannot be published until it has a title, a video source, and a valid content type.",
+          ? "لا يمكن نشر العمل قبل التأكد من وجود عنوان وملف وسائط صالح ونوع محتوى صحيح."
+          : "This work cannot be published until it has a title, a media source, and a valid content type.",
       );
       return;
     }
@@ -103,7 +124,11 @@ export default function StudioWorkManager({ works: initialWorks, locale }: Props
       const response = await fetch("/api/studio/publish-work", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ videoId: work.id, published: nextPublished }),
+        body: JSON.stringify({
+          videoId: work.id,
+          published: nextPublished,
+          visibility: work.visibility || "public",
+        }),
       });
       const payload = (await response.json()) as {
         ok?: boolean;
@@ -160,7 +185,7 @@ export default function StudioWorkManager({ works: initialWorks, locale }: Props
         <div>
           <div className="eyebrow">RAVINE / WORKS</div>
           <h2>{ar ? "إدارة أعمالك" : "Manage your work"}</h2>
-          <p className="section-note">{ar ? "عدّل البيانات، انشر العمل أو أخفِه، أو احذفه." : "Edit metadata, publish or hide a work, or remove it."}</p>
+          <p className="section-note">{ar ? "عدّل البيانات، غيّر الظهور، انشر العمل أو أخفِه، أو احذفه." : "Edit metadata, change visibility, publish or hide a work, or remove it."}</p>
         </div>
       </div>
 
@@ -174,7 +199,11 @@ export default function StudioWorkManager({ works: initialWorks, locale }: Props
           return (
             <article className="studio-work-row" key={work.id}>
               <div className="studio-work-main">
-                <div className="video-kicker">{work.published ? (ar ? "منشور" : "PUBLISHED") : (ar ? "مسودة" : "DRAFT")} · {work.content_type || "video"} · {work.quality || "1080p"}</div>
+                <div className="video-kicker">
+                  {work.published ? (ar ? "منشور" : "PUBLISHED") : (ar ? "مسودة" : "DRAFT")}
+                  {work.published && work.visibility ? ` · ${visibilityLabel(work.visibility, ar)}` : ""}
+                  {` · ${work.content_type || "video"} · ${work.quality || "1080p"}`}
+                </div>
                 {editing ? (
                   <div className="studio-inline-form">
                     <input value={editTitle} onChange={(event) => setEditTitle(event.target.value)} placeholder={ar ? "العنوان" : "Title"} />
@@ -191,6 +220,13 @@ export default function StudioWorkManager({ works: initialWorks, locale }: Props
                         <option value="1080p">1080p</option>
                         <option value="1440p">1440p</option>
                         <option value="2160p">4K</option>
+                      </select>
+                      <select value={editVisibility} onChange={(event) => setEditVisibility(event.target.value)}>
+                        <option value="public">{ar ? "عام" : "Public"}</option>
+                        <option value="followers">{ar ? "المتابعون" : "Followers"}</option>
+                        <option value="unlisted">{ar ? "بالرابط" : "Unlisted"}</option>
+                        <option value="private">{ar ? "خاص" : "Private"}</option>
+                        <option value="custom">{ar ? "جمهور مخصص" : "Custom audience"}</option>
                       </select>
                     </div>
                     <div className="studio-work-actions">
