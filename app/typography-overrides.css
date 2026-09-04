@@ -4,6 +4,47 @@
    English remains Satoshi throughout.
    ========================================================= */
 
+/* The repository already contains the approved Thmanyah text files locally. */
+@font-face {
+  font-family: "Thmanyah Text";
+  src: url("/fonts/thmanyahsans-Light.woff2") format("woff2");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Thmanyah Text";
+  src: url("/fonts/thmanyahsans-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Thmanyah Text";
+  src: url("/fonts/thmanyahsans-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Thmanyah Text";
+  src: url("/fonts/thmanyahsans-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Thmanyah Text";
+  src: url("/fonts/thmanyahsans-Black.woff2") format("woff2");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Global text families by locale. */
 html[lang="en"] body {
   font-family: "Satoshi", sans-serif !important;
