@@ -1,5 +1,6 @@
 import "./globals.css";
 import "./typography.css";
+import "./motion.css";
 import type { ReactNode } from "react";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
