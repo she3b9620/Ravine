@@ -14,6 +14,16 @@ type CloudinaryUpload = {
   error?: { message?: string };
 };
 
+type MediaAsset = {
+  work_id: number;
+  kind: "main" | "trailer" | "preview";
+  media_url: string | null;
+  public_id: string | null;
+  duration: number | null;
+  mime_type: string | null;
+  sort_order: number;
+};
+
 const videoAccept = "video/mp4,video/webm,video/quicktime,video/x-matroska";
 const audioAccept = "audio/mpeg,audio/mp4,audio/wav,audio/ogg,audio/aac,audio/x-m4a";
 
@@ -76,10 +86,6 @@ export default function StudioUpload({ creatorId, locale }: Props) {
       return;
     }
 
-    if (isVideoLike && previewFile && !isShort) {
-      // Preview is intentionally supported only as a short teaser for long-form video/film/documentary.
-    }
-
     const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
     const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
     if (!cloudName || !uploadPreset) {
@@ -120,39 +126,39 @@ export default function StudioUpload({ creatorId, locale }: Props) {
         .single();
       if (insertError || !work) throw insertError || new Error(ar ? "تعذر إنشاء العمل." : "Could not create the work.");
 
-      const mediaAssets = [
+      const mediaAssets: MediaAsset[] = [
         {
           work_id: work.id,
           kind: "main",
-          media_url: mainUpload.secure_url,
+          media_url: mainUpload.secure_url ?? null,
           public_id: mainUpload.public_id ?? null,
           duration: mainUpload.duration ?? null,
           mime_type: file.type || null,
           sort_order: 0,
         },
-        trailerUpload
-          ? {
+        ...(trailerUpload
+          ? [{
               work_id: work.id,
-              kind: "trailer",
-              media_url: trailerUpload.secure_url,
+              kind: "trailer" as const,
+              media_url: trailerUpload.secure_url ?? null,
               public_id: trailerUpload.public_id ?? null,
               duration: trailerUpload.duration ?? null,
               mime_type: trailerFile?.type || null,
               sort_order: 1,
-            }
-          : null,
-        previewUpload
-          ? {
+            }]
+          : []),
+        ...(previewUpload
+          ? [{
               work_id: work.id,
-              kind: "preview",
-              media_url: previewUpload.secure_url,
+              kind: "preview" as const,
+              media_url: previewUpload.secure_url ?? null,
               public_id: previewUpload.public_id ?? null,
               duration: previewUpload.duration ?? null,
               mime_type: previewFile?.type || null,
               sort_order: 2,
-            }
-          : null,
-      ].filter(Boolean);
+            }]
+          : []),
+      ];
 
       const { error: assetsError } = await supabase.from("work_media_assets").insert(mediaAssets);
       if (assetsError) throw assetsError;
