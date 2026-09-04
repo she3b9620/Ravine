@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import ThemeToggle from "./ThemeToggle";
 import AuthTrigger, { AuthModal } from "./AuthTrigger";
 import MobileNav from "./MobileNav";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 const navigation = [
   ["discover", "Discover", "اكتشف"],
@@ -18,7 +19,6 @@ type Locale = "ar" | "en";
 
 export default async function RavineShell({ locale, children }: { locale: Locale; children: ReactNode }) {
   const isArabic = locale === "ar";
-  const alternateLocale: Locale = isArabic ? "en" : "ar";
 
   let user = null;
 
@@ -64,9 +64,7 @@ export default async function RavineShell({ locale, children }: { locale: Locale
               <AuthTrigger locale={locale} label={isArabic ? "دخول" : "Sign in"} />
             )}
             <ThemeToggle locale={locale} />
-            <Link href={`/${alternateLocale}`} className="ravine-language">
-              {isArabic ? "EN" : "عربي"}
-            </Link>
+            <LanguageSwitcher locale={locale} />
           </div>
         </div>
       </header>
