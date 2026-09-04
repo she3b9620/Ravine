@@ -66,7 +66,7 @@ export default async function RavineShell({ locale, children }: { locale: Locale
   const displayName = profile?.display_name || profile?.username || user?.email?.split("@")[0] || (isArabic ? "مستخدم RAVINE" : "RAVINE user");
 
   return (
-    <div className="ravine-shell" lang={locale} dir={isArabic ? "rtl" : "ltr"}>
+    <div className={`ravine-shell${user ? "" : " guest-shell"}`} lang={locale} dir={isArabic ? "rtl" : "ltr"}>
       <header className="ravine-header">
         <div className="ravine-header-inner">
           <Link href={`/${locale}`} className="ravine-brand ravine-brand-lockup" aria-label="RAVINE">
