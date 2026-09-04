@@ -1,27 +1,85 @@
-/* Mixed-script typography: Latin text stays Satoshi while Arabic glyphs
-   fall back to the Thmanyah Serif Display family already registered in globals.css. */
-html[lang="ar"] body,
-html[lang="en"] body,
-.font-ar,
-.font-en {
-  font-family: "Satoshi", "Thmanyah Serif Display", sans-serif !important;
+/* =========================================================
+   RAVINE TYPOGRAPHY OVERRIDES
+   Semantic separation between Arabic display and text/UI.
+   English remains Satoshi throughout.
+   ========================================================= */
+
+/* Global text families by locale. */
+html[lang="en"] body {
+  font-family: "Satoshi", sans-serif !important;
 }
 
-.font-ar *,
+html[lang="ar"] body {
+  font-family: "Thmanyah Text", sans-serif !important;
+}
+
+/* Arabic editorial/display hierarchy. */
+html[lang="ar"] h1,
+html[lang="ar"] h2,
+html[lang="ar"] h3,
+html[lang="ar"] h4,
+html[lang="ar"] h5,
+html[lang="ar"] h6,
+html[lang="ar"] [data-ravine-display="true"],
+html[lang="ar"] .font-ar-display {
+  font-family: "Thmanyah Serif Display", serif !important;
+}
+
+/* Arabic body/UI copy uses the approved text family. */
+html[lang="ar"] body,
+html[lang="ar"] p,
+html[lang="ar"] li,
+html[lang="ar"] label,
+html[lang="ar"] button,
+html[lang="ar"] input,
+html[lang="ar"] textarea,
+html[lang="ar"] select,
+html[lang="ar"] option,
+html[lang="ar"] small,
+html[lang="ar"] [data-ravine-text="true"],
+html[lang="ar"] .font-ar-text {
+  font-family: "Thmanyah Text", sans-serif !important;
+}
+
+/* Explicit utility classes remain semantic and reusable in mixed-script UI. */
+.font-en {
+  font-family: "Satoshi", sans-serif !important;
+}
+
 .font-en * {
   font-family: inherit !important;
 }
 
-/* Arabic and English copy can coexist on the same page without forcing
-   one family's glyphs onto the other script. */
+.font-ar-display {
+  font-family: "Thmanyah Serif Display", serif !important;
+}
+
+.font-ar-text {
+  font-family: "Thmanyah Text", sans-serif !important;
+}
+
+/* Do not force one family onto nested mixed-script content. */
+.font-ar-text .font-en,
+.font-ar-display .font-en,
+.font-en .font-ar-text,
+.font-en .font-ar-display {
+  font-family: inherit !important;
+}
+
 html[lang="ar"] body,
 html[lang="en"] body {
   font-synthesis: none;
 }
 
-/* Keep typed text readable in its own writing system. */
-input,
-textarea,
-select {
-  font-family: "Satoshi", "Thmanyah Serif Display", sans-serif !important;
+/* Typed controls should stay in their locale's text family. */
+html[lang="en"] input,
+html[lang="en"] textarea,
+html[lang="en"] select {
+  font-family: "Satoshi", sans-serif !important;
+}
+
+html[lang="ar"] input,
+html[lang="ar"] textarea,
+html[lang="ar"] select {
+  font-family: "Thmanyah Text", sans-serif !important;
 }
