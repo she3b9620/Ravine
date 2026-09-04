@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ChevronDown, Compass, Heart, Library, LogOut, MessageCircle, Settings, UserRound, Video } from "lucide-react";
+import { ChevronDown, Compass, Library, LogOut, MessageCircle, Settings, UserRound, Video } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -81,7 +81,7 @@ export default function AccountMenu({ locale, displayName, username, avatarUrl, 
           <Link href={`/${locale}`} onClick={() => setOpen(false)} role="menuitem"><UserRound size={16} />{ar ? "الرئيسية" : "Home"}</Link>
           <Link href={`/${locale}/account`} onClick={() => setOpen(false)} role="menuitem"><Settings size={16} />{ar ? "الحساب والإعدادات" : "Account & settings"}</Link>
           <Link href={`/${locale}/library`} onClick={() => setOpen(false)} role="menuitem"><Library size={16} />{ar ? "المكتبة" : "Library"}</Link>
-          <Link href={`/${locale}/notifications`} onClick={() => setOpen(false)} role="menuitem"><Heart size={16} />{ar ? "الإشعارات" : "Notifications"}</Link>
+          <Link href={`/${locale}/messages`} onClick={() => setOpen(false)} role="menuitem"><MessageCircle size={16} />{ar ? "الرسائل" : "Messages"}</Link>
           <Link href={`/${locale}/community`} onClick={() => setOpen(false)} role="menuitem"><MessageCircle size={16} />{ar ? "المجتمعات" : "Communities"}</Link>
           <Link href={`/${locale}/discover`} onClick={() => setOpen(false)} role="menuitem"><Compass size={16} />{ar ? "الاكتشاف" : "Discover"}</Link>
 
