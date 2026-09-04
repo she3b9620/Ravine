@@ -1,10 +1,10 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { Suspense, FormEvent, useMemo, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-export default function AuthPage() {
+function AuthForm() {
   const params = useParams<{ locale: string }>();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -92,5 +92,13 @@ export default function AuthPage() {
         </button>
       </div>
     </section>
+  );
+}
+
+export default function AuthPage() {
+  return (
+    <Suspense fallback={<section className="auth-page"><div className="auth-card"><div className="eyebrow">RAVINE / ACCESS</div><p className="auth-intro">Loading…</p></div></section>}>
+      <AuthForm />
+    </Suspense>
   );
 }
