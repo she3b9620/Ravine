@@ -21,6 +21,12 @@ type Props = {
   locale: "ar" | "en";
 };
 
+const allowedContentTypes = new Set(["video", "short", "documentary", "podcast", "film"]);
+
+function isPublishable(work: Work) {
+  return Boolean(work.title.trim() && work.video_url?.trim() && allowedContentTypes.has(work.content_type || "video"));
+}
+
 export default function StudioWorkManager({ works: initialWorks, locale }: Props) {
   const ar = locale === "ar";
   const [works, setWorks] = useState(initialWorks);
@@ -46,47 +52,71 @@ export default function StudioWorkManager({ works: initialWorks, locale }: Props
       setError(ar ? "العنوان مطلوب." : "Title is required.");
       return;
     }
+    if (!allowedContentTypes.has(editType)) {
+      setError(ar ? "نوع المحتوى غير صالح." : "Invalid content type.");
+      return;
+    }
     setBusyId(id);
     setError("");
-    const supabase = createClient();
-    const { data, error: updateError } = await supabase
-      .from("videos")
-      .update({
-        title: editTitle.trim(),
-        description: editDescription.trim() || null,
-        content_type: editType,
-        quality: editQuality,
-      })
-      .eq("id", id)
-      .select("id,title,description,content_type,quality,published,video_url,views,likes,created_at")
-      .single();
+    try {
+      const supabase = createClient();
+      const { data, error: updateError } = await supabase
+        .from("videos")
+        .update({
+          title: editTitle.trim(),
+          description: editDescription.trim() || null,
+          content_type: editType,
+          quality: editQuality,
+        })
+        .eq("id", id)
+        .select("id,title,description,content_type,quality,published,video_url,views,likes,created_at")
+        .single();
 
-    if (updateError || !data) {
-      setError(updateError?.message || (ar ? "تعذر التحديث." : "Update failed."));
-    } else {
-      setWorks((current) => current.map((work) => (work.id === id ? (data as Work) : work)));
-      setEditingId(null);
+      if (updateError || !data) {
+        setError(updateError?.message || (ar ? "تعذر التحديث." : "Update failed."));
+      } else {
+        setWorks((current) => current.map((work) => (work.id === id ? (data as Work) : work)));
+        setEditingId(null);
+      }
+    } catch (saveError) {
+      setError(saveError instanceof Error ? saveError.message : String(saveError));
+    } finally {
+      setBusyId(null);
     }
-    setBusyId(null);
   }
 
   async function togglePublished(work: Work) {
+    const nextPublished = !work.published;
+    if (nextPublished && !isPublishable(work)) {
+      setError(
+        ar
+          ? "لا يمكن نشر العمل قبل التأكد من وجود عنوان وملف فيديو صالح ونوع محتوى صحيح."
+          : "This work cannot be published until it has a title, a video source, and a valid content type.",
+      );
+      return;
+    }
+
     setBusyId(work.id);
     setError("");
-    const supabase = createClient();
-    const { data, error: updateError } = await supabase
-      .from("videos")
-      .update({ published: !work.published })
-      .eq("id", work.id)
-      .select("id,title,description,content_type,quality,published,video_url,views,likes,created_at")
-      .single();
+    try {
+      const supabase = createClient();
+      const { data, error: updateError } = await supabase
+        .from("videos")
+        .update({ published: nextPublished })
+        .eq("id", work.id)
+        .select("id,title,description,content_type,quality,published,video_url,views,likes,created_at")
+        .single();
 
-    if (updateError || !data) {
-      setError(updateError?.message || (ar ? "تعذر تغيير حالة النشر." : "Could not change publishing state."));
-    } else {
-      setWorks((current) => current.map((item) => (item.id === work.id ? (data as Work) : item)));
+      if (updateError || !data) {
+        setError(updateError?.message || (ar ? "تعذر تغيير حالة النشر." : "Could not change publishing state."));
+      } else {
+        setWorks((current) => current.map((item) => (item.id === work.id ? (data as Work) : item)));
+      }
+    } catch (publishError) {
+      setError(publishError instanceof Error ? publishError.message : String(publishError));
+    } finally {
+      setBusyId(null);
     }
-    setBusyId(null);
   }
 
   async function removeWork(work: Work) {
@@ -104,7 +134,7 @@ export default function StudioWorkManager({ works: initialWorks, locale }: Props
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ videoId: work.id }),
       });
-      const payload = await response.json() as { ok?: boolean; error?: string };
+      const payload = (await response.json()) as { ok?: boolean; error?: string };
       if (!response.ok || !payload.ok) {
         throw new Error(payload.error || (ar ? "تعذر حذف العمل." : "Could not delete work."));
       }
@@ -136,6 +166,7 @@ export default function StudioWorkManager({ works: initialWorks, locale }: Props
         {works.map((work) => {
           const editing = editingId === work.id;
           const busy = busyId === work.id;
+          const publishBlocked = !work.published && !isPublishable(work);
           return (
             <article className="studio-work-row" key={work.id}>
               <div className="studio-work-main">
@@ -159,7 +190,7 @@ export default function StudioWorkManager({ works: initialWorks, locale }: Props
                       </select>
                     </div>
                     <div className="studio-work-actions">
-                      <button className="button primary" type="button" onClick={() => saveEdit(work.id)} disabled={busy}>{ar ? "حفظ" : "Save"}</button>
+                      <button className="button primary" type="button" onClick={() => void saveEdit(work.id)} disabled={busy}>{ar ? "حفظ" : "Save"}</button>
                       <button className="button secondary" type="button" onClick={() => setEditingId(null)} disabled={busy}>{ar ? "إلغاء" : "Cancel"}</button>
                     </div>
                   </div>
@@ -174,8 +205,8 @@ export default function StudioWorkManager({ works: initialWorks, locale }: Props
               {!editing ? (
                 <div className="studio-work-actions">
                   <button className="button secondary" type="button" onClick={() => beginEdit(work)} disabled={busy}>{ar ? "تعديل" : "Edit"}</button>
-                  <button className="button secondary" type="button" onClick={() => togglePublished(work)} disabled={busy}>{busy ? "…" : work.published ? (ar ? "إخفاء" : "Unpublish") : (ar ? "نشر" : "Publish")}</button>
-                  <button className="button secondary" type="button" onClick={() => removeWork(work)} disabled={busy}>{ar ? "حذف" : "Delete"}</button>
+                  <button className="button secondary" type="button" onClick={() => void togglePublished(work)} disabled={busy || publishBlocked}>{busy ? "…" : work.published ? (ar ? "إخفاء" : "Unpublish") : (ar ? "نشر" : "Publish")}</button>
+                  <button className="button secondary" type="button" onClick={() => void removeWork(work)} disabled={busy}>{ar ? "حذف" : "Delete"}</button>
                 </div>
               ) : null}
             </article>
