@@ -8,6 +8,7 @@ import "../components/SearchLauncher.css";
 import "./ravine-ui-refinement.css";
 import "./ravine-brand-refinement.css";
 import "./ravine-dashboard.css";
+import "./ravine-final-visual-fixes.css";
 import type { ReactNode } from "react";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
