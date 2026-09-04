@@ -91,17 +91,28 @@ export default function SearchLauncher({ locale, categories }: Props) {
 
   useEffect(() => {
     if (!open) return;
-    const previous = document.body.style.overflow;
+
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    const previousBodyPaddingRight = document.body.style.paddingRight;
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+
+    document.documentElement.style.overflow = "hidden";
     document.body.style.overflow = "hidden";
+    if (scrollbarWidth > 0) document.body.style.paddingRight = `${scrollbarWidth}px`;
+
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") close();
     };
+
     window.addEventListener("keydown", onKey);
     return () => {
-      document.body.style.overflow = previous;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+      document.body.style.overflow = previousBodyOverflow;
+      document.body.style.paddingRight = previousBodyPaddingRight;
       window.removeEventListener("keydown", onKey);
     };
-  }, [open, closing]);
+  }, [open]);
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -129,7 +140,15 @@ export default function SearchLauncher({ locale, categories }: Props) {
 
   return (
     <>
-      <button type="button" className="ravine-minor-link ravine-search-trigger" onClick={() => { setClosing(false); setOpen(true); }} aria-label={label}>
+      <button
+        type="button"
+        className="ravine-minor-link ravine-search-trigger"
+        onClick={() => {
+          setClosing(false);
+          setOpen(true);
+        }}
+        aria-label={label}
+      >
         <Search size={15} aria-hidden="true" />
         <span>{label}</span>
       </button>
@@ -138,22 +157,40 @@ export default function SearchLauncher({ locale, categories }: Props) {
         <div
           className={`ravine-search-overlay${closing ? " is-closing" : ""}`}
           role="presentation"
-          onMouseDown={(event) => { if (event.currentTarget === event.target) close(); }}
-          onAnimationEnd={(event) => { if (closing && event.target === event.currentTarget) finishClose(); }}
+          onPointerDown={(event) => {
+            if (event.currentTarget === event.target) close();
+          }}
+          onAnimationEnd={(event) => {
+            if (closing && event.target === event.currentTarget) finishClose();
+          }}
         >
-          <div className={`ravine-search-dialog${advanced ? " is-advanced" : ""}${closing ? " is-closing" : ""}`} role="dialog" aria-modal="true" aria-labelledby="ravine-search-title" dir={ar ? "rtl" : "ltr"}>
+          <div
+            className={`ravine-search-dialog${advanced ? " is-advanced" : ""}${closing ? " is-closing" : ""}`}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="ravine-search-title"
+            dir={ar ? "rtl" : "ltr"}
+            onPointerDown={(event) => event.stopPropagation()}
+          >
             <div className="ravine-search-dialog-head">
               <div>
                 <div className="eyebrow">{ar ? "رَافِين / البحث" : "RAVINE / SEARCH"}</div>
                 <h2 id="ravine-search-title">{ar ? "ابحث داخل عالم رَافِين." : "Search inside the RAVINE world."}</h2>
               </div>
-              <button type="button" className="ravine-search-close" onClick={close} aria-label={ar ? "إغلاق البحث" : "Close search"}><X size={18} /></button>
+              <button type="button" className="ravine-search-close" onClick={close} aria-label={ar ? "إغلاق البحث" : "Close search"}>
+                <X size={18} />
+              </button>
             </div>
 
             <form onSubmit={submit} className="ravine-search-form">
               <label className="ravine-search-input">
                 <Search size={18} aria-hidden="true" />
-                <input value={query} onChange={(event) => setQuery(event.target.value)} autoFocus placeholder={ar ? "اسم عمل، فكرة، مبدع، موضوع..." : "A work, idea, creator, topic..."} />
+                <input
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  autoFocus
+                  placeholder={ar ? "اسم عمل، فكرة، مبدع، موضوع..." : "A work, idea, creator, topic..."}
+                />
               </label>
 
               <div className="ravine-search-field-grid two">
