@@ -7,7 +7,6 @@ import AuthTrigger, { AuthModal } from "./AuthTrigger";
 import MobileNav from "./MobileNav";
 import LanguageSwitcher from "./LanguageSwitcher";
 import SearchLauncher from "./SearchLauncher";
-import "./SearchLauncher.css";
 
 const navigation = [
   ["discover", "Discover", "اكتشف"],
@@ -20,18 +19,24 @@ const navigation = [
 ] as const;
 
 type Locale = "ar" | "en";
+type HeaderCategory = { id: number; name: string; slug: string | null };
 
 export default async function RavineShell({ locale, children }: { locale: Locale; children: ReactNode }) {
   const isArabic = locale === "ar";
-
   let user = null;
+  let categories: HeaderCategory[] = [];
 
   try {
     const supabase = await createClient();
-    const { data } = await supabase.auth.getUser();
-    user = data.user;
+    const [{ data: userData }, { data: categoryData }] = await Promise.all([
+      supabase.auth.getUser(),
+      supabase.from("categories").select("id,name,slug").order("name", { ascending: true }).limit(40),
+    ]);
+    user = userData.user;
+    categories = (categoryData ?? []) as HeaderCategory[];
   } catch {
     user = null;
+    categories = [];
   }
 
   return (
@@ -44,7 +49,7 @@ export default async function RavineShell({ locale, children }: { locale: Locale
           </nav>
           <div className="ravine-header-actions">
             <MobileNav locale={locale} authenticated={Boolean(user)} />
-            <SearchLauncher locale={locale} />
+            <SearchLauncher locale={locale} categories={categories} />
             {user ? (
               <>
                 <Link href={`/${locale}/library`} className="ravine-minor-link">{isArabic ? "المكتبة" : "Library"}</Link>
