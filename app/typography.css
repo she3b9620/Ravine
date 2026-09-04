@@ -23,17 +23,8 @@
 @font-face{font-family:"RAVINE Text";src:url("https://cdn.jsdelivr.net/gh/engdawood/thmanyah-font-web@4266a9d/fonts/thmanyah-serif-text/woff2/thmanyah-serif-text-Black.woff2") format("woff2");font-weight:900;font-style:normal;font-display:swap;unicode-range:U+0600-06FF,U+0750-077F,U+08A0-08FF,U+FB50-FDFF,U+FE70-FEFF}
 
 :root{--ravine-font-display:"RAVINE Display",serif;--ravine-font-text:"RAVINE Text",serif}
-
 html,body,.ravine-shell,.ravine-shell *{font-family:var(--ravine-font-text)!important;font-synthesis:none}
-
 .ravine-shell .hero h1,.ravine-shell .section h2,.ravine-shell .discover-page h1,.ravine-shell .work h3,.ravine-shell .video-meta h2,.ravine-shell .auth-card h1,.ravine-shell .watch-copy h1,.ravine-shell .about-grid h2{font-family:var(--ravine-font-display)!important}
-
 .ravine-shell .ravine-brand,.ravine-shell .ravine-footer-brand{font-family:"Satoshi",sans-serif!important}
-
-.about-lead{margin-bottom:34px!important}
-.about-principles{gap:22px!important}
-.about-principles>div{gap:28px!important;padding-top:20px!important}
-.about-principles strong{line-height:1.4!important}
-.about-principles span{line-height:1.9!important}
-
+.about-lead{margin-bottom:34px!important}.about-principles{gap:22px!important}.about-principles>div{gap:28px!important;padding-top:20px!important}.about-principles strong{line-height:1.4!important}.about-principles span{line-height:1.9!important}
 @media(max-width:820px){.about-lead{margin-bottom:26px!important}.about-principles{gap:18px!important}.about-principles>div{gap:8px!important;padding-top:18px!important}}
