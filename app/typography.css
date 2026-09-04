@@ -1,171 +1,118 @@
-/* RAVINE Typography — true script-aware families. */
+/* RAVINE Typography — explicit script roles. */
 
-/* The package stylesheet is still linked from app/layout.tsx for the canonical Thmanyah families. */
+@font-face {
+  font-family: "Thmanyah Sans";
+  src: url("/fonts/thmanyahsans-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Thmanyah Sans";
+  src: url("/fonts/thmanyahsans-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Thmanyah Sans";
+  src: url("/fonts/thmanyahsans-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Thmanyah Sans";
+  src: url("/fonts/thmanyahsans-Black.woff2") format("woff2");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
-  --ravine-font-display: "RAVINE Display", sans-serif;
-  --ravine-font-text: "RAVINE Text", sans-serif;
-  --ravine-font-ui: "RAVINE UI", sans-serif;
+  --ravine-satoshi: "Satoshi", Arial, sans-serif;
+  --ravine-thmanyah-sans: "Thmanyah Sans", Arial, sans-serif;
+  --ravine-thmanyah-display: "Thmanyah Serif Display", "Thmanyah Sans", Georgia, serif;
+  --ravine-thmanyah-text: "Thmanyah Serif Text", "Thmanyah Sans", Georgia, serif;
 }
 
-/* One logical family per role. Unicode ranges force Latin glyphs to Satoshi and Arabic glyphs to Thmanyah. */
-@font-face {
-  font-family: "RAVINE Display";
-  src: url("/fonts/Satoshi-Regular.otf") format("opentype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-  unicode-range: U+0000-024F, U+1E00-1EFF;
-}
-@font-face {
-  font-family: "RAVINE Display";
-  src: url("https://cdn.jsdelivr.net/gh/engdawood/thmanyah-font-web@4266a9d/fonts/thmanyah-serif-display/woff2/thmanyah-serif-display-Regular.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-  unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
-}
-@font-face {
-  font-family: "RAVINE Display";
-  src: url("/fonts/Satoshi-Bold.otf") format("opentype");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-  unicode-range: U+0000-024F, U+1E00-1EFF;
-}
-@font-face {
-  font-family: "RAVINE Display";
-  src: url("https://cdn.jsdelivr.net/gh/engdawood/thmanyah-font-web@4266a9d/fonts/thmanyah-serif-display/woff2/thmanyah-serif-display-Bold.woff2") format("woff2");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-  unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
+/* English stays Satoshi. */
+.ravine-shell[dir="ltr"] {
+  font-family: var(--ravine-satoshi) !important;
 }
 
-@font-face {
-  font-family: "RAVINE Text";
-  src: url("/fonts/Satoshi-Regular.otf") format("opentype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-  unicode-range: U+0000-024F, U+1E00-1EFF;
-}
-@font-face {
-  font-family: "RAVINE Text";
-  src: url("https://cdn.jsdelivr.net/gh/engdawood/thmanyah-font-web@4266a9d/fonts/thmanyah-serif-text/woff2/thmanyah-serif-text-Regular.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-  unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
-}
-@font-face {
-  font-family: "RAVINE Text";
-  src: url("/fonts/Satoshi-Bold.otf") format("opentype");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-  unicode-range: U+0000-024F, U+1E00-1EFF;
-}
-@font-face {
-  font-family: "RAVINE Text";
-  src: url("https://cdn.jsdelivr.net/gh/engdawood/thmanyah-font-web@4266a9d/fonts/thmanyah-serif-text/woff2/thmanyah-serif-text-Bold.woff2") format("woff2");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-  unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
+.ravine-shell[dir="ltr"] .ravine-brand,
+.ravine-shell[dir="ltr"] .ravine-nav-link,
+.ravine-shell[dir="ltr"] .ravine-minor-link,
+.ravine-shell[dir="ltr"] .button,
+.ravine-shell[dir="ltr"] h1,
+.ravine-shell[dir="ltr"] h2,
+.ravine-shell[dir="ltr"] h3,
+.ravine-shell[dir="ltr"] p,
+.ravine-shell[dir="ltr"] span,
+.ravine-shell[dir="ltr"] label,
+.ravine-shell[dir="ltr"] input,
+.ravine-shell[dir="ltr"] select,
+.ravine-shell[dir="ltr"] button {
+  font-family: var(--ravine-satoshi) !important;
 }
 
-@font-face {
-  font-family: "RAVINE UI";
-  src: url("/fonts/Satoshi-Regular.otf") format("opentype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-  unicode-range: U+0000-024F, U+1E00-1EFF;
-}
-@font-face {
-  font-family: "RAVINE UI";
-  src: url("https://cdn.jsdelivr.net/gh/engdawood/thmanyah-font-web@4266a9d/fonts/thmanyah-sans/woff2/thmanyah-sans-Regular.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-  unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
-}
-@font-face {
-  font-family: "RAVINE UI";
-  src: url("/fonts/Satoshi-Bold.otf") format("opentype");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-  unicode-range: U+0000-024F, U+1E00-1EFF;
-}
-@font-face {
-  font-family: "RAVINE UI";
-  src: url("https://cdn.jsdelivr.net/gh/engdawood/thmanyah-font-web@4266a9d/fonts/thmanyah-sans/woff2/thmanyah-sans-Bold.woff2") format("woff2");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-  unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
+/* Arabic page uses the local Thmanyah webfont that is already bundled with RAVINE. */
+.ravine-shell[dir="rtl"] {
+  font-family: var(--ravine-thmanyah-sans) !important;
 }
 
-html,
-body,
-button,
-input,
-textarea,
-select {
-  font-family: var(--ravine-font-ui) !important;
+.ravine-shell[dir="rtl"] .ravine-brand,
+.ravine-shell[dir="rtl"] .ravine-language,
+.ravine-shell[dir="rtl"] .button,
+.ravine-shell[dir="rtl"] .ravine-nav-link,
+.ravine-shell[dir="rtl"] .ravine-minor-link,
+.ravine-shell[dir="rtl"] .eyebrow,
+.ravine-shell[dir="rtl"] .work-kicker,
+.ravine-shell[dir="rtl"] .video-kicker,
+.ravine-shell[dir="rtl"] .duration,
+.ravine-shell[dir="rtl"] .video-stats,
+.ravine-shell[dir="rtl"] .auth-google,
+.ravine-shell[dir="rtl"] .auth-switch,
+.ravine-shell[dir="rtl"] .auth-form input,
+.ravine-shell[dir="rtl"] .auth-form select,
+.ravine-shell[dir="rtl"] .watch-kicker,
+.ravine-shell[dir="rtl"] .watch-pill,
+.ravine-shell[dir="rtl"] .watch-action,
+.ravine-shell[dir="rtl"] .watch-progress-note,
+.ravine-shell[dir="rtl"] .ravine-footer-meta,
+.ravine-shell[dir="rtl"] .auth-form label {
+  font-family: var(--ravine-thmanyah-sans) !important;
 }
 
-.hero h1,
-.section h2,
-.discover-page h1,
-.work h3,
-.video-meta h2,
-.auth-card h1,
-.watch-copy h1,
-.about-grid h2 {
-  font-family: var(--ravine-font-display) !important;
+.ravine-shell[dir="rtl"] .hero h1,
+.ravine-shell[dir="rtl"] .section h2,
+.ravine-shell[dir="rtl"] .discover-page h1,
+.ravine-shell[dir="rtl"] .work h3,
+.ravine-shell[dir="rtl"] .video-meta h2,
+.ravine-shell[dir="rtl"] .auth-card h1,
+.ravine-shell[dir="rtl"] .watch-copy h1,
+.ravine-shell[dir="rtl"] .about-grid h2 {
+  font-family: var(--ravine-thmanyah-display) !important;
 }
 
-.hero p,
-.section-note,
-.work p,
-.video-meta p,
-.auth-intro,
-.auth-message,
-.watch-copy p,
-.watch-action-message,
-.ravine-footer p,
-.about-lead,
-.about-principles span {
-  font-family: var(--ravine-font-text) !important;
+.ravine-shell[dir="rtl"] .hero p,
+.ravine-shell[dir="rtl"] .section-note,
+.ravine-shell[dir="rtl"] .work p,
+.ravine-shell[dir="rtl"] .video-meta p,
+.ravine-shell[dir="rtl"] .auth-intro,
+.ravine-shell[dir="rtl"] .auth-message,
+.ravine-shell[dir="rtl"] .watch-copy p,
+.ravine-shell[dir="rtl"] .watch-action-message,
+.ravine-shell[dir="rtl"] .ravine-footer p,
+.ravine-shell[dir="rtl"] .about-lead,
+.ravine-shell[dir="rtl"] .about-principles span {
+  font-family: var(--ravine-thmanyah-text) !important;
 }
 
-.ravine-brand,
-.ravine-footer-brand,
-.ravine-language,
-.ravine-nav-link,
-.ravine-minor-link,
-.button,
-.eyebrow,
-.work-kicker,
-.video-kicker,
-.duration,
-.video-stats,
-.auth-google,
-.auth-switch,
-.auth-form label,
-.auth-form input,
-.auth-form select,
-.watch-kicker,
-.watch-pill,
-.watch-action,
-.watch-progress-note,
-.ravine-footer-meta,
-.empty-state,
-.about-principles strong {
-  font-family: var(--ravine-font-ui) !important;
+/* Keep the Latin brand mark in Satoshi even inside Arabic UI. */
+.ravine-shell[dir="rtl"] .ravine-brand {
+  font-family: var(--ravine-satoshi) !important;
 }
 
 .about-lead {
