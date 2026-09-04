@@ -33,14 +33,14 @@ function copyCookies(from: NextResponse, to: NextResponse) {
 }
 
 export default async function proxy(request: NextRequest) {
-  const response = intlMiddleware(request);
-
-  const segments = request.nextUrl.pathname.split("/").filter(Boolean);
+  const pathname = request.nextUrl.pathname;
+  const segments = pathname.split("/").filter(Boolean);
   const localeCandidate = segments[0];
   const appPath = `/${segments.slice(1).join("/")}` || "/";
+  const protectedPath = isProtectedPath(pathname);
 
-  // Compatibility alias: the product currently has a concrete /discover route.
-  // Keep /explore reachable while the Master Spec's canonical-name decision remains OPEN.
+  const response = intlMiddleware(request);
+
   if (
     routing.locales.includes(
       localeCandidate as (typeof routing.locales)[number]
@@ -52,11 +52,29 @@ export default async function proxy(request: NextRequest) {
     return NextResponse.redirect(discoverUrl, 307);
   }
 
-  if (!isProtectedPath(request.nextUrl.pathname)) return response;
+  if (!protectedPath) return response;
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-  if (!supabaseUrl || !supabaseKey) return response;
+
+  if (!supabaseUrl || !supabaseKey) {
+    const locale = routing.locales.includes(
+      localeCandidate as (typeof routing.locales)[number]
+    )
+      ? localeCandidate
+      : routing.defaultLocale;
+
+    const loginUrl = new URL(`/${locale}/auth`, request.url);
+    loginUrl.searchParams.set(
+      "next",
+      `${request.nextUrl.pathname}${request.nextUrl.search}`
+    );
+
+    const redirectResponse = NextResponse.redirect(loginUrl);
+    redirectResponse.headers.set("Cache-Control", "private, no-store, max-age=0");
+    copyCookies(response, redirectResponse);
+    return redirectResponse;
+  }
 
   const supabase = createServerClient(supabaseUrl, supabaseKey, {
     cookies: {
@@ -79,9 +97,7 @@ export default async function proxy(request: NextRequest) {
 
   const { data, error } = await supabase.auth.getClaims();
 
-  if (!error && data?.claims) {
-    return response;
-  }
+  if (!error && data?.claims) return response;
 
   const locale = routing.locales.includes(
     localeCandidate as (typeof routing.locales)[number]
