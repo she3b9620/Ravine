@@ -6,7 +6,6 @@ import { Check, ChevronDown, RotateCcw, SlidersHorizontal, X } from "lucide-reac
 type Category = { id: number; name: string; slug: string | null };
 type Locale = "ar" | "en";
 type FilterKey = "category" | "type";
-type PanelKey = "duration" | "format" | "quality" | "sort";
 
 type Props = {
   locale: Locale;
@@ -54,10 +53,6 @@ const sorts = [
   { value: "oldest", ar: "الأقدم", en: "Oldest" },
 ];
 
-function optionLabel(options: Array<{ value: string; ar: string; en: string }>, value: string, fallback: string) {
-  return value ? options.find((item) => item.value === value)?.[fallback === "ar" ? "ar" : "en"] ?? value : null;
-}
-
 export default function DiscoverFilters({
   locale,
   query,
@@ -103,14 +98,10 @@ export default function DiscoverFilters({
 
   const categoryLabel = selectedCategory
     ? categories.find((item) => String(item.id) === selectedCategory)?.name ?? (isArabic ? "تصنيف" : "Category")
-    : isArabic
-      ? "كل التصنيفات"
-      : "All categories";
+    : isArabic ? "كل التصنيفات" : "All categories";
   const typeLabel = selectedType
     ? types.find((item) => item.value === selectedType)?.[locale] ?? selectedType
-    : isArabic
-      ? "كل الأنواع"
-      : "All types";
+    : isArabic ? "كل الأنواع" : "All types";
 
   const advancedCount = [selectedDuration, selectedFormat, selectedQuality].filter(Boolean).length;
 
@@ -127,11 +118,7 @@ export default function DiscoverFilters({
     <form ref={rootRef} className="discover-filters" action={`/${locale}/discover`}>
       <label className="discover-search">
         <span aria-hidden="true">⌕</span>
-        <input
-          name="q"
-          defaultValue={query}
-          placeholder={isArabic ? "ابحث عن عمل أو فكرة..." : "Search work or ideas..."}
-        />
+        <input name="q" defaultValue={query} placeholder={isArabic ? "ابحث عن عمل أو فكرة..." : "Search work or ideas..."} />
       </label>
 
       <div className="discover-filter-field">
@@ -139,10 +126,7 @@ export default function DiscoverFilters({
           className={`discover-filter-trigger${open === "category" ? " is-open" : ""}`}
           type="button"
           aria-expanded={open === "category"}
-          onClick={() => {
-            setAdvancedOpen(false);
-            setOpen(open === "category" ? null : "category");
-          }}
+          onClick={() => { setAdvancedOpen(false); setOpen(open === "category" ? null : "category"); }}
         >
           <span className="discover-filter-copy">
             <small>{isArabic ? "التصنيف" : "Category"}</small>
@@ -150,7 +134,7 @@ export default function DiscoverFilters({
           </span>
           <span className="discover-chevron" aria-hidden="true"><ChevronDown size={16} /></span>
         </button>
-        {open === "category" && (
+        {open === "category" ? (
           <div className="discover-filter-menu" role="listbox" aria-label={isArabic ? "اختيار التصنيف" : "Choose category"}>
             <button type="button" className={!selectedCategory ? "is-selected" : ""} onClick={() => { setSelectedCategory(""); setOpen(null); }}>
               <span>{isArabic ? "كل التصنيفات" : "All categories"}</span>
@@ -166,7 +150,7 @@ export default function DiscoverFilters({
               );
             })}
           </div>
-        )}
+        ) : null}
         <input type="hidden" name="category" value={selectedCategory} />
       </div>
 
@@ -175,10 +159,7 @@ export default function DiscoverFilters({
           className={`discover-filter-trigger${open === "type" ? " is-open" : ""}`}
           type="button"
           aria-expanded={open === "type"}
-          onClick={() => {
-            setAdvancedOpen(false);
-            setOpen(open === "type" ? null : "type");
-          }}
+          onClick={() => { setAdvancedOpen(false); setOpen(open === "type" ? null : "type"); }}
         >
           <span className="discover-filter-copy">
             <small>{isArabic ? "النوع" : "Type"}</small>
@@ -186,7 +167,7 @@ export default function DiscoverFilters({
           </span>
           <span className="discover-chevron" aria-hidden="true"><ChevronDown size={16} /></span>
         </button>
-        {open === "type" && (
+        {open === "type" ? (
           <div className="discover-filter-menu" role="listbox" aria-label={isArabic ? "اختيار النوع" : "Choose type"}>
             <button type="button" className={!selectedType ? "is-selected" : ""} onClick={() => { setSelectedType(""); setOpen(null); }}>
               <span>{isArabic ? "كل الأنواع" : "All types"}</span>
@@ -202,7 +183,7 @@ export default function DiscoverFilters({
               );
             })}
           </div>
-        )}
+        ) : null}
         <input type="hidden" name="type" value={selectedType} />
       </div>
 
@@ -217,21 +198,17 @@ export default function DiscoverFilters({
         {advancedCount > 0 ? <b>{advancedCount}</b> : null}
       </button>
 
-      <button className="button primary discover-submit" type="submit">
-        {isArabic ? "اكتشف" : "Discover"}
-      </button>
+      <button className="button primary discover-submit" type="submit">{isArabic ? "اكتشف" : "Discover"}</button>
 
       <div className={`discover-filter-sheet${advancedOpen ? " is-open" : ""}`} aria-hidden={!advancedOpen}>
         <div className="discover-filter-backdrop" onClick={() => setAdvancedOpen(false)} />
-        <aside className="discover-filter-panel" role="dialog" aria-modal="false" aria-label={isArabic ? "فلاتر الاكتشاف" : "Discover filters"}>
+        <aside className="discover-filter-panel" role="dialog" aria-modal="true" aria-label={isArabic ? "فلاتر الاكتشاف" : "Discover filters"}>
           <div className="discover-filter-panel-head">
             <div>
-              <span>{isArabic ? "RAVINE / FILTERS" : "RAVINE / FILTERS"}</span>
+              <span>RAVINE / FILTERS</span>
               <h2>{isArabic ? "شكّل طريق اكتشافك." : "Shape your discovery path."}</h2>
             </div>
-            <button type="button" className="discover-filter-close" onClick={() => setAdvancedOpen(false)} aria-label={isArabic ? "إغلاق الفلاتر" : "Close filters"}>
-              <X size={18} />
-            </button>
+            <button type="button" className="discover-filter-close" onClick={() => setAdvancedOpen(false)} aria-label={isArabic ? "إغلاق الفلاتر" : "Close filters"}><X size={18} /></button>
           </div>
 
           <div className="discover-filter-panel-grid">
