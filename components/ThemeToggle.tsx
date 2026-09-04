@@ -19,7 +19,12 @@ export default function ThemeToggle({ locale }: { locale: "ar" | "en" }) {
 
   function toggleTheme() {
     const nextTheme: Theme = theme === "dark" ? "light" : "dark";
-    document.documentElement.dataset.theme = nextTheme;
+    const root = document.documentElement;
+    root.classList.remove("theme-switching");
+    void root.offsetWidth;
+    root.dataset.theme = nextTheme;
+    root.classList.add("theme-switching");
+    window.setTimeout(() => root.classList.remove("theme-switching"), 520);
     window.localStorage.setItem(STORAGE_KEY, nextTheme);
     setTheme(nextTheme);
   }
