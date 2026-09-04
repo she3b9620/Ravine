@@ -16,8 +16,19 @@ type Locale = "ar" | "en";
 export default async function RavineShell({ locale, children }: { locale: Locale; children: ReactNode }) {
   const isArabic = locale === "ar";
   const alternateLocale: Locale = isArabic ? "en" : "ar";
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+
+  let user = null;
+  const hasSupabaseConfig = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+
+  if (hasSupabaseConfig) {
+    try {
+      const supabase = await createClient();
+      const { data } = await supabase.auth.getUser();
+      user = data.user;
+    } catch {
+      user = null;
+    }
+  }
 
   return (
     <div className="ravine-shell" dir={isArabic ? "rtl" : "ltr"}>
