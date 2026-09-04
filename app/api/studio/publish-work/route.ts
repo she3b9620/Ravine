@@ -2,10 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
 const allowedContentTypes = new Set(["video", "short", "documentary", "podcast", "film"]);
+const allowedVisibility = new Set(["public", "followers", "unlisted", "private", "custom"]);
+
+type Body = {
+  videoId?: number;
+  published?: boolean;
+  visibility?: string;
+};
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json() as { videoId?: number; published?: boolean };
+    const body = (await request.json()) as Body;
     const videoId = Number(body.videoId);
     const published = body.published === true;
 
@@ -21,7 +28,7 @@ export async function POST(request: NextRequest) {
 
     const { data: work, error: workError } = await supabase
       .from("videos")
-      .select("id,user_id,creator_id,title,description,video_url,content_type,quality,published")
+      .select("id,user_id,creator_id,title,description,video_url,content_type,quality,published,visibility")
       .eq("id", videoId)
       .single();
 
@@ -44,7 +51,7 @@ export async function POST(request: NextRequest) {
         .from("videos")
         .update({ published: false })
         .eq("id", videoId)
-        .select("id,title,description,content_type,quality,published,video_url,views,likes,created_at")
+        .select("id,title,description,content_type,quality,published,visibility,video_url,views,likes,created_at")
         .single();
 
       if (error || !data) return NextResponse.json({ error: error?.message || "Could not unpublish work." }, { status: 500 });
@@ -55,6 +62,9 @@ export async function POST(request: NextRequest) {
     const description = typeof work.description === "string" ? work.description.trim() : "";
     const contentType = typeof work.content_type === "string" ? work.content_type : "video";
     const quality = typeof work.quality === "string" ? work.quality : "1080p";
+    const visibility = typeof body.visibility === "string"
+      ? body.visibility
+      : typeof work.visibility === "string" ? work.visibility : "public";
 
     if (!title || !work.video_url) {
       return NextResponse.json({ error: "A title and media source are required before publishing." }, { status: 422 });
@@ -62,6 +72,10 @@ export async function POST(request: NextRequest) {
 
     if (!allowedContentTypes.has(contentType)) {
       return NextResponse.json({ error: "This content type is not supported." }, { status: 422 });
+    }
+
+    if (!allowedVisibility.has(visibility)) {
+      return NextResponse.json({ error: "This visibility mode is not supported." }, { status: 422 });
     }
 
     const { data, error } = await supabase
@@ -72,9 +86,10 @@ export async function POST(request: NextRequest) {
         description: description || null,
         content_type: contentType,
         quality,
+        visibility,
       })
       .eq("id", videoId)
-      .select("id,title,description,content_type,quality,published,video_url,views,likes,created_at")
+      .select("id,title,description,content_type,quality,published,visibility,video_url,views,likes,created_at")
       .single();
 
     if (error || !data) {
