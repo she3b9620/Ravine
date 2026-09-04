@@ -1,0 +1,44 @@
+/* RAVINE Motion — layered, cinematic, restrained by interaction density. */
+
+@keyframes ravinePageIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes ravineHeroDrift{0%,100%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(0,-7px,0) scale(1.008)}}
+@keyframes ravineAmbient{0%,100%{opacity:.72;transform:scale(1)}50%{opacity:1;transform:scale(1.035)}}
+@keyframes ravineLineReveal{from{opacity:0;transform:scaleX(0);transform-origin:left center}to{opacity:1;transform:scaleX(1)}}
+@keyframes ravineFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+
+.ravine-header{animation:ravinePageIn .65s cubic-bezier(.22,.61,.36,1) both}
+.ravine-main{animation:ravinePageIn .7s .03s cubic-bezier(.22,.61,.36,1) both}
+.hero{isolation:isolate}
+.hero:before,.hero:after{content:"";position:absolute;pointer-events:none;z-index:0;border-radius:50%;filter:blur(1px);animation:ravineAmbient 10s ease-in-out infinite}
+.hero:before{width:46vw;height:46vw;max-width:700px;max-height:700px;right:-10vw;top:-18vw;background:radial-gradient(circle,rgba(24,63,70,.18),transparent 68%)}
+.hero:after{width:34vw;height:34vw;max-width:520px;max-height:520px;left:-12vw;bottom:-18vw;background:radial-gradient(circle,rgba(196,122,82,.075),transparent 70%);animation-delay:-4s}
+.hero-inner{animation:ravineHeroDrift 11s ease-in-out infinite}
+.eyebrow:after{content:"";display:block;width:28px;height:1px;margin-top:9px;background:rgba(196,122,82,.5);animation:ravineLineReveal .65s .25s cubic-bezier(.22,.61,.36,1) both}
+.hero-actions .button:nth-child(1){animation:ravinePageIn .7s .14s both}
+.hero-actions .button:nth-child(2){animation:ravinePageIn .7s .21s both}
+
+.section{animation:ravinePageIn .7s cubic-bezier(.22,.61,.36,1) both}
+.section-head{position:relative}
+.section-head:after{content:"";position:absolute;inset:auto 0 -14px 0;height:1px;background:linear-gradient(90deg,rgba(196,122,82,.26),transparent 42%);transform-origin:left;animation:ravineLineReveal .8s .08s both}
+
+.video-card,.work,.pathway-card,.creator-feature{will-change:transform}
+.video-card,.work,.pathway-card,.creator-feature,.button,.watch-action,.watch-pill{transition-timing-function:cubic-bezier(.22,.61,.36,1)}
+.video-card:hover,.work:hover{transform:translateY(-7px) scale(1.009);box-shadow:0 22px 58px rgba(0,0,0,.22)}
+.video-card .video-thumb img,.work-art{transition:transform .8s cubic-bezier(.22,.61,.36,1),filter .5s ease}
+.video-card:hover .video-thumb img{transform:scale(1.045)}
+.work:hover .work-art{transform:scale(1.028)}
+.button:active,.watch-action:active{transform:translateY(1px) scale(.985)!important}
+
+.ravine-nav-link{position:relative;padding-block:8px}
+.ravine-nav-link:after{content:"";position:absolute;left:0;right:0;bottom:1px;height:1px;background:var(--copper);transform:scaleX(0);transform-origin:right;transition:transform .35s cubic-bezier(.22,.61,.36,1)}
+.ravine-nav-link:hover:after,.ravine-nav-link:focus-visible:after{transform:scaleX(1);transform-origin:left}
+.ravine-language{transition:transform .3s cubic-bezier(.22,.61,.36,1),border-color .25s ease,background .25s ease!important}
+.ravine-language:hover{transform:translateY(-2px) rotate(-2deg)}
+.ravine-mobile-menu-button{transition:transform .3s ease,border-color .25s ease,background .25s ease}
+.ravine-mobile-menu-button:hover{transform:rotate(4deg) scale(1.04)}
+
+@media(prefers-reduced-motion:reduce){
+  .ravine-header,.ravine-main,.hero-inner,.hero:before,.hero:after,.section,.section-head:after,.hero-actions .button:nth-child(1),.hero-actions .button:nth-child(2),.eyebrow:after{animation:none!important}
+  .ravine-nav-link:after{transition:none!important}
+  .video-card:hover,.work:hover,.ravine-language:hover,.ravine-mobile-menu-button:hover{transform:none!important}
+}
