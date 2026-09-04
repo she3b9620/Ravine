@@ -46,13 +46,15 @@ export default async function WatchPage({ params }: { params: Promise<{ locale: 
         ) : (
           <div className="empty-state" style={{ minHeight: "60vh", justifyContent: "center", alignItems: "center" }}><strong>{ar ? "العمل غير متاح للتشغيل حاليًا." : "This work is not available for playback yet."}</strong></div>
         )}
+
         <div className="watch-copy">
           <div className="watch-kicker">{video.content_type || "WORK"}{video.quality ? ` · ${video.quality}` : ""}</div>
           <h1>{video.title || (ar ? "بدون عنوان" : "Untitled")}</h1>
           <p>{video.description || (ar ? "عمل إبداعي من مجتمع RAVINE." : "A creative work from the RAVINE community.")}</p>
           <div className="watch-meta"><span className="watch-pill">{Number(video.views || 0).toLocaleString()} {ar ? "مشاهدة" : "views"}</span><span className="watch-pill">{Number(video.likes || 0).toLocaleString()} {ar ? "إعجاب" : "likes"}</span>{video.category && <span className="watch-pill">{video.category}</span>}{video.duration && <span className="watch-pill">{Math.floor(video.duration / 60)}:{String(video.duration % 60).padStart(2, "0")}</span>}</div>
-          <WatchActions videoId={video.id} duration={video.duration} locale={locale} />
         </div>
+
+        <WatchActions videoId={video.id} duration={video.duration} locale={locale} />
       </div>
     </main>
   );
