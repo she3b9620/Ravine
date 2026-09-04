@@ -3,8 +3,10 @@ import { NextResponse } from "next/server";
 
 function extractStoragePath(videoUrl: string | null) {
   if (!videoUrl) return null;
+
   const marker = "/storage/v1/object/public/videos/";
   const index = videoUrl.indexOf(marker);
+
   if (index !== -1) {
     try {
       return decodeURIComponent(videoUrl.slice(index + marker.length));
@@ -12,10 +14,16 @@ function extractStoragePath(videoUrl: string | null) {
       return videoUrl.slice(index + marker.length);
     }
   }
+
   if (!videoUrl.startsWith("http://") && !videoUrl.startsWith("https://")) {
     return videoUrl.replace(/^\/+/, "");
   }
+
   return null;
+}
+
+function isHttpUrl(value: string | null): value is string {
+  return Boolean(value && /^https?:\/\//i.test(value));
 }
 
 export async function GET(
@@ -33,7 +41,10 @@ export async function GET(
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !serviceRoleKey) {
-    return NextResponse.json({ error: "Video service is not configured." }, { status: 503 });
+    return NextResponse.json(
+      { error: "Video service is not configured." },
+      { status: 503 }
+    );
   }
 
   const supabase = createClient(supabaseUrl, serviceRoleKey, {
@@ -48,16 +59,40 @@ export async function GET(
     .maybeSingle();
 
   if (videoError) {
-    return NextResponse.json({ error: "Unable to load video." }, { status: 500 });
+    return NextResponse.json(
+      { error: "Unable to load video." },
+      { status: 500 }
+    );
   }
 
   if (!video?.video_url) {
-    return NextResponse.json({ error: "Video file is unavailable." }, { status: 404 });
+    return NextResponse.json(
+      { error: "Video file is unavailable." },
+      { status: 404 }
+    );
+  }
+
+  // Transitional compatibility: Cloudinary (or another approved CDN) can
+  // provide a delivery URL directly, while legacy Supabase Storage URLs
+  // continue to be signed server-side until media migration is complete.
+  if (isHttpUrl(video.video_url)) {
+    return NextResponse.json(
+      { signedUrl: video.video_url },
+      {
+        headers: {
+          "Cache-Control": "private, no-store",
+        },
+      }
+    );
   }
 
   const storagePath = extractStoragePath(video.video_url);
+
   if (!storagePath) {
-    return NextResponse.json({ error: "Video file is unavailable." }, { status: 404 });
+    return NextResponse.json(
+      { error: "Video file is unavailable." },
+      { status: 404 }
+    );
   }
 
   const { data, error: signedError } = await supabase.storage
@@ -65,7 +100,10 @@ export async function GET(
     .createSignedUrl(storagePath, 60 * 60);
 
   if (signedError || !data?.signedUrl) {
-    return NextResponse.json({ error: "Unable to create secure video URL." }, { status: 502 });
+    return NextResponse.json(
+      { error: "Unable to create secure video URL." },
+      { status: 502 }
+    );
   }
 
   return NextResponse.json(
