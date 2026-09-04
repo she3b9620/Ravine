@@ -1,122 +1,120 @@
-/* RAVINE Typography — script-aware, independent of /ar and /en. */
+/* RAVINE Typography — true script-aware families. */
 
-/* Thmanyah webfont files, pinned to a known community-package commit. */
+/* The package stylesheet is still linked from app/layout.tsx for the canonical Thmanyah families. */
+
+:root {
+  --ravine-font-display: "RAVINE Display", sans-serif;
+  --ravine-font-text: "RAVINE Text", sans-serif;
+  --ravine-font-ui: "RAVINE UI", sans-serif;
+}
+
+/* One logical family per role. Unicode ranges force Latin glyphs to Satoshi and Arabic glyphs to Thmanyah. */
 @font-face {
-  font-family: "Thmanyah Sans";
-  src: url("https://cdn.jsdelivr.net/gh/engdawood/thmanyah-font-web@4266a9d/fonts/thmanyah-sans/woff2/thmanyah-sans-Regular.woff2") format("woff2");
+  font-family: "RAVINE Display";
+  src: url("/fonts/Satoshi-Regular.otf") format("opentype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
+  unicode-range: U+0000-024F, U+1E00-1EFF;
 }
 @font-face {
-  font-family: "Thmanyah Sans";
-  src: url("https://cdn.jsdelivr.net/gh/engdawood/thmanyah-font-web@4266a9d/fonts/thmanyah-sans/woff2/thmanyah-sans-Medium.woff2") format("woff2");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Thmanyah Sans";
-  src: url("https://cdn.jsdelivr.net/gh/engdawood/thmanyah-font-web@4266a9d/fonts/thmanyah-sans/woff2/thmanyah-sans-Bold.woff2") format("woff2");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Thmanyah Sans";
-  src: url("https://cdn.jsdelivr.net/gh/engdawood/thmanyah-font-web@4266a9d/fonts/thmanyah-sans/woff2/thmanyah-sans-Black.woff2") format("woff2");
-  font-weight: 900;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Thmanyah Serif Display";
+  font-family: "RAVINE Display";
   src: url("https://cdn.jsdelivr.net/gh/engdawood/thmanyah-font-web@4266a9d/fonts/thmanyah-serif-display/woff2/thmanyah-serif-display-Regular.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
 }
 @font-face {
-  font-family: "Thmanyah Serif Display";
-  src: url("https://cdn.jsdelivr.net/gh/engdawood/thmanyah-font-web@4266a9d/fonts/thmanyah-serif-display/woff2/thmanyah-serif-display-Medium.woff2") format("woff2");
-  font-weight: 500;
+  font-family: "RAVINE Display";
+  src: url("/fonts/Satoshi-Bold.otf") format("opentype");
+  font-weight: 700;
   font-style: normal;
   font-display: swap;
+  unicode-range: U+0000-024F, U+1E00-1EFF;
 }
 @font-face {
-  font-family: "Thmanyah Serif Display";
+  font-family: "RAVINE Display";
   src: url("https://cdn.jsdelivr.net/gh/engdawood/thmanyah-font-web@4266a9d/fonts/thmanyah-serif-display/woff2/thmanyah-serif-display-Bold.woff2") format("woff2");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
-}
-@font-face {
-  font-family: "Thmanyah Serif Display";
-  src: url("https://cdn.jsdelivr.net/gh/engdawood/thmanyah-font-web@4266a9d/fonts/thmanyah-serif-display/woff2/thmanyah-serif-display-Black.woff2") format("woff2");
-  font-weight: 900;
-  font-style: normal;
-  font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
 }
 
 @font-face {
-  font-family: "Thmanyah Serif Text";
+  font-family: "RAVINE Text";
+  src: url("/fonts/Satoshi-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-024F, U+1E00-1EFF;
+}
+@font-face {
+  font-family: "RAVINE Text";
   src: url("https://cdn.jsdelivr.net/gh/engdawood/thmanyah-font-web@4266a9d/fonts/thmanyah-serif-text/woff2/thmanyah-serif-text-Regular.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
 }
 @font-face {
-  font-family: "Thmanyah Serif Text";
-  src: url("https://cdn.jsdelivr.net/gh/engdawood/thmanyah-font-web@4266a9d/fonts/thmanyah-serif-text/woff2/thmanyah-serif-text-Medium.woff2") format("woff2");
-  font-weight: 500;
+  font-family: "RAVINE Text";
+  src: url("/fonts/Satoshi-Bold.otf") format("opentype");
+  font-weight: 700;
   font-style: normal;
   font-display: swap;
+  unicode-range: U+0000-024F, U+1E00-1EFF;
 }
 @font-face {
-  font-family: "Thmanyah Serif Text";
+  font-family: "RAVINE Text";
   src: url("https://cdn.jsdelivr.net/gh/engdawood/thmanyah-font-web@4266a9d/fonts/thmanyah-serif-text/woff2/thmanyah-serif-text-Bold.woff2") format("woff2");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
 }
+
 @font-face {
-  font-family: "Thmanyah Serif Text";
-  src: url("https://cdn.jsdelivr.net/gh/engdawood/thmanyah-font-web@4266a9d/fonts/thmanyah-serif-text/woff2/thmanyah-serif-text-Black.woff2") format("woff2");
-  font-weight: 900;
+  font-family: "RAVINE UI";
+  src: url("/fonts/Satoshi-Regular.otf") format("opentype");
+  font-weight: 400;
   font-style: normal;
   font-display: swap;
+  unicode-range: U+0000-024F, U+1E00-1EFF;
+}
+@font-face {
+  font-family: "RAVINE UI";
+  src: url("https://cdn.jsdelivr.net/gh/engdawood/thmanyah-font-web@4266a9d/fonts/thmanyah-sans/woff2/thmanyah-sans-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
+}
+@font-face {
+  font-family: "RAVINE UI";
+  src: url("/fonts/Satoshi-Bold.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-024F, U+1E00-1EFF;
+}
+@font-face {
+  font-family: "RAVINE UI";
+  src: url("https://cdn.jsdelivr.net/gh/engdawood/thmanyah-font-web@4266a9d/fonts/thmanyah-sans/woff2/thmanyah-sans-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
 }
 
-:root {
-  --ravine-font-latin: "Satoshi", Arial, sans-serif;
-  --ravine-font-ar-display: "Thmanyah Serif Display", Georgia, serif;
-  --ravine-font-ar-text: "Thmanyah Serif Text", Georgia, serif;
-  --ravine-font-ar-ui: "Thmanyah Sans", Arial, sans-serif;
-}
-
-/* Mixed-script rule: Latin glyphs use Satoshi; Arabic glyphs fall through to Thmanyah. */
+html,
 body,
-html[lang="ar"] body,
-html[lang="en"] body,
-.ravine-language,
-.ravine-nav-link,
-.ravine-minor-link,
-.button,
-.eyebrow,
-.work-kicker,
-.video-kicker,
-.duration,
-.video-stats,
-.auth-google,
-.auth-switch,
-.auth-form input,
-.auth-form select,
-.watch-kicker,
-.watch-pill,
-.watch-action,
-.watch-progress-note {
-  font-family: var(--ravine-font-latin), var(--ravine-font-ar-ui) !important;
+button,
+input,
+textarea,
+select {
+  font-family: var(--ravine-font-ui) !important;
 }
 
 .hero h1,
@@ -127,7 +125,7 @@ html[lang="en"] body,
 .auth-card h1,
 .watch-copy h1,
 .about-grid h2 {
-  font-family: var(--ravine-font-latin), var(--ravine-font-ar-display) !important;
+  font-family: var(--ravine-font-display) !important;
 }
 
 .hero p,
@@ -141,17 +139,35 @@ html[lang="en"] body,
 .ravine-footer p,
 .about-lead,
 .about-principles span {
-  font-family: var(--ravine-font-latin), var(--ravine-font-ar-text) !important;
+  font-family: var(--ravine-font-text) !important;
 }
 
-.ravine-footer-meta,
+.ravine-brand,
+.ravine-footer-brand,
+.ravine-language,
+.ravine-nav-link,
+.ravine-minor-link,
+.button,
+.eyebrow,
+.work-kicker,
+.video-kicker,
+.duration,
+.video-stats,
+.auth-google,
+.auth-switch,
 .auth-form label,
+.auth-form input,
+.auth-form select,
+.watch-kicker,
+.watch-pill,
+.watch-action,
+.watch-progress-note,
+.ravine-footer-meta,
 .empty-state,
 .about-principles strong {
-  font-family: var(--ravine-font-latin), var(--ravine-font-ar-ui) !important;
+  font-family: var(--ravine-font-ui) !important;
 }
 
-/* Comfortable editorial rhythm for the About principles. */
 .about-lead {
   margin-bottom: 34px !important;
 }
