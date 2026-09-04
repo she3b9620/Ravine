@@ -1,0 +1,60 @@
+/* RAVINE typography: script-aware fallback, independent of /ar or /en locale. */
+
+:root {
+  --ravine-font-en: Satoshi, Arial, sans-serif;
+  --ravine-font-ar-display: "Thmanyah Serif Display", Georgia, serif;
+  --ravine-font-ar-text: "Thmanyah Serif Text", Georgia, serif;
+  --ravine-font-ar-ui: ThmanyahUI, Arial, sans-serif;
+}
+
+/* Latin stays Satoshi; Arabic glyphs fall back to the appropriate Thmanyah family. */
+body,
+.ravine-language,
+.button,
+.ravine-nav-link,
+.ravine-minor-link,
+.eyebrow,
+.work-kicker,
+.video-kicker,
+.duration,
+.video-stats,
+.auth-google,
+.auth-switch,
+.auth-form input,
+.auth-form select,
+.watch-kicker,
+.watch-pill,
+.watch-action,
+.watch-progress-note {
+  font-family: var(--ravine-font-en), var(--ravine-font-ar-ui);
+}
+
+/* Large/display text: English is Satoshi, Arabic glyphs use Thmanyah Serif Display. */
+.hero h1,
+.section h2,
+.discover-page h1,
+.work h3,
+.video-meta h2,
+.auth-card h1,
+.watch-copy h1 {
+  font-family: var(--ravine-font-en), var(--ravine-font-ar-display);
+}
+
+/* Reading text: English remains Satoshi, Arabic glyphs use Thmanyah Serif Text. */
+.hero p,
+.section-note,
+.work p,
+.video-meta p,
+.auth-intro,
+.auth-message,
+.watch-copy p,
+.ravine-footer p {
+  font-family: var(--ravine-font-en), var(--ravine-font-ar-text);
+}
+
+/* Explicit Arabic UI fallback while preserving Satoshi for Latin characters. */
+.ravine-footer-meta,
+.auth-form label,
+.empty-state {
+  font-family: var(--ravine-font-en), var(--ravine-font-ar-ui);
+}
