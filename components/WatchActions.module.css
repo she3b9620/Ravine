@@ -9,3 +9,5 @@
 :global(.watch-page .watch-actions){transition:opacity .3s ease,transform .3s ease}
 @media(max-width:820px){:global(.watch-page.cinema-active .watch-frame){padding-top:8px}:global(.watch-page.cinema-active .watch-video){border-radius:6px;transform:none}}
 @media(prefers-reduced-motion:reduce){:global(.watch-page),:global(.watch-page .watch-video),:global(.watch-page .watch-copy),:global(.watch-page .watch-actions){transition:none}}
+
+/* Preview redeploy marker: Cinema Mode styles are present on this branch. */
