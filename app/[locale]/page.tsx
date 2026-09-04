@@ -119,7 +119,7 @@ function getCreatorLabel(creator: Work["creators"], locale: Locale) {
 
 function WorkCard({ work, locale, views, likes }: { work: Work; locale: Locale; views: string; likes: string }) {
   return (
-    <Link href={`/${locale}/watch/${work.id}`} className="video-card" key={work.id}>
+    <Link href={`/${locale}/watch/${work.id}`} className="video-card">
       <div className="video-thumb">
         <img src={work.thumbnail_url || "/RAVINE.png"} alt="" loading="lazy" />
         <span className="duration">{formatDuration(work.duration)}</span>
@@ -141,24 +141,31 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const { locale: rawLocale } = await params;
   const locale: Locale = rawLocale === "en" ? "en" : "ar";
   const t = copy[locale];
-  const supabase = await createClient();
 
-  const [{ data: worksData }, { data: creatorsData }] = await Promise.all([
-    supabase
-      .from("videos")
-      .select("id,title,description,thumbnail_url,duration,views,likes,content_type,quality,creators(name,username)")
-      .eq("published", true)
-      .order("created_at", { ascending: false })
-      .limit(12),
-    supabase
-      .from("creators")
-      .select("id,name,username,avatar_url,specialty,followers")
-      .order("followers", { ascending: false, nullsFirst: false })
-      .limit(6),
-  ]);
+  let works: Work[] = [];
+  let creators: Creator[] = [];
 
-  const works = (worksData ?? []) as Work[];
-  const creators = (creatorsData ?? []) as Creator[];
+  try {
+    const supabase = await createClient();
+    const [{ data: worksData }, { data: creatorsData }] = await Promise.all([
+      supabase
+        .from("videos")
+        .select("id,title,description,thumbnail_url,duration,views,likes,content_type,quality,creators(name,username)")
+        .eq("published", true)
+        .order("created_at", { ascending: false })
+        .limit(12),
+      supabase
+        .from("creators")
+        .select("id,name,username,avatar_url,specialty,followers")
+        .order("followers", { ascending: false, nullsFirst: false })
+        .limit(6),
+    ]);
+    works = (worksData ?? []) as Work[];
+    creators = (creatorsData ?? []) as Creator[];
+  } catch {
+    // Keep the public cinematic experience renderable when the data service is unavailable.
+  }
+
   const liveWorks = works.filter((work) => work.content_type === "live").slice(0, 3);
   const podcastWorks = works.filter((work) => work.content_type === "podcast").slice(0, 3);
   const discoveryWork = works.filter((work) => work.content_type !== "live" && work.content_type !== "podcast").slice(0, 4);
@@ -191,21 +198,12 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             <span className="selection-tab">{t.yearly}</span>
           </div>
         </div>
-        {discoveryWork.length ? (
-          <div className="video-grid">
-            {discoveryWork.map((work) => <WorkCard key={work.id} work={work} locale={locale} views={t.views} likes={t.likes} />)}
-          </div>
-        ) : (
-          <div className="empty-state"><strong>{t.empty}</strong></div>
-        )}
+        {discoveryWork.length ? <div className="video-grid">{discoveryWork.map((work) => <WorkCard key={work.id} work={work} locale={locale} views={t.views} likes={t.likes} />)}</div> : <div className="empty-state"><strong>{t.empty}</strong></div>}
       </section>
 
       <section className="section">
         <div className="section-head">
-          <div>
-            <div className="eyebrow">RAVINE / DISCOVER</div>
-            <h2>{t.pathways}</h2>
-          </div>
+          <div><div className="eyebrow">RAVINE / DISCOVER</div><h2>{t.pathways}</h2></div>
           <Link className="button secondary" href={`/${locale}/discover`}>{t.discover}</Link>
         </div>
         <div className="pathway-grid">
@@ -218,54 +216,26 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
       <section className="section">
         <div className="section-head">
-          <div>
-            <div className="eyebrow">RAVINE / CREATORS</div>
-            <h2>{t.creatorsTitle}</h2>
-            <p className="section-note">{t.creatorsBody}</p>
-          </div>
+          <div><div className="eyebrow">RAVINE / CREATORS</div><h2>{t.creatorsTitle}</h2><p className="section-note">{t.creatorsBody}</p></div>
           <Link className="button secondary" href={`/${locale}/creators`}>{t.creators}</Link>
         </div>
-        {creators.length ? (
-          <div className="creator-strip">
-            {creators.map((creator) => (
-              <Link key={creator.id} href={`/${locale}/creators/${creator.id}`} className="creator-feature">
-                <div className="creator-feature-avatar"><img src={creator.avatar_url || "/RAVINE.png"} alt="" loading="lazy" /></div>
-                <div>
-                  <div className="video-kicker">{creator.specialty || "CREATOR"}</div>
-                  <strong>{creator.name || `Creator ${creator.id}`}</strong>
-                  <span>@{creator.username || `creator-${creator.id}`}</span>
-                </div>
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <div className="empty-state"><strong>{locale === "ar" ? "لا يوجد مبدعون منشورون بعد." : "No published creators yet."}</strong></div>
-        )}
+        {creators.length ? <div className="creator-strip">{creators.map((creator) => <Link key={creator.id} href={`/${locale}/creators/${creator.id}`} className="creator-feature"><div className="creator-feature-avatar"><img src={creator.avatar_url || "/RAVINE.png"} alt="" loading="lazy" /></div><div><div className="video-kicker">{creator.specialty || "CREATOR"}</div><strong>{creator.name || `Creator ${creator.id}`}</strong><span>@{creator.username || `creator-${creator.id}`}</span></div></Link>)}</div> : <div className="empty-state"><strong>{locale === "ar" ? "لا يوجد مبدعون منشورون بعد." : "No published creators yet."}</strong></div>}
       </section>
 
       <section className="section media-section">
         <div className="media-column">
-          <div className="section-head compact">
-            <div><div className="eyebrow">RAVINE / LIVE</div><h2>{t.liveTitle}</h2></div>
-            <Link className="button secondary" href={`/${locale}/live`}>{t.discover}</Link>
-          </div>
+          <div className="section-head compact"><div><div className="eyebrow">RAVINE / LIVE</div><h2>{t.liveTitle}</h2></div><Link className="button secondary" href={`/${locale}/live`}>{t.discover}</Link></div>
           {liveWorks.length ? <div className="mini-grid">{liveWorks.map((work) => <WorkCard key={work.id} work={work} locale={locale} views={t.views} likes={t.likes} />)}</div> : <div className="empty-state"><strong>{t.emptyLive}</strong></div>}
         </div>
         <div className="media-column">
-          <div className="section-head compact">
-            <div><div className="eyebrow">RAVINE / PODCAST</div><h2>{t.podcastTitle}</h2></div>
-            <Link className="button secondary" href={`/${locale}/podcasts`}>{t.discover}</Link>
-          </div>
+          <div className="section-head compact"><div><div className="eyebrow">RAVINE / PODCAST</div><h2>{t.podcastTitle}</h2></div><Link className="button secondary" href={`/${locale}/podcasts`}>{t.discover}</Link></div>
           {podcastWorks.length ? <div className="mini-grid">{podcastWorks.map((work) => <WorkCard key={work.id} work={work} locale={locale} views={t.views} likes={t.likes} />)}</div> : <div className="empty-state"><strong>{t.emptyPodcast}</strong></div>}
         </div>
       </section>
 
       <section className="section about-section">
         <div className="about-grid">
-          <div>
-            <div className="eyebrow">{t.aboutEyebrow}</div>
-            <h2>{t.aboutTitle}</h2>
-          </div>
+          <div><div className="eyebrow">{t.aboutEyebrow}</div><h2>{t.aboutTitle}</h2></div>
           <div>
             <p className="about-lead">{t.aboutBody}</p>
             <div className="about-principles">
