@@ -6,6 +6,8 @@ import ThemeToggle from "./ThemeToggle";
 import AuthTrigger, { AuthModal } from "./AuthTrigger";
 import MobileNav from "./MobileNav";
 import LanguageSwitcher from "./LanguageSwitcher";
+import SearchLauncher from "./SearchLauncher";
+import "./SearchLauncher.css";
 
 const navigation = [
   ["discover", "Discover", "اكتشف"],
@@ -14,6 +16,7 @@ const navigation = [
   ["podcasts", "Podcasts", "البودكاست"],
   ["live", "Live", "مباشر"],
   ["creators", "Creators", "المبدعون"],
+  ["community", "Community", "المجتمعات"],
 ] as const;
 
 type Locale = "ar" | "en";
@@ -41,13 +44,18 @@ export default async function RavineShell({ locale, children }: { locale: Locale
           </nav>
           <div className="ravine-header-actions">
             <MobileNav locale={locale} authenticated={Boolean(user)} />
-            <Link href={`/${locale}/search`} className="ravine-minor-link">{isArabic ? "بحث" : "Search"}</Link>
+            <SearchLauncher locale={locale} />
             {user ? (
               <>
                 <Link href={`/${locale}/library`} className="ravine-minor-link">{isArabic ? "المكتبة" : "Library"}</Link>
                 <Link href={`/${locale}/account`} className="ravine-minor-link">{isArabic ? "الحساب" : "Account"}</Link>
               </>
-            ) : <AuthTrigger locale={locale} label={isArabic ? "دخول" : "Sign in"} />}
+            ) : (
+              <>
+                <AuthTrigger locale={locale} label={isArabic ? "دخول" : "Sign in"} mode="signin" />
+                <AuthTrigger locale={locale} label={isArabic ? "أنشئ حسابك" : "Create account"} mode="signup" primary />
+              </>
+            )}
             <ThemeToggle locale={locale} />
             <Suspense fallback={<span className="ravine-language" aria-hidden="true">{locale === "ar" ? "EN" : "عربي"}</span>}>
               <LanguageSwitcher locale={locale} />
