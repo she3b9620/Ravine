@@ -9,7 +9,7 @@ import styles from "./AuthModal.module.css";
 type Locale = "ar" | "en";
 type AuthMode = "signin" | "signup" | "reset";
 
-type OpenDetail = { next?: string | null };
+type OpenDetail = { next?: string | null; mode?: "signin" | "signup" };
 
 function safeNext(value: string | null | undefined, locale: Locale) {
   const fallback = `/${locale}`;
@@ -18,8 +18,8 @@ function safeNext(value: string | null | undefined, locale: Locale) {
   return value;
 }
 
-export function requestRavineAuth(next?: string) {
-  window.dispatchEvent(new CustomEvent<OpenDetail>("ravine:open-auth", { detail: { next } }));
+export function requestRavineAuth(next?: string, mode: "signin" | "signup" = "signin") {
+  window.dispatchEvent(new CustomEvent<OpenDetail>("ravine:open-auth", { detail: { next, mode } }));
 }
 
 export default function AuthModal({ locale }: { locale: Locale }) {
@@ -37,7 +37,7 @@ export default function AuthModal({ locale }: { locale: Locale }) {
     const handler = (event: Event) => {
       const detail = (event as CustomEvent<OpenDetail>).detail;
       setNext(safeNext(detail?.next, locale));
-      setMode("signin");
+      setMode(detail?.mode === "signup" ? "signup" : "signin");
       setMessage("");
       setOpen(true);
     };
@@ -69,7 +69,7 @@ export default function AuthModal({ locale }: { locale: Locale }) {
     password: "كلمة المرور",
     google: "المتابعة باستخدام Google",
     submitIn: "دخول",
-    submitUp: "ابدأ على RAVINE",
+    submitUp: "ابدأ على رَافِين",
     submitReset: "إرسال رابط الاستعادة",
     switchIn: "ليس لديك حساب؟ أنشئ حسابًا",
     switchUp: "لديك حساب بالفعل؟ سجّل الدخول",
@@ -160,7 +160,7 @@ export default function AuthModal({ locale }: { locale: Locale }) {
         <button className={styles.close} type="button" onClick={() => setOpen(false)} aria-label={ar ? "إغلاق" : "Close"}>
           <X size={18} />
         </button>
-        <div className="eyebrow">RAVINE / ACCESS</div>
+        <div className="eyebrow">{ar ? "رَافِين / الدخول" : "RAVINE / ACCESS"}</div>
         <h2 id="ravine-auth-title">{title}</h2>
         <p className={styles.intro}>{copy.intro}</p>
 
