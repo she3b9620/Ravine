@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import "./home-enhancements.module.css";
 
 const copy = {
   ar: {
