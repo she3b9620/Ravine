@@ -6,6 +6,7 @@ import "./ravine-arabic-smoothing.css";
 import "./ravine-contrast-fixes.css";
 import "../components/SearchLauncher.css";
 import "./ravine-ui-refinement.css";
+import "./ravine-brand-refinement.css";
 import type { ReactNode } from "react";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
