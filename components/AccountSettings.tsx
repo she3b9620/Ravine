@@ -45,7 +45,7 @@ export default function AccountSettings({ profile, locale }: Props) {
     });
     if (uploadError) throw uploadError;
     const { data } = supabase.storage.from(bucket).getPublicUrl(path);
-    return data.publicUrl;
+    return { url: data.publicUrl, path };
   }
 
   async function save() {
@@ -60,31 +60,33 @@ export default function AccountSettings({ profile, locale }: Props) {
       return;
     }
 
-    const uploadedPaths: Array<{ bucket: "avatars" | "covers"; path: string }> = [];
+    const uploadedAssets: Array<{ bucket: "avatars" | "covers"; path: string }> = [];
 
     try {
-      let avatarUrl = profile?.avatar_url || null;
-      let coverUrl: string | null = null;
+      let avatarUrl: string | null = profile?.avatar_url || null;
+      let coverUrl: string | null = profile?.cover_url || null;
 
       if (avatar) {
-        avatarUrl = await uploadAsset(auth.user.id, "avatars", avatar);
-        uploadedPaths.push({ bucket: "avatars", path: new URL(avatarUrl).pathname.split("/storage/v1/object/public/avatars/")[1] || "" });
+        const uploaded = await uploadAsset(auth.user.id, "avatars", avatar);
+        avatarUrl = uploaded.url;
+        uploadedAssets.push({ bucket: "avatars", path: uploaded.path });
       }
       if (cover) {
-        coverUrl = await uploadAsset(auth.user.id, "covers", cover);
-        uploadedPaths.push({ bucket: "covers", path: new URL(coverUrl).pathname.split("/storage/v1/object/public/covers/")[1] || "" });
+        const uploaded = await uploadAsset(auth.user.id, "covers", cover);
+        coverUrl = uploaded.url;
+        uploadedAssets.push({ bucket: "covers", path: uploaded.path });
       }
 
-      const patch: Record<string, string | null> = {
+      const patch = {
         display_name: displayName.trim() || null,
         username: username.trim().replace(/^@+/, "") || null,
         bio: bio.trim() || null,
         country: country.trim() || null,
-        language,
+        language: language as "ar" | "en",
         website_url: website.trim() || null,
+        avatar_url: avatarUrl,
+        cover_url: coverUrl,
       };
-      if (avatar) patch.avatar_url = avatarUrl;
-      if (cover) patch.cover_url = coverUrl;
 
       const { error: updateError } = await supabase.from("profiles").update(patch).eq("id", auth.user.id);
       if (updateError) throw updateError;
@@ -94,8 +96,8 @@ export default function AccountSettings({ profile, locale }: Props) {
       setMessage(ar ? "تم حفظ بيانات الحساب." : "Account details saved.");
       router.refresh();
     } catch (saveError) {
-      for (const item of uploadedPaths) {
-        if (item.path) await supabase.storage.from(item.bucket).remove([item.path]);
+      for (const item of uploadedAssets) {
+        await supabase.storage.from(item.bucket).remove([item.path]);
       }
       setError(saveError instanceof Error ? saveError.message : String(saveError));
     } finally {
