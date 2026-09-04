@@ -1,1 +1,0 @@
-Backup marker after Google OAuth PKCE + callback hardening. Commits: ba28ce697b49a0eeb19355db059374a9c9a2e9e1 and 2b013b00731b625fa2d59cf6cec436d383c54725.

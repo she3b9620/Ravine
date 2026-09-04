@@ -1,1 +1,0 @@
-Backup marker for hero/logo/background styling work on 2026-09-03. Main remains the source of truth; this marker is intentionally non-functional.
