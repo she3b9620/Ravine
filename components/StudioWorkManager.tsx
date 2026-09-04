@@ -56,6 +56,7 @@ export default function StudioWorkManager({ works: initialWorks, locale }: Props
       setError(ar ? "نوع المحتوى غير صالح." : "Invalid content type.");
       return;
     }
+
     setBusyId(id);
     setError("");
     try {
@@ -99,19 +100,22 @@ export default function StudioWorkManager({ works: initialWorks, locale }: Props
     setBusyId(work.id);
     setError("");
     try {
-      const supabase = createClient();
-      const { data, error: updateError } = await supabase
-        .from("videos")
-        .update({ published: nextPublished })
-        .eq("id", work.id)
-        .select("id,title,description,content_type,quality,published,video_url,views,likes,created_at")
-        .single();
+      const response = await fetch("/api/studio/publish-work", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ videoId: work.id, published: nextPublished }),
+      });
+      const payload = (await response.json()) as {
+        ok?: boolean;
+        error?: string;
+        work?: Work;
+      };
 
-      if (updateError || !data) {
-        setError(updateError?.message || (ar ? "تعذر تغيير حالة النشر." : "Could not change publishing state."));
-      } else {
-        setWorks((current) => current.map((item) => (item.id === work.id ? (data as Work) : item)));
+      if (!response.ok || !payload.ok || !payload.work) {
+        throw new Error(payload.error || (ar ? "تعذر تغيير حالة النشر." : "Could not change publishing state."));
       }
+
+      setWorks((current) => current.map((item) => (item.id === work.id ? payload.work as Work : item)));
     } catch (publishError) {
       setError(publishError instanceof Error ? publishError.message : String(publishError));
     } finally {
