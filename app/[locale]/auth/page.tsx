@@ -4,12 +4,19 @@ import { Suspense, FormEvent, useMemo, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
+function safeNext(value: string | null, locale: "ar" | "en") {
+  const fallback = `/${locale}`;
+  if (!value || !value.startsWith("/") || value.startsWith("//")) return fallback;
+  if (value.includes("\\") || /:\/\//.test(value)) return fallback;
+  return value;
+}
+
 function AuthForm() {
   const params = useParams<{ locale: string }>();
   const router = useRouter();
   const searchParams = useSearchParams();
   const locale = params.locale === "en" ? "en" : "ar";
-  const next = searchParams.get("next") || `/${locale}`;
+  const next = safeNext(searchParams.get("next"), locale);
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
