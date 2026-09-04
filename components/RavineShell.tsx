@@ -1,7 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { createClient } from "@/lib/supabase/server";
-import { supabasePublishableKey, supabaseUrl } from "@/lib/supabase/config";
 import ThemeToggle from "./ThemeToggle";
 import AuthTrigger, { AuthModal } from "./AuthTrigger";
 import MobileNav from "./MobileNav";
