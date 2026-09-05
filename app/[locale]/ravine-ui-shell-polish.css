@@ -1,0 +1,43 @@
+/* Sidebar is closed by default and revealed by SidebarToggle. */
+.ravine-sidebar{will-change:transform,opacity}
+html[data-ravine-sidebar="open"] .ravine-sidebar{box-shadow:0 28px 80px rgba(0,0,0,.22)}
+
+/* Give the top bar breathing room instead of packing controls together. */
+.ravine-header-inner{grid-template-columns:auto minmax(80px,1fr) auto!important;column-gap:clamp(22px,3vw,44px)!important}
+.ravine-header-start{gap:16px!important}
+.ravine-header-actions{gap:12px!important;padding-inline-start:8px}
+.ravine-header-actions>*{flex:0 0 auto}
+.ravine-header-actions .ravine-search-trigger{max-width:min(300px,28vw)}
+.ravine-header-actions .ravine-header-icon{width:40px;height:40px;flex-basis:40px}
+.ravine-account-trigger{min-height:40px!important}
+
+/* Popups: every visible open/close state gets a symmetrical entrance/exit motion. */
+.ravine-notification-popover{transform-origin:top right}
+.ravine-shell[dir="rtl"] .ravine-notification-popover{transform-origin:top left}
+.ravine-message-center{transform-origin:center center}
+.ravine-message-center-overlay{will-change:opacity}
+.ravine-message-center{will-change:transform,opacity}
+.ravine-notification-popover{will-change:transform,opacity}
+.ravine-notification-popover.is-closing{animation:ravine-popover-out .2s cubic-bezier(.4,0,.8,.2) both}
+.ravine-message-center-overlay.is-closing{animation:ravine-overlay-out .2s ease both}
+.ravine-message-center.is-closing{animation:ravine-popover-out .2s cubic-bezier(.4,0,.8,.2) both}
+
+/* Other RAVINE dialogs/popovers that expose an is-closing state inherit the same rhythm. */
+[class*="popover"].is-closing,[class*="modal"].is-closing,[class*="dialog"].is-closing{animation:ravine-popover-out .2s cubic-bezier(.4,0,.8,.2) both}
+[class*="overlay"].is-closing{animation:ravine-overlay-out .2s ease both}
+
+@media(max-width:1180px){
+  .ravine-header-inner{column-gap:20px!important;padding-inline:22px!important}
+  .ravine-header-actions{gap:9px!important}
+  .ravine-header-actions .ravine-search-trigger{max-width:240px}
+}
+@media(max-width:820px){
+  .ravine-header-inner{grid-template-columns:auto minmax(0,1fr)!important;column-gap:12px!important;padding-inline:16px!important}
+  .ravine-header-start{gap:10px!important}
+  .ravine-header-actions{gap:7px!important;padding-inline-start:0}
+  .ravine-header-actions .ravine-search-trigger{max-width:none}
+  .ravine-header-actions .ravine-header-icon{width:36px;height:36px;flex-basis:36px}
+}
+@media(prefers-reduced-motion:reduce){
+  .ravine-sidebar,.ravine-notification-popover,.ravine-message-center,.ravine-message-center-overlay,[class*="popover"].is-closing,[class*="modal"].is-closing,[class*="dialog"].is-closing,[class*="overlay"].is-closing{animation:none!important;transition:none!important}
+}
