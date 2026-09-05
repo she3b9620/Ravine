@@ -126,10 +126,4 @@ html body .ravine-auth-overlay label {
   font-family: RavineSansMixed, sans-serif !important;
 }
 
-/* Final guard for any Latin/Arabic text living in arbitrary spans/divs, including mixed-language pages. */
-html body .ravine-shell[lang="ar"] :where(span,strong,b,small,a,div,time),
-html body .ravine-shell[lang="en"] :where(span,strong,b,small,a,div,time) {
-  font-family: RavineSansMixed, sans-serif !important;
-}
-
 /* Portal visual effects are owned by their dedicated component CSS. */
