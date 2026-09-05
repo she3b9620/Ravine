@@ -7,13 +7,13 @@
   .guest-shell .ravine-header .ravine-brand{min-width:40px}
 }
 
-/* Authenticated-only sidebar utility: keep Settings anchored at the bottom of the navigation column. */
-.ravine-sidebar-nav{min-height:100%}
+/* Authenticated-only sidebar utility: keep Settings pinned to the true bottom of the navigation column. */
+.ravine-sidebar-nav{display:flex;flex-direction:column;min-height:100%;height:100%}
 .ravine-sidebar-settings-group{margin-top:auto;padding-top:16px;border-top:1px solid rgba(241,233,220,.07)}
 html[data-theme="light"] .ravine-sidebar-settings-group{border-top-color:rgba(23,23,23,.08)}
 
 @media (max-width:980px){
-  .ravine-sidebar-nav{min-height:0}
+  .ravine-sidebar-nav{min-height:0;height:auto}
 }
 
 @media (prefers-reduced-motion:reduce){
