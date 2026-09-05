@@ -1,0 +1,35 @@
+/* RAVINE Light Mode motion parity. Visual effects stay restrained and semantic; Light Mode must not become static. */
+html[data-theme="light"] .ravine-search-overlay{animation:ravineLightOverlayIn .24s ease both!important}
+html[data-theme="light"] .ravine-search-dialog{animation:ravineLightDialogIn .34s cubic-bezier(.22,.61,.36,1) both!important;box-shadow:0 28px 90px rgba(23,23,23,.16)!important}
+html[data-theme="light"] .ravine-notification-popover{animation:ravineLightPopoverIn .22s cubic-bezier(.22,1,.36,1) both!important;box-shadow:0 24px 70px rgba(23,23,23,.14)!important}
+html[data-theme="light"] .ravine-message-center{animation:ravineLightPanelIn .28s cubic-bezier(.22,.61,.36,1) both!important}
+html[data-theme="light"] .ravine-message-center-overlay{animation:ravineLightOverlayIn .22s ease both!important}
+html[data-theme="light"] .ravine-message-center-close,.ravine-search-close{transition:transform .2s ease,border-color .2s ease,background .2s ease,color .2s ease,box-shadow .2s ease!important}
+html[data-theme="light"] .ravine-message-center-close:hover,.ravine-search-close:hover{transform:translateY(-1px) scale(1.04)!important;box-shadow:0 8px 24px rgba(23,23,23,.1)!important}
+html[data-theme="light"] .ravine-header-icon{transition:color .2s ease,border-color .2s ease,background .2s ease,transform .2s ease,box-shadow .2s ease!important}
+html[data-theme="light"] .ravine-header-icon:hover{transform:translateY(-1px) scale(1.025)!important;box-shadow:0 8px 24px rgba(23,23,23,.1)!important}
+
+/* Keep media previews visually clean: no native player chrome or play controls. */
+.home-work-preview{pointer-events:none!important}
+.home-work-preview::-webkit-media-controls,
+.home-work-preview::-webkit-media-controls-enclosure,
+.home-work-preview::-webkit-media-controls-panel,
+.home-work-preview::-webkit-media-controls-play-button,
+.home-work-preview::-webkit-media-controls-start-playback-button{display:none!important;opacity:0!important;visibility:hidden!important}
+.home-work-preview{appearance:none!important;-webkit-appearance:none!important}
+
+/* The cinematic guest iframe is a background, never an interactive player. */
+.ravine-guest-cinematic-backdrop iframe{pointer-events:none!important}
+
+@keyframes ravineLightOverlayIn{from{opacity:0}to{opacity:1}}
+@keyframes ravineLightDialogIn{from{opacity:0;transform:translateY(-14px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes ravineLightPopoverIn{from{opacity:0;transform:translateY(-5px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes ravineLightPanelIn{from{opacity:0;transform:translate3d(0,14px,0) scale(.985)}to{opacity:1;transform:translate3d(0,0,0) scale(1)}}
+
+@media(prefers-reduced-motion:reduce){
+  html[data-theme="light"] .ravine-search-overlay,
+  html[data-theme="light"] .ravine-search-dialog,
+  html[data-theme="light"] .ravine-notification-popover,
+  html[data-theme="light"] .ravine-message-center,
+  html[data-theme="light"] .ravine-message-center-overlay{animation:none!important}
+}
