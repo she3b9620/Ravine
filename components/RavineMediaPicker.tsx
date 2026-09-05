@@ -3,16 +3,15 @@ import { ChangeEvent, PointerEvent, useEffect, useRef, useState } from "react";
 import { Check, ImagePlus, Maximize2, Minus, Plus, RotateCcw } from "lucide-react";
 
 type Aspect="square"|"cover";
-type Props={aspect:Aspect;locale:"ar"|"en";value:File|null;existingUrl?:string|null;onChange:(file:File|null)=>void};
+type Props={aspect:Aspect;locale:"ar"|"en";value:File|null;existingUrl?:string|null;resetKey?:number;onChange:(file:File|null)=>void};
 const T={ar:{choose:"اختيار صورة",change:"تغيير الصورة",adjust:"تعديل الإطار",avatar:"الصورة الشخصية · 1:1",cover:"الغلاف السينمائي · 16:9",hint:"الصورة ثابتة عند المقاس الطبيعي. كبّرها أولًا لتتمكن من تحريكها.",apply:"اعتماد القص",applied:"تم اعتماد القص",reset:"إعادة ضبط",zoomIn:"تكبير",zoomOut:"تصغير"},en:{choose:"Choose image",change:"Change image",adjust:"Adjust frame",avatar:"Profile image · 1:1",cover:"Cinematic cover · 16:9",hint:"The image stays fixed at natural fit. Zoom first to move it.",apply:"Apply crop",applied:"Crop applied",reset:"Reset",zoomIn:"Zoom in",zoomOut:"Zoom out"}};
 const srcOf=(u:string|null|undefined)=>!u?null:u.startsWith("blob:")||u.startsWith("data:")?u:`/api/profile-image-proxy?url=${encodeURIComponent(u)}`;
-export default function RavineMediaPicker({aspect,locale,value,existingUrl,onChange}:Props){
+export default function RavineMediaPicker({aspect,locale,value,existingUrl,resetKey=0,onChange}:Props){
  const c=T[locale],ar=locale==="ar",ratio=aspect==="square"?1:16/9,out=aspect==="square"?[1200,1200]:[1600,900];
  const input=useRef<HTMLInputElement>(null),view=useRef<HTMLDivElement>(null),image=useRef<HTMLImageElement>(null),drag=useRef({x:0,y:0,ox:0,oy:0});
  const [url,setUrl]=useState(srcOf(existingUrl)),[natural,setNatural]=useState({w:0,h:0}),[zoom,setZoom]=useState(1),[offset,setOffset]=useState({x:0,y:0}),[moving,setMoving]=useState(false),[dirty,setDirty]=useState(false),[applied,setApplied]=useState(Boolean(value)),[error,setError]=useState(false);
- // Sync only when the persisted URL changes. The save cycle clears value before the server refreshes,
- // so including `value` here would remount the visual state and cause the visible zoom flash.
  useEffect(()=>{setUrl(srcOf(existingUrl));setNatural({w:0,h:0});setZoom(1);setOffset({x:0,y:0});setDirty(false);setApplied(false);setError(false)},[existingUrl]);
+ useEffect(()=>{if(!resetKey)return;setUrl(srcOf(existingUrl));setNatural({w:0,h:0});setZoom(1);setOffset({x:0,y:0});setDirty(false);setApplied(false);setError(false)},[resetKey,existingUrl]);
  useEffect(()=>()=>{if(url?.startsWith("blob:"))URL.revokeObjectURL(url)},[url]);
  const metrics=()=>{const e=view.current;if(!e||!natural.w)return null;const w=e.clientWidth,h=w/ratio,b=Math.min(w/natural.w,h/natural.h),s=b*zoom;return{w,h,s,iw:natural.w*s,ih:natural.h*s}};
  const clamp=(x:number,y:number)=>{const m=metrics();if(!m)return{x:0,y:0};const lx=Math.max(0,(m.iw-m.w)/2),ly=Math.max(0,(m.ih-m.h)/2);return{x:Math.max(-lx,Math.min(lx,x)),y:Math.max(-ly,Math.min(ly,y))}};
