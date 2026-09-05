@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Compass, Clapperboard, PlaySquare, Mic2, Radio, Users, MessagesSquare } from "lucide-react";
+import { Home, Compass, Clapperboard, PlaySquare, Mic2, Radio, Users, MessagesSquare, LockKeyhole } from "lucide-react";
 import { requestRavineAuth } from "./AuthModal";
 
 type Locale = "ar" | "en";
@@ -48,12 +48,15 @@ export default function PrimaryNav({ locale, authenticated = false }: { locale: 
           <button
             key={slug || "home"}
             type="button"
-            className={`ravine-nav-link${active ? " is-active" : ""}${slug === "live" ? " is-live-link" : ""}`}
+            className={`ravine-nav-link ravine-nav-gated${active ? " is-active" : ""}${slug === "live" ? " is-live-link" : ""}`}
             onClick={() => handleGuestNavigation(slug)}
             aria-label={locale === "ar" ? `${ar} — سجّل للدخول` : `${en} — sign in to continue`}
+            title={locale === "ar" ? "سجّل للدخول للمتابعة" : "Sign in to continue"}
+            style={{ border: 0, padding: 0, background: "transparent", appearance: "none", WebkitAppearance: "none", cursor: "pointer" }}
           >
             <Icon className="ravine-nav-icon" size={14} strokeWidth={1.8} aria-hidden="true" />
             <span>{locale === "ar" ? ar : en}</span>
+            <LockKeyhole aria-hidden="true" size={10} strokeWidth={2} style={{ opacity: 0.55, marginInlineStart: 2 }} />
             {slug === "live" ? <span className="ravine-live-dot" aria-hidden="true" /> : null}
           </button>
         ) : (
