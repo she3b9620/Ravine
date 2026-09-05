@@ -5,7 +5,38 @@
 .home-guest{position:relative;z-index:3}
 .home-guest-hero{position:relative;background:transparent!important;min-height:min(780px,88vh);display:flex;align-items:center}
 .home-guest-hero .hero-inner{position:relative;z-index:4}
+
+/* Guest light mode is controlled by RAVINE's explicit theme attribute, not only OS preference. */
+html[data-theme="light"] .guest-shell .ravine-header,
+html[data-theme="light"] .guest-shell .ravine-header .ravine-header-actions,
+html[data-theme="light"] .guest-shell .ravine-header .ravine-nav,
+html[data-theme="light"] .guest-shell .ravine-header .ravine-header-start{color:#ffffff!important}
+html[data-theme="light"] .guest-shell .ravine-header .ravine-nav-link,
+html[data-theme="light"] .guest-shell .ravine-header .ravine-minor-link,
+html[data-theme="light"] .guest-shell .ravine-header .ravine-auth-trigger,
+html[data-theme="light"] .guest-shell .ravine-header .ravine-language,
+html[data-theme="light"] .guest-shell .ravine-header .ravine-header-icon,
+html[data-theme="light"] .guest-shell .ravine-header .ravine-search-trigger,
+html[data-theme="light"] .guest-shell .ravine-header .ravine-sidebar-toggle,
+html[data-theme="light"] .guest-shell .ravine-header .ravine-theme-toggle{color:#ffffff!important}
+html[data-theme="light"] .guest-shell .ravine-header .ravine-nav-link:hover,
+html[data-theme="light"] .guest-shell .ravine-header .ravine-minor-link:hover,
+html[data-theme="light"] .guest-shell .ravine-header .ravine-auth-trigger:hover,
+html[data-theme="light"] .guest-shell .ravine-header .ravine-language:hover,
+html[data-theme="light"] .guest-shell .ravine-header .ravine-header-icon:hover,
+html[data-theme="light"] .guest-shell .ravine-header .ravine-search-trigger:hover{color:#ffffff!important}
+html[data-theme="light"] .guest-shell .ravine-header .ravine-auth-trigger-primary{color:#ffffff!important}
+html[data-theme="light"] .guest-shell .ravine-header .ravine-auth-trigger-primary,
+html[data-theme="light"] .guest-shell .ravine-header .ravine-minor-link.ravine-auth-trigger-primary{font-family:Satoshi, sans-serif!important}
+
+/* Fade the cinematic frame into the light canvas instead of ending on a hard edge. */
+html[data-theme="light"] .ravine-guest-cinematic-backdrop{display:block!important;background:#f1e9dc!important;height:min(91vh,920px)!important}
+html[data-theme="light"] .ravine-guest-cinematic-backdrop::after{content:"";position:absolute;left:0;right:0;bottom:0;height:34%;z-index:3;pointer-events:none;background:linear-gradient(180deg,rgba(241,233,220,0) 0%,rgba(241,233,220,.12) 18%,rgba(241,233,220,.46) 44%,rgba(241,233,220,.82) 70%,#f1e9dc 100%)}
+html[data-theme="light"] .ravine-guest-cinematic-wash{background:linear-gradient(90deg,rgba(9,9,9,.82) 0%,rgba(9,9,9,.58) 28%,rgba(9,9,9,.28) 60%,rgba(9,9,9,.5) 100%),linear-gradient(180deg,rgba(9,9,9,.16) 0%,rgba(9,9,9,.04) 48%,rgba(241,233,220,.22) 72%,rgba(241,233,220,.92) 100%)}
+html[data-theme="light"] .ravine-guest-cinematic-vignette{background:radial-gradient(circle at 62% 34%,transparent 0%,rgba(9,9,9,.08) 42%,rgba(9,9,9,.26) 86%);mix-blend-mode:multiply}
+html[data-theme="light"] .home-guest-hero{background:linear-gradient(180deg,rgba(241,233,220,0) 0%,rgba(241,233,220,.04) 50%,#f1e9dc 100%)!important}
+
 @keyframes ravineGuestBackdropIn{from{opacity:0}to{opacity:1}}
-@media(max-width:820px){.ravine-guest-cinematic-backdrop{height:78vh}.ravine-guest-cinematic-backdrop iframe{transform:translate(-50%,-50%) scale(1.28);opacity:.56}.ravine-guest-cinematic-wash{background:linear-gradient(90deg,rgba(9,9,9,.92),rgba(9,9,9,.56)),linear-gradient(180deg,rgba(9,9,9,.36),#090909 94%)}}
+@media(max-width:820px){.ravine-guest-cinematic-backdrop{height:78vh}.ravine-guest-cinematic-backdrop iframe{transform:translate(-50%,-50%) scale(1.28);opacity:.56}.ravine-guest-cinematic-wash{background:linear-gradient(90deg,rgba(9,9,9,.92),rgba(9,9,9,.56)),linear-gradient(180deg,rgba(9,9,9,.36),#090909 94%)}html[data-theme="light"] .ravine-guest-cinematic-backdrop{height:82vh!important}html[data-theme="light"] .ravine-guest-cinematic-backdrop::after{height:40%}html[data-theme="light"] .ravine-guest-cinematic-wash{background:linear-gradient(90deg,rgba(9,9,9,.68),rgba(9,9,9,.38)),linear-gradient(180deg,rgba(9,9,9,.12) 0%,rgba(241,233,220,.88) 100%)}}
 @media(prefers-reduced-motion:reduce){.ravine-guest-cinematic-backdrop{animation:none;opacity:1}}
-@media (prefers-color-scheme:light){.ravine-guest-cinematic-backdrop{display:none}.home-guest-hero{background:var(--bg-primary,#f1e9dc)!important}}
+@media (prefers-color-scheme:light){.home-guest-hero{background:var(--bg-primary,#f1e9dc)!important}}
