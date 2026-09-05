@@ -36,20 +36,30 @@ const VIDEO_IDS = [
 const YOUTUBE_API_SRC = "https://www.youtube.com/iframe_api";
 const PLAYER_ID = "ravine-guest-cinematic-player";
 
+function randomVideoIndex(length: number) {
+  if (length <= 1) return 0;
+  if (typeof window === "undefined" || !window.crypto?.getRandomValues) return Math.floor(Math.random() * length);
+  const values = new Uint32Array(1);
+  window.crypto.getRandomValues(values);
+  return values[0] % length;
+}
+
 export default function GuestCinematicBackdrop({ locale }: GuestCinematicBackdropProps) {
   const pathname = usePathname();
   const [isGuestHome, setIsGuestHome] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [startIndex, setStartIndex] = useState<number | null>(null);
 
   const embedUrl = useMemo(() => {
-    const first = VIDEO_IDS[0];
-    const playlist = VIDEO_IDS.join(",");
+    if (startIndex === null) return null;
+    const orderedIds = [...VIDEO_IDS.slice(startIndex), ...VIDEO_IDS.slice(0, startIndex)];
+    const [first, ...playlistIds] = orderedIds;
     const params = new URLSearchParams({
       autoplay: "1",
       mute: "1",
       controls: "0",
       loop: "1",
-      playlist,
+      playlist: playlistIds.concat(first).join(","),
       playsinline: "1",
       modestbranding: "1",
       rel: "0",
@@ -60,14 +70,17 @@ export default function GuestCinematicBackdrop({ locale }: GuestCinematicBackdro
       origin: typeof window !== "undefined" ? window.location.origin : "",
     });
     return `https://www.youtube-nocookie.com/embed/${first}?${params.toString()}`;
-  }, []);
+  }, [startIndex]);
 
   useEffect(() => {
     if (pathname !== `/${locale}`) {
       setIsGuestHome(false);
       setIsPlaying(false);
+      setStartIndex(null);
       return;
     }
+
+    setStartIndex(randomVideoIndex(VIDEO_IDS.length));
 
     let mounted = true;
     const supabase = createClient();
@@ -84,7 +97,7 @@ export default function GuestCinematicBackdrop({ locale }: GuestCinematicBackdro
   }, [locale, pathname]);
 
   useEffect(() => {
-    if (!isGuestHome) return;
+    if (!isGuestHome || !embedUrl) return;
 
     let cancelled = false;
     let player: YouTubePlayer | null = null;
@@ -120,16 +133,14 @@ export default function GuestCinematicBackdrop({ locale }: GuestCinematicBackdro
 
     return () => {
       cancelled = true;
-      if (window.onYouTubeIframeAPIReady === previousReadyHandler || previousReadyHandler === undefined) {
-        window.onYouTubeIframeAPIReady = previousReadyHandler;
-      }
+      if (window.onYouTubeIframeAPIReady === previousReadyHandler || previousReadyHandler === undefined) window.onYouTubeIframeAPIReady = previousReadyHandler;
       player?.destroy();
       player = null;
       setIsPlaying(false);
     };
-  }, [isGuestHome]);
+  }, [isGuestHome, embedUrl]);
 
-  if (!isGuestHome) return null;
+  if (!isGuestHome || !embedUrl) return null;
 
   return (
     <div className={`ravine-guest-cinematic-backdrop${isPlaying ? " is-playing" : ""}`} aria-hidden="true">
