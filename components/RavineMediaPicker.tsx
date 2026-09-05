@@ -229,6 +229,8 @@ export default function RavineMediaPicker({ aspect, locale, value, existingUrl, 
         objectPosition: "center",
         transform: `translate(-50%, -50%) translate(${offset.x}px, ${offset.y}px) scale(${zoom})`,
         transformOrigin: "center center",
+        transition: dragging ? "none" : "transform 180ms cubic-bezier(0.22, 1, 0.36, 1)",
+        willChange: "transform",
       }
     : undefined;
 
