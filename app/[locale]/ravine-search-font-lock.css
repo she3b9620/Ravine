@@ -1,11 +1,16 @@
 /* RAVINE search typography authority.
-   One mixed font family: Latin -> Satoshi, Arabic -> Thmanyah Sans.
-   The search is portalled to <body>, so this file intentionally has strong, local selectors. */
+   The mixed family is real: each glyph script selects its own face.
+   This prevents Arabic typed on /en from falling back to Arial. */
+@font-face{font-family:RavineSearchMixed;src:url('/fonts/Satoshi-Regular.otf') format('opentype');font-weight:400;font-style:normal;font-display:swap;unicode-range:U+0000-024F,U+1E00-1EFF,U+2000-206F,U+20A0-20CF,U+2100-214F,U+2190-21FF,U+2200-22FF,U+2300-23FF,U+25A0-25FF}
+@font-face{font-family:RavineSearchMixed;src:url('/fonts/Satoshi-Bold.otf') format('opentype');font-weight:700;font-style:normal;font-display:swap;unicode-range:U+0000-024F,U+1E00-1EFF,U+2000-206F,U+20A0-20CF,U+2100-214F,U+2190-21FF,U+2200-22FF,U+2300-23FF,U+25A0-25FF}
+@font-face{font-family:RavineSearchMixed;src:url('/fonts/thmanyahsans-Regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap;unicode-range:U+0600-06FF,U+0750-077F,U+08A0-08FF,U+FB50-FDFF,U+FE70-FEFF}
+@font-face{font-family:RavineSearchMixed;src:url('/fonts/thmanyahsans-Bold.woff2') format('woff2');font-weight:700;font-style:normal;font-display:swap;unicode-range:U+0600-06FF,U+0750-077F,U+08A0-08FF,U+FB50-FDFF,U+FE70-FEFF}
+
 html body .ravine-search-overlay,
 html body .ravine-search-overlay *,
 html body .ravine-search-dialog,
 html body .ravine-search-dialog * {
-  font-family: RavineSansMixed, sans-serif !important;
+  font-family: RavineSearchMixed, sans-serif !important;
   font-synthesis: none !important;
 }
 
@@ -17,11 +22,10 @@ html body .ravine-search-select-trigger,
 html body .ravine-search-select-menu button,
 html body .ravine-search-actions .button,
 html body .ravine-advanced-search-toggle {
-  font-family: RavineSansMixed, sans-serif !important;
+  font-family: RavineSearchMixed, sans-serif !important;
   font-synthesis: none !important;
 }
 
-/* Keep Latin in Satoshi and Arabic in Thmanyah inside the same input, even on /en. */
 html body .ravine-search-dialog input,
 html body .ravine-search-dialog textarea {
   direction: auto;
