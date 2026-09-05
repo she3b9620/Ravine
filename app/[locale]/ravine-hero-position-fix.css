@@ -1,11 +1,11 @@
-/* Restore the Hero to its authored position. Do not scale or vertically offset the copy. */
+/* Restore the Hero to the exact compact/lifted position used before the mistaken reset. */
 .ravine-shell .home-guest-hero .hero-inner{
-  transform:none!important;
+  transform:translateY(-28px) scale(.94)!important;
   transform-origin:center center!important;
 }
 
 @media(max-width:820px){
   .ravine-shell .home-guest-hero .hero-inner{
-    transform:none!important;
+    transform:translateY(-18px) scale(.96)!important;
   }
 }
