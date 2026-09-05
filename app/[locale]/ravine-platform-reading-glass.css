@@ -1,0 +1,36 @@
+/* Platform-wide readability veil: the cultural pattern remains visible, while page copy gets a calmer surface. */
+.ravine-platform-reading-glass{
+  position:fixed;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  background:rgba(9,9,9,.045);
+  -webkit-backdrop-filter:blur(4px) saturate(101%);
+  backdrop-filter:blur(4px) saturate(101%);
+}
+
+html[data-theme="light"] .ravine-platform-reading-glass{
+  background:rgba(241,233,220,.075);
+  -webkit-backdrop-filter:blur(4px) saturate(101%);
+  backdrop-filter:blur(4px) saturate(101%);
+}
+
+@media(max-width:980px){
+  .ravine-platform-reading-glass{
+    background:rgba(9,9,9,.035);
+    -webkit-backdrop-filter:blur(3.25px) saturate(101%);
+    backdrop-filter:blur(3.25px) saturate(101%);
+  }
+  html[data-theme="light"] .ravine-platform-reading-glass{
+    background:rgba(241,233,220,.06);
+    -webkit-backdrop-filter:blur(3.25px) saturate(101%);
+    backdrop-filter:blur(3.25px) saturate(101%);
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .ravine-platform-reading-glass{
+    -webkit-backdrop-filter:none;
+    backdrop-filter:none;
+  }
+}
