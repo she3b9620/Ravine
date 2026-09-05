@@ -30,45 +30,18 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
   const username = profile?.username ? westernDigits(profile.username) : null;
   const cards = [
     { label: ar ? "المحفوظات" : "Saved", value: savedCount ?? 0, action: ar ? "افتح المكتبة" : "Open library", href: `/${locale}/library`, icon: Library },
-    { label: ar ? "سجل المشاهدة" : "Watch history", value: historyCount ?? 0, action: ar ? "تابع المشاهدة" : "Continue watching", href: `/${locale}/library`, icon: ArrowUpRight },
+    { label: ar ? "سجل المشاهدة" : "Watch history", value: historyCount ?? 0, action: ar ? "تابع المشاهدة" : "Continue watching", href: `/${locale}/history`, icon: ArrowUpRight },
     { label: ar ? "المتابَعون" : "Following", value: followingCount ?? 0, action: ar ? "اكتشف المبدعين" : "Discover creators", href: `/${locale}/creators`, icon: Compass },
   ];
 
   return (
     <section className={`section dashboard-page ${styles.page}`} dir={ar ? "rtl" : "ltr"}>
       <div className={styles.hero}>
-        <div>
-          <div className={styles.eyebrow}>RAVINE / {ar ? "لوحتك" : "DASHBOARD"}</div>
-          <div className={styles.kicker}>{ar ? "مساحتك" : "YOUR SPACE"}</div>
-          <h1 className={styles.title}>{ar ? `أهلًا ${displayName}.` : `Welcome, ${displayName}.`}</h1>
-          <p className={styles.note}>{ar ? "نظرة واضحة على مكتبتك ومسار اكتشافك وحالتك داخل RAVINE." : "A clear view of your library, discovery path, and current place inside RAVINE."}</p>
-        </div>
-        <div className={styles.profileChip} aria-label={ar ? "ملف الحساب" : "Account profile"}>
-          <span className={styles.avatar}>
-            {profile?.avatar_url ? <img src={profile.avatar_url} alt={ar ? `صورة ${displayName}` : `${displayName} profile`} /> : <span>{displayName.slice(0, 1).toUpperCase()}</span>}
-          </span>
-          <div className={styles.profileCopy}>
-            <strong>{displayName}</strong>
-            <span>{username ? `@${username}` : (ar ? "حسابك على RAVINE" : "Your RAVINE account")}</span>
-            <small>{profile?.is_creator ? (ar ? "مبدع" : "Creator") : (ar ? "مشاهد" : "Viewer")}{profile?.is_verified ? (ar ? " · موثق" : " · Verified") : ""}</small>
-          </div>
-        </div>
+        <div><div className={styles.eyebrow}>RAVINE / {ar ? "لوحتك" : "DASHBOARD"}</div><div className={styles.kicker}>{ar ? "مساحتك" : "YOUR SPACE"}</div><h1 className={styles.title}>{ar ? `أهلًا ${displayName}.` : `Welcome, ${displayName}.`}</h1><p className={styles.note}>{ar ? "نظرة واضحة على مكتبتك ومسار اكتشافك وحالتك داخل RAVINE." : "A clear view of your library, discovery path, and current place inside RAVINE."}</p></div>
+        <div className={styles.profileChip} aria-label={ar ? "ملف الحساب" : "Account profile"}><span className={styles.avatar}>{profile?.avatar_url ? <img src={profile.avatar_url} alt={ar ? `صورة ${displayName}` : `${displayName} profile`} /> : <span>{displayName.slice(0, 1).toUpperCase()}</span>}</span><div className={styles.profileCopy}><strong>{displayName}</strong><span>{username ? `@${username}` : (ar ? "حسابك على RAVINE" : "Your RAVINE account")}</span><small>{profile?.is_creator ? (ar ? "مبدع" : "Creator") : (ar ? "مشاهد" : "Viewer")}{profile?.is_verified ? (ar ? " · موثق" : " · Verified") : ""}</small></div></div>
       </div>
-
-      <div className={styles.cardGrid}>
-        {cards.map(({ label, value, action, href, icon: Icon }) => (
-          <Link key={label} href={href} className={styles.card}>
-            <span className={styles.cardLabel}>{label}</span>
-            <strong className={styles.cardValue}>{ravineNumber(value)}</strong>
-            <span className={styles.cardAction}>{action} <Icon size={12} /></span>
-          </Link>
-        ))}
-      </div>
-
-      <div className={styles.actions}>
-        <Link className={`${styles.button} ${styles.primary}`} href={`/${locale}/discover`}><Compass size={15} />{ar ? "ابدأ اكتشافًا جديدًا" : "Start a new discovery"}</Link>
-        <Link className={`${styles.button} ${styles.secondary}`} href={`/${locale}/account`}><Settings2 size={15} />{ar ? "إدارة الحساب والإعدادات" : "Manage account & settings"}</Link>
-      </div>
+      <div className={styles.cardGrid}>{cards.map(({ label, value, action, href, icon: Icon }) => <Link key={label} href={href} className={styles.card}><span className={styles.cardLabel}>{label}</span><strong className={styles.cardValue}>{ravineNumber(value, locale)}</strong><span className={styles.cardAction}>{action} <Icon size={12} /></span></Link>)}</div>
+      <div className={styles.actions}><Link className={`${styles.button} ${styles.primary}`} href={`/${locale}/discover`}><Compass size={15} />{ar ? "ابدأ اكتشافًا جديدًا" : "Start a new discovery"}</Link><Link className={`${styles.button} ${styles.secondary}`} href={`/${locale}/account`}><Settings2 size={15} />{ar ? "إدارة الحساب والإعدادات" : "Manage account & settings"}</Link></div>
     </section>
   );
 }
