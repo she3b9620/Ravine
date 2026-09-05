@@ -12,6 +12,16 @@ type Creator = { id: number; name: string | null; username: string | null; avata
 type Chapter = { id: number; title: string; start_seconds: number; end_seconds: number | null; thumbnail_url: string | null };
 type Asset = { id: number; kind: string; media_url: string; duration: number | null; label: string | null; language: string | null; mime_type: string | null };
 
+function isYouTubeUrl(value: string | null) {
+  if (!value) return false;
+  try {
+    const host = new URL(value).hostname.toLowerCase().replace(/^www\./, "");
+    return host === "youtube.com" || host === "youtu.be" || host.endsWith(".youtube.com");
+  } catch {
+    return false;
+  }
+}
+
 export default async function WatchPage({ params }: { params: Promise<{ locale: string; id: string }> }) {
   const { locale: rawLocale, id } = await params;
   const locale: Locale = rawLocale === "en" ? "en" : "ar";
@@ -36,7 +46,7 @@ export default async function WatchPage({ params }: { params: Promise<{ locale: 
     supabase.from("work_media_assets").select("id,kind,media_url,duration,label,language,mime_type").eq("work_id", videoId).order("sort_order", { ascending: true }),
   ]);
 
-  let playbackUrl = video.video_url as string | null;
+  let playbackUrl = isYouTubeUrl(video.video_url as string | null) ? null : (video.video_url as string | null);
   if (playbackUrl?.includes("/storage/v1/object/public/")) {
     try {
       const marker = "/storage/v1/object/public/";
@@ -59,6 +69,12 @@ export default async function WatchPage({ params }: { params: Promise<{ locale: 
     <main className="watch-page" dir={ar ? "rtl" : "ltr"}>
       <div className="watch-frame">
         <RAVINEPlayer src={playbackUrl} poster={video.thumbnail_url} title={video.title || "Untitled"} contentType={video.content_type || "video"} duration={video.duration} locale={locale} chapters={chapters} assets={assets} />
+        {isYouTubeUrl(video.video_url as string | null) && (
+          <div className="empty-state" style={{ margin: "16px 0" }}>
+            <strong>{ar ? "هذا العمل يحتاج نسخة مستقلة داخل RAVINE قبل التشغيل." : "This work needs an independent RAVINE media asset before it can play."}</strong>
+            <span>{ar ? "رابط YouTube يُحفظ كمصدر مرجعي فقط ولا يُستخدم كمشغل داخل RAVINE." : "The YouTube URL is retained as a reference source only and is not used as the RAVINE player source."}</span>
+          </div>
+        )}
         <div className="watch-copy">
           <div className="watch-kicker">{video.content_type || "WORK"}{video.quality ? ` · ${video.quality}` : ""}</div>
           <h1>{video.title || (ar ? "بدون عنوان" : "Untitled")}</h1>
