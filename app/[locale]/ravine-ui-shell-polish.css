@@ -2,6 +2,8 @@
 .ravine-header-inner{grid-template-columns:auto minmax(0,1fr) auto!important;column-gap:clamp(20px,3vw,42px)!important;padding-inline:clamp(20px,3vw,34px)!important}
 .ravine-header-start{gap:15px!important;min-width:0}.ravine-header-start .ravine-brand{flex:0 0 auto}
 .ravine-nav{min-width:0;display:flex!important;align-items:center;justify-content:center;gap:clamp(14px,1.5vw,24px)!important;overflow-x:auto;scrollbar-width:none}.ravine-nav::-webkit-scrollbar{display:none}.ravine-nav-link{white-space:nowrap!important}
+/* Keep the desktop active heading line fully visible; the legacy line intentionally sits below the nav item's box. */
+@media (min-width:981px){.ravine-nav{overflow:visible!important}}
 .ravine-header-actions{gap:clamp(9px,1vw,14px)!important;padding-inline-start:clamp(4px,1vw,10px)!important;min-width:0}.ravine-header-actions>*{flex:0 0 auto}.ravine-header-actions .ravine-search-trigger{max-width:min(280px,24vw)}
 .ravine-sidebar{will-change:transform,opacity}.ravine-sidebar-toggle{position:relative;z-index:2}
 .home-viewer-discovery-bar{display:none!important}
