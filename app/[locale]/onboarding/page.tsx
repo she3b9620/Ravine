@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import OnboardingSelectors from "@/components/OnboardingSelectors";
+import styles from "./OnboardingPage.module.css";
 
 export default function OnboardingPage() {
   const params = useParams<{ locale: string }>();
@@ -120,13 +121,13 @@ export default function OnboardingPage() {
         <label>
           {ar ? "اسم المستخدم" : "Username"}
           <input value={username} onChange={(e) => void checkUsernameAvailability(e.target.value)} required minLength={3} maxLength={30} pattern="[A-Za-z0-9_]{3,30}" autoCapitalize="none" autoComplete="username" placeholder="yourname" dir="ltr" />
-          <span className={`onboarding-username-status ${usernameState}`} aria-live="polite">
+          <span className={`${styles.usernameStatus} ${styles[usernameState]}`} aria-live="polite">
             {usernameState === "checking" ? (ar ? "جارٍ التحقق..." : "Checking...") : usernameState === "available" ? (ar ? "اسم المستخدم متاح" : "Username available") : usernameState === "taken" ? (ar ? "اسم المستخدم مستخدم" : "Username is taken") : ""}
           </span>
           {usernameState === "taken" && usernameSuggestions.length ? (
-            <div className="onboarding-username-suggestions">
+            <div className={styles.suggestions}>
               <span>{ar ? "اقتراحات متاحة:" : "Available suggestions:"}</span>
-              <div>{usernameSuggestions.map((suggestion) => <button type="button" key={suggestion} onClick={() => void checkUsernameAvailability(suggestion)}>{suggestion}</button>)}</div>
+              <div>{usernameSuggestions.map((suggestion) => <button className={styles.suggestionButton} type="button" key={suggestion} onClick={() => void checkUsernameAvailability(suggestion)}>{suggestion}</button>)}</div>
             </div>
           ) : null}
         </label>
