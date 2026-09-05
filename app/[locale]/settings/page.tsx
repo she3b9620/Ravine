@@ -1,0 +1,89 @@
+"use client";
+
+import Link from "next/link";
+import { ArrowUpRight, Check, MonitorCog, Moon, Sun, UserRound } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import styles from "../account/account.module.css";
+
+export default function GeneralSettingsPage({ params }: { params: Promise<{ locale: string }> }) {
+  const router = useRouter();
+  const [locale, setLocale] = useState<"ar" | "en">("ar");
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
+
+  useEffect(() => {
+    let active = true;
+    void params.then(({ locale: raw }) => {
+      if (active) setLocale(raw === "en" ? "en" : "ar");
+    });
+    const stored = window.localStorage.getItem("ravine-theme");
+    const next = stored === "light" ? "light" : "dark";
+    setTheme(next);
+    document.documentElement.dataset.theme = next;
+    return () => { active = false; };
+  }, [params]);
+
+  const ar = locale === "ar";
+  const setThemeAndPersist = (next: "dark" | "light") => {
+    setTheme(next);
+    document.documentElement.dataset.theme = next;
+    window.localStorage.setItem("ravine-theme", next);
+  };
+
+  return (
+    <section className={`section ${styles.page}`} dir={ar ? "rtl" : "ltr"}>
+      <div className={styles.hero}>
+        <div>
+          <div className={styles.eyebrow}>RAVINE / {ar ? "الإعدادات العامة" : "GENERAL SETTINGS"}</div>
+          <h1 className={styles.heroTitle}>{ar ? "إعداداتك العامة." : "General settings."}</h1>
+          <p className={styles.heroNote}>{ar ? "الخيارات العامة للتجربة، منفصلة عن تعديل ملفك وهويتك." : "Global experience preferences, kept separate from your public profile."}</p>
+        </div>
+      </div>
+
+      <div className={styles.settingsShell}>
+        <section className={styles.sectionBlock}>
+          <h2 className={styles.sectionLabel}>{ar ? "المظهر" : "Appearance"}</h2>
+          <p className={styles.settingsNote}>{ar ? "اختر الشكل العام لواجهة RAVINE على هذا الجهاز." : "Choose the overall RAVINE interface appearance on this device."}</p>
+          <div className={styles.generalOptionGrid}>
+            <button type="button" className={`${styles.generalOption} ${theme === "dark" ? styles.generalOptionActive : ""}`} onClick={() => setThemeAndPersist("dark")}>
+              <span className={styles.generalOptionIcon}><Moon size={18} /></span>
+              <span><strong>{ar ? "داكن" : "Dark"}</strong><small>{ar ? "المظهر السينمائي الأساسي" : "The primary cinematic look"}</small></span>
+              {theme === "dark" ? <Check size={15} /> : null}
+            </button>
+            <button type="button" className={`${styles.generalOption} ${theme === "light" ? styles.generalOptionActive : ""}`} onClick={() => setThemeAndPersist("light")}>
+              <span className={styles.generalOptionIcon}><Sun size={18} /></span>
+              <span><strong>{ar ? "فاتح" : "Light"}</strong><small>{ar ? "واجهة أكثر سطوعًا وهدوءًا" : "A brighter, quieter interface"}</small></span>
+              {theme === "light" ? <Check size={15} /> : null}
+            </button>
+          </div>
+        </section>
+
+        <section className={styles.sectionBlock}>
+          <h2 className={styles.sectionLabel}>{ar ? "اللغة" : "Language"}</h2>
+          <p className={styles.settingsNote}>{ar ? "غيّر واجهة RAVINE بدون تغيير بيانات ملفك الشخصي." : "Switch the RAVINE interface without changing your profile data."}</p>
+          <div className={styles.generalOptionGrid}>
+            <Link href="/ar" className={`${styles.generalOption} ${ar ? styles.generalOptionActive : ""}`}>
+              <span className={styles.generalOptionIcon}><MonitorCog size={18} /></span>
+              <span><strong>العربية</strong><small>واجهة RAVINE بالعربية</small></span>
+              {ar ? <Check size={15} /> : <ArrowUpRight size={15} />}
+            </Link>
+            <Link href="/en" className={`${styles.generalOption} ${!ar ? styles.generalOptionActive : ""}`}>
+              <span className={styles.generalOptionIcon}><MonitorCog size={18} /></span>
+              <span><strong>English</strong><small>RAVINE interface in English</small></span>
+              {!ar ? <Check size={15} /> : <ArrowUpRight size={15} />}
+            </Link>
+          </div>
+        </section>
+
+        <section className={styles.sectionBlock}>
+          <h2 className={styles.sectionLabel}>{ar ? "هويتك" : "Your identity"}</h2>
+          <p className={styles.settingsNote}>{ar ? "تعديل الاسم والاسم المستخدم والنبذة والصور من مساحة تعديل الملف." : "Edit your name, username, bio, and media from the dedicated profile editor."}</p>
+          <div className={styles.actions}>
+            <Link className={styles.actionLink} href={`/${locale}/account`}><UserRound size={14} />{ar ? "دخول إلى الحساب" : "Open account"}</Link>
+            <Link className={styles.actionLink} href={`/${locale}/account/edit`}>{ar ? "تعديل الملف الشخصي" : "Edit profile"}<ArrowUpRight size={14} /></Link>
+          </div>
+        </section>
+      </div>
+    </section>
+  );
+}
