@@ -51,7 +51,7 @@ export default function LanguageSwitcher({ locale }: { locale: Locale }) {
     <details className="ravine-language-menu">
       <summary className="ravine-language" aria-label={locale === "ar" ? "اختيار اللغة" : "Choose language"}>
         <span className="ravine-language-current-flags" aria-hidden="true">
-          {current.flags.slice(0, 3).map((flag) => <FlagIcon code={flag} key={flag} />)}
+          {current.flags.map((flag) => <FlagIcon code={flag} key={flag} />)}
         </span>
         <span className="ravine-language-copy">
           <span className="ravine-language-label">{current.label}</span>
