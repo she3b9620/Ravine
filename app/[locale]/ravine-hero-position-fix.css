@@ -1,0 +1,11 @@
+/* Restore the Hero to its authored position. Do not scale or vertically offset the copy. */
+.ravine-shell .home-guest-hero .hero-inner{
+  transform:none!important;
+  transform-origin:center center!important;
+}
+
+@media(max-width:820px){
+  .ravine-shell .home-guest-hero .hero-inner{
+    transform:none!important;
+  }
+}
