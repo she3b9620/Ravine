@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { ravineErrorMessage } from "@/lib/ravine-error";
 
 export const dynamic = "force-dynamic";
 
@@ -14,20 +15,6 @@ type Notification = {
   created_at: string;
   video_id: number | null;
 };
-
-function friendlyNotificationError(error: unknown, ar: boolean) {
-  const text = error instanceof Error ? error.message : String(error ?? "");
-  if (/column\s+notifications\.type\s+does not exist/i.test(text)) {
-    return ar ? "تعذر تحميل بعض تفاصيل الإشعارات بسبب إصدار قديم من بنية قاعدة البيانات." : "Some notification details could not be loaded because the database schema is outdated.";
-  }
-  if (/relation\s+[\"']notifications[\"']\s+does not exist/i.test(text)) {
-    return ar ? "نظام الإشعارات غير متاح حاليًا." : "The notification system is currently unavailable.";
-  }
-  if (/infinite recursion detected in policy/i.test(text)) {
-    return ar ? "تعذر الوصول إلى الإشعارات بسبب خطأ في صلاحيات قاعدة البيانات." : "Notifications could not be accessed because of a database access-policy error.";
-  }
-  return ar ? "تعذر تحميل الإشعارات حاليًا. حاول مرة أخرى." : "Notifications could not be loaded right now. Please try again.";
-}
 
 export default async function NotificationsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: rawLocale } = await params;
@@ -64,7 +51,7 @@ export default async function NotificationsPage({ params }: { params: Promise<{ 
 
   const notifications = (data ?? []) as Notification[];
   const unreadCount = notifications.filter((notification) => !notification.is_read).length;
-  const errorMessage = error ? friendlyNotificationError(error, ar) : "";
+  const errorMessage = error ? ravineErrorMessage(error, locale) : "";
 
   return (
     <section className="section notifications-page">
