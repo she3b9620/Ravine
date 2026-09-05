@@ -58,7 +58,7 @@ export default function LanguageSwitcher({ locale }: { locale: Locale }) {
           <span className="ravine-language-chevron" aria-hidden="true">⌄</span>
         </span>
       </summary>
-      <div className="ravine-language-panel" dir="ltr">
+      <div className="ravine-language-panel" dir={locale === "ar" ? "rtl" : "ltr"}>
         <div className="ravine-language-panel-title">{locale === "ar" ? "لغة RAVINE" : "RAVINE language"}</div>
         <Link
           href={buildHref(current.locale)}
