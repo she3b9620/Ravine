@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
+import { persistRavineLocale, type RavineLocale } from "@/lib/locale-preference";
 
-type Locale = "ar" | "en";
+type Locale = RavineLocale;
 
 const LANGUAGE_FLAGS = {
   ar: ["🇪🇬", "🇸🇦", "🇵🇸"],
@@ -25,8 +26,18 @@ export default function LanguageSwitcher({ locale }: { locale: Locale }) {
   const label = locale === "ar" ? "العربية" : "English";
   const switchLabel = locale === "ar" ? "Switch to English" : "التبديل إلى العربية";
 
+  function handleLanguageChange() {
+    persistRavineLocale(alternateLocale);
+  }
+
   return (
-    <Link href={href} className="ravine-language" aria-label={switchLabel} title={switchLabel}>
+    <Link
+      href={href}
+      className="ravine-language"
+      aria-label={switchLabel}
+      title={switchLabel}
+      onClick={handleLanguageChange}
+    >
       <span className="ravine-language-flags" aria-hidden="true">
         {flags.map((flag, index) => (
           <span key={flag} className="ravine-language-flag" style={{ zIndex: flags.length - index }}>{flag}</span>
