@@ -56,6 +56,52 @@ html body .ravine-shell .about-lead {
   font-family: RavineTextMixed, serif !important;
 }
 
+/* Main navigation icon lock: deterministic Lucide geometry and a persistent Live accent. */
+html body .ravine-shell .ravine-nav-link {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+html body .ravine-shell .ravine-nav-link .ravine-nav-icon {
+  width: 14px !important;
+  height: 14px !important;
+  min-width: 14px !important;
+  min-height: 14px !important;
+  flex: 0 0 14px !important;
+  display: block !important;
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 1.8 !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+html body .ravine-shell .ravine-nav-link.is-live-link .ravine-nav-icon,
+html body .ravine-shell .ravine-nav-link.is-live-link:hover .ravine-nav-icon,
+html body .ravine-shell .ravine-nav-link.is-live-link:focus-visible .ravine-nav-icon,
+html body .ravine-shell .ravine-nav-link.is-live-link.is-active .ravine-nav-icon {
+  color: #d95454 !important;
+  stroke: #d95454 !important;
+}
+html body .ravine-shell .ravine-live-dot {
+  width: 6px !important;
+  height: 6px !important;
+  min-width: 6px !important;
+  min-height: 6px !important;
+  display: inline-block !important;
+  flex: 0 0 6px !important;
+  border-radius: 999px !important;
+  background: #d95454 !important;
+  box-shadow: 0 0 0 0 rgba(217,84,84,.48), 0 0 10px rgba(217,84,84,.52) !important;
+  animation: ravineLivePulse 1.8s ease-out infinite !important;
+}
+@keyframes ravineLivePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(217,84,84,.42), 0 0 10px rgba(217,84,84,.48); opacity: 1; }
+  50% { box-shadow: 0 0 0 5px rgba(217,84,84,0), 0 0 15px rgba(217,84,84,.62); opacity: .9; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html body .ravine-shell .ravine-live-dot { animation: none !important; }
+}
+
 /* Search portal lives under body, outside .ravine-shell. */
 html body .ravine-search-dialog,
 html body .ravine-search-dialog * {
