@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowUpRight, LogOut, RotateCcw } from "lucide-react";
+import { ArrowUpRight, RotateCcw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import styles from "@/app/[locale]/account/account.module.css";
@@ -124,21 +124,6 @@ export default function AccountSettings({ profile, locale }: Props) {
     }
   }
 
-  async function signOut() {
-    if (busy) return;
-    setBusy(true);
-    setError("");
-    const supabase = createClient();
-    const { error: signOutError } = await supabase.auth.signOut();
-    if (signOutError) {
-      setError(ar ? "تعذر تسجيل الخروج." : "Could not sign out.");
-      setBusy(false);
-      return;
-    }
-    router.replace(`/${locale}`);
-    router.refresh();
-  }
-
   return (
     <div className={styles.settingsShell}>
       <div className={styles.settingsHead}>
@@ -195,13 +180,6 @@ export default function AccountSettings({ profile, locale }: Props) {
             <RotateCcw size={14} />
             <span>{ar ? "إلغاء التعديلات" : "Discard changes"}</span>
           </button>
-          <div className={styles.sessionAction}>
-            <button className={`${styles.button} ${styles.danger}`} type="button" onClick={signOut} disabled={busy} title={ar ? "إنهاء جلسة تسجيل الدخول والخروج من RAVINE" : "End your signed-in session and leave RAVINE"}>
-              <LogOut size={14} />
-              <span>{ar ? "تسجيل الخروج" : "Sign out"}</span>
-            </button>
-            <small>{ar ? "ينهي جلسة تسجيل الدخول ويعيدك للصفحة الرئيسية." : "Ends your signed-in session and returns you to the home page."}</small>
-          </div>
           <button className={`${styles.button} ${styles.buttonPrimary}`} type="button" onClick={save} disabled={busy}>
             <span>{busy ? (ar ? "جارٍ التنفيذ…" : "Working…") : (ar ? "حفظ التغييرات" : "Save changes")}</span>
           </button>
