@@ -1,0 +1,169 @@
+/* RAVINE ABSOLUTE MIXED-SCRIPT FONT LOCK
+   Locale never chooses typography.
+   Arabic glyphs use Thmanyah; Latin/English glyphs use Satoshi.
+   Thmanyah is listed first and its @font-face unicode-range contains Arabic only,
+   so Latin glyphs in the same element fall through to Satoshi automatically. */
+
+:root {
+  --ravine-ui-mixed: "Thmanyah Sans", Satoshi, sans-serif;
+  --ravine-display-mixed: "Thmanyah Serif Display", Satoshi, serif;
+  --ravine-text-mixed: "Thmanyah Serif Text", Satoshi, serif;
+}
+
+/* Every visible text node in the authenticated/guest product shell. */
+html body .ravine-shell,
+html body .ravine-shell * {
+  font-family: var(--ravine-ui-mixed) !important;
+}
+
+/* Editorial roles: Arabic -> Thmanyah Serif Display, Latin -> Satoshi. */
+html body .ravine-shell h1,
+html body .ravine-shell h2,
+html body .ravine-shell h3,
+html body .ravine-shell h4,
+html body .ravine-shell h5,
+html body .ravine-shell h6,
+html body .ravine-shell .creator-profile-title,
+html body .ravine-shell .hero-title,
+html body .ravine-shell .heroTitle,
+html body .ravine-shell .work-title,
+html body .ravine-shell .video-title,
+html body .ravine-shell .section-title {
+  font-family: var(--ravine-display-mixed) !important;
+}
+
+/* Reading/editorial roles: Arabic -> Thmanyah Serif Text, Latin -> Satoshi. */
+html body .ravine-shell p,
+html body .ravine-shell li,
+html body .ravine-shell blockquote,
+html body .ravine-shell .description,
+html body .ravine-shell .bio,
+html body .ravine-shell .section-note,
+html body .ravine-shell .hero-note,
+html body .ravine-shell .settings-note,
+html body .ravine-shell .about-lead {
+  font-family: var(--ravine-text-mixed) !important;
+}
+
+/* Controls, navigation, metadata, account menu and language switcher. */
+html body .ravine-shell button,
+html body .ravine-shell input,
+html body .ravine-shell textarea,
+html body .ravine-shell select,
+html body .ravine-shell option,
+html body .ravine-shell label,
+html body .ravine-shell a,
+html body .ravine-shell span,
+html body .ravine-shell small,
+html body .ravine-shell strong,
+html body .ravine-shell time,
+html body .ravine-shell [role="button"],
+html body .ravine-shell [role="option"] {
+  font-family: var(--ravine-ui-mixed) !important;
+}
+
+/* User-entered Arabic/English and placeholder text. */
+html body .ravine-shell input,
+html body .ravine-shell textarea,
+html body .ravine-shell input::placeholder,
+html body .ravine-shell textarea::placeholder {
+  font-family: var(--ravine-ui-mixed) !important;
+}
+
+/* Search portal is outside .ravine-shell because it is portalled to body. */
+html body .ravine-search-overlay,
+html body .ravine-search-overlay *,
+html body .ravine-search-dialog,
+html body .ravine-search-dialog * {
+  font-family: var(--ravine-ui-mixed) !important;
+}
+html body .ravine-search-dialog h1,
+html body .ravine-search-dialog h2,
+html body .ravine-search-dialog h3,
+html body .ravine-search-dialog h4,
+html body .ravine-search-dialog h5,
+html body .ravine-search-dialog h6 {
+  font-family: var(--ravine-display-mixed) !important;
+}
+html body .ravine-search-dialog p,
+html body .ravine-search-dialog li,
+html body .ravine-search-dialog blockquote {
+  font-family: var(--ravine-text-mixed) !important;
+}
+html body .ravine-search-dialog input,
+html body .ravine-search-dialog textarea,
+html body .ravine-search-dialog input::placeholder,
+html body .ravine-search-dialog textarea::placeholder {
+  font-family: var(--ravine-ui-mixed) !important;
+}
+
+/* Messages portal. */
+html body .ravine-message-center,
+html body .ravine-message-center * {
+  font-family: var(--ravine-ui-mixed) !important;
+}
+html body .ravine-message-center h1,
+html body .ravine-message-center h2,
+html body .ravine-message-center h3,
+html body .ravine-message-center h4,
+html body .ravine-message-center h5,
+html body .ravine-message-center h6 {
+  font-family: var(--ravine-display-mixed) !important;
+}
+html body .ravine-message-center p,
+html body .ravine-message-center li,
+html body .ravine-message-center .direct-error,
+html body .ravine-message-center .direct-empty,
+html body .ravine-message-center .direct-thread-status {
+  font-family: var(--ravine-text-mixed) !important;
+}
+html body .ravine-message-center input,
+html body .ravine-message-center textarea,
+html body .ravine-message-center input::placeholder,
+html body .ravine-message-center textarea::placeholder {
+  font-family: var(--ravine-ui-mixed) !important;
+}
+
+/* Auth portal. */
+html body .ravine-auth-overlay,
+html body .ravine-auth-overlay * {
+  font-family: var(--ravine-ui-mixed) !important;
+}
+html body .ravine-auth-overlay h1,
+html body .ravine-auth-overlay h2,
+html body .ravine-auth-overlay h3,
+html body .ravine-auth-overlay h4,
+html body .ravine-auth-overlay h5,
+html body .ravine-auth-overlay h6 {
+  font-family: var(--ravine-display-mixed) !important;
+}
+html body .ravine-auth-overlay p,
+html body .ravine-auth-overlay .intro,
+html body .ravine-auth-overlay .auth-message {
+  font-family: var(--ravine-text-mixed) !important;
+}
+html body .ravine-auth-overlay input,
+html body .ravine-auth-overlay textarea,
+html body .ravine-auth-overlay input::placeholder,
+html body .ravine-auth-overlay textarea::placeholder {
+  font-family: var(--ravine-ui-mixed) !important;
+}
+
+/* Explicit search controls, including Arabic entered into the live search box. */
+html body .ravine-search-input input,
+html body .ravine-search-input input::placeholder,
+html body .ravine-search-select-trigger,
+html body .ravine-search-select-menu,
+html body .ravine-search-select-menu button,
+html body .ravine-advanced-search-toggle,
+html body .ravine-search-actions .button {
+  font-family: var(--ravine-ui-mixed) !important;
+}
+
+/* Do not let locale, direction, or theme change font selection. */
+html body .ravine-shell[lang="ar"],
+html body .ravine-shell[lang="en"],
+html body .ravine-search-dialog[dir="rtl"],
+html body .ravine-search-dialog[dir="ltr"] {
+  font-synthesis: none;
+}
