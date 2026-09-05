@@ -9,6 +9,7 @@ export default function GeneralSettingsPage({ params }: { params: Promise<{ loca
   const { locale: rawLocale } = use(params);
   const locale = rawLocale === "en" ? "en" : "ar";
   const ar = locale === "ar";
+  const alternateLocale = locale === "ar" ? "en" : "ar";
   const [theme, setTheme] = useState<"dark" | "light">("dark");
 
   useEffect(() => {
@@ -54,14 +55,14 @@ export default function GeneralSettingsPage({ params }: { params: Promise<{ loca
 
         <section className={styles.sectionBlock}>
           <h2 className={styles.sectionLabel}>{ar ? "اللغة" : "Language"}</h2>
-          <p className={styles.settingsNote}>{ar ? "غيّر واجهة RAVINE بدون تغيير بيانات ملفك الشخصي." : "Switch the RAVINE interface without changing your profile data."}</p>
+          <p className={styles.settingsNote}>{ar ? "غيّر واجهة RAVINE مع الحفاظ على الصفحة التي تتصفحها الآن." : "Switch the RAVINE interface while staying on the page you are viewing."}</p>
           <div className={styles.generalOptionGrid}>
-            <Link href="/ar" className={`${styles.generalOption} ${ar ? styles.generalOptionActive : ""}`}>
+            <Link href={`/${locale}/settings`} className={`${styles.generalOption} ${ar ? styles.generalOptionActive : ""}`}>
               <span className={styles.generalOptionIcon}><MonitorCog size={18} /></span>
               <span><strong>العربية</strong><small>واجهة RAVINE بالعربية</small></span>
               {ar ? <Check size={15} /> : <ArrowUpRight size={15} />}
             </Link>
-            <Link href="/en" className={`${styles.generalOption} ${!ar ? styles.generalOptionActive : ""}`}>
+            <Link href={`/${alternateLocale}/settings`} className={`${styles.generalOption} ${!ar ? styles.generalOptionActive : ""}`}>
               <span className={styles.generalOptionIcon}><MonitorCog size={18} /></span>
               <span><strong>English</strong><small>RAVINE interface in English</small></span>
               {!ar ? <Check size={15} /> : <ArrowUpRight size={15} />}
