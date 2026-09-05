@@ -9,6 +9,7 @@ import "./search-permission-fixes.css";
 import "./messaging-header.css";
 import "./ravine-typography-search-final.css";
 import "./ravine-font-authority.css";
+import "./ravine-script-font-lock.css";
 
 const locales = ["ar", "en"] as const;
 type Locale = (typeof locales)[number];
