@@ -10,16 +10,7 @@ import SearchLauncher from "./SearchLauncher";
 import AccountMenu from "./AccountMenu";
 import NotificationBell from "./NotificationBell";
 import ChatLauncher from "./ChatLauncher";
-
-const navigation = [
-  ["discover", "Discover", "اكتشف"],
-  ["cuts", "Cuts", "كِتس"],
-  ["videos", "Videos", "الفيديو"],
-  ["podcasts", "Podcasts", "البودكاست"],
-  ["live", "Live", "مباشر"],
-  ["creators", "Creators", "المبدعون"],
-  ["community", "Community", "المجتمعات"],
-] as const;
+import PrimaryNav from "./PrimaryNav";
 
 type Locale = "ar" | "en";
 type HeaderCategory = { id: number; name: string; slug: string | null };
@@ -28,8 +19,8 @@ type HeaderProfile = { display_name: string | null; username: string | null; ava
 function RavineLockup({ compact = false }: { compact?: boolean }) {
   return (
     <span className={`ravine-lockup${compact ? " compact" : ""}`} aria-hidden="true">
-      <img src="/ravine-mark.svg" alt="" className="ravine-lockup-mark" />
-      <img src="/ravine-wordmark.svg" alt="" className="ravine-lockup-wordmark" />
+      <img src="/اللوجو.png" alt="" className="ravine-lockup-mark" />
+      <img src="/التايبو.png" alt="" className="ravine-lockup-wordmark" />
     </span>
   );
 }
@@ -72,9 +63,7 @@ export default async function RavineShell({ locale, children }: { locale: Locale
           <Link href={`/${locale}`} className="ravine-brand ravine-brand-lockup" aria-label="RAVINE">
             <RavineLockup />
           </Link>
-          <nav className="ravine-nav" aria-label={isArabic ? "التنقل الرئيسي" : "Primary navigation"}>
-            {navigation.map(([slug, en, ar]) => <Link key={slug} href={`/${locale}/${slug}`} className="ravine-nav-link">{isArabic ? ar : en}</Link>)}
-          </nav>
+          <PrimaryNav locale={locale} />
           <div className="ravine-header-actions">
             <MobileNav locale={locale} authenticated={Boolean(user)} />
             <SearchLauncher locale={locale} categories={categories} />
