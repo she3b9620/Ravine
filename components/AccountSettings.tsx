@@ -191,19 +191,20 @@ export default function AccountSettings({ profile, locale }: Props) {
       <div className={styles.actions}>
         <a className={styles.actionLink} href={`/${locale}/dashboard`}>{ar ? "العودة للوحة المستخدم" : "Back to dashboard"}<ArrowUpRight size={14} /></a>
         <div className={styles.actionsRight}>
-          <div className={styles.actionsRight}>
-            <button className={`${styles.button} ${styles.secondaryButton}`} type="button" onClick={cancelChanges} disabled={busy} title={ar ? "إلغاء كل التعديلات والعودة لآخر نسخة محفوظة" : "Discard all changes and return to the last saved version"}>
-              <RotateCcw size={14} />
-              <span>{ar ? "إلغاء التعديلات" : "Discard changes"}</span>
-            </button>
+          <button className={`${styles.button} ${styles.secondaryButton}`} type="button" onClick={cancelChanges} disabled={busy} title={ar ? "إلغاء كل التعديلات والعودة لآخر نسخة محفوظة" : "Discard all changes and return to the last saved version"}>
+            <RotateCcw size={14} />
+            <span>{ar ? "إلغاء التعديلات" : "Discard changes"}</span>
+          </button>
+          <div className={styles.sessionAction}>
             <button className={`${styles.button} ${styles.danger}`} type="button" onClick={signOut} disabled={busy} title={ar ? "إنهاء جلسة تسجيل الدخول والخروج من RAVINE" : "End your signed-in session and leave RAVINE"}>
               <LogOut size={14} />
               <span>{ar ? "تسجيل الخروج" : "Sign out"}</span>
             </button>
-            <button className={`${styles.button} ${styles.buttonPrimary}`} type="button" onClick={save} disabled={busy}>
-              <span>{busy ? (ar ? "جارٍ التنفيذ…" : "Working…") : (ar ? "حفظ التغييرات" : "Save changes")}</span>
-            </button>
+            <small>{ar ? "ينهي جلسة تسجيل الدخول ويعيدك للصفحة الرئيسية." : "Ends your signed-in session and returns you to the home page."}</small>
           </div>
+          <button className={`${styles.button} ${styles.buttonPrimary}`} type="button" onClick={save} disabled={busy}>
+            <span>{busy ? (ar ? "جارٍ التنفيذ…" : "Working…") : (ar ? "حفظ التغييرات" : "Save changes")}</span>
+          </button>
         </div>
       </div>
     </div>
