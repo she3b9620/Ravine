@@ -52,10 +52,11 @@ export default async function RavineShell({ locale, children }: { locale: Locale
     profile = null;
   }
 
+  const isAuthenticated = Boolean(user);
   const displayName = profile?.display_name || profile?.username || user?.email?.split("@")[0] || (isArabic ? "مستخدم RAVINE" : "RAVINE user");
 
   return (
-    <div className={`ravine-shell${user ? "" : " guest-shell"}`} lang={locale} dir={isArabic ? "rtl" : "ltr"}>
+    <div className={`ravine-shell${isAuthenticated ? "" : " guest-shell"}`} lang={locale} dir={isArabic ? "rtl" : "ltr"}>
       <header className="ravine-header">
         <div className="ravine-header-inner">
           <div className="ravine-header-start">
@@ -66,9 +67,9 @@ export default async function RavineShell({ locale, children }: { locale: Locale
           </div>
           <PrimaryNav locale={locale} />
           <div className="ravine-header-actions">
-            <MobileNav locale={locale} authenticated={Boolean(user)} />
+            <MobileNav locale={locale} authenticated={isAuthenticated} />
             <SearchLauncher locale={locale} categories={categories} />
-            {user ? (
+            {isAuthenticated ? (
               <>
                 <NotificationBell locale={locale} />
                 <ChatLauncher locale={locale} />
@@ -87,7 +88,7 @@ export default async function RavineShell({ locale, children }: { locale: Locale
       </header>
 
       <aside className="ravine-sidebar" aria-label={isArabic ? "القائمة الجانبية الرئيسية" : "Primary sidebar"}>
-        <SidebarNav locale={locale} />
+        <SidebarNav locale={locale} authenticated={isAuthenticated} />
       </aside>
 
       <main className="ravine-main">{children}</main>
