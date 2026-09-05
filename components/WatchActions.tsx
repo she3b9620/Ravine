@@ -8,7 +8,7 @@ import "./WatchActions.module.css";
 
 function localizeActionError(error: { message?: string } | null, ar: boolean) {
   const message = error?.message ?? "";
-  if (ar && /permission denied for table follows/i.test(message)) return "لا تملك صلاحية تنفيذ هذه العملية حاليًا.";
+  if (ar && /permission denied for table follows/i.test(message)) return "لا تملك صلاحية الوصول إلى المتابعات حاليًا.";
   if (ar && /permission denied/i.test(message)) return "لا تملك صلاحية تنفيذ هذه العملية حاليًا.";
   return ar ? "تعذر تنفيذ العملية حاليًا." : message || "Unable to complete the action right now.";
 }
