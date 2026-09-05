@@ -1,11 +1,19 @@
-/* RAVINE guest cinematic finish: let the video dissolve into the page instead of ending as a hard rectangle. */
+﻿/* RAVINE guest cinematic finish */
+
 .guest-shell .ravine-guest-cinematic-backdrop::before{
   content:"";
   position:absolute;
   inset:-8%;
   z-index:3;
   pointer-events:none;
-  background:radial-gradient(ellipse at center,transparent 38%,rgba(9,9,9,.08) 52%,rgba(9,9,9,.26) 70%,rgba(9,9,9,.62) 92%,rgba(9,9,9,.8) 100%);
+  background:radial-gradient(
+    ellipse at center,
+    transparent 38%,
+    rgba(9,9,9,.08) 52%,
+    rgba(9,9,9,.26) 70%,
+    rgba(9,9,9,.62) 92%,
+    rgba(9,9,9,.8) 100%
+  );
   mix-blend-mode:multiply;
   filter:blur(12px);
   opacity:.82;
@@ -21,55 +29,99 @@
   height:42%;
   z-index:4;
   pointer-events:none;
-  background:linear-gradient(180deg,rgba(9,9,9,0) 0%,rgba(9,9,9,.035) 18%,rgba(9,9,9,.12) 38%,rgba(9,9,9,.34) 58%,rgba(9,9,9,.68) 80%,#090909 100%);
-  filter:none;
-  opacity:1;
+  background:linear-gradient(
+    180deg,
+    rgba(9,9,9,0) 0%,
+    rgba(9,9,9,.035) 18%,
+    rgba(9,9,9,.12) 38%,
+    rgba(9,9,9,.34) 58%,
+    rgba(9,9,9,.68) 80%,
+    #090909 100%
+  );
 }
 
-.guest-shell .ravine-hero-video-audio-toggle{
+.guest-shell .ravine-hero-video-controls{
   position:fixed;
   top:104px;
   inset-inline-end:32px;
   z-index:45;
-  width:42px;
-  height:42px;
-  display:grid;
-  place-items:center;
-  padding:0;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:5px;
   border:1px solid rgba(241,233,220,.16);
   border-radius:999px;
   background:rgba(9,9,9,.34);
   color:#F1E9DC;
   -webkit-backdrop-filter:blur(12px) saturate(110%);
   backdrop-filter:blur(12px) saturate(110%);
-  box-shadow:0 10px 30px rgba(0,0,0,.18),0 0 0 1px rgba(196,122,82,.025);
-  cursor:pointer;
-  transition:transform .24s ease,border-color .24s ease,background .24s ease,color .24s ease,box-shadow .24s ease;
+  box-shadow:
+    0 10px 30px rgba(0,0,0,.18),
+    0 0 0 1px rgba(196,122,82,.025);
 }
-.guest-shell .ravine-hero-video-audio-toggle:hover,
-.guest-shell .ravine-hero-video-audio-toggle:focus-visible{
+
+.guest-shell .ravine-hero-video-control{
+  width:34px;
+  height:34px;
+  display:grid;
+  place-items:center;
+  padding:0;
+  border:1px solid transparent;
+  border-radius:999px;
+  background:transparent;
+  color:#F1E9DC;
+  cursor:pointer;
+  transition:
+    transform .24s ease,
+    border-color .24s ease,
+    background .24s ease,
+    color .24s ease,
+    box-shadow .24s ease;
+}
+
+.guest-shell .ravine-hero-video-control:hover,
+.guest-shell .ravine-hero-video-control:focus-visible{
   transform:translateY(-1px);
-  border-color:rgba(196,122,82,.58);
+  border-color:rgba(196,122,82,.5);
   background:rgba(196,122,82,.09);
   color:#F1E9DC;
-  box-shadow:0 12px 34px rgba(0,0,0,.22),0 0 18px rgba(196,122,82,.08);
   outline:none;
 }
-.guest-shell .ravine-hero-video-audio-toggle[aria-pressed="true"]{
-  border-color:rgba(196,122,82,.58);
-  color:#D49A78;
-  background:rgba(196,122,82,.09);
-}
-.guest-shell .ravine-hero-video-audio-icon{width:18px;height:18px;display:grid;place-items:center}
-.guest-shell .ravine-hero-video-audio-icon svg{width:18px;height:18px;display:block;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 
-/* Restore the exact active-header line treatment from the reference deployment. */
+.guest-shell .ravine-hero-video-control[aria-pressed="true"]{
+  border-color:rgba(196,122,82,.48);
+  background:rgba(196,122,82,.09);
+  color:#D49A78;
+}
+
+.guest-shell .ravine-hero-video-control svg{
+  width:16px;
+  height:16px;
+  display:block;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.7;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+.guest-shell .ravine-hero-video-control:nth-child(2) svg{
+  width:17px;
+  height:17px;
+}
+
+.guest-shell .ravine-hero-video-audio-svg{
+  width:17px!important;
+  height:17px!important;
+}
+
 .guest-shell .ravine-nav-link.is-active,
 .guest-shell .ravine-nav-link.is-active:hover,
 .guest-shell .ravine-nav-link.is-active:focus-visible{
   position:relative;
   color:var(--ivory)!important;
 }
+
 .guest-shell .ravine-nav-link.is-active::after{
   content:"";
   position:absolute;
@@ -84,30 +136,96 @@
 }
 
 html[data-theme="light"] .guest-shell .ravine-guest-cinematic-backdrop::after{
-  background:linear-gradient(180deg,rgba(241,233,220,0) 0%,rgba(241,233,220,.035) 18%,rgba(241,233,220,.12) 38%,rgba(241,233,220,.34) 58%,rgba(241,233,220,.68) 80%,#F1E9DC 100%);
+  background:linear-gradient(
+    180deg,
+    rgba(241,233,220,0) 0%,
+    rgba(241,233,220,.035) 18%,
+    rgba(241,233,220,.12) 38%,
+    rgba(241,233,220,.34) 58%,
+    rgba(241,233,220,.68) 80%,
+    #F1E9DC 100%
+  );
 }
-html[data-theme="light"] .guest-shell .ravine-hero-video-audio-toggle{
+
+html[data-theme="light"] .guest-shell .ravine-hero-video-controls{
   background:rgba(241,233,220,.48);
   border-color:rgba(23,23,23,.14);
   color:#171717;
-  box-shadow:0 10px 28px rgba(23,23,23,.08),0 0 0 1px rgba(196,122,82,.035);
+  box-shadow:
+    0 10px 28px rgba(23,23,23,.08),
+    0 0 0 1px rgba(196,122,82,.035);
 }
-html[data-theme="light"] .guest-shell .ravine-hero-video-audio-toggle:hover,
-html[data-theme="light"] .guest-shell .ravine-hero-video-audio-toggle:focus-visible,
-html[data-theme="light"] .guest-shell .ravine-hero-video-audio-toggle[aria-pressed="true"]{
+
+html[data-theme="light"] .guest-shell .ravine-hero-video-control:hover,
+html[data-theme="light"] .guest-shell .ravine-hero-video-control:focus-visible,
+html[data-theme="light"] .guest-shell .ravine-hero-video-control[aria-pressed="true"]{
   border-color:rgba(169,93,56,.48);
   background:rgba(255,250,246,.78);
   color:#70402F;
 }
 
 @media(max-width:820px){
-  .guest-shell .ravine-guest-cinematic-backdrop::before{inset:-10%;opacity:.72;filter:blur(10px)}
-  .guest-shell .ravine-guest-cinematic-backdrop::after{height:48%;background:linear-gradient(180deg,rgba(9,9,9,0) 0%,rgba(9,9,9,.04) 18%,rgba(9,9,9,.16) 40%,rgba(9,9,9,.42) 64%,rgba(9,9,9,.74) 82%,#090909 100%)}
-  html[data-theme="light"] .guest-shell .ravine-guest-cinematic-backdrop::after{height:48%;background:linear-gradient(180deg,rgba(241,233,220,0) 0%,rgba(241,233,220,.04) 18%,rgba(241,233,220,.16) 40%,rgba(241,233,220,.42) 64%,rgba(241,233,220,.78) 84%,#F1E9DC 100%)}
-  .guest-shell .ravine-hero-video-audio-toggle{top:88px;inset-inline-end:14px;width:38px;height:38px}
-  .guest-shell .ravine-hero-video-audio-icon,.guest-shell .ravine-hero-video-audio-icon svg{width:17px;height:17px}
+  .guest-shell .ravine-guest-cinematic-backdrop::before{
+    inset:-10%;
+    opacity:.72;
+    filter:blur(10px);
+  }
+
+  .guest-shell .ravine-guest-cinematic-backdrop::after{
+    height:48%;
+    background:linear-gradient(
+      180deg,
+      rgba(9,9,9,0) 0%,
+      rgba(9,9,9,.04) 18%,
+      rgba(9,9,9,.16) 40%,
+      rgba(9,9,9,.42) 64%,
+      rgba(9,9,9,.74) 82%,
+      #090909 100%
+    );
+  }
+
+  html[data-theme="light"] .guest-shell .ravine-guest-cinematic-backdrop::after{
+    height:48%;
+    background:linear-gradient(
+      180deg,
+      rgba(241,233,220,0) 0%,
+      rgba(241,233,220,.04) 18%,
+      rgba(241,233,220,.16) 40%,
+      rgba(241,233,220,.42) 64%,
+      rgba(241,233,220,.78) 84%,
+      #F1E9DC 100%
+    );
+  }
+
+  .guest-shell .ravine-hero-video-controls{
+    top:88px;
+    inset-inline-end:14px;
+    gap:4px;
+    padding:4px;
+  }
+
+  .guest-shell .ravine-hero-video-control{
+    width:31px;
+    height:31px;
+  }
+
+  .guest-shell .ravine-hero-video-control svg{
+    width:15px;
+    height:15px;
+  }
+
+  .guest-shell .ravine-hero-video-audio-svg{
+    width:16px!important;
+    height:16px!important;
+  }
+
+  .guest-shell .ravine-nav-link.is-active::after{
+    bottom:-8px;
+  }
 }
 
 @media(prefers-reduced-motion:reduce){
-  .guest-shell .ravine-hero-video-audio-toggle{transition:none}
+  .guest-shell .ravine-hero-video-control{
+    transition:none;
+  }
 }
