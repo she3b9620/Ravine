@@ -19,6 +19,7 @@ const copy = {
     creatorsBody: "لكل مبدع مجتمع مستقل عن تعليقات الأعمال، مع إعدادات وصول وخصوصية قابلة للضبط.",
     groupsBody: "مجموعات ينشئها المستخدمون حول اهتماماتهم ومشاريعهم وممارساتهم الإبداعية، وفق قواعد الأهلية التي ستُحسم لاحقًا.",
     eliteBody: "مساحات نادرة ذات طابع خاص، تُفعّل لاحقًا وفق معايير واضحة وليست مفتوحة تلقائيًا للجميع.",
+    open: "فتح المجتمع",
     loop: "العمل ← المجتمع ← الحوار ← الجلسة المباشرة ← البرنامج الصوتي ← العودة إلى المجتمع",
     note: "هذه البنية تعرض اتجاه المنتج فقط؛ قواعد الأهلية الدقيقة للمجموعات، وسياسات الإشراف والتصعيد، ما زالت قرارات مفتوحة في المواصفة.",
     back: "العودة إلى الاكتشاف",
@@ -37,6 +38,7 @@ const copy = {
     creatorsBody: "Every Creator can have a community separate from work comments, with configurable access and privacy.",
     groupsBody: "User-created groups around interests, projects and creative practices, under eligibility rules that remain to be finalized.",
     eliteBody: "Rare, special spaces activated later under explicit criteria rather than being automatically open to everyone.",
+    open: "Open community",
     loop: "Work → Community → Conversation → Live → Podcast → Community",
     note: "This page represents the agreed product direction only. Exact group eligibility, moderation and escalation rules remain open decisions in the specification.",
     back: "Back to discovery",
@@ -49,12 +51,12 @@ export default async function CommunityPage({ params }: { params: Promise<{ loca
   const t = copy[locale];
 
   const spaces = [
-    [t.general, t.generalBody],
-    [t.topics, t.topicsBody],
-    [t.creators, t.creatorsBody],
-    [t.groups, t.groupsBody],
-    [t.elite, t.eliteBody],
-  ];
+    [t.general, t.generalBody, "general"],
+    [t.topics, t.topicsBody, "film"],
+    [t.creators, t.creatorsBody, "creators-hub"],
+    [t.groups, t.groupsBody, "user-groups"],
+    [t.elite, t.eliteBody, "elite"],
+  ] as const;
 
   return (
     <section className="section community-page">
@@ -63,12 +65,13 @@ export default async function CommunityPage({ params }: { params: Promise<{ loca
       <p className="section-note">{t.body}</p>
 
       <div className="community-space-grid">
-        {spaces.map(([name, description], index) => (
-          <article className="community-space-card" key={name}>
+        {spaces.map(([name, description, slug], index) => (
+          <Link className="community-space-card" href={`/${locale}/community/${slug}`} key={slug}>
             <span>{String(index + 1).padStart(2, "0")}</span>
             <h2>{name}</h2>
             <p>{description}</p>
-          </article>
+            <strong>{t.open}</strong>
+          </Link>
         ))}
       </div>
 
