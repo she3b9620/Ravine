@@ -6,11 +6,14 @@
 .home-guest-hero{position:relative;background:transparent!important;min-height:min(780px,88vh);display:flex;align-items:center}
 .home-guest-hero .hero-inner{position:relative;z-index:4}
 
-/* Guest light mode: only the Hero title, kicker, and primary Create account action are white. */
-html[data-theme="light"] .home-guest-hero .hero h1{color:#fff!important}
-html[data-theme="light"] .home-guest-hero .hero .home-state-kicker{color:#fff!important}
+/* Guest light mode: improve Hero copy contrast against changing video frames without changing the top header. */
+html[data-theme="light"] .home-guest-hero .hero h1{color:#fff!important;text-shadow:0 2px 22px rgba(0,0,0,.62),0 0 2px rgba(0,0,0,.9)!important}
+html[data-theme="light"] .home-guest-hero .hero .home-state-kicker{color:#fff!important;text-shadow:0 2px 16px rgba(0,0,0,.58)!important}
+html[data-theme="light"] .home-guest-hero .hero p{color:#fff!important;text-shadow:0 2px 18px rgba(0,0,0,.68),0 0 2px rgba(0,0,0,.9)!important}
 html[data-theme="light"] .home-guest-hero .hero .ravine-auth-trigger-primary,
-html[data-theme="light"] .home-guest-hero .hero .ravine-minor-link.ravine-auth-trigger-primary{color:#fff!important}
+html[data-theme="light"] .home-guest-hero .hero .ravine-minor-link.ravine-auth-trigger-primary{color:#fff!important;text-shadow:0 2px 12px rgba(0,0,0,.55)!important}
+html[data-theme="light"] .home-guest-hero .hero-inner{isolation:isolate}
+html[data-theme="light"] .home-guest-hero .hero-inner::before{content:"";position:absolute;inset: -42px -54px -54px -42px;z-index:-1;pointer-events:none;border-radius:38px;background:radial-gradient(ellipse at 42% 44%,rgba(9,9,9,.42) 0%,rgba(9,9,9,.24) 38%,rgba(9,9,9,.08) 66%,transparent 78%);filter:blur(14px)}
 
 /* Fade the cinematic frame smoothly into the light canvas instead of a hard edge. */
 html[data-theme="light"] .ravine-guest-cinematic-backdrop{display:block!important;background:#f1e9dc!important;height:min(91vh,920px)!important}
@@ -20,6 +23,6 @@ html[data-theme="light"] .ravine-guest-cinematic-vignette{background:radial-grad
 html[data-theme="light"] .home-guest-hero{background:linear-gradient(180deg,rgba(241,233,220,0) 0%,rgba(241,233,220,.04) 50%,#f1e9dc 100%)!important}
 
 @keyframes ravineGuestBackdropIn{from{opacity:0}to{opacity:1}}
-@media(max-width:820px){.ravine-guest-cinematic-backdrop{height:78vh}.ravine-guest-cinematic-backdrop iframe{transform:translate(-50%,-50%) scale(1.28);opacity:.56}.ravine-guest-cinematic-wash{background:linear-gradient(90deg,rgba(9,9,9,.92),rgba(9,9,9,.56)),linear-gradient(180deg,rgba(9,9,9,.36),#090909 94%)}html[data-theme="light"] .ravine-guest-cinematic-backdrop{height:82vh!important}html[data-theme="light"] .ravine-guest-cinematic-backdrop::after{height:40%}html[data-theme="light"] .ravine-guest-cinematic-wash{background:linear-gradient(90deg,rgba(9,9,9,.68),rgba(9,9,9,.38)),linear-gradient(180deg,rgba(9,9,9,.12) 0%,rgba(241,233,220,.88) 100%)}}
+@media(max-width:820px){.ravine-guest-cinematic-backdrop{height:78vh}.ravine-guest-cinematic-backdrop iframe{transform:translate(-50%,-50%) scale(1.28);opacity:.56}.ravine-guest-cinematic-wash{background:linear-gradient(90deg,rgba(9,9,9,.92),rgba(9,9,9,.56)),linear-gradient(180deg,rgba(9,9,9,.36),#090909 94%)}html[data-theme="light"] .ravine-guest-cinematic-backdrop{height:82vh!important}html[data-theme="light"] .ravine-guest-cinematic-backdrop::after{height:40%}html[data-theme="light"] .ravine-guest-cinematic-wash{background:linear-gradient(90deg,rgba(9,9,9,.68),rgba(9,9,9,.38)),linear-gradient(180deg,rgba(9,9,9,.12) 0%,rgba(241,233,220,.88) 100%)}html[data-theme="light"] .home-guest-hero .hero-inner::before{inset:-24px -26px -34px -22px;filter:blur(12px)}}
 @media(prefers-reduced-motion:reduce){.ravine-guest-cinematic-backdrop{animation:none;opacity:1}}
 @media (prefers-color-scheme:light){.home-guest-hero{background:var(--bg-primary,#f1e9dc)!important}}
