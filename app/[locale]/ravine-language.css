@@ -1,54 +1,54 @@
-.ravine-language{
-  position:relative;
-  display:inline-flex;
-  align-items:center;
-  gap:10px;
-  min-height:42px;
-  padding:6px 10px 6px 8px;
-  border:1px solid rgba(241,233,220,.14);
-  border-radius:999px;
-  background:rgba(241,233,220,.035);
-  color:var(--ivory);
-  overflow:hidden;
-  isolation:isolate;
-  transition:transform .28s cubic-bezier(.22,1,.36,1),border-color .28s ease,background .28s ease,box-shadow .28s ease;
-}
-.ravine-language::before{
-  content:"";
-  position:absolute;
-  inset:-1px;
-  z-index:-1;
-  background:linear-gradient(110deg,transparent 28%,rgba(196,122,82,.14) 50%,transparent 72%);
-  transform:translateX(-120%);
-  transition:transform .65s cubic-bezier(.22,1,.36,1);
-}
-.ravine-language:hover{transform:translateY(-1px);border-color:rgba(196,122,82,.52);background:rgba(196,122,82,.065);box-shadow:0 10px 28px rgba(0,0,0,.14)}
-.ravine-language:hover::before{transform:translateX(120%)}
-.ravine-language:active{transform:translateY(0) scale(.97)}
-.ravine-language-flags{display:inline-flex;align-items:center;height:28px;padding-inline:2px;isolation:isolate}
-.ravine-language-flag{width:20px;height:20px;display:grid;place-items:center;font-size:17px;line-height:1;border-radius:50%;background:var(--charcoal);box-shadow:0 0 0 2px var(--obsidian);transform:translateX(calc(var(--flag-index, 0) * -4px));transition:transform .35s cubic-bezier(.22,1,.36,1),scale .35s cubic-bezier(.22,1,.36,1)}
-.ravine-language-flag + .ravine-language-flag{margin-inline-start:-5px}
-.ravine-language:hover .ravine-language-flag{transform:translateY(-2px) scale(1.08)}
-.ravine-language-copy{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
-.ravine-language-label{font-size:11px;font-weight:700;letter-spacing:.03em;line-height:1}
-.ravine-language-arrow{font-size:12px;line-height:1;opacity:.55;transform:translateY(-1px);transition:transform .28s ease,opacity .28s ease,color .28s ease}
-.ravine-language:hover .ravine-language-arrow{transform:translate(2px,-3px);opacity:1;color:var(--copper)}
-html[data-theme="light"] .ravine-language{border-color:rgba(23,23,23,.14);background:rgba(23,23,23,.035);color:#171717}
-html[data-theme="light"] .ravine-language::before{background:linear-gradient(110deg,transparent 28%,rgba(169,93,56,.13) 50%,transparent 72%)}
-html[data-theme="light"] .ravine-language:hover{border-color:rgba(169,93,56,.52);background:rgba(169,93,56,.06);box-shadow:0 10px 28px rgba(23,23,23,.1)}
-html[data-theme="light"] .ravine-language-flag{background:#fffdfb;box-shadow:0 0 0 2px var(--obsidian)}
-@media(max-width:1180px){
-  .ravine-language{min-height:40px;padding:5px 8px 5px 7px;gap:7px}
-  .ravine-language-flags{height:24px}
-  .ravine-language-flag{width:18px;height:18px;font-size:15px}
-  .ravine-language-label{font-size:10px}
-}
-@media(max-width:980px){
-  .ravine-language-copy{display:none}
-  .ravine-language{width:42px;height:42px;min-height:42px;justify-content:center;padding:5px}
-  .ravine-language-flags{padding:0}
-}
-@media(prefers-reduced-motion:reduce){
-  .ravine-language,.ravine-language::before,.ravine-language-flag,.ravine-language-arrow{transition:none}
-  .ravine-language:hover{transform:none;box-shadow:none}
-}
+.ravine-language-menu{position:relative;display:inline-flex;z-index:80}
+.ravine-language-menu>summary{list-style:none}
+.ravine-language-menu>summary::-webkit-details-marker{display:none}
+.ravine-language{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:38px;padding:5px 9px;border:0;border-radius:999px;background:transparent;color:var(--ivory);cursor:pointer;overflow:visible;white-space:nowrap;transition:background .25s ease,color .25s ease,transform .25s cubic-bezier(.22,1,.36,1)}
+.ravine-language:hover{background:rgba(196,122,82,.08);color:var(--ivory);transform:translateY(-1px)}
+.ravine-language:active{transform:translateY(0) scale(.98)}
+.ravine-language-current-flags{display:inline-flex;align-items:center;height:22px;padding-inline:2px}
+.ravine-flag{position:relative;display:inline-block;width:22px;height:15px;flex:0 0 22px;border-radius:3px;overflow:hidden;box-shadow:0 0 0 1px rgba(241,233,220,.2),0 2px 6px rgba(0,0,0,.18);background:#777}
+.ravine-language-current-flags .ravine-flag:not(:first-child),.ravine-language-option-flags .ravine-flag:not(:first-child){margin-inline-start:-5px}
+.ravine-language-copy{display:inline-flex;align-items:center;gap:5px;line-height:1}
+.ravine-language-label{font-size:11px;font-weight:700;letter-spacing:.01em;line-height:1}
+.ravine-language-chevron{font-size:15px;line-height:.8;opacity:.62;transform:translateY(-1px);transition:transform .25s ease,opacity .25s ease}
+.ravine-language-menu[open] .ravine-language-chevron{transform:translateY(1px) rotate(180deg);opacity:1}
+
+/* Clear, unmistakable flag glyphs without relying on OS emoji rendering. */
+.ravine-flag-eg{background:linear-gradient(to bottom,#ce1126 0 33.33%,#fff 33.33% 66.66%,#111 66.66%)}
+.ravine-flag-eg:after{content:"";position:absolute;left:50%;top:50%;width:6px;height:6px;transform:translate(-50%,-50%);background:#c9a227;border-radius:1px;opacity:.9}
+.ravine-flag-sa{background:#006c35}
+.ravine-flag-sa:after{content:"";position:absolute;left:24%;right:12%;bottom:22%;height:2px;background:#fff;border-radius:2px;box-shadow:0 -6px 0 -1px rgba(255,255,255,.75)}
+.ravine-flag-ps{background:linear-gradient(to bottom,#000 0 33.33%,#fff 33.33% 66.66%,#16864b 66.66%)}
+.ravine-flag-ps:after{content:"";position:absolute;inset:0 auto 0 0;width:9px;background:#ce1126;clip-path:polygon(0 0,100% 50%,0 100%)}
+.ravine-flag-gb{background:linear-gradient(90deg,transparent 41%,#fff 41% 59%,transparent 59%),linear-gradient(0deg,transparent 35%,#fff 35% 65%,transparent 65%),linear-gradient(90deg,transparent 44%,#c8102e 44% 56%,transparent 56%),linear-gradient(0deg,transparent 42%,#c8102e 42% 58%,transparent 58%),#012169}
+.ravine-flag-us{background:repeating-linear-gradient(to bottom,#b22234 0 8%,#fff 8% 16%)}
+.ravine-flag-us:after{content:"";position:absolute;left:0;top:0;width:42%;height:54%;background:#3c3b6e;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+.ravine-flag-ca{background:linear-gradient(90deg,#d80621 0 25%,#fff 25% 75%,#d80621 75%)}
+.ravine-flag-ca:after{content:"";position:absolute;left:50%;top:50%;width:7px;height:9px;transform:translate(-50%,-50%);background:#d80621;clip-path:polygon(50% 0,60% 27%,82% 14%,76% 39%,100% 45%,76% 55%,82% 83%,60% 70%,50% 100%,40% 70%,18% 83%,24% 55%,0 45%,24% 39%,18% 14%,40% 27%)}
+.ravine-flag-au{background:#012169}
+.ravine-flag-au:before{content:"";position:absolute;left:0;top:0;width:48%;height:62%;background:linear-gradient(90deg,transparent 42%,#fff 42% 58%,transparent 58%),linear-gradient(0deg,transparent 34%,#fff 34% 66%,transparent 66%),linear-gradient(90deg,transparent 46%,#cf142b 46% 54%,transparent 54%),linear-gradient(0deg,transparent 40%,#cf142b 40% 60%,transparent 60%),#012169}
+.ravine-flag-au:after{content:"✦";position:absolute;right:8%;bottom:3%;font-size:6px;color:#fff;opacity:.9}
+
+.ravine-language-panel{position:absolute;top:calc(100% + 9px);inset-inline-end:0;width:266px;padding:10px;border:1px solid rgba(241,233,220,.13);border-radius:18px;background:rgba(21,23,25,.97);box-shadow:0 24px 70px rgba(0,0,0,.34);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);animation:ravineLanguagePanelIn .22s cubic-bezier(.22,.61,.36,1) both}
+.ravine-language-panel-title{padding:4px 8px 9px;color:var(--stone);font-size:10px;font-weight:700;letter-spacing:.11em;text-transform:uppercase}
+.ravine-language-option{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;width:100%;min-height:56px;padding:8px;border:1px solid transparent;border-radius:12px;color:var(--ivory);transition:background .22s ease,border-color .22s ease,transform .22s ease}
+.ravine-language-option:hover{background:rgba(196,122,82,.075);border-color:rgba(196,122,82,.18);transform:translateX(2px)}
+.ravine-language-option.is-current{background:rgba(241,233,220,.035);border-color:rgba(241,233,220,.08)}
+.ravine-language-option-flags{display:inline-flex;align-items:center;padding-inline:2px}
+.ravine-language-option-copy{display:grid;gap:3px;min-width:0}
+.ravine-language-option-copy strong{font-family:var(--font-latin);font-size:13px;line-height:1.1}
+.ravine-language-option-copy small{color:var(--stone);font-family:var(--font-latin);font-size:10px;line-height:1.2}
+.ravine-language-check,.ravine-language-open{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;font-size:12px;color:var(--copper);opacity:.9}
+.ravine-language-open{color:var(--stone);opacity:.65}
+.ravine-language-note{margin-top:6px;padding:9px 8px 3px;border-top:1px solid rgba(241,233,220,.07);color:var(--stone);font-size:10px;line-height:1.55}
+@keyframes ravineLanguagePanelIn{from{opacity:0;transform:translateY(-5px) scale(.985)}to{opacity:1;transform:none}}
+html[data-theme="light"] .ravine-language{color:#171717}
+html[data-theme="light"] .ravine-language:hover{background:rgba(169,93,56,.07);color:#171717}
+html[data-theme="light"] .ravine-language-panel{background:rgba(255,253,251,.98);border-color:rgba(23,23,23,.12);box-shadow:0 24px 70px rgba(23,23,23,.13);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+html[data-theme="light"] .ravine-language-option{color:#171717}
+html[data-theme="light"] .ravine-language-option:hover{background:rgba(169,93,56,.065);border-color:rgba(169,93,56,.16)}
+html[data-theme="light"] .ravine-language-option.is-current{background:rgba(23,23,23,.025);border-color:rgba(23,23,23,.09)}
+html[data-theme="light"] .ravine-language-note{border-top-color:rgba(23,23,23,.08)}
+@media(max-width:1180px){.ravine-language-label{font-size:10px}.ravine-language-panel{width:250px}}
+@media(max-width:980px){.ravine-language{width:40px;height:40px;min-height:40px;padding:5px}.ravine-language-copy{display:none}.ravine-language-panel{inset-inline-end:-4px}}
+@media(max-width:560px){.ravine-language-panel{position:fixed;top:62px;inset-inline:10px;width:auto;max-width:none}.ravine-language-option{min-height:54px}}
+@media(prefers-reduced-motion:reduce){.ravine-language,.ravine-language-chevron,.ravine-language-panel,.ravine-language-option{transition:none;animation:none}.ravine-language:hover,.ravine-language-option:hover{transform:none}.ravine-language-menu[open] .ravine-language-chevron{transform:none}}
