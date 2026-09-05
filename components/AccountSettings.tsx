@@ -1,8 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import styles from "@/app/[locale]/account/account.module.css";
 
 type Profile = {
   display_name: string | null;
@@ -97,9 +100,7 @@ export default function AccountSettings({ profile, locale }: Props) {
       setMessage(ar ? "تم حفظ بيانات الحساب." : "Account details saved.");
       router.refresh();
     } catch (saveError) {
-      for (const item of uploadedAssets) {
-        await supabase.storage.from(item.bucket).remove([item.path]);
-      }
+      for (const item of uploadedAssets) await supabase.storage.from(item.bucket).remove([item.path]);
       setError(saveError instanceof Error ? saveError.message : String(saveError));
     } finally {
       setBusy(false);
@@ -115,32 +116,51 @@ export default function AccountSettings({ profile, locale }: Props) {
   }
 
   return (
-    <div className="account-settings">
-      <div className="section-head">
+    <div className={styles.settingsShell}>
+      <div className={styles.settingsHead}>
         <div>
-          <div className="eyebrow">RAVINE / SETTINGS</div>
-          <h2>{ar ? "إدارة الهوية والحساب" : "Manage identity and account"}</h2>
-          <p className="section-note">{ar ? "حافظ على هويتك كما تريد أن يراها مجتمع RAVINE." : "Shape the identity you present to the RAVINE community."}</p>
+          <div className={styles.sectionLabel}>{ar ? "إعدادات الحساب" : "Account settings"}</div>
+          <h2 className={styles.settingsTitle}>{ar ? "إدارة هويتك داخل RAVINE." : "Shape your RAVINE identity."}</h2>
+          <p className={styles.settingsNote}>{ar ? "المعلومات التي تظهر لك وللمجتمع، منظمة في مساحة واحدة واضحة." : "Your public identity and account details, organized in one clear workspace."}</p>
         </div>
+        <Link className={styles.actionLink} href={`/${locale}/dashboard`}><span>{ar ? "لوحة المستخدم" : "User dashboard"}</span><ArrowUpRight size={14} /></Link>
       </div>
 
-      <div className="studio-form-grid">
-        <label><span>{ar ? "الاسم الظاهر" : "Display name"}</span><input value={displayName} onChange={(event) => setDisplayName(event.target.value)} /></label>
-        <label><span>{ar ? "اسم المستخدم" : "Username"}</span><input value={username} onChange={(event) => setUsername(event.target.value)} /></label>
-        <label><span>{ar ? "البلد" : "Country"}</span><input value={country} onChange={(event) => setCountry(event.target.value)} /></label>
-        <label><span>{ar ? "اللغة" : "Language"}</span><select value={language} onChange={(event) => setLanguage(event.target.value)}><option value="ar">العربية</option><option value="en">English</option></select></label>
-        <label className="studio-form-wide"><span>{ar ? "نبذة" : "Bio"}</span><textarea value={bio} onChange={(event) => setBio(event.target.value)} rows={5} /></label>
-        <label className="studio-form-wide"><span>{ar ? "الموقع الإلكتروني" : "Website"}</span><input value={website} onChange={(event) => setWebsite(event.target.value)} placeholder="https://" /></label>
-        <label><span>{ar ? "الصورة الشخصية" : "Avatar"}</span><input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => setAvatar(event.target.files?.[0] ?? null)} /></label>
-        <label><span>{ar ? "صورة الغلاف" : "Cover"}</span><input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => setCover(event.target.files?.[0] ?? null)} /></label>
-      </div>
+      <section className={styles.sectionBlock}>
+        <h3 className={styles.sectionLabel}>{ar ? "الهوية" : "Identity"}</h3>
+        <div className={styles.formGrid}>
+          <label className={styles.field}><span>{ar ? "الاسم الظاهر" : "Display name"}</span><input className={styles.input} value={displayName} onChange={(event) => setDisplayName(event.target.value)} /></label>
+          <label className={styles.field}><span>{ar ? "اسم المستخدم" : "Username"}</span><input className={styles.input} value={username} onChange={(event) => setUsername(event.target.value)} /></label>
+          <label className={styles.field}><span>{ar ? "البلد" : "Country"}</span><input className={styles.input} value={country} onChange={(event) => setCountry(event.target.value)} /></label>
+          <label className={styles.field}><span>{ar ? "لغة الحساب" : "Account language"}</span><select className={styles.select} value={language} onChange={(event) => setLanguage(event.target.value)}><option value="ar">العربية</option><option value="en">English</option></select></label>
+        </div>
+      </section>
 
-      {error ? <div className="empty-state"><strong>{ar ? "تعذر الحفظ." : "Could not save."}</strong><span>{error}</span></div> : null}
-      {message ? <div className="empty-state"><strong>{ar ? "تم الحفظ." : "Saved."}</strong><span>{message}</span></div> : null}
+      <section className={styles.sectionBlock}>
+        <h3 className={styles.sectionLabel}>{ar ? "التعريف" : "Profile"}</h3>
+        <div className={styles.formGrid}>
+          <label className={`${styles.field} ${styles.fieldWide}`}><span>{ar ? "نبذة عنك" : "Bio"}</span><textarea className={styles.textarea} value={bio} onChange={(event) => setBio(event.target.value)} rows={5} placeholder={ar ? "عرّف الناس بك وبما تصنعه..." : "Tell people who you are and what you create..."} /></label>
+          <label className={`${styles.field} ${styles.fieldWide}`}><span>{ar ? "الموقع الإلكتروني" : "Website"}</span><input className={styles.input} value={website} onChange={(event) => setWebsite(event.target.value)} placeholder="https://" /></label>
+        </div>
+      </section>
 
-      <div className="studio-work-actions">
-        <button className="button primary" type="button" onClick={save} disabled={busy}>{busy ? (ar ? "جارٍ الحفظ…" : "Saving…") : (ar ? "حفظ التغييرات" : "Save changes")}</button>
-        <button className="button secondary" type="button" onClick={signOut} disabled={busy}>{ar ? "تسجيل الخروج" : "Sign out"}</button>
+      <section className={styles.sectionBlock}>
+        <h3 className={styles.sectionLabel}>{ar ? "الصور" : "Media"}</h3>
+        <div className={styles.formGrid}>
+          <label className={styles.field}><span>{ar ? "الصورة الشخصية" : "Avatar"}</span><input className={styles.file} type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => setAvatar(event.target.files?.[0] ?? null)} /><small className={styles.help}>{ar ? "صورة مربعة تمثل هويتك." : "A square image representing your identity."}</small></label>
+          <label className={styles.field}><span>{ar ? "صورة الغلاف" : "Cover"}</span><input className={styles.file} type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => setCover(event.target.files?.[0] ?? null)} /><small className={styles.help}>{ar ? "غلاف لصفحتك وملفك العام." : "A cover image for your public profile."}</small></label>
+        </div>
+      </section>
+
+      {error ? <div className={styles.feedback}><strong>{ar ? "تعذر الحفظ" : "Could not save"}</strong><span>{error}</span></div> : null}
+      {message ? <div className={styles.feedback}><strong>{ar ? "تم الحفظ" : "Saved"}</strong><span>{message}</span></div> : null}
+
+      <div className={styles.actions}>
+        <Link className={styles.actionLink} href={`/${locale}/dashboard`}>{ar ? "العودة للوحة المستخدم" : "Back to dashboard"}<ArrowUpRight size={14} /></Link>
+        <div className={styles.actionsRight}>
+          <button className={`${styles.button} ${styles.danger}`} type="button" onClick={signOut} disabled={busy}>{ar ? "تسجيل الخروج" : "Sign out"}</button>
+          <button className={`${styles.button} ${styles.buttonPrimary}`} type="button" onClick={save} disabled={busy}>{busy ? (ar ? "جارٍ الحفظ…" : "Saving…") : (ar ? "حفظ التغييرات" : "Save changes")}</button>
+        </div>
       </div>
     </div>
   );
