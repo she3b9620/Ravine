@@ -11,6 +11,7 @@ import AccountMenu from "./AccountMenu";
 import NotificationBell from "./NotificationBell";
 import ChatLauncher from "./ChatLauncher";
 import PrimaryNav from "./PrimaryNav";
+import SidebarToggle from "./SidebarToggle";
 
 type Locale = "ar" | "en";
 type HeaderCategory = { id: number; name: string; slug: string | null };
@@ -60,9 +61,12 @@ export default async function RavineShell({ locale, children }: { locale: Locale
     <div className={`ravine-shell${user ? "" : " guest-shell"}`} lang={locale} dir={isArabic ? "rtl" : "ltr"}>
       <header className="ravine-header">
         <div className="ravine-header-inner">
-          <Link href={`/${locale}`} className="ravine-brand ravine-brand-lockup" aria-label="RAVINE">
-            <RavineLockup />
-          </Link>
+          <div className="ravine-header-start">
+            <SidebarToggle locale={locale} />
+            <Link href={`/${locale}`} className="ravine-brand ravine-brand-lockup" aria-label="RAVINE">
+              <RavineLockup />
+            </Link>
+          </div>
           <div className="ravine-header-actions">
             <MobileNav locale={locale} authenticated={Boolean(user)} />
             <SearchLauncher locale={locale} categories={categories} />
