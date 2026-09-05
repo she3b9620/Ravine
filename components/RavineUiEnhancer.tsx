@@ -19,12 +19,11 @@ function walkTextNodes(root: Node, replace: (value: string) => string) {
 }
 
 function localizeFollowErrors() {
-  document.querySelectorAll('.ravine-shell[lang="ar"] [role="alert"], .ravine-shell[lang="ar"] .empty-state, .ravine-shell[lang="ar"] .auth-message').forEach((node) => {
-    walkTextNodes(node, (value) => {
-      if (FOLLOW_PERMISSION.test(value)) return value.replace(FOLLOW_PERMISSION, "لا تملك صلاحية الوصول إلى المتابعات حاليًا.");
-      if (/permission denied/i.test(value)) return value.replace(/permission denied[^.\n]*/gi, "لا تملك صلاحية تنفيذ هذه العملية حاليًا.");
-      return value;
-    });
+  const shell = document.querySelector('.ravine-shell[lang="ar"]');
+  if (!shell) return;
+  walkTextNodes(shell, (value) => {
+    if (FOLLOW_PERMISSION.test(value)) return value.replace(FOLLOW_PERMISSION, "لا تملك صلاحية الوصول إلى المتابعات حاليًا.");
+    return value;
   });
 }
 
