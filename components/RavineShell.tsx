@@ -65,7 +65,7 @@ export default async function RavineShell({ locale, children }: { locale: Locale
               <RavineLockup />
             </Link>
           </div>
-          <PrimaryNav locale={locale} />
+          <PrimaryNav locale={locale} authenticated={isAuthenticated} />
           <div className="ravine-header-actions">
             <MobileNav locale={locale} authenticated={isAuthenticated} />
             <SearchLauncher locale={locale} categories={categories} />
