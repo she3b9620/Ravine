@@ -87,6 +87,7 @@ function enhanceSelectionTabs() {
   document.querySelectorAll(".selection-tabs button, .selection-tabs a").forEach((element) => {
     const key = labels.get(element.textContent?.trim() || "");
     if (!key) return;
+    if (!(element instanceof HTMLElement)) return;
     element.classList.add("ravine-period-tab");
     element.setAttribute("data-ravine-period", key);
     if (!element.hasAttribute("aria-pressed")) element.setAttribute("aria-pressed", element.classList.contains("active") ? "true" : "false");
