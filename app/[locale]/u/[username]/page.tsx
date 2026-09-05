@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight, BadgeCheck, Clapperboard, Edit3 } from "lucide-react";
+import { ArrowUpRight, BadgeCheck, Clapperboard, UserRound } from "lucide-react";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { westernDigits } from "@/lib/ravine-format";
@@ -7,6 +7,7 @@ import { westernDigits } from "@/lib/ravine-format";
 export const dynamic = "force-dynamic";
 type Locale = "ar" | "en";
 type Profile = { id:string; display_name:string|null; username:string|null; bio:string|null; avatar_url:string|null; cover_url:string|null; website_url:string|null; country:string|null; is_verified:boolean|null; is_creator:boolean|null; trailer_url:string|null };
+type Creator = { id:number; username:string|null; user_id:string|null };
 type Work = { id:number; title:string; description:string|null; thumbnail_url:string|null; views:number|null; duration:number|null; content_type:string|null; creator_id:number|null };
 
 export default async function PublicUserPage({params}:{params:Promise<{locale:string;username:string}>}){
@@ -19,8 +20,17 @@ export default async function PublicUserPage({params}:{params:Promise<{locale:st
   const {data}=await s.from("profiles").select("id,display_name,username,bio,avatar_url,cover_url,website_url,country,is_verified,is_creator,trailer_url").eq("username",username).maybeSingle();
   const profile=data as Profile|null;
   if(!profile)return notFound();
-  const {data:worksData}=profile.is_creator?await s.from("videos").select("id,title,description,thumbnail_url,views,duration,content_type,creator_id").eq("published",true).eq("creator_id",profile.id).order("created_at",{ascending:false}).limit(12):{data:[] as Work[]};
-  const works=(worksData??[]) as Work[];
+
+  let works:Work[]=[];
+  if(profile.is_creator){
+    const {data:creatorData}=await s.from("creators").select("id,username,user_id").eq("user_id",profile.id).maybeSingle();
+    const creator=creatorData as Creator|null;
+    if(creator){
+      const {data:worksData}=await s.from("videos").select("id,title,description,thumbnail_url,views,duration,content_type,creator_id").eq("published",true).eq("creator_id",creator.id).order("created_at",{ascending:false}).limit(12);
+      works=(worksData??[]) as Work[];
+    }
+  }
+
   const name=westernDigits(profile.display_name||profile.username||"RAVINE user");
   const handle=westernDigits(profile.username||username);
   return <section className="public-profile-page section" dir={ar?"rtl":"ltr"}>
@@ -28,7 +38,7 @@ export default async function PublicUserPage({params}:{params:Promise<{locale:st
       <div className="public-profile-cover">{profile.cover_url?<img src={profile.cover_url} alt=""/>:null}<div className="public-profile-cover-wash"/></div>
       <div className="public-profile-hero-inner">
         <div className="public-profile-avatar">{profile.avatar_url?<img src={profile.avatar_url} alt=""/>:<span>{name.slice(0,1).toUpperCase()}</span>}</div>
-        <div className="public-profile-identity"><div className="public-profile-kicker">RAVINE / {profile.is_creator?(ar?"المبدع":"CREATOR"):(ar?"الملف الشخصي":"PROFILE")}</div><h1>{name}</h1><div className="public-profile-handle">@{handle}{profile.is_verified?<span className="public-profile-verified"><BadgeCheck size={13}/>{ar?"موثق":"Verified"}</span>:null}</div><p>{profile.bio||(profile.is_creator?(ar?"مبدع داخل عالم رَافِين.":"Creator inside the RAVINE world."):(ar?"هذا الملف الشخصي على رَافِين.":"A personal profile on RAVINE."))}</p><div className="public-profile-actions">{profile.is_creator&&profile.trailer_url?<a className="public-profile-button secondary" href={profile.trailer_url} target="_blank" rel="noreferrer"><Clapperboard size={15}/>{ar?"مشاهدة التريلر":"Watch trailer"}</a>:null}<Link className="public-profile-button secondary" href={`/${locale}/account`}><Edit3 size={15}/>{ar?"حسابي":"My account"}</Link></div></div>
+        <div className="public-profile-identity"><div className="public-profile-kicker">RAVINE / {profile.is_creator?(ar?"المبدع":"CREATOR"):(ar?"الملف الشخصي":"PROFILE")}</div><h1>{name}</h1><div className="public-profile-handle">@{handle}{profile.is_verified?<span className="public-profile-verified"><BadgeCheck size={13}/>{ar?"موثق":"Verified"}</span>:null}</div><p>{profile.bio||(profile.is_creator?(ar?"مبدع داخل عالم رَافِين.":"Creator inside the RAVINE world."):(ar?"هذا الملف الشخصي على رَافِين.":"A personal profile on RAVINE."))}</p><div className="public-profile-actions">{profile.is_creator&&profile.trailer_url?<a className="public-profile-button secondary" href={profile.trailer_url} target="_blank" rel="noreferrer"><Clapperboard size={15}/>{ar?"مشاهدة التريلر":"Watch trailer"}</a>:null}<Link className="public-profile-button secondary" href={`/${locale}/account`}><UserRound size={15}/>{ar?"العودة إلى حسابي":"Back to my account"}</Link></div></div>
       </div>
     </header>
     <section className="public-profile-body">
