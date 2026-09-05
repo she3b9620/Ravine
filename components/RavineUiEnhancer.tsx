@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 
 const FOLLOW_PERMISSION = /permission denied for table follows/i;
+const VIDEOS_RECURSION = /infinite recursion detected in policy for relation [\"']videos[\"']/i;
 const ARABIC_DIGITS = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
 const USER_IDENTITY_SELECTOR = [
   "[data-preserve-numerals]",
@@ -47,18 +48,15 @@ function toArabicIndicDigits(value: string) {
 function shouldPreserveNumerals(node: Text) {
   const parent = node.parentElement;
   if (!parent) return true;
-
   if (parent.closest(USER_IDENTITY_SELECTOR)) return true;
   if (parent.closest("input, textarea, code, pre, kbd, samp, script, style")) return true;
   if (parent.closest("[data-numeric-literal]")) return true;
-
   return false;
 }
 
 function localizeArabicNumerals() {
   const shell = document.querySelector('.ravine-shell[lang="ar"]');
   if (!shell) return;
-
   walkTextNodes(shell, (value, node) => {
     if (shouldPreserveNumerals(node)) return value;
     return toArabicIndicDigits(value);
@@ -71,6 +69,15 @@ function localizeFollowErrors() {
   walkTextNodes(shell, (value) => {
     if (FOLLOW_PERMISSION.test(value)) return value.replace(FOLLOW_PERMISSION, "لا تملك صلاحية الوصول إلى المتابعات حاليًا.");
     return value;
+  });
+}
+
+function localizeVideosPolicyError() {
+  if (document.documentElement.lang !== "ar") return;
+  const root = document.querySelector('.ravine-shell[lang="ar"]') || document.body;
+  walkTextNodes(root, (value) => {
+    if (!VIDEOS_RECURSION.test(value)) return value;
+    return "تعذر تحميل بعض الأعمال مؤقتًا بسبب خطأ في صلاحيات قاعدة البيانات. تم إصلاح المشكلة، حدّث الصفحة وحاول مرة أخرى.";
   });
 }
 
@@ -107,7 +114,6 @@ function isHomeRoute() {
 
 function syncGuestAbout() {
   const existing = document.querySelectorAll(".ravine-guest-about");
-
   if (!isHomeRoute()) {
     existing.forEach((section) => section.remove());
     return;
@@ -130,12 +136,14 @@ export default function RavineUiEnhancer() {
   useEffect(() => {
     localizeArabicNumerals();
     localizeFollowErrors();
+    localizeVideosPolicyError();
     enhanceSelectionTabs();
     syncGuestAbout();
 
     const observer = new MutationObserver(() => {
       localizeArabicNumerals();
       localizeFollowErrors();
+      localizeVideosPolicyError();
       enhanceSelectionTabs();
       syncGuestAbout();
     });
