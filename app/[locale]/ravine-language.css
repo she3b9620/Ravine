@@ -1,12 +1,14 @@
 .ravine-language-menu{position:relative;display:inline-flex;z-index:80}
 .ravine-language-menu>summary{list-style:none}
 .ravine-language-menu>summary::-webkit-details-marker{display:none}
-.ravine-language{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:38px;padding:5px 9px;border:0;border-radius:999px;background:transparent;color:var(--ivory);cursor:pointer;overflow:visible;white-space:nowrap;transition:background .25s ease,color .25s ease,transform .25s cubic-bezier(.22,1,.36,1)}
+.ravine-language{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:38px;padding:5px 8px;border:0;border-radius:999px;background:transparent;color:var(--ivory);cursor:pointer;overflow:visible;white-space:nowrap;transition:background .25s ease,color .25s ease,transform .25s cubic-bezier(.22,1,.36,1)}
 .ravine-language:hover{background:rgba(196,122,82,.08);color:var(--ivory);transform:translateY(-1px)}
 .ravine-language:active{transform:translateY(0) scale(.98)}
-.ravine-language-current-flags{display:inline-flex;align-items:center;height:22px;padding-inline:2px}
+.ravine-language-current-flags{display:inline-flex;align-items:center;height:20px;padding-inline:2px;min-width:0}
+.ravine-language-current-flags .ravine-flag{width:20px;height:14px;flex-basis:20px;border-radius:3px}
 .ravine-flag{position:relative;display:inline-block;width:22px;height:15px;flex:0 0 22px;border-radius:3px;overflow:hidden;box-shadow:0 0 0 1px rgba(241,233,220,.2),0 2px 6px rgba(0,0,0,.18);background:#777}
-.ravine-language-current-flags .ravine-flag:not(:first-child),.ravine-language-option-flags .ravine-flag:not(:first-child){margin-inline-start:-5px}
+.ravine-language-current-flags .ravine-flag:not(:first-child){margin-inline-start:-5px}
+.ravine-language-option-flags .ravine-flag:not(:first-child){margin-inline-start:-5px}
 .ravine-language-copy{display:inline-flex;align-items:center;gap:5px;line-height:1}
 .ravine-language-label{font-size:11px;font-weight:700;letter-spacing:.01em;line-height:1}
 .ravine-language-chevron{font-size:15px;line-height:.8;opacity:.62;transform:translateY(-1px);transition:transform .25s ease,opacity .25s ease}
@@ -22,7 +24,7 @@
 .ravine-flag-us{background:repeating-linear-gradient(to bottom,#b22234 0 8%,#fff 8% 16%)}
 .ravine-flag-us:after{content:"";position:absolute;left:0;top:0;width:42%;height:54%;background:#3c3b6e;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
 .ravine-flag-ca{background:linear-gradient(90deg,#d80621 0 25%,#fff 25% 75%,#d80621 75%)}
-.ravine-flag-ca:after{content:"";position:absolute;left:50%;top:50%;width:7px;height:9px;transform:translate(-50%,-50%);background:#d80621;clip-path:polygon(50% 0,60% 27%,82% 14%,76% 39%,100% 45%,76% 55%,82% 83%,60% 70%,50% 100%,40% 70%,18% 83%,24% 55%,0 45%,24% 39%,18% 14%,40% 27%)}
+.ravine-flag-ca:after{content:"";position:absolute;left:50%;top:50%;width:7px;height:9px;transform:translate(-50%,-50%);background:#d80621;clip-path:polygon(50% 0,60% 27%,82% 14%,76% 39%,100% 45%,76% 55%,82% 83%,60% 70%,50% 100%,40% 70%,18% 83%,24% 55%,0 45%,24% 39%,18% 14%,40% 27)}
 .ravine-flag-au{background:#012169}
 .ravine-flag-au:before{content:"";position:absolute;left:0;top:0;width:48%;height:62%;background:linear-gradient(90deg,transparent 42%,#fff 42% 58%,transparent 58%),linear-gradient(0deg,transparent 34%,#fff 34% 66%,transparent 66%),linear-gradient(90deg,transparent 46%,#cf142b 46% 54%,transparent 54%),linear-gradient(0deg,transparent 40%,#cf142b 40% 60%,transparent 60%),#012169}
 .ravine-flag-au:after{content:"✦";position:absolute;right:8%;bottom:3%;font-size:6px;color:#fff;opacity:.9}
@@ -51,6 +53,6 @@ html[data-theme="light"] .ravine-language-option:hover{background:rgba(169,93,56
 html[data-theme="light"] .ravine-language-option.is-current{background:rgba(23,23,23,.025);border-color:rgba(23,23,23,.09)}
 html[data-theme="light"] .ravine-language-note{border-top-color:rgba(23,23,23,.08)}
 @media(max-width:1180px){.ravine-language-label{font-size:10px}.ravine-language-panel{width:250px}}
-@media(max-width:980px){.ravine-language{width:40px;height:40px;min-height:40px;padding:5px}.ravine-language-copy{display:none}.ravine-language-panel{inset-inline-end:-4px}}
+@media(max-width:980px){.ravine-language{width:40px;height:40px;min-height:40px;padding:5px}.ravine-language-copy{display:none}.ravine-language-panel{inset-inline-end:-4px}.ravine-language-current-flags .ravine-flag{width:19px;height:13px;flex-basis:19px}.ravine-language-current-flags .ravine-flag:not(:first-child){margin-inline-start:-5px}}
 @media(max-width:560px){.ravine-language-panel{position:fixed;top:62px;inset-inline:10px;width:auto;max-width:none}.ravine-language-option{min-height:54px}}
 @media(prefers-reduced-motion:reduce){.ravine-language,.ravine-language-chevron,.ravine-language-panel,.ravine-language-option{transition:none;animation:none}.ravine-language:hover,.ravine-language-option:hover{transform:none}.ravine-language-menu[open] .ravine-language-chevron{transform:none}}
