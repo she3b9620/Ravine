@@ -41,9 +41,15 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
           <h1 className={styles.title}>{ar ? `أهلًا ${displayName}.` : `Welcome, ${displayName}.`}</h1>
           <p className={styles.note}>{ar ? "نظرة واضحة على مكتبتك ومسار اكتشافك وحالتك داخل RAVINE." : "A clear view of your library, discovery path, and current place inside RAVINE."}</p>
         </div>
-        <div className={styles.profileChip}>
-          <span className={styles.avatar}>{profile?.avatar_url ? <img src={profile.avatar_url} alt="" /> : <span>{displayName.slice(0, 1).toUpperCase()}</span>}</span>
-          <div className={styles.profileCopy}><strong>{profile?.username ? `@${profile.username}` : (ar ? "هوية شخصية" : "Personal identity")}</strong><span>{profile?.is_creator ? (ar ? "مبدع" : "Creator") : (ar ? "مشاهد" : "Viewer")}{profile?.is_verified ? " · ✓" : ""}</span></div>
+        <div className={styles.profileChip} aria-label={ar ? "ملف الحساب" : "Account profile"}>
+          <span className={styles.avatar}>
+            {profile?.avatar_url ? <img src={profile.avatar_url} alt={ar ? `صورة ${displayName}` : `${displayName} profile`} /> : <span>{displayName.slice(0, 1).toUpperCase()}</span>}
+          </span>
+          <div className={styles.profileCopy}>
+            <strong>{displayName}</strong>
+            <span>{profile?.username ? `@${profile.username}` : (ar ? "حسابك على RAVINE" : "Your RAVINE account")}</span>
+            <small>{profile?.is_creator ? (ar ? "مبدع" : "Creator") : (ar ? "مشاهد" : "Viewer")}{profile?.is_verified ? (ar ? " · موثق" : " · Verified") : ""}</small>
+          </div>
         </div>
       </div>
 
