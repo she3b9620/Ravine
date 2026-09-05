@@ -6,7 +6,7 @@ html[data-theme="dark"] .home-guest-hero h1{font-weight:900!important;letter-spa
 /* Light-mode Hero copy: explicit treatment on the text itself; no background, panel, or position change. */
 html[data-theme="light"] .home-guest-hero h1{color:#C47A52!important;font-weight:900!important;letter-spacing:-.035em!important;-webkit-text-fill-color:#C47A52!important;-webkit-text-stroke:.7px #F1E9DC!important;paint-order:stroke fill;text-shadow:0 2px 0 rgba(9,9,9,.55),0 4px 22px rgba(9,9,9,.58)!important}
 html[data-theme="light"] .home-guest-hero .home-state-kicker{color:#D49A78!important;font-weight:800!important;text-shadow:0 2px 12px rgba(9,9,9,.72)!important}
-html[data-theme="light"] .home-guest-hero p{color:#F1E9DC!important;text-shadow:0 2px 14px rgba(9,9,9,.78),0 0 2px rgba(9,9,9,.9)!important}
+html[data-theme="light"] .home-guest-hero p{color:#F1E9DC!important;font-weight:650!important;letter-spacing:-.008em!important;-webkit-text-stroke:.3px rgba(9,9,9,.38)!important;paint-order:stroke fill;text-shadow:0 2px 0 rgba(9,9,9,.66),0 4px 18px rgba(9,9,9,.74),0 0 2px rgba(9,9,9,.92)!important}
 html[data-theme="light"] .home-guest-hero .ravine-auth-trigger-primary,html[data-theme="light"] .home-guest-hero .ravine-minor-link.ravine-auth-trigger-primary{color:#fff!important;text-shadow:0 2px 10px rgba(9,9,9,.6)!important}
 
 /* Fade the cinematic frame smoothly into the light canvas instead of a hard edge. */
