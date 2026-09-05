@@ -46,6 +46,12 @@ const COPY = {
   },
 };
 
+function toCropSourceUrl(url: string | null | undefined) {
+  if (!url) return null;
+  if (url.startsWith("blob:") || url.startsWith("data:")) return url;
+  return `/api/profile-image-proxy?url=${encodeURIComponent(url)}`;
+}
+
 export default function RavineMediaPicker({ aspect, locale, value, existingUrl, onChange }: Props) {
   const ar = locale === "ar";
   const copy = COPY[locale];
@@ -54,7 +60,7 @@ export default function RavineMediaPicker({ aspect, locale, value, existingUrl, 
   const inputRef = useRef<HTMLInputElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
-  const [sourceUrl, setSourceUrl] = useState<string | null>(existingUrl || null);
+  const [sourceUrl, setSourceUrl] = useState<string | null>(toCropSourceUrl(existingUrl));
   const [naturalSize, setNaturalSize] = useState({ width: 0, height: 0 });
   const [zoom, setZoom] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
@@ -66,7 +72,10 @@ export default function RavineMediaPicker({ aspect, locale, value, existingUrl, 
 
   useEffect(() => {
     if (value) return;
-    setSourceUrl(existingUrl || null);
+    setSourceUrl(toCropSourceUrl(existingUrl));
+    setNaturalSize({ width: 0, height: 0 });
+    setZoom(1);
+    setOffset({ x: 0, y: 0 });
     setApplied(false);
     setDirty(false);
     setCropError(false);
@@ -231,7 +240,7 @@ export default function RavineMediaPicker({ aspect, locale, value, existingUrl, 
       ) : (
         <>
           <div ref={viewportRef} className={`ravine-media-crop${applied ? " is-applied" : ""}`} onPointerDown={startDrag} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={endDrag} style={{ aspectRatio: `${ratio}` }}>
-            <img ref={imageRef} crossOrigin="anonymous" src={sourceUrl} alt="" onLoad={onLoad} className="ravine-media-crop-image" style={previewStyle} draggable={false} />
+            <img ref={imageRef} src={sourceUrl} alt="" onLoad={onLoad} onError={() => setCropError(true)} className="ravine-media-crop-image" style={previewStyle} draggable={false} />
             <div className="ravine-media-crop-frame" aria-hidden="true" />
             {applied ? <div className="ravine-media-crop-applied"><Check size={16} /><span>{copy.applied}</span></div> : <div className="ravine-media-crop-hint">{copy.drag}</div>}
           </div>
