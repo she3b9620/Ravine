@@ -220,11 +220,16 @@ export default function RavineMediaPicker({ aspect, locale, value, existingUrl, 
   }
 
   const previewStyle = sourceUrl && naturalSize.width
-    ? (() => {
-        const metric = metrics();
-        if (!metric) return undefined;
-        return { width: metric.imageWidth, height: metric.imageHeight, left: `calc(50% - ${metric.imageWidth / 2}px + ${offset.x}px)`, top: `calc(50% - ${metric.imageHeight / 2}px + ${offset.y}px)` };
-      })()
+    ? {
+        width: "100%",
+        height: "100%",
+        left: "50%",
+        top: "50%",
+        objectFit: "cover" as const,
+        objectPosition: "center",
+        transform: `translate(-50%, -50%) translate(${offset.x}px, ${offset.y}px) scale(${zoom})`,
+        transformOrigin: "center center",
+      }
     : undefined;
 
   return (
