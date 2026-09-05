@@ -59,14 +59,13 @@ export default async function RavineShell({ locale, children }: { locale: Locale
       <header className="ravine-header">
         <div className="ravine-header-inner">
           <div className="ravine-header-start">
-            {!isArabic ? <SidebarToggle locale={locale} /> : null}
+            <SidebarToggle locale={locale} />
             <Link href={`/${locale}`} className="ravine-brand ravine-brand-lockup" aria-label="RAVINE">
               <RavineLockup />
             </Link>
           </div>
           <PrimaryNav locale={locale} />
           <div className="ravine-header-actions">
-            {isArabic ? <SidebarToggle locale={locale} /> : null}
             <MobileNav locale={locale} authenticated={Boolean(user)} />
             <SearchLauncher locale={locale} categories={categories} />
             {user ? (
