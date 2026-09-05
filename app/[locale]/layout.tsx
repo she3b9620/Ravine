@@ -33,6 +33,7 @@ import "./ravine-header-hero-polish.css";
 import "./ravine-search-light-glass.css";
 import "./ravine-page-glass.css";
 import "../community-system.css";
+import "./ravine-hero-position-fix.css";
 
 const locales = ["ar", "en"] as const;
 type Locale = (typeof locales)[number];
