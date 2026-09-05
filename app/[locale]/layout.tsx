@@ -21,6 +21,7 @@ import "./ravine-search-font-lock.css";
 import "./ravine-home-account-sidebar-final.css";
 import "./ravine-public-profile.css";
 import "./guest-cinematic-backdrop.css";
+import "../community-system.css";
 
 const locales = ["ar", "en"] as const;
 type Locale = (typeof locales)[number];
