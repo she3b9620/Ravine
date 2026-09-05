@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Compass, Clapperboard, PlaySquare, Mic2, Radio, Users, MessagesSquare, LockKeyhole } from "lucide-react";
+import { Home, Compass, Clapperboard, PlaySquare, Mic2, Film, Radio, Users, MessagesSquare, LockKeyhole } from "lucide-react";
 import { requestRavineAuth } from "./AuthModal";
 
 type Locale = "ar" | "en";
@@ -13,7 +13,7 @@ const navigation: Item[] = [
   ["discover", "Discover", "اكتشف", Compass],
   ["cuts", "Cuts", "كِتس", Clapperboard],
   ["videos", "Videos", "الفيديو", PlaySquare],
-  ["podcasts", "Podcasts", "البودكاست", Mic2],
+  ["podcasts", "Podcasts & Documentaries", "البودكاست والوثائقي", Mic2],
   ["live", "Live", "مباشر", Radio],
   ["creators", "Creators", "المبدعون", Users],
   ["community", "Community", "المجتمع", MessagesSquare],
@@ -44,6 +44,7 @@ export default function PrimaryNav({ locale, authenticated = false }: { locale: 
         const active = isActive(slug);
         const href = slug ? `/${locale}/${slug}` : `/${locale}`;
         const gated = !authenticated && GUEST_GATED.has(slug);
+        const combinedContentIcon = slug === "podcasts";
         return gated ? (
           <button
             key={slug || "home"}
@@ -54,14 +55,14 @@ export default function PrimaryNav({ locale, authenticated = false }: { locale: 
             title={locale === "ar" ? "سجّل للدخول للمتابعة" : "Sign in to continue"}
             style={{ border: 0, padding: 0, background: "transparent", appearance: "none", WebkitAppearance: "none", cursor: "pointer" }}
           >
-            <Icon className="ravine-nav-icon" size={14} strokeWidth={1.8} aria-hidden="true" />
+            {combinedContentIcon ? <span className="ravine-nav-dual-icon" aria-hidden="true"><Mic2 className="ravine-nav-icon" size={14} strokeWidth={1.8} /><Film size={10} strokeWidth={1.9} /></span> : <Icon className="ravine-nav-icon" size={14} strokeWidth={1.8} aria-hidden="true" />}
             <span>{locale === "ar" ? ar : en}</span>
             <LockKeyhole aria-hidden="true" size={10} strokeWidth={2} style={{ opacity: 0.55, marginInlineStart: 2 }} />
             {slug === "live" ? <span className="ravine-live-dot" aria-hidden="true" /> : null}
           </button>
         ) : (
           <Link key={slug || "home"} href={href} className={`ravine-nav-link${active ? " is-active" : ""}${slug === "live" ? " is-live-link" : ""}`} aria-current={active ? "page" : undefined}>
-            <Icon className="ravine-nav-icon" size={14} strokeWidth={1.8} aria-hidden="true" />
+            {combinedContentIcon ? <span className="ravine-nav-dual-icon" aria-hidden="true"><Mic2 className="ravine-nav-icon" size={14} strokeWidth={1.8} /><Film size={10} strokeWidth={1.9} /></span> : <Icon className="ravine-nav-icon" size={14} strokeWidth={1.8} aria-hidden="true" />}
             <span>{locale === "ar" ? ar : en}</span>
             {slug === "live" ? <span className="ravine-live-dot" aria-hidden="true" /> : null}
           </Link>
