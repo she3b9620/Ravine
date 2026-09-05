@@ -3,19 +3,13 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { requestRavineAuth } from "./AuthModal";
+import { localizeSupabaseError } from "@/lib/localizeSupabaseError";
 
 type Props = {
   creatorId: number;
   locale: "ar" | "en";
   creatorUserId: string | null;
 };
-
-function localizeFollowError(error: { message?: string } | null, ar: boolean) {
-  const message = error?.message ?? "";
-  if (ar && /permission denied for table follows/i.test(message)) return "لا تملك صلاحية الوصول إلى المتابعات حاليًا.";
-  if (ar && /permission denied/i.test(message)) return "لا تملك صلاحية تنفيذ هذه العملية حاليًا.";
-  return ar ? "تعذر تحديث المتابعة حاليًا." : message || "Unable to update the follow state right now.";
-}
 
 export default function FollowCreator({ creatorId, locale, creatorUserId }: Props) {
   const ar = locale === "ar";
@@ -47,11 +41,11 @@ export default function FollowCreator({ creatorId, locale, creatorUserId }: Prop
 
         if (!active) return;
         setFollowing(Boolean(data));
-        if (error) setErrorMessage(localizeFollowError(error, ar));
+        if (error) setErrorMessage(localizeSupabaseError(error, locale, "تعذر تحميل حالة المتابعة حاليًا."));
         setBusy(false);
-      } catch {
+      } catch (error) {
         if (active) {
-          setErrorMessage(ar ? "تعذر تحميل حالة المتابعة حاليًا." : "Unable to load follow state right now.");
+          setErrorMessage(localizeSupabaseError(error, locale, "تعذر تحميل حالة المتابعة حاليًا."));
           setBusy(false);
         }
       }
@@ -61,7 +55,7 @@ export default function FollowCreator({ creatorId, locale, creatorUserId }: Prop
     return () => {
       active = false;
     };
-  }, [creatorId, ar]);
+  }, [creatorId, locale]);
 
   async function toggle() {
     if (!userId) {
@@ -77,14 +71,14 @@ export default function FollowCreator({ creatorId, locale, creatorUserId }: Prop
       if (following) {
         const { error } = await supabase.from("follows").delete().eq("follower_id", userId).eq("creator_id", creatorId);
         if (error) {
-          setErrorMessage(localizeFollowError(error, ar));
+          setErrorMessage(localizeSupabaseError(error, locale, "تعذر تحديث المتابعة حاليًا."));
         } else {
           setFollowing(false);
         }
       } else {
         const { error } = await supabase.from("follows").insert({ follower_id: userId, creator_id: creatorId });
         if (error) {
-          setErrorMessage(localizeFollowError(error, ar));
+          setErrorMessage(localizeSupabaseError(error, locale, "تعذر تحديث المتابعة حاليًا."));
         } else {
           setFollowing(true);
         }
