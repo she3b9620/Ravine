@@ -12,7 +12,8 @@ type Props = {
 
 function localizeFollowError(error: { message?: string } | null, ar: boolean) {
   const message = error?.message ?? "";
-  if (ar && /permission denied for table follows/i.test(message)) return "لا تملك صلاحية تنفيذ هذه العملية حاليًا.";
+  if (ar && /permission denied for table follows/i.test(message)) return "لا تملك صلاحية الوصول إلى المتابعات حاليًا.";
+  if (ar && /permission denied/i.test(message)) return "لا تملك صلاحية تنفيذ هذه العملية حاليًا.";
   return ar ? "تعذر تحديث المتابعة حاليًا." : message || "Unable to update the follow state right now.";
 }
 
@@ -48,9 +49,9 @@ export default function FollowCreator({ creatorId, locale, creatorUserId }: Prop
         setFollowing(Boolean(data));
         if (error) setErrorMessage(localizeFollowError(error, ar));
         setBusy(false);
-      } catch (error) {
+      } catch {
         if (active) {
-          setErrorMessage(error instanceof Error && ar ? "تعذر تحميل حالة المتابعة حاليًا." : "Unable to load follow state right now.");
+          setErrorMessage(ar ? "تعذر تحميل حالة المتابعة حاليًا." : "Unable to load follow state right now.");
           setBusy(false);
         }
       }
