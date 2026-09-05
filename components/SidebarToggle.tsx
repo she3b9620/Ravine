@@ -35,8 +35,13 @@ export default function SidebarToggle({ locale }: { locale: "ar" | "en" }) {
 
     const onPointerDown = (event: PointerEvent) => {
       if (!open) return;
-      const target = event.target as Node | null;
+      const target = event.target as Element | null;
       if (root?.contains(target) || sidebar?.contains(target)) return;
+
+      // Changing theme is a global visual update, not a request to close
+      // whatever transient navigation surface the user currently has open.
+      if (target?.closest(".theme-toggle-visual")) return;
+
       setOpen(false);
     };
 
