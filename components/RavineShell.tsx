@@ -57,6 +57,7 @@ export default async function RavineShell({ locale, children }: { locale: Locale
 
   return (
     <div className={`ravine-shell${isAuthenticated ? "" : " guest-shell"}`} lang={locale} dir={isArabic ? "rtl" : "ltr"}>
+      <div className="ravine-platform-reading-glass" aria-hidden="true" />
       <header className="ravine-header">
         <div className="ravine-header-inner">
           <div className="ravine-header-start">
