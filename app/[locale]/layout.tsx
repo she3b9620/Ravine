@@ -11,6 +11,7 @@ import "./ravine-typography-search-final.css";
 import "./ravine-font-authority.css";
 import "./ravine-script-font-lock.css";
 import "./ravine-controls.css";
+import "./ravine-final-font-lock.css";
 
 const locales = ["ar", "en"] as const;
 type Locale = (typeof locales)[number];
