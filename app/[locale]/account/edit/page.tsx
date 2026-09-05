@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { ArrowLeft, ArrowRight, BadgeCheck, Camera, Clapperboard, UserRound } from "lucide-react";
+import { ArrowLeft, ArrowRight, BadgeCheck, Camera, Clapperboard, ExternalLink, UserRound } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import AccountSettings from "@/components/AccountSettings";
 import styles from "../account.module.css";
@@ -18,7 +18,8 @@ export default async function EditAccountPage({params}:{params:Promise<{locale:s
   const {data}=await supabase.from("profiles").select("display_name,username,bio,avatar_url,cover_url,country,language,website_url,is_creator,trailer_url,timezone").eq("id",auth.user.id).maybeSingle();
   const profile=data as Profile|null;
   const name=profile?.display_name||profile?.username||auth.user.email?.split("@")[0]||(ar?"مستخدم RAVINE":"RAVINE user");
-  const username=profile?.username?`@${profile.username}`:"";
+  const username=profile?.username||"";
+  const publicProfileHref=username?`/${locale}/u/${encodeURIComponent(username)}`:null;
   return <section className={`section ${styles.page} ${styles.editPage} account-edit-page`} dir={ar?"rtl":"ltr"}>
     <div className={styles.editHero}>
       <div className={styles.editHeroCopy}>
@@ -26,7 +27,10 @@ export default async function EditAccountPage({params}:{params:Promise<{locale:s
         <div className={styles.editHeroKicker}>{ar?"مساحة التشكيل":"IDENTITY WORKSPACE"}</div>
         <h1 className={styles.heroTitle}>{ar?"شكّل حضورك داخل رَافِين.":"Shape your presence in RAVINE."}</h1>
         <p className={styles.heroNote}>{ar?"عدّل الاسم والصور والنبذة ومعلومات الموقع من مساحة واحدة، وشاهد هويتك قبل الحفظ.":"Shape your name, media, bio, and location from one focused workspace, with a live identity preview before you save."}</p>
-        <a className={styles.editBackLink} href={`/${locale}/account`}>{ar?<ArrowRight size={15}/>:<ArrowLeft size={15}/>}<span>{ar?"العودة إلى الحساب":"Back to account"}</span></a>
+        <div className={styles.editHeroActions}>
+          <a className={styles.editBackLink} href={`/${locale}/account`}>{ar?<ArrowRight size={15}/>:<ArrowLeft size={15}/>}<span>{ar?"العودة إلى الحساب":"Back to account"}</span></a>
+          {publicProfileHref?<a className={styles.editPreviewLink} href={publicProfileHref}><ExternalLink size={15}/><span>{ar?"معاينة صفحتي":"Preview my page"}</span></a>:null}
+        </div>
       </div>
       <div className={styles.identityPreview}>
         <div className={styles.identityPreviewGlow}/>
@@ -35,7 +39,7 @@ export default async function EditAccountPage({params}:{params:Promise<{locale:s
           <div className={styles.identityPreviewAvatar}>{profile?.avatar_url?<img src={profile.avatar_url} alt=""/>:<span>{name.slice(0,1).toUpperCase()}</span>}<span className={styles.identityPreviewAvatarBadge}><Camera size={11}/></span></div>
           <div className={styles.identityPreviewText}>
             <strong>{name}</strong>
-            <span>{username||"@ravine"}</span>
+            <span>{username?`@${username}`:"@ravine"}</span>
             <small>
               {profile?.is_creator?(ar?"مبدع RAVINE":"RAVINE Creator"):(ar?"حساب شخصي":"Personal account")}
               {profile?.is_creator&&profile.trailer_url ? <><i/> <Clapperboard size={11}/> {ar?"تريلر جاهز":"Trailer ready"}</> : null}
