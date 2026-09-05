@@ -12,6 +12,7 @@ import NotificationBell from "./NotificationBell";
 import ChatLauncher from "./ChatLauncher";
 import PrimaryNav from "./PrimaryNav";
 import SidebarToggle from "./SidebarToggle";
+import SidebarNav from "./SidebarNav";
 
 type Locale = "ar" | "en";
 type HeaderCategory = { id: number; name: string; slug: string | null };
@@ -42,11 +43,7 @@ export default async function RavineShell({ locale, children }: { locale: Locale
     categories = (categoryData ?? []) as HeaderCategory[];
 
     if (user) {
-      const { data } = await supabase
-        .from("profiles")
-        .select("display_name,username,avatar_url,is_creator")
-        .eq("id", user.id)
-        .maybeSingle();
+      const { data } = await supabase.from("profiles").select("display_name,username,avatar_url,is_creator").eq("id", user.id).maybeSingle();
       profile = data as HeaderProfile | null;
     }
   } catch {
@@ -67,6 +64,7 @@ export default async function RavineShell({ locale, children }: { locale: Locale
               <RavineLockup />
             </Link>
           </div>
+          <PrimaryNav locale={locale} />
           <div className="ravine-header-actions">
             <MobileNav locale={locale} authenticated={Boolean(user)} />
             <SearchLauncher locale={locale} categories={categories} />
@@ -74,13 +72,7 @@ export default async function RavineShell({ locale, children }: { locale: Locale
               <>
                 <NotificationBell locale={locale} />
                 <ChatLauncher locale={locale} />
-                <AccountMenu
-                  locale={locale}
-                  displayName={displayName}
-                  username={profile?.username || null}
-                  avatarUrl={profile?.avatar_url || null}
-                  isCreator={Boolean(profile?.is_creator)}
-                />
+                <AccountMenu locale={locale} displayName={displayName} username={profile?.username || null} avatarUrl={profile?.avatar_url || null} isCreator={Boolean(profile?.is_creator)} />
               </>
             ) : (
               <>
@@ -89,27 +81,19 @@ export default async function RavineShell({ locale, children }: { locale: Locale
               </>
             )}
             <ThemeToggle locale={locale} />
-            <Suspense fallback={<span className="ravine-language" aria-hidden="true">{locale === "ar" ? "EN" : "عربي"}</span>}>
-              <LanguageSwitcher locale={locale} />
-            </Suspense>
+            <Suspense fallback={<span className="ravine-language" aria-hidden="true">{locale === "ar" ? "EN" : "عربي"}</span>}><LanguageSwitcher locale={locale} /></Suspense>
           </div>
         </div>
       </header>
 
       <aside className="ravine-sidebar" aria-label={isArabic ? "القائمة الجانبية الرئيسية" : "Primary sidebar"}>
-        <PrimaryNav locale={locale} />
+        <SidebarNav locale={locale} />
       </aside>
 
       <main className="ravine-main">{children}</main>
       <footer className="ravine-footer">
-        <div>
-          <div className="ravine-footer-brand ravine-brand-lockup"><RavineLockup compact /></div>
-          <p>{isArabic ? "منصة إبداعية سينمائية تُقدّر العمل وسياقه ومن يقف خلفه." : "A cinematic creative platform that values the work, its context, and the people behind it."}</p>
-        </div>
-        <div className="ravine-footer-meta">
-          <span>{isArabic ? "لا شيء زخرفي بلا معنى" : "Nothing Decorative Without Meaning"}</span>
-          <span>© {new Date().getFullYear()} RAVINE</span>
-        </div>
+        <div><div className="ravine-footer-brand ravine-brand-lockup"><RavineLockup compact /></div><p>{isArabic ? "منصة إبداعية سينمائية تُقدّر العمل وسياقه ومن يقف خلفه." : "A cinematic creative platform that values the work, its context, and the people behind it."}</p></div>
+        <div className="ravine-footer-meta"><span>{isArabic ? "لا شيء زخرفي بلا معنى" : "Nothing Decorative Without Meaning"}</span><span>© {new Date().getFullYear()} RAVINE</span></div>
       </footer>
       <AuthModal locale={locale} />
     </div>
