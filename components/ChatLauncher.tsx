@@ -30,31 +30,26 @@ export default function ChatLauncher({ locale }: { locale: Locale }) {
 
   return (
     <>
-      <button type="button" className="ravine-header-icon ravine-chat-launcher" aria-label={ar ? "الرسائل" : "Messages"} title={ar ? "الرسائل" : "Messages"} aria-expanded={open && !closing} onClick={openCenter}>
+      <button type="button" className="ravine-header-icon ravine-chat-launcher" aria-label={ar ? "الرسائل" : "Messages"} title={ar ? "الرسائل" : "Messages"} aria-expanded={open && !closing} onClick={open ? close : openCenter}>
         <MessageCircle size={18} strokeWidth={1.8} />
       </button>
 
-      {mounted && (open || closing)
-        ? createPortal(
-            <div className={`ravine-message-center-overlay${closing ? " is-closing" : ""}`} role="presentation" onPointerDown={(event) => { if (event.target === event.currentTarget) close(); }}>
-              <div className={`ravine-message-center${closing ? " is-closing" : ""}`} role="dialog" aria-modal="true" aria-labelledby="ravine-message-center-title" dir={ar ? "rtl" : "ltr"}>
-                <div className="ravine-message-center-head">
-                  <div>
-                    <span>{ar ? "RAVINE / الرسائل" : "RAVINE / MESSAGES"}</span>
-                    <h2 id="ravine-message-center-title">{ar ? "رسائلك، في مكانها." : "Your conversations, right here."}</h2>
-                  </div>
-                  <button type="button" className="ravine-message-center-close" onClick={close} aria-label={ar ? "إغلاق الرسائل" : "Close messages"}><X size={18} /></button>
-                </div>
-                <div className="ravine-message-center-body"><DirectMessages locale={locale} compact /></div>
-                <div className="ravine-message-center-footer">
-                  <span>{ar ? "يمكنك إدارة كل محادثاتك من الصفحة الكاملة." : "Manage every conversation from the full messages page."}</span>
-                  <Link className="button primary" href={`/${locale}/messages`} onClick={close}>{ar ? "فتح الرسائل كاملة" : "Open full messages"}</Link>
-                </div>
-              </div>
-            </div>,
-            document.body,
-          )
-        : null}
+      {mounted && (open || closing) ? createPortal(
+        <div className={`ravine-message-center-overlay${closing ? " is-closing" : ""}`} role="presentation" onPointerDown={(event) => { if (event.target === event.currentTarget) close(); }}>
+          <div className={`ravine-message-center${closing ? " is-closing" : ""}`} role="dialog" aria-modal="true" aria-labelledby="ravine-message-center-title" dir={ar ? "rtl" : "ltr"}>
+            <div className="ravine-message-center-head">
+              <div><span>{ar ? "RAVINE / الرسائل" : "RAVINE / MESSAGES"}</span><h2 id="ravine-message-center-title">{ar ? "رسائلك، في مكانها." : "Your conversations, right here."}</h2></div>
+              <button type="button" className="ravine-message-center-close" onClick={close} aria-label={ar ? "إغلاق الرسائل" : "Close messages"}><X size={18} /></button>
+            </div>
+            <div className="ravine-message-center-body"><DirectMessages locale={locale} compact /></div>
+            <div className="ravine-message-center-footer">
+              <span>{ar ? "يمكنك إدارة كل محادثاتك من الصفحة الكاملة." : "Manage every conversation from the full messages page."}</span>
+              <Link className="button primary" href={`/${locale}/messages`} onClick={close}>{ar ? "فتح الرسائل كاملة" : "Open full messages"}</Link>
+            </div>
+          </div>
+        </div>,
+        document.body,
+      ) : null}
     </>
   );
 }
