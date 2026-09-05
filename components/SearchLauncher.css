@@ -3,3 +3,12 @@ html[data-theme="light"] .ravine-search-overlay{background:transparent!important
 @keyframes ravineSearchOverlayIn{from{opacity:0}to{opacity:1}}@keyframes ravineSearchDialogIn{from{opacity:0;transform:translateY(-16px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
 @media(max-width:720px){.ravine-search-overlay{padding:76px 10px 10px}.ravine-search-dialog{padding:22px;border-radius:26px;max-height:calc(100vh - 86px)}.ravine-search-field-grid,.ravine-search-field-grid.three{grid-template-columns:1fr}.ravine-advanced-search-toggle{width:100%}.ravine-search-dialog-head h2{font-size:clamp(30px,8vw,44px)}}
 @media(prefers-reduced-motion:reduce){.ravine-search-overlay,.ravine-search-dialog{animation:none}.ravine-search-advanced{transition:none}}
+
+/* Search font authority: this field owns its typography, independently of page locale. */
+@font-face{font-family:"RAVINE Search UI";src:url('/fonts/Satoshi-Regular.otf') format('opentype');font-weight:400;font-style:normal;font-display:swap;unicode-range:U+0000-024F,U+1E00-1EFF,U+2000-206F,U+20A0-20CF,U+2100-214F,U+2190-21FF,U+2200-22FF}
+@font-face{font-family:"RAVINE Search UI";src:url('/fonts/Satoshi-Bold.otf') format('opentype');font-weight:700;font-style:normal;font-display:swap;unicode-range:U+0000-024F,U+1E00-1EFF,U+2000-206F,U+20A0-20CF,U+2100-214F,U+2190-21FF,U+2200-22FF}
+@font-face{font-family:"RAVINE Search UI";src:url('/fonts/thmanyahsans-Regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap;unicode-range:U+0600-06FF,U+0750-077F,U+08A0-08FF,U+FB50-FDFF,U+FE70-FEFF}
+@font-face{font-family:"RAVINE Search UI";src:url('/fonts/thmanyahsans-Bold.woff2') format('woff2');font-weight:700;font-style:normal;font-display:swap;unicode-range:U+0600-06FF,U+0750-077F,U+08A0-08FF,U+FB50-FDFF,U+FE70-FEFF}
+html body .ravine-search-dialog .ravine-search-input input,html body .ravine-search-dialog .ravine-search-input input::placeholder{font-family:"RAVINE Search UI",sans-serif!important;font-synthesis:none!important;text-rendering:optimizeLegibility}
+html body .ravine-search-dialog .ravine-search-input input{direction:auto;unicode-bidi:plaintext}
+html[lang="ar"] body .ravine-search-dialog .ravine-search-input input,html[lang="ar"] body .ravine-search-dialog .ravine-search-input input::placeholder{font-family:"RAVINE Search UI",sans-serif!important}
