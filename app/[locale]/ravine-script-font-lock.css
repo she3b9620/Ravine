@@ -2,14 +2,14 @@
    Locale never controls typography.
    Latin/English glyphs: Satoshi.
    Arabic glyphs: the semantic Thmanyah family.
-   The browser resolves each glyph from the stack, so mixed Arabic/English strings stay mixed correctly. */
+   Use the mixed font families whose unicode ranges select the correct script per glyph. */
 
 /* Base / functional UI */
 html body .ravine-shell,
 html body .ravine-shell .ravine-header,
 html body .ravine-shell .ravine-main,
 html body .ravine-shell .ravine-footer {
-  font-family: "Satoshi", "Thmanyah Sans", sans-serif !important;
+  font-family: RavineSansMixed, sans-serif !important;
 }
 
 html body .ravine-shell button,
@@ -28,10 +28,10 @@ html body .ravine-shell .video-stats,
 html body .ravine-shell .duration,
 html body .ravine-shell .empty-state,
 html body .ravine-shell .ravine-footer-meta {
-  font-family: "Satoshi", "Thmanyah Sans", sans-serif !important;
+  font-family: RavineSansMixed, sans-serif !important;
 }
 
-/* Arabic editorial/display roles remain Thmanyah, while English glyphs in them remain Satoshi. */
+/* Display typography: English stays Satoshi; Arabic uses Thmanyah Serif Display. */
 html body .ravine-shell h1,
 html body .ravine-shell h2,
 html body .ravine-shell h3,
@@ -39,9 +39,10 @@ html body .ravine-shell h4,
 html body .ravine-shell h5,
 html body .ravine-shell h6,
 html body .ravine-shell .creator-profile-title {
-  font-family: "Satoshi", "Thmanyah Serif Display", serif !important;
+  font-family: RavineDisplayMixed, serif !important;
 }
 
+/* Editorial reading text: English stays Satoshi; Arabic uses Thmanyah Serif Text. */
 html body .ravine-shell p,
 html body .ravine-shell li,
 html body .ravine-shell blockquote,
@@ -52,46 +53,46 @@ html body .ravine-shell .auth-intro,
 html body .ravine-shell .auth-message,
 html body .ravine-shell .home-feed-intro,
 html body .ravine-shell .about-lead {
-  font-family: "Satoshi", "Thmanyah Serif Text", serif !important;
+  font-family: RavineTextMixed, serif !important;
 }
 
 /* Search portal lives under body, outside .ravine-shell. */
 html body .ravine-search-dialog,
 html body .ravine-search-dialog * {
-  font-family: "Satoshi", "Thmanyah Sans", sans-serif !important;
+  font-family: RavineSansMixed, sans-serif !important;
 }
 html body .ravine-search-dialog h1,
 html body .ravine-search-dialog h2,
 html body .ravine-search-dialog h3 {
-  font-family: "Satoshi", "Thmanyah Serif Display", serif !important;
+  font-family: RavineDisplayMixed, serif !important;
 }
 html body .ravine-search-dialog p {
-  font-family: "Satoshi", "Thmanyah Serif Text", serif !important;
+  font-family: RavineTextMixed, serif !important;
 }
 
 /* Auth portal lives under body, outside .ravine-shell. */
 html body .ravine-auth-overlay,
 html body .ravine-auth-overlay * {
-  font-family: "Satoshi", "Thmanyah Sans", sans-serif !important;
+  font-family: RavineSansMixed, sans-serif !important;
 }
 html body .ravine-auth-overlay h1,
 html body .ravine-auth-overlay h2,
 html body .ravine-auth-overlay h3 {
-  font-family: "Satoshi", "Thmanyah Serif Display", serif !important;
+  font-family: RavineDisplayMixed, serif !important;
 }
 html body .ravine-auth-overlay p,
 html body .ravine-auth-overlay .intro,
 html body .ravine-auth-overlay .auth-message {
-  font-family: "Satoshi", "Thmanyah Serif Text", serif !important;
+  font-family: RavineTextMixed, serif !important;
 }
 
 /* Footer/body descriptive copy */
 html body .ravine-shell .ravine-footer p {
-  font-family: "Satoshi", "Thmanyah Serif Text", serif !important;
+  font-family: RavineTextMixed, serif !important;
 }
 
 /* Locale must never switch the page's typography stack. */
 html body .ravine-shell[lang="ar"],
 html body .ravine-shell[lang="en"] {
-  font-family: "Satoshi", "Thmanyah Sans", sans-serif !important;
+  font-family: RavineSansMixed, sans-serif !important;
 }
