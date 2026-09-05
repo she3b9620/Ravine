@@ -19,7 +19,8 @@ type HeaderProfile = { display_name: string | null; username: string | null; ava
 function RavineLockup({ compact = false }: { compact?: boolean }) {
   return (
     <span className={`ravine-lockup${compact ? " compact" : ""}`} aria-hidden="true">
-      <img src="/اللوجو كامل.png" alt="" className="ravine-lockup-full" />
+      <img src="/اللوجو.png" alt="" className="ravine-lockup-mark" />
+      <img src="/التايبو.png" alt="" className="ravine-lockup-wordmark" />
     </span>
   );
 }
@@ -101,7 +102,7 @@ export default async function RavineShell({ locale, children }: { locale: Locale
           <span>{isArabic ? "لا شيء زخرفي بلا معنى" : "Nothing Decorative Without Meaning"}</span>
           <span>© {new Date().getFullYear()} RAVINE</span>
         </div>
-      </footer>
+      </div>
       <AuthModal locale={locale} />
     </div>
   );
