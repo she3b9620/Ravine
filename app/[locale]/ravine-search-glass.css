@@ -1,24 +1,50 @@
 .ravine-search-overlay{
-  background:rgba(9,9,9,.42) !important;
-  -webkit-backdrop-filter:blur(18px) saturate(112%) !important;
-  backdrop-filter:blur(18px) saturate(112%) !important;
+  background:rgba(9,9,9,.28)!important;
+  background-image:none!important;
+  -webkit-backdrop-filter:blur(0px) saturate(100%)!important;
+  backdrop-filter:blur(0px) saturate(100%)!important;
+  will-change:opacity,backdrop-filter;
+  animation:ravineSearchGlassIn .38s cubic-bezier(.22,.61,.36,1) both!important;
 }
+
+.ravine-search-overlay.is-closing{animation:ravineSearchGlassOut .22s cubic-bezier(.4,0,.8,.2) both!important}
 
 html[data-theme="light"] .ravine-search-overlay{
-  background:rgba(241,233,220,.46) !important;
-  -webkit-backdrop-filter:blur(18px) saturate(108%) !important;
-  backdrop-filter:blur(18px) saturate(108%) !important;
+  background:rgba(241,233,220,.30)!important;
+  background-image:none!important;
+  -webkit-backdrop-filter:blur(0px) saturate(100%)!important;
+  backdrop-filter:blur(0px) saturate(100%)!important;
+  animation:ravineSearchGlassInLight .38s cubic-bezier(.22,.61,.36,1) both!important;
 }
 
-.ravine-search-dialog{
-  position:relative;
-  z-index:1;
+html[data-theme="light"] .ravine-search-overlay.is-closing{animation:ravineSearchGlassOutLight .22s cubic-bezier(.4,0,.8,.2) both!important}
+
+.ravine-search-dialog{position:relative;z-index:1}
+
+@keyframes ravineSearchGlassIn{
+  from{opacity:0;background:rgba(9,9,9,0);-webkit-backdrop-filter:blur(0px) saturate(100%);backdrop-filter:blur(0px) saturate(100%)}
+  to{opacity:1;background:rgba(9,9,9,.28);-webkit-backdrop-filter:blur(20px) saturate(112%);backdrop-filter:blur(20px) saturate(112%)}
+}
+@keyframes ravineSearchGlassOut{
+  from{opacity:1;background:rgba(9,9,9,.28);-webkit-backdrop-filter:blur(20px) saturate(112%);backdrop-filter:blur(20px) saturate(112%)}
+  to{opacity:0;background:rgba(9,9,9,0);-webkit-backdrop-filter:blur(0px) saturate(100%);backdrop-filter:blur(0px) saturate(100%)}
+}
+@keyframes ravineSearchGlassInLight{
+  from{opacity:0;background:rgba(241,233,220,0);-webkit-backdrop-filter:blur(0px) saturate(100%);backdrop-filter:blur(0px) saturate(100%)}
+  to{opacity:1;background:rgba(241,233,220,.30);-webkit-backdrop-filter:blur(20px) saturate(108%);backdrop-filter:blur(20px) saturate(108%)}
+}
+@keyframes ravineSearchGlassOutLight{
+  from{opacity:1;background:rgba(241,233,220,.30);-webkit-backdrop-filter:blur(20px) saturate(108%);backdrop-filter:blur(20px) saturate(108%)}
+  to{opacity:0;background:rgba(241,233,220,0);-webkit-backdrop-filter:blur(0px) saturate(100%);backdrop-filter:blur(0px) saturate(100%)}
 }
 
 @media(prefers-reduced-motion:reduce){
   .ravine-search-overlay,
   html[data-theme="light"] .ravine-search-overlay{
-    -webkit-backdrop-filter:none !important;
-    backdrop-filter:none !important;
+    animation:none!important;
+    -webkit-backdrop-filter:blur(16px) saturate(108%)!important;
+    backdrop-filter:blur(16px) saturate(108%)!important;
   }
+  .ravine-search-overlay.is-closing,
+  html[data-theme="light"] .ravine-search-overlay.is-closing{animation:none!important}
 }
