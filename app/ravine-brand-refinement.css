@@ -1,11 +1,18 @@
-/* RAVINE brand lockup: founder-supplied mark + wordmark separated from the old text placeholder. */
-.ravine-brand-lockup{display:inline-flex!important;align-items:center;gap:7px;line-height:1}
-.ravine-lockup{display:inline-flex;align-items:center;gap:7px;height:38px}
-.ravine-lockup-mark{width:31px;height:31px;display:block;object-fit:contain}
-.ravine-lockup-wordmark{width:90px;height:auto;display:block;object-fit:contain}
+/* RAVINE brand lockup: use the founder-supplied complete local logo asset. */
+.ravine-brand-lockup{display:inline-flex!important;align-items:center;line-height:1}
+.ravine-lockup{display:inline-flex;align-items:center;justify-content:flex-start;height:44px;line-height:1}
+.ravine-lockup-full{width:138px;height:44px;display:block;object-fit:contain;object-position:center}
 .ravine-lockup.compact{height:30px}
-.ravine-lockup.compact .ravine-lockup-mark{width:25px;height:25px}
-.ravine-lockup.compact .ravine-lockup-wordmark{width:72px}
-html[data-theme="light"] .ravine-lockup-mark,html[data-theme="light"] .ravine-lockup-wordmark{filter:brightness(.18) saturate(.95)}
-@media(max-width:820px){.ravine-brand-lockup .ravine-lockup{height:34px}.ravine-brand-lockup .ravine-lockup-mark{width:28px;height:28px}.ravine-brand-lockup .ravine-lockup-wordmark{width:80px}.ravine-header-inner{gap:16px;padding-inline:18px}.ravine-header-actions{gap:8px}.ravine-search-trigger span,.ravine-auth-trigger:not(.ravine-auth-trigger-primary) span{display:none}}
-@media(max-width:560px){.ravine-brand-lockup .ravine-lockup-wordmark{width:70px}.ravine-brand-lockup .ravine-lockup-mark{width:26px;height:26px}.ravine-header-actions{gap:6px}}
+.ravine-lockup.compact .ravine-lockup-full{width:96px;height:30px}
+html[data-theme="light"] .ravine-lockup-full{filter:brightness(.18) saturate(.95)}
+@media(max-width:820px){
+  .ravine-brand-lockup .ravine-lockup{height:38px}
+  .ravine-brand-lockup .ravine-lockup-full{width:118px;height:38px}
+  .ravine-header-inner{gap:16px;padding-inline:18px}
+  .ravine-header-actions{gap:8px}
+  .ravine-search-trigger span,.ravine-auth-trigger:not(.ravine-auth-trigger-primary) span{display:none}
+}
+@media(max-width:560px){
+  .ravine-brand-lockup .ravine-lockup-full{width:104px;height:34px}
+  .ravine-header-actions{gap:6px}
+}
