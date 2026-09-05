@@ -8,6 +8,6 @@ export function westernDigits(value: string | number | null | undefined) {
     .replace(/[۰-۹]/g, (digit) => WESTERN_DIGITS[PERSIAN_DIGITS.indexOf(digit)]);
 }
 
-export function ravineNumber(value: number | null | undefined) {
-  return new Intl.NumberFormat("en-US", { useGrouping: true }).format(Number(value ?? 0));
+export function ravineNumber(value: number | null | undefined, locale: "ar" | "en" = "en") {
+  return new Intl.NumberFormat(locale === "ar" ? "ar-EG" : "en-US", { useGrouping: true }).format(Number(value ?? 0));
 }
