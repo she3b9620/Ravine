@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowUpRight, BadgeCheck, LayoutDashboard, UserRound } from "lucide-react";
+import { BadgeCheck, LayoutDashboard, UserRound } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import AccountSettings from "@/components/AccountSettings";
 import styles from "./account.module.css";
@@ -30,16 +30,14 @@ export default async function AccountPage({ params }: { params: Promise<{ locale
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) redirect(`/${locale}/auth?next=/${locale}/account`);
 
-  const [{ data: profileData }, { data: roleRows }, { count: savedCount }, { count: followingCount }] = await Promise.all([
+  const [{ data: profileData }, { count: savedCount }, { count: followingCount }] = await Promise.all([
     supabase.from("profiles").select("display_name,username,bio,avatar_url,cover_url,country,is_verified,is_creator,language,website_url").eq("id", auth.user.id).maybeSingle(),
-    supabase.from("user_roles").select("role").eq("user_id", auth.user.id),
     supabase.from("video_saves").select("id", { count: "exact", head: true }).eq("user_id", auth.user.id),
     supabase.from("follows").select("id", { count: "exact", head: true }).eq("follower_id", auth.user.id),
   ]);
 
   const profile = profileData as Profile | null;
   const displayName = profile?.display_name || auth.user.email?.split("@")[0] || (ar ? "مستخدم RAVINE" : "RAVINE user");
-  const roles = (roleRows ?? []).map((row) => row.role).filter(Boolean);
   const settingsProfile = profile
     ? {
         display_name: profile.display_name,
@@ -77,7 +75,7 @@ export default async function AccountPage({ params }: { params: Promise<{ locale
       </div>
 
       <div className={styles.actions}>
-        <Link className={styles.actionLink} href={`/${locale}/dashboard"><LayoutDashboard size={14} />{ar ? "لوحة المستخدم" : "User dashboard"}</Link>
+        <Link className={styles.actionLink} href={`/${locale}/dashboard`}><LayoutDashboard size={14} />{ar ? "لوحة المستخدم" : "User dashboard"}</Link>
         {profile?.is_creator ? <Link className={styles.actionLink} href={`/${locale}/studio`}><UserRound size={14} />{ar ? "استوديو المبدع" : "Creator Studio"}</Link> : null}
         {profile?.is_verified ? <span className={styles.actionLink}><BadgeCheck size={14} />{ar ? "موثق" : "Verified"}</span> : null}
       </div>
