@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Compass, Users, History, Library, Heart, MessagesSquare, Radio, Mic2, LayoutDashboard, UserRound, Clapperboard } from "lucide-react";
+import { Home, Compass, Users, History, Library, Heart, MessagesSquare, Radio, Mic2, LayoutDashboard, UserRound, Clapperboard, Settings } from "lucide-react";
 import { requestRavineAuth } from "./AuthModal";
 
 type Locale = "ar" | "en";
@@ -77,6 +77,21 @@ export default function SidebarNav({ locale, authenticated }: { locale: Locale; 
           </div>
         </section>
       ))}
+
+      {authenticated ? (
+        <section className="ravine-sidebar-group ravine-sidebar-settings-group">
+          <div className="ravine-sidebar-nav-list">
+            <Link
+              href={`/${locale}/account/edit`}
+              className={`ravine-sidebar-link${isActive("account/edit") ? " is-active" : ""}`}
+              aria-current={isActive("account/edit") ? "page" : undefined}
+            >
+              <span className="ravine-sidebar-link-icon"><Settings size={18} strokeWidth={1.8} aria-hidden="true" /></span>
+              <span className="ravine-sidebar-link-label">{locale === "ar" ? "الإعدادات" : "Settings"}</span>
+            </Link>
+          </div>
+        </section>
+      ) : null}
     </nav>
   );
 }
