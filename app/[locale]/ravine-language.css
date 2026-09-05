@@ -36,10 +36,8 @@
 .ravine-language-option-copy{display:grid;gap:3px;min-width:0}
 .ravine-language-option-copy strong{font-family:var(--font-latin);font-size:13px;line-height:1.1}
 .ravine-language-option-copy small{color:var(--stone);font-family:var(--font-latin);font-size:10px;line-height:1.2}
-
-/* Mixed-script typography: Arabic labels remain Thmanyah even when the shell locale is English. */
-.ravine-language-option[dir="rtl"] .ravine-language-option-copy strong,.ravine-language-option[dir="rtl"] .ravine-language-option-copy small{font-family:var(--font-arabic-ui)!important}
-.ravine-language-option[dir="ltr"] .ravine-language-option-copy strong,.ravine-language-option[dir="ltr"] .ravine-language-option-copy small{font-family:var(--font-latin)!important}
+.ravine-language-option.is-arabic .ravine-language-option-copy strong,.ravine-language-option.is-arabic .ravine-language-option-copy small{font-family:var(--font-arabic-ui)!important}
+.ravine-language-option.is-english .ravine-language-option-copy strong,.ravine-language-option.is-english .ravine-language-option-copy small{font-family:var(--font-latin)!important}
 
 .ravine-language-check,.ravine-language-open{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;font-size:12px;color:var(--copper);opacity:.9}
 .ravine-language-open{color:var(--stone);opacity:.65}
