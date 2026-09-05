@@ -7,10 +7,15 @@ export function ravineErrorMessage(error: unknown, locale: RavineErrorLocale) {
 
   if (!text.trim()) return ar ? "تعذر تنفيذ العملية حاليًا." : "The action could not be completed right now.";
 
-  if (normalized.includes("permission denied") || normalized.includes("insufficient privilege") || normalized.includes("row-level security")) {
+  if (
+    normalized.includes("permission denied for schema private") ||
+    normalized.includes("permission denied") ||
+    normalized.includes("insufficient privilege") ||
+    normalized.includes("row-level security")
+  ) {
     return ar
-      ? "تعذر الوصول إلى هذه البيانات بسبب صلاحيات الوصول. حاول مرة أخرى، وإذا استمرت المشكلة سنحتاج إلى مراجعة إعدادات الوصول في قاعدة البيانات."
-      : "These data could not be accessed because of an access-permission issue. Please try again; persistent issues may require a database access review.";
+      ? "تعذر الوصول إلى هذه البيانات بسبب صلاحيات الوصول. حاول مرة أخرى لاحقًا."
+      : "These data could not be accessed because of an access-permission issue. Please try again later.";
   }
 
   if (normalized.includes("infinite recursion detected in policy")) {
