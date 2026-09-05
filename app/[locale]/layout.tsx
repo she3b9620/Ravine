@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import RavineShell from "../../components/RavineShell";
 import RavineUiEnhancer from "../../components/RavineUiEnhancer";
+import SelectionTabsEnhancer from "../../components/SelectionTabsEnhancer";
 import GuestCinematicBackdrop from "../../components/GuestCinematicBackdrop";
 import LocalePersistence from "../../components/LocalePersistence";
 import "./ravine-overrides.css";
@@ -33,10 +34,11 @@ import "./ravine-platform-reading-glass.css";
 import "./ravine-header-hero-polish.css";
 import "./ravine-search-light-glass.css";
 import "./ravine-page-glass.css";
+import "./ravine-selection-tabs.css";
 import "../community-system.css";
 import "./ravine-hero-overlay-fix.css";
 
 const locales = ["ar", "en"] as const;
 type Locale = (typeof locales)[number];
 export function generateStaticParams(){return locales.map((locale)=>({locale}))}
-export default async function LocaleLayout({children,params}:{children:ReactNode;params:Promise<{locale:string}>}){const {locale}=await params;if(!locales.includes(locale as Locale))notFound();return <RavineShell locale={locale as Locale}><LocalePersistence locale={locale as Locale}/><GuestCinematicBackdrop locale={locale as Locale}/><RavineUiEnhancer />{children}</RavineShell>}
+export default async function LocaleLayout({children,params}:{children:ReactNode;params:Promise<{locale:string}>}){const {locale}=await params;if(!locales.includes(locale as Locale))notFound();return <RavineShell locale={locale as Locale}><LocalePersistence locale={locale as Locale}/><GuestCinematicBackdrop locale={locale as Locale}/><RavineUiEnhancer /><SelectionTabsEnhancer />{children}</RavineShell>}
