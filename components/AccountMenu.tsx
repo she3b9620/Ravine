@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ChevronDown, Compass, Library, LogOut, MessageCircle, Settings, UserRound, Video } from "lucide-react";
+import { ChevronDown, Compass, Library, LogOut, MessageCircle, Settings, UserRound, UserCog, Video } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -77,16 +77,19 @@ export default function AccountMenu({ locale, displayName, username, avatarUrl, 
             </div>
           </div>
 
+          <div className="ravine-account-section-label">{ar ? "الحساب" : "Account"}</div>
+          <Link href={`/${locale}/account`} onClick={() => setOpen(false)} role="menuitem"><UserRound size={16} />{ar ? "دخول إلى الحساب" : "Open account"}</Link>
+          <Link href={`/${locale}/account/edit`} onClick={() => setOpen(false)} role="menuitem"><UserCog size={16} />{ar ? "تعديل الملف الشخصي" : "Edit profile"}</Link>
+          <Link href={`/${locale}/settings`} onClick={() => setOpen(false)} role="menuitem"><Settings size={16} />{ar ? "الإعدادات العامة" : "General settings"}</Link>
+
           <div className="ravine-account-section-label">{ar ? "مساحتك" : "Your space"}</div>
-          <Link href={`/${locale}`} onClick={() => setOpen(false)} role="menuitem"><UserRound size={16} />{ar ? "الرئيسية" : "Home"}</Link>
-          <Link href={`/${locale}/account`} onClick={() => setOpen(false)} role="menuitem"><Settings size={16} />{ar ? "الحساب والإعدادات" : "Account & settings"}</Link>
           <Link href={`/${locale}/library`} onClick={() => setOpen(false)} role="menuitem"><Library size={16} />{ar ? "المكتبة" : "Library"}</Link>
           <Link href={`/${locale}/messages`} onClick={() => setOpen(false)} role="menuitem"><MessageCircle size={16} />{ar ? "الرسائل" : "Messages"}</Link>
           <Link href={`/${locale}/community`} onClick={() => setOpen(false)} role="menuitem"><MessageCircle size={16} />{ar ? "المجتمعات" : "Communities"}</Link>
           <Link href={`/${locale}/discover`} onClick={() => setOpen(false)} role="menuitem"><Compass size={16} />{ar ? "الاكتشاف" : "Discover"}</Link>
 
           <div className="ravine-account-section-label">{ar ? "لوحتك" : "Dashboard"}</div>
-          <Link href={`/${locale}/account`} onClick={() => setOpen(false)} role="menuitem"><Video size={16} />{ar ? "لوحة المستخدم" : "User dashboard"}</Link>
+          <Link href={`/${locale}/dashboard`} onClick={() => setOpen(false)} role="menuitem"><Video size={16} />{ar ? "لوحة المستخدم" : "User dashboard"}</Link>
           {isCreator ? <Link href={`/${locale}/studio`} onClick={() => setOpen(false)} role="menuitem"><Video size={16} />{ar ? "استوديو المبدع" : "Creator Studio"}</Link> : null}
 
           <div className="ravine-account-divider" />
