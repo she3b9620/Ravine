@@ -29,6 +29,7 @@ import "./ravine-search-glass.css";
 import "./ravine-shell-overlap.css";
 import "./ravine-language.css";
 import "./ravine-cultural-pattern.css";
+import "./ravine-header-hero-polish.css";
 import "../community-system.css";
 
 const locales = ["ar", "en"] as const;
