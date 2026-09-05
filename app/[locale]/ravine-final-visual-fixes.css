@@ -89,11 +89,78 @@
   transform-origin: center center !important;
 }
 
-/* Search modal: no black layer or blur in light mode. */
-html[data-theme="light"] .ravine-search-overlay {
-  background: #f1e9dc !important;
+/* Search modal: completely remove the dimming/black veil and any decorative layer.
+   The dialog itself is the only painted surface; no overlay, pseudo-element, filter,
+   blend mode, gradient, or shadow may sit above the title/close button. */
+.ravine-search-overlay,
+.ravine-search-overlay::before,
+.ravine-search-overlay::after {
+  background: transparent !important;
   background-image: none !important;
   box-shadow: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  mix-blend-mode: normal !important;
+  opacity: 1 !important;
+}
+
+.ravine-search-dialog,
+.ravine-search-dialog::before,
+.ravine-search-dialog::after,
+.ravine-search-dialog-head,
+.ravine-search-dialog-head::before,
+.ravine-search-dialog-head::after,
+.ravine-search-dialog-head > div,
+.ravine-search-dialog-head > div::before,
+.ravine-search-dialog-head > div::after {
+  filter: none !important;
+  mix-blend-mode: normal !important;
+}
+
+.ravine-search-dialog::before,
+.ravine-search-dialog::after,
+.ravine-search-dialog-head::before,
+.ravine-search-dialog-head::after,
+.ravine-search-dialog-head > div::before,
+.ravine-search-dialog-head > div::after {
+  content: none !important;
+  display: none !important;
+  background: none !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.ravine-search-dialog {
+  z-index: 1 !important;
+  isolation: isolate !important;
+  box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+  background-image: none !important;
+}
+
+.ravine-search-dialog-head {
+  position: relative !important;
+  z-index: 10 !important;
+  isolation: isolate !important;
+}
+
+.ravine-search-dialog-head > div:first-child,
+.ravine-search-dialog-head h2,
+.ravine-search-dialog .ravine-search-close {
+  position: relative !important;
+  z-index: 20 !important;
+}
+
+html[data-theme="light"] .ravine-search-overlay,
+html[data-theme="light"] .ravine-search-overlay::before,
+html[data-theme="light"] .ravine-search-overlay::after {
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  filter: none !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
@@ -109,10 +176,12 @@ html[data-theme="light"] .ravine-search-dialog {
 
 html[data-theme="light"] .ravine-search-dialog::before,
 html[data-theme="light"] .ravine-search-dialog::after,
-html[data-theme="light"] .ravine-search-overlay::before,
-html[data-theme="light"] .ravine-search-overlay::after {
+html[data-theme="light"] .ravine-search-dialog-head::before,
+html[data-theme="light"] .ravine-search-dialog-head::after {
   content: none !important;
   display: none !important;
+  background: none !important;
+  background-image: none !important;
   box-shadow: none !important;
   filter: none !important;
 }
@@ -121,6 +190,7 @@ html[data-theme="light"] .ravine-search-dialog,
 html[data-theme="light"] .ravine-search-dialog * {
   filter: none !important;
   text-shadow: none !important;
+  mix-blend-mode: normal !important;
 }
 
 html[data-theme="light"] .ravine-search-overlay,
@@ -143,7 +213,6 @@ html[data-theme="light"] .ravine-search-dialog[dir="rtl"] .ravine-search-input i
   opacity: 1 !important;
 }
 
-/* Primary navigation: make the current section unmistakable. */
 .ravine-nav-link.is-active,
 .ravine-nav-link.is-active:hover,
 .ravine-nav-link.is-active:focus-visible {
@@ -164,7 +233,6 @@ html[data-theme="light"] .ravine-search-dialog[dir="rtl"] .ravine-search-input i
   box-shadow: 0 0 12px rgba(196, 122, 82, 0.22);
 }
 
-/* Guest hero eyebrow: make “رَافِين / للضيوف” visibly readable. */
 .ravine-shell .home-guest-hero .home-state-kicker {
   font-size: 15px !important;
   line-height: 1.45 !important;
