@@ -65,6 +65,8 @@ function categoryLabel(category: Category, locale: Locale) {
   return ARABIC_CATEGORY_NAMES[category.slug?.toLowerCase() || ""] || category.name;
 }
 
+const CLOSE_MS = 220;
+
 export default function SearchLauncher({ locale, categories }: Props) {
   const ar = locale === "ar";
   const router = useRouter();
@@ -78,16 +80,15 @@ export default function SearchLauncher({ locale, categories }: Props) {
   const [format, setFormat] = useState("");
   const [quality, setQuality] = useState("");
 
-  const close = () => {
+  function close() {
     if (!open || closing) return;
     setClosing(true);
-  };
-
-  const finishClose = () => {
-    setOpen(false);
-    setClosing(false);
-    setAdvanced(false);
-  };
+    window.setTimeout(() => {
+      setOpen(false);
+      setClosing(false);
+      setAdvanced(false);
+    }, CLOSE_MS);
+  }
 
   useEffect(() => {
     if (!open) return;
@@ -117,7 +118,6 @@ export default function SearchLauncher({ locale, categories }: Props) {
     event.preventDefault();
     const params = new URLSearchParams();
     const cleanQuery = query.trim();
-
     if (cleanQuery) params.set("q", cleanQuery);
     if (category) params.set("category", category);
     if (type) params.set("type", type);
@@ -125,11 +125,10 @@ export default function SearchLauncher({ locale, categories }: Props) {
     if (advanced && format) params.set("format", format);
     if (advanced && quality) params.set("quality", quality);
 
-    close();
-
     const search = params.toString();
     const destination = `/${locale}/discover${search ? `?${search}` : ""}`;
-    window.setTimeout(() => router.push(destination), 180);
+    close();
+    window.setTimeout(() => router.push(destination), CLOSE_MS);
   }
 
   function clear() {
@@ -148,9 +147,6 @@ export default function SearchLauncher({ locale, categories }: Props) {
       onPointerDown={(event) => {
         if (event.target === event.currentTarget) close();
       }}
-      onAnimationEnd={(event) => {
-        if (closing && event.target === event.currentTarget) finishClose();
-      }}
     >
       <div
         className={`ravine-search-dialog${advanced ? " is-advanced" : ""}${closing ? " is-closing" : ""}`}
@@ -158,114 +154,41 @@ export default function SearchLauncher({ locale, categories }: Props) {
         aria-modal="true"
         aria-labelledby="ravine-search-title"
         dir={ar ? "rtl" : "ltr"}
-        onPointerDown={(event) => {
-          const target = event.target as HTMLElement;
-          if (!target.closest(".ravine-search-select")) {
-            document.querySelectorAll(".ravine-search-select.is-open").forEach((node) => node.classList.remove("is-open"));
-          }
-        }}
       >
         <div className="ravine-search-dialog-head">
           <div>
             <div className="eyebrow">{ar ? "رَافِين / البحث" : "RAVINE / SEARCH"}</div>
-            <h2 id="ravine-search-title">
-              {ar ? "ابحث داخل عالم رَافِين." : "Search inside the RAVINE world."}
-            </h2>
+            <h2 id="ravine-search-title">{ar ? "ابحث داخل عالم رَافِين." : "Search inside the RAVINE world."}</h2>
           </div>
-          <button
-            type="button"
-            className="ravine-search-close"
-            onClick={close}
-            aria-label={ar ? "إغلاق البحث" : "Close search"}
-          >
-            <X size={18} />
-          </button>
+          <button type="button" className="ravine-search-close" onClick={close} aria-label={ar ? "إغلاق البحث" : "Close search"}><X size={18} /></button>
         </div>
 
         <form className="ravine-search-form" onSubmit={submit}>
           <div className="ravine-search-input">
             <Search size={18} aria-hidden="true" />
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              autoFocus
-              placeholder={ar ? "اسم عمل، فكرة، مبدع، موضوع..." : "A work, idea, creator, topic..."}
-            />
+            <input value={query} onChange={(event) => setQuery(event.target.value)} autoFocus placeholder={ar ? "اسم عمل، فكرة، مبدع، موضوع..." : "A work, idea, creator, topic..."} />
           </div>
 
           <div className="ravine-search-field-grid two">
-            <SearchSelect
-              label={ar ? "التصنيف" : "Category"}
-              value={category}
-              locale={locale}
-              placeholder={ar ? "كل التصنيفات" : "All categories"}
-              options={categories.map((item) => ({
-                value: String(item.id),
-                ar: categoryLabel(item, "ar"),
-                en: categoryLabel(item, "en"),
-              }))}
-              onChange={setCategory}
-            />
-            <SearchSelect
-              label={ar ? "النوع" : "Type"}
-              value={type}
-              locale={locale}
-              placeholder={ar ? "كل الأنواع" : "All types"}
-              options={TYPES}
-              onChange={setType}
-            />
+            <SearchSelect label={ar ? "التصنيف" : "Category"} value={category} locale={locale} placeholder={ar ? "كل التصنيفات" : "All categories"} options={categories.map((item) => ({ value: String(item.id), ar: categoryLabel(item, "ar"), en: categoryLabel(item, "en") }))} onChange={setCategory} />
+            <SearchSelect label={ar ? "النوع" : "Type"} value={type} locale={locale} placeholder={ar ? "كل الأنواع" : "All types"} options={TYPES} onChange={setType} />
           </div>
 
-          <button
-            type="button"
-            className={`ravine-advanced-search-toggle${advanced ? " active" : ""}`}
-            onClick={() => setAdvanced((value) => !value)}
-            aria-expanded={advanced}
-          >
-            <SlidersHorizontal size={16} />
-            <span>{ar ? "بحث متقدم" : "Advanced search"}</span>
-            <ChevronDown size={15} className="ravine-advanced-chevron" />
+          <button type="button" className={`ravine-advanced-search-toggle${advanced ? " active" : ""}`} onClick={() => setAdvanced((value) => !value)} aria-expanded={advanced}>
+            <SlidersHorizontal size={16} /><span>{ar ? "بحث متقدم" : "Advanced search"}</span><ChevronDown size={15} className="ravine-advanced-chevron" />
           </button>
 
           <div className={`ravine-search-advanced${advanced ? " open" : ""}`} aria-hidden={!advanced}>
             <div className="ravine-search-field-grid three">
-              <SearchSelect
-                label={ar ? "المدة" : "Duration"}
-                value={duration}
-                locale={locale}
-                placeholder={ar ? "كل المدد" : "Any duration"}
-                options={DURATIONS}
-                onChange={setDuration}
-                disabled={!advanced}
-              />
-              <SearchSelect
-                label={ar ? "النسبة" : "Format"}
-                value={format}
-                locale={locale}
-                placeholder={ar ? "كل النسب" : "Any format"}
-                options={FORMATS}
-                onChange={setFormat}
-                disabled={!advanced}
-              />
-              <SearchSelect
-                label={ar ? "الجودة" : "Quality"}
-                value={quality}
-                locale={locale}
-                placeholder={ar ? "كل الجودات" : "Any quality"}
-                options={QUALITIES}
-                onChange={setQuality}
-                disabled={!advanced}
-              />
+              <SearchSelect label={ar ? "المدة" : "Duration"} value={duration} locale={locale} placeholder={ar ? "كل المدد" : "Any duration"} options={DURATIONS} onChange={setDuration} disabled={!advanced} />
+              <SearchSelect label={ar ? "النسبة" : "Format"} value={format} locale={locale} placeholder={ar ? "كل النسب" : "Any format"} options={FORMATS} onChange={setFormat} disabled={!advanced} />
+              <SearchSelect label={ar ? "الجودة" : "Quality"} value={quality} locale={locale} placeholder={ar ? "كل الجودات" : "Any quality"} options={QUALITIES} onChange={setQuality} disabled={!advanced} />
             </div>
           </div>
 
           <div className="ravine-search-actions">
-            <button type="button" className="button secondary ravine-search-clear" onClick={clear}>
-              {ar ? "مسح" : "Clear"}
-            </button>
-            <button type="submit" className="button primary">
-              {ar ? "بحث" : "Search"}
-            </button>
+            <button type="button" className="button secondary ravine-search-clear" onClick={clear}>{ar ? "مسح" : "Clear"}</button>
+            <button type="submit" className="button primary">{ar ? "بحث" : "Search"}</button>
           </div>
         </form>
       </div>
@@ -274,17 +197,8 @@ export default function SearchLauncher({ locale, categories }: Props) {
 
   return (
     <>
-      <button
-        type="button"
-        className="ravine-minor-link ravine-search-trigger"
-        onClick={() => {
-          setClosing(false);
-          setOpen(true);
-        }}
-        aria-label={ar ? "بحث" : "Search"}
-      >
-        <Search size={15} aria-hidden="true" />
-        <span>{ar ? "بحث" : "Search"}</span>
+      <button type="button" className="ravine-minor-link ravine-search-trigger" onClick={() => { setClosing(false); setOpen(true); }} aria-label={ar ? "بحث" : "Search"}>
+        <Search size={15} aria-hidden="true" /><span>{ar ? "بحث" : "Search"}</span>
       </button>
       {modal && typeof document !== "undefined" ? createPortal(modal, document.body) : null}
     </>
@@ -292,21 +206,9 @@ export default function SearchLauncher({ locale, categories }: Props) {
 }
 
 function SearchSelect({
-  label,
-  value,
-  locale,
-  placeholder,
-  options,
-  onChange,
-  disabled = false,
+  label, value, locale, placeholder, options, onChange, disabled = false,
 }: {
-  label: string;
-  value: string;
-  locale: Locale;
-  placeholder: string;
-  options: Option[];
-  onChange: (value: string) => void;
-  disabled?: boolean;
+  label: string; value: string; locale: Locale; placeholder: string; options: Option[]; onChange: (value: string) => void; disabled?: boolean;
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
@@ -314,58 +216,22 @@ function SearchSelect({
 
   useEffect(() => {
     const onPointerDown = (event: PointerEvent) => {
-      const target = event.target as Node;
-      if (!rootRef.current?.contains(target)) setOpen(false);
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
     };
-
     document.addEventListener("pointerdown", onPointerDown);
     return () => document.removeEventListener("pointerdown", onPointerDown);
   }, []);
 
   return (
-    <div
-      ref={rootRef}
-      className={`ravine-search-select${open ? " is-open" : ""}${value ? " has-value" : ""}${disabled ? " is-disabled" : ""}`}
-    >
+    <div ref={rootRef} className={`ravine-search-select${open ? " is-open" : ""}${value ? " has-value" : ""}${disabled ? " is-disabled" : ""}`}>
       <span className="ravine-search-field-label">{label}</span>
-      <button
-        type="button"
-        className="ravine-search-select-trigger"
-        disabled={disabled}
-        aria-expanded={open}
-        onClick={() => {
-          if (!disabled) setOpen((state) => !state);
-        }}
-      >
-        <span>{current ? current[locale] : placeholder}</span>
-        <ChevronDown size={16} aria-hidden="true" />
+      <button type="button" className="ravine-search-select-trigger" disabled={disabled} aria-expanded={open} onClick={() => { if (!disabled) setOpen((state) => !state); }}>
+        <span>{current ? current[locale] : placeholder}</span><ChevronDown size={16} aria-hidden="true" />
       </button>
-
       {open ? (
         <div className="ravine-search-select-menu" role="listbox">
-          <button
-            type="button"
-            className={!value ? "is-selected" : ""}
-            onClick={() => {
-              onChange("");
-              setOpen(false);
-            }}
-          >
-            <span>{placeholder}</span>
-          </button>
-          {options.map((item) => (
-            <button
-              type="button"
-              key={item.value}
-              className={value === item.value ? "is-selected" : ""}
-              onClick={() => {
-                onChange(item.value);
-                setOpen(false);
-              }}
-            >
-              <span>{item[locale]}</span>
-            </button>
-          ))}
+          <button type="button" className={!value ? "is-selected" : ""} onClick={() => { onChange(""); setOpen(false); }}><span>{placeholder}</span></button>
+          {options.map((item) => <button type="button" key={item.value} className={value === item.value ? "is-selected" : ""} onClick={() => { onChange(item.value); setOpen(false); }}><span>{item[locale]}</span></button>)}
         </div>
       ) : null}
     </div>
