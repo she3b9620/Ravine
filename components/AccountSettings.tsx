@@ -6,6 +6,8 @@ import { ArrowUpRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import styles from "@/app/[locale]/account/account.module.css";
+import RavineMediaPicker from "@/components/RavineMediaPicker";
+import RavineSelect from "@/components/RavineSelect";
 
 type Profile = {
   display_name: string | null;
@@ -40,12 +42,11 @@ export default function AccountSettings({ profile, locale }: Props) {
 
   async function uploadAsset(userId: string, bucket: "avatars" | "covers", file: File) {
     const supabase = createClient();
-    const extension = file.name.split(".").pop()?.toLowerCase() || "webp";
-    const path = `${userId}/${crypto.randomUUID()}.${extension}`;
+    const path = `${userId}/${crypto.randomUUID()}.webp`;
     const { error: uploadError } = await supabase.storage.from(bucket).upload(path, file, {
       cacheControl: "3600",
       upsert: false,
-      contentType: file.type,
+      contentType: "image/webp",
     });
     if (uploadError) throw uploadError;
     const { data } = supabase.storage.from(bucket).getPublicUrl(path);
@@ -132,7 +133,16 @@ export default function AccountSettings({ profile, locale }: Props) {
           <label className={styles.field}><span>{ar ? "الاسم الظاهر" : "Display name"}</span><input className={styles.input} value={displayName} onChange={(event) => setDisplayName(event.target.value)} /></label>
           <label className={styles.field}><span>{ar ? "اسم المستخدم" : "Username"}</span><input className={styles.input} value={username} onChange={(event) => setUsername(event.target.value)} /></label>
           <label className={styles.field}><span>{ar ? "البلد" : "Country"}</span><input className={styles.input} value={country} onChange={(event) => setCountry(event.target.value)} /></label>
-          <label className={styles.field}><span>{ar ? "لغة الحساب" : "Account language"}</span><select className={styles.select} value={language} onChange={(event) => setLanguage(event.target.value)}><option value="ar">العربية</option><option value="en">English</option></select></label>
+          <div className={styles.field}>
+            <span>{ar ? "لغة الحساب" : "Account language"}</span>
+            <RavineSelect
+              value={language}
+              options={[{ value: "ar", label: "العربية" }, { value: "en", label: "English" }]}
+              onChange={setLanguage}
+              ariaLabel={ar ? "لغة الحساب" : "Account language"}
+              className="account-language-select"
+            />
+          </div>
         </div>
       </section>
 
@@ -146,9 +156,9 @@ export default function AccountSettings({ profile, locale }: Props) {
 
       <section className={styles.sectionBlock}>
         <h3 className={styles.sectionLabel}>{ar ? "الصور" : "Media"}</h3>
-        <div className={styles.formGrid}>
-          <label className={styles.field}><span>{ar ? "الصورة الشخصية" : "Avatar"}</span><input className={styles.file} type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => setAvatar(event.target.files?.[0] ?? null)} /><small className={styles.help}>{ar ? "صورة مربعة تمثل هويتك." : "A square image representing your identity."}</small></label>
-          <label className={styles.field}><span>{ar ? "صورة الغلاف" : "Cover"}</span><input className={styles.file} type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => setCover(event.target.files?.[0] ?? null)} /><small className={styles.help}>{ar ? "غلاف لصفحتك وملفك العام." : "A cover image for your public profile."}</small></label>
+        <div className={styles.mediaGrid}>
+          <RavineMediaPicker aspect="square" locale={locale} existingUrl={profile?.avatar_url} value={avatar} onChange={setAvatar} />
+          <RavineMediaPicker aspect="cover" locale={locale} existingUrl={profile?.cover_url} value={cover} onChange={setCover} />
         </div>
       </section>
 
