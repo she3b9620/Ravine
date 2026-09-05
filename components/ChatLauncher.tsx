@@ -1,6 +1,6 @@
 "use client";
 
-import { MessageCircle, Send, X } from "lucide-react";
+import { MessageCircle, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
@@ -30,14 +30,7 @@ export default function ChatLauncher({ locale }: { locale: Locale }) {
 
   return (
     <>
-      <button
-        type="button"
-        className="ravine-header-icon ravine-chat-launcher"
-        aria-label={ar ? "الرسائل" : "Messages"}
-        title={ar ? "الرسائل" : "Messages"}
-        aria-expanded={open && !closing}
-        onClick={openCenter}
-      >
+      <button type="button" className="ravine-header-icon ravine-chat-launcher" aria-label={ar ? "الرسائل" : "Messages"} title={ar ? "الرسائل" : "Messages"} aria-expanded={open && !closing} onClick={openCenter}>
         <MessageCircle size={18} strokeWidth={1.8} />
       </button>
 
@@ -50,20 +43,12 @@ export default function ChatLauncher({ locale }: { locale: Locale }) {
                     <span>{ar ? "RAVINE / الرسائل" : "RAVINE / MESSAGES"}</span>
                     <h2 id="ravine-message-center-title">{ar ? "رسائلك، في مكانها." : "Your conversations, right here."}</h2>
                   </div>
-                  <button type="button" className="ravine-message-center-close" onClick={close} aria-label={ar ? "إغلاق الرسائل" : "Close messages"}>
-                    <X size={18} />
-                  </button>
+                  <button type="button" className="ravine-message-center-close" onClick={close} aria-label={ar ? "إغلاق الرسائل" : "Close messages"}><X size={18} /></button>
                 </div>
-
-                <div className="ravine-message-center-body">
-                  <DirectMessages locale={locale} compact />
-                </div>
-
+                <div className="ravine-message-center-body"><DirectMessages locale={locale} compact /></div>
                 <div className="ravine-message-center-footer">
                   <span>{ar ? "يمكنك إدارة كل محادثاتك من الصفحة الكاملة." : "Manage every conversation from the full messages page."}</span>
-                  <Link className="button primary" href={`/${locale}/messages`} onClick={close}>
-                    {ar ? "فتح الرسائل كاملة" : "Open full messages"}
-                  </Link>
+                  <Link className="button primary" href={`/${locale}/messages`} onClick={close}>{ar ? "فتح الرسائل كاملة" : "Open full messages"}</Link>
                 </div>
               </div>
             </div>,
