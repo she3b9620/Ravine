@@ -1,9 +1,11 @@
-/* Search is a deliberate typography exception: use a Thmanyah family in the search UI so Arabic never falls back to Arial. */
+/* RAVINE search typography authority.
+   One mixed font family: Latin -> Satoshi, Arabic -> Thmanyah Sans.
+   The search is portalled to <body>, so this file intentionally has strong, local selectors. */
 html body .ravine-search-overlay,
 html body .ravine-search-overlay *,
 html body .ravine-search-dialog,
 html body .ravine-search-dialog * {
-  font-family: "Thmanyah Sans", sans-serif !important;
+  font-family: RavineSansMixed, sans-serif !important;
   font-synthesis: none !important;
 }
 
@@ -15,28 +17,23 @@ html body .ravine-search-select-trigger,
 html body .ravine-search-select-menu button,
 html body .ravine-search-actions .button,
 html body .ravine-advanced-search-toggle {
-  font-family: "Thmanyah Sans", sans-serif !important;
+  font-family: RavineSansMixed, sans-serif !important;
+  font-synthesis: none !important;
 }
 
+/* Keep Latin in Satoshi and Arabic in Thmanyah inside the same input, even on /en. */
 html body .ravine-search-dialog input,
 html body .ravine-search-dialog textarea {
   direction: auto;
   unicode-bidi: plaintext;
+  font-variant-numeric: normal;
   text-rendering: optimizeLegibility;
 }
 
-.ravine-search-overlay {
-  animation: ravine-search-overlay-in .2s ease both;
-}
-.ravine-search-overlay.is-closing {
-  animation: ravine-search-overlay-out .22s ease both;
-}
-.ravine-search-dialog {
-  animation: ravine-search-dialog-in .22s cubic-bezier(.22,1,.36,1) both;
-}
-.ravine-search-dialog.is-closing {
-  animation: ravine-search-dialog-out .2s cubic-bezier(.4,0,.8,.2) both;
-}
+.ravine-search-overlay { animation: ravine-search-overlay-in .2s ease both; }
+.ravine-search-overlay.is-closing { animation: ravine-search-overlay-out .22s ease both; }
+.ravine-search-dialog { animation: ravine-search-dialog-in .22s cubic-bezier(.22,1,.36,1) both; }
+.ravine-search-dialog.is-closing { animation: ravine-search-dialog-out .2s cubic-bezier(.4,0,.8,.2) both; }
 
 @keyframes ravine-search-overlay-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes ravine-search-overlay-out { from { opacity: 1; } to { opacity: 0; } }
@@ -47,5 +44,5 @@ html body .ravine-search-dialog textarea {
   .ravine-search-overlay,
   .ravine-search-overlay.is-closing,
   .ravine-search-dialog,
-  .ravine-search-dialog.is-closing{animation:none!important;transition:none!important}
+  .ravine-search-dialog.is-closing { animation:none!important;transition:none!important; }
 }
