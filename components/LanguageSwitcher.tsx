@@ -62,7 +62,7 @@ export default function LanguageSwitcher({ locale }: { locale: Locale }) {
         <div className="ravine-language-panel-title">{locale === "ar" ? "لغة RAVINE" : "RAVINE language"}</div>
         <Link
           href={buildHref(current.locale)}
-          className="ravine-language-option is-current"
+          className={`ravine-language-option ${current.locale === "ar" ? "is-arabic" : "is-english"} is-current`}
           aria-current="page"
           onClick={() => handleLanguageChange(current.locale)}
         >
@@ -77,7 +77,7 @@ export default function LanguageSwitcher({ locale }: { locale: Locale }) {
         </Link>
         <Link
           href={buildHref(alternate.locale)}
-          className="ravine-language-option"
+          className={`ravine-language-option ${alternate.locale === "ar" ? "is-arabic" : "is-english"}`}
           onClick={() => handleLanguageChange(alternate.locale)}
         >
           <span className="ravine-language-option-flags">
