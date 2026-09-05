@@ -20,7 +20,18 @@ export default function SidebarToggle({ locale }: { locale: "ar" | "en" }) {
     const sidebar = document.querySelector<HTMLElement>(".ravine-sidebar");
 
     document.documentElement.dataset.ravineSidebar = open ? "open" : "closed";
+    document.documentElement.dataset.ravineSidebarDirection = ar ? "rtl" : "ltr";
     window.localStorage.setItem(STORAGE_KEY, open ? "1" : "0");
+
+    // Keep the sidebar state deterministic even when another RTL stylesheet
+    // overrides transform ordering. CSS still owns the transition/visuals.
+    if (sidebar) {
+      sidebar.dataset.sidebarOpen = open ? "true" : "false";
+      sidebar.style.transform = open ? "translateX(0)" : ar ? "translateX(100%)" : "translateX(-100%)";
+      sidebar.style.opacity = open ? "1" : "0";
+      sidebar.style.visibility = open ? "visible" : "hidden";
+      sidebar.style.pointerEvents = open ? "auto" : "none";
+    }
 
     const onPointerDown = (event: PointerEvent) => {
       if (!open) return;
@@ -39,7 +50,7 @@ export default function SidebarToggle({ locale }: { locale: "ar" | "en" }) {
       document.removeEventListener("pointerdown", onPointerDown);
       document.removeEventListener("keydown", onKeyDown);
     };
-  }, [open]);
+  }, [open, ar]);
 
   return (
     <button
