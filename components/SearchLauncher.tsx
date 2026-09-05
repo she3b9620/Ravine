@@ -100,14 +100,13 @@ export default function SearchLauncher({ locale, categories }: Props) {
       <div
         className={`ravine-search-dialog${advanced ? " is-advanced" : ""}${closing ? " is-closing" : ""}`}
         role="dialog" aria-modal="true" aria-labelledby="ravine-search-title" dir={ar ? "rtl" : "ltr"}
-        onPointerDown={(event) => event.stopPropagation()}
       >
         <div className="ravine-search-dialog-head">
           <div><div className="eyebrow">{ar ? "رَافِين / البحث" : "RAVINE / SEARCH"}</div><h2 id="ravine-search-title">{ar ? "ابحث داخل عالم رَافِين." : "Search inside the RAVINE world."}</h2></div>
           <button type="button" className="ravine-search-close" onClick={close} aria-label={ar ? "إغلاق البحث" : "Close search"}><X size={18} /></button>
         </div>
         <form onSubmit={submit} className="ravine-search-form">
-          <label className="ravine-search-input"><Search size={18} aria-hidden="true" /><input value={query} onChange={(event) => setQuery(event.target.value)} autoFocus placeholder={ar ? "اسم عمل، فكرة، مبدع، موضوع..." : "A work, idea, creator, topic..."} /></label>
+          <label className="ravine-search-input"><Search size={18} aria-hidden="true" /><input value={query} onChange={(event) => setQuery(event.target.value)} autoFocus placeholder={ar ? "اسم عمل، فكرة، مبدع، موضوع..." : "A work, idea, creator, topic..." /></label>
           <div className="ravine-search-field-grid two">
             <SearchSelect label={ar ? "التصنيف" : "Category"} value={category} locale={locale} placeholder={ar ? "كل التصنيفات" : "All categories"} options={categories.map((item) => ({ value: String(item.id), ar: categoryLabel(item, locale), en: categoryLabel(item, locale) }))} onChange={setCategory} />
             <SearchSelect label={ar ? "النوع" : "Type"} value={type} locale={locale} placeholder={ar ? "كل الأنواع" : "All types"} options={types} onChange={setType} />
