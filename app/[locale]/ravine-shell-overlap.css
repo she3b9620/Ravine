@@ -1,0 +1,21 @@
+.ravine-sidebar{
+  top:0 !important;
+  inset-block-start:0 !important;
+  height:100dvh !important;
+  z-index:40 !important;
+  padding-top:102px !important;
+}
+
+.ravine-header{
+  position:sticky;
+  top:0;
+  z-index:50 !important;
+}
+
+html[data-theme="light"] .ravine-sidebar{
+  background:rgba(255,250,246,.97);
+}
+
+@media(max-width:980px){
+  .ravine-sidebar{display:none !important;}
+}
