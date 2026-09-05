@@ -1,0 +1,100 @@
+/* RAVINE FINAL FONT AUTHORITY
+   The locale controls copy/direction, never font selection.
+   Mixed font-face families select Satoshi for Latin glyphs and Thmanyah for Arabic glyphs. */
+
+html body .ravine-shell[lang="ar"],
+html body .ravine-shell[lang="en"],
+html body .ravine-shell[lang="ar"] *,
+html body .ravine-shell[lang="en"] * {
+  font-family:RavineSansMixed, Satoshi, "Thmanyah Sans", sans-serif !important;
+}
+
+html body .ravine-shell[lang="ar"] h1,
+html body .ravine-shell[lang="en"] h1,
+html body .ravine-shell[lang="ar"] h2,
+html body .ravine-shell[lang="en"] h2,
+html body .ravine-shell[lang="ar"] h3,
+html body .ravine-shell[lang="en"] h3,
+html body .ravine-shell[lang="ar"] h4,
+html body .ravine-shell[lang="en"] h4,
+html body .ravine-shell[lang="ar"] h5,
+html body .ravine-shell[lang="en"] h5,
+html body .ravine-shell[lang="ar"] h6,
+html body .ravine-shell[lang="en"] h6,
+html body .ravine-shell[lang="ar"] .creator-profile-title,
+html body .ravine-shell[lang="en"] .creator-profile-title {
+  font-family:RavineDisplayMixed, Satoshi, "Thmanyah Serif Display", serif !important;
+}
+
+html body .ravine-shell[lang="ar"] p,
+html body .ravine-shell[lang="en"] p,
+html body .ravine-shell[lang="ar"] li,
+html body .ravine-shell[lang="en"] li,
+html body .ravine-shell[lang="ar"] blockquote,
+html body .ravine-shell[lang="en"] blockquote,
+html body .ravine-shell[lang="ar"] .description,
+html body .ravine-shell[lang="en"] .description,
+html body .ravine-shell[lang="ar"] .bio,
+html body .ravine-shell[lang="en"] .bio,
+html body .ravine-shell[lang="ar"] .section-note,
+html body .ravine-shell[lang="en"] .section-note {
+  font-family:RavineTextMixed, Satoshi, "Thmanyah Serif Text", serif !important;
+}
+
+html body .ravine-search-dialog,
+html body .ravine-search-dialog * {
+  font-family:RavineSansMixed, Satoshi, "Thmanyah Sans", sans-serif !important;
+}
+html body .ravine-search-dialog h1,
+html body .ravine-search-dialog h2,
+html body .ravine-search-dialog h3,
+html body .ravine-search-dialog h4,
+html body .ravine-search-dialog h5,
+html body .ravine-search-dialog h6 {
+  font-family:RavineDisplayMixed, Satoshi, "Thmanyah Serif Display", serif !important;
+}
+html body .ravine-search-dialog p,
+html body .ravine-search-dialog li {
+  font-family:RavineTextMixed, Satoshi, "Thmanyah Serif Text", serif !important;
+}
+
+html body .ravine-message-center,
+html body .ravine-message-center * {
+  font-family:RavineSansMixed, Satoshi, "Thmanyah Sans", sans-serif !important;
+}
+html body .ravine-message-center h1,
+html body .ravine-message-center h2,
+html body .ravine-message-center h3 {
+  font-family:RavineDisplayMixed, Satoshi, "Thmanyah Serif Display", serif !important;
+}
+html body .ravine-message-center p,
+html body .ravine-message-center .direct-error,
+html body .ravine-message-center .direct-empty,
+html body .ravine-message-center .direct-thread-status {
+  font-family:RavineTextMixed, Satoshi, "Thmanyah Serif Text", serif !important;
+}
+
+html body .ravine-auth-overlay,
+html body .ravine-auth-overlay * {
+  font-family:RavineSansMixed, Satoshi, "Thmanyah Sans", sans-serif !important;
+}
+html body .ravine-auth-overlay h1,
+html body .ravine-auth-overlay h2,
+html body .ravine-auth-overlay h3,
+html body .ravine-auth-overlay h4,
+html body .ravine-auth-overlay h5,
+html body .ravine-auth-overlay h6 {
+  font-family:RavineDisplayMixed, Satoshi, "Thmanyah Serif Display", serif !important;
+}
+html body .ravine-auth-overlay p,
+html body .ravine-auth-overlay .intro,
+html body .ravine-auth-overlay .auth-message {
+  font-family:RavineTextMixed, Satoshi, "Thmanyah Serif Text", serif !important;
+}
+
+/* Search trigger and utility chrome also follow the same mixed family. */
+html body .ravine-shell .ravine-search-trigger,
+html body .ravine-shell .ravine-header-actions,
+html body .ravine-shell .ravine-header-actions * {
+  font-family:RavineSansMixed, Satoshi, "Thmanyah Sans", sans-serif !important;
+}
