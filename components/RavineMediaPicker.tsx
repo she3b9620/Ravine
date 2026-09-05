@@ -27,6 +27,7 @@ const COPY = {
     ready: "الصورة جاهزة للحفظ",
     zoomIn: "تكبير",
     zoomOut: "تصغير",
+    cropError: "تعذر اعتماد القص لهذه الصورة. جرّب تغيير الصورة مرة أخرى.",
   },
   en: {
     choose: "Choose image",
@@ -41,6 +42,7 @@ const COPY = {
     ready: "Image ready to save",
     zoomIn: "Zoom in",
     zoomOut: "Zoom out",
+    cropError: "This image could not be cropped here. Try selecting the image again.",
   },
 };
 
@@ -59,6 +61,7 @@ export default function RavineMediaPicker({ aspect, locale, value, existingUrl, 
   const [dragging, setDragging] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [applied, setApplied] = useState(Boolean(value));
+  const [cropError, setCropError] = useState(false);
   const dragRef = useRef({ x: 0, y: 0, originX: 0, originY: 0 });
 
   useEffect(() => {
@@ -66,6 +69,7 @@ export default function RavineMediaPicker({ aspect, locale, value, existingUrl, 
     setSourceUrl(existingUrl || null);
     setApplied(false);
     setDirty(false);
+    setCropError(false);
   }, [existingUrl, value]);
 
   useEffect(() => {
@@ -79,6 +83,7 @@ export default function RavineMediaPicker({ aspect, locale, value, existingUrl, 
     setOffset({ x: 0, y: 0 });
     setDirty(true);
     setApplied(false);
+    setCropError(false);
   }
 
   function onFile(event: ChangeEvent<HTMLInputElement>) {
@@ -91,6 +96,7 @@ export default function RavineMediaPicker({ aspect, locale, value, existingUrl, 
     setOffset({ x: 0, y: 0 });
     setDirty(true);
     setApplied(false);
+    setCropError(false);
     event.target.value = "";
   }
 
@@ -126,13 +132,14 @@ export default function RavineMediaPicker({ aspect, locale, value, existingUrl, 
   }
 
   function moveDrag(event: ReactPointerEvent<HTMLDivElement>) {
-    if (!dragging) return;
+    if (!dragging || applied) return;
     setOffset(clampPosition(
       dragRef.current.originX + event.clientX - dragRef.current.x,
       dragRef.current.originY + event.clientY - dragRef.current.y,
     ));
     setDirty(true);
     setApplied(false);
+    setCropError(false);
   }
 
   function endDrag(event: ReactPointerEvent<HTMLDivElement>) {
@@ -141,48 +148,66 @@ export default function RavineMediaPicker({ aspect, locale, value, existingUrl, 
   }
 
   function setZoomSafe(nextZoom: number) {
+    if (applied) return;
     const next = Math.max(1, Math.min(2.8, nextZoom));
     setZoom(next);
     requestAnimationFrame(() => setOffset((current) => clampPosition(current.x, current.y)));
     setDirty(true);
     setApplied(false);
+    setCropError(false);
   }
 
   async function applyCrop() {
-    if (!sourceUrl || !naturalSize.width || !naturalSize.height) return;
+    if (applied || !sourceUrl || !naturalSize.width || !naturalSize.height) return;
     const metric = metrics();
     if (!metric) return;
     const image = imageRef.current;
     if (!image) return;
 
-    const cropSourceWidth = metric.width / metric.scale;
-    const cropSourceHeight = metric.height / metric.scale;
-    const sourceX = (naturalSize.width - cropSourceWidth) / 2 - offset.x / metric.scale;
-    const sourceY = (naturalSize.height - cropSourceHeight) / 2 - offset.y / metric.scale;
-    const canvas = document.createElement("canvas");
-    canvas.width = output[0];
-    canvas.height = output[1];
-    const context = canvas.getContext("2d");
-    if (!context) return;
-    context.imageSmoothingEnabled = true;
-    context.imageSmoothingQuality = "high";
-    context.drawImage(
-      image,
-      Math.max(0, Math.min(naturalSize.width - cropSourceWidth, sourceX)),
-      Math.max(0, Math.min(naturalSize.height - cropSourceHeight, sourceY)),
-      cropSourceWidth,
-      cropSourceHeight,
-      0,
-      0,
-      output[0],
-      output[1],
-    );
+    try {
+      if (!image.complete || image.naturalWidth === 0) throw new Error("Image is not ready");
 
-    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/webp", 0.9));
-    if (!blob) return;
-    onChange(new File([blob], aspect === "square" ? "ravine-avatar.webp" : "ravine-cover.webp", { type: "image/webp" }));
-    setDirty(false);
-    setApplied(true);
+      const canvas = document.createElement("canvas");
+      canvas.width = output[0];
+      canvas.height = output[1];
+      const context = canvas.getContext("2d");
+      if (!context) throw new Error("Canvas context unavailable");
+      context.imageSmoothingEnabled = true;
+      context.imageSmoothingQuality = "high";
+
+      const cropSourceWidth = metric.width / metric.scale;
+      const cropSourceHeight = metric.height / metric.scale;
+      const sourceX = (naturalSize.width - cropSourceWidth) / 2 - offset.x / metric.scale;
+      const sourceY = (naturalSize.height - cropSourceHeight) / 2 - offset.y / metric.scale;
+      context.drawImage(
+        image,
+        Math.max(0, Math.min(naturalSize.width - cropSourceWidth, sourceX)),
+        Math.max(0, Math.min(naturalSize.height - cropSourceHeight, sourceY)),
+        cropSourceWidth,
+        cropSourceHeight,
+        0,
+        0,
+        output[0],
+        output[1],
+      );
+
+      const blob = await new Promise<Blob | null>((resolve, reject) => {
+        try {
+          canvas.toBlob(resolve, "image/webp", 0.9);
+        } catch (error) {
+          reject(error);
+        }
+      });
+      if (!blob) throw new Error("Canvas export failed");
+
+      onChange(new File([blob], aspect === "square" ? "ravine-avatar.webp" : "ravine-cover.webp", { type: "image/webp" }));
+      setDirty(false);
+      setApplied(true);
+      setCropError(false);
+    } catch {
+      setApplied(false);
+      setCropError(true);
+    }
   }
 
   const previewStyle = sourceUrl && naturalSize.width
@@ -197,7 +222,7 @@ export default function RavineMediaPicker({ aspect, locale, value, existingUrl, 
     <div className={`ravine-media-picker ravine-media-picker--${aspect}`} dir={ar ? "rtl" : "ltr"}>
       <input ref={inputRef} className="ravine-media-picker-input" type="file" accept="image/jpeg,image/png,image/webp" onChange={onFile} />
       <div className="ravine-media-picker-head">
-        <div><span>{aspect === "square" ? copy.avatar : copy.cover}</span><strong>{dirty ? copy.adjust : applied ? copy.ready : (sourceUrl ? copy.change : copy.choose)}</strong></div>
+        <div><span>{aspect === "square" ? copy.avatar : copy.cover}</span><strong>{cropError ? copy.cropError : dirty ? copy.adjust : applied ? copy.ready : (sourceUrl ? copy.change : copy.choose)}</strong></div>
         <span className="ravine-media-ratio">{aspect === "square" ? "1:1" : "16:9"}</span>
       </div>
 
@@ -206,7 +231,7 @@ export default function RavineMediaPicker({ aspect, locale, value, existingUrl, 
       ) : (
         <>
           <div ref={viewportRef} className={`ravine-media-crop${applied ? " is-applied" : ""}`} onPointerDown={startDrag} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={endDrag} style={{ aspectRatio: `${ratio}` }}>
-            <img ref={imageRef} src={sourceUrl} alt="" onLoad={onLoad} className="ravine-media-crop-image" style={previewStyle} draggable={false} />
+            <img ref={imageRef} crossOrigin="anonymous" src={sourceUrl} alt="" onLoad={onLoad} className="ravine-media-crop-image" style={previewStyle} draggable={false} />
             <div className="ravine-media-crop-frame" aria-hidden="true" />
             {applied ? <div className="ravine-media-crop-applied"><Check size={16} /><span>{copy.applied}</span></div> : <div className="ravine-media-crop-hint">{copy.drag}</div>}
           </div>
@@ -216,7 +241,7 @@ export default function RavineMediaPicker({ aspect, locale, value, existingUrl, 
             <button type="button" className="ravine-media-icon-button" onClick={() => setZoomSafe(zoom + 0.1)} disabled={zoom >= 2.8 || applied} aria-label={copy.zoomIn} title={copy.zoomIn}><Plus size={14} /></button>
             <button type="button" className="ravine-media-icon-button" onClick={resetPosition} disabled={applied} aria-label={copy.reset} title={copy.reset}><RotateCcw size={15} /></button>
             <button type="button" className="ravine-media-change" onClick={() => inputRef.current?.click()}><Maximize2 size={14}/>{copy.change}</button>
-            {dirty ? <button type="button" className="ravine-media-apply" onClick={() => void applyCrop()}><Check size={14}/>{copy.apply}</button> : applied ? <button type="button" className="ravine-media-applied" disabled><Check size={14}/>{copy.applied}</button> : null}
+            {dirty && !applied ? <button type="button" className="ravine-media-apply" onClick={() => void applyCrop()}><Check size={14}/>{copy.apply}</button> : applied ? <button type="button" className="ravine-media-applied" disabled><Check size={14}/>{copy.applied}</button> : null}
           </div>
         </>
       )}
