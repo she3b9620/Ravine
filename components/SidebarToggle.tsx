@@ -1,12 +1,13 @@
 "use client";
 
 import { Menu, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const STORAGE_KEY = "ravine-sidebar-open";
 
 export default function SidebarToggle({ locale }: { locale: "ar" | "en" }) {
   const ar = locale === "ar";
+  const rootRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -15,15 +16,34 @@ export default function SidebarToggle({ locale }: { locale: "ar" | "en" }) {
   }, []);
 
   useEffect(() => {
+    const root = rootRef.current;
+    const sidebar = document.querySelector<HTMLElement>(".ravine-sidebar");
+
     document.documentElement.dataset.ravineSidebar = open ? "open" : "closed";
     window.localStorage.setItem(STORAGE_KEY, open ? "1" : "0");
+
+    const onPointerDown = (event: PointerEvent) => {
+      if (!open) return;
+      const target = event.target as Node | null;
+      if (root?.contains(target) || sidebar?.contains(target)) return;
+      setOpen(false);
+    };
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (open && event.key === "Escape") setOpen(false);
+    };
+
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
     return () => {
-      delete document.documentElement.dataset.ravineSidebar;
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
     };
   }, [open]);
 
   return (
     <button
+      ref={rootRef}
       type="button"
       className="ravine-sidebar-toggle"
       aria-label={open ? (ar ? "إخفاء القائمة الجانبية" : "Hide sidebar") : (ar ? "إظهار القائمة الجانبية" : "Show sidebar")}
@@ -31,7 +51,7 @@ export default function SidebarToggle({ locale }: { locale: "ar" | "en" }) {
       title={open ? (ar ? "إخفاء القائمة" : "Hide sidebar") : (ar ? "إظهار القائمة" : "Show sidebar")}
       onClick={() => setOpen((value) => !value)}
     >
-      {open ? <X size={18} strokeWidth={1.8} /> : <Menu size={18} strokeWidth={1.8} />}
+      {open ? <X aria-hidden="true" size={19} strokeWidth={2} /> : <Menu aria-hidden="true" size={19} strokeWidth={2} />}
     </button>
   );
 }
