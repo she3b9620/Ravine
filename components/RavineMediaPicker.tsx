@@ -55,8 +55,8 @@ export default function RavineMediaPicker({ aspect, locale, value, existingUrl, 
   const dragRef = useRef({ x: 0, y: 0, originX: 0, originY: 0 });
 
   useEffect(() => {
-    if (!value && !existingUrl) setSourceUrl(null);
-    else if (!value && existingUrl) setSourceUrl(existingUrl);
+    if (value) return;
+    setSourceUrl(existingUrl || null);
   }, [existingUrl, value]);
 
   useEffect(() => {
@@ -68,7 +68,7 @@ export default function RavineMediaPicker({ aspect, locale, value, existingUrl, 
   function resetPosition() {
     setZoom(1);
     setOffset({ x: 0, y: 0 });
-    setDirty(false);
+    setDirty(true);
   }
 
   function onFile(event: ChangeEvent<HTMLInputElement>) {
@@ -80,7 +80,6 @@ export default function RavineMediaPicker({ aspect, locale, value, existingUrl, 
     setZoom(1);
     setOffset({ x: 0, y: 0 });
     setDirty(true);
-    onChange(null);
     event.target.value = "";
   }
 
@@ -97,13 +96,7 @@ export default function RavineMediaPicker({ aspect, locale, value, existingUrl, 
     const height = width / ratio;
     const baseScale = Math.max(width / naturalSize.width, height / naturalSize.height);
     const scale = baseScale * zoom;
-    return {
-      width,
-      height,
-      scale,
-      imageWidth: naturalSize.width * scale,
-      imageHeight: naturalSize.height * scale,
-    };
+    return { width, height, scale, imageWidth: naturalSize.width * scale, imageHeight: naturalSize.height * scale };
   }
 
   function clampPosition(x: number, y: number) {
@@ -111,41 +104,32 @@ export default function RavineMediaPicker({ aspect, locale, value, existingUrl, 
     if (!metric) return { x, y };
     const limitX = Math.max(0, (metric.imageWidth - metric.width) / 2);
     const limitY = Math.max(0, (metric.imageHeight - metric.height) / 2);
-    return {
-      x: Math.max(-limitX, Math.min(limitX, x)),
-      y: Math.max(-limitY, Math.min(limitY, y)),
-    };
+    return { x: Math.max(-limitX, Math.min(limitX, x)), y: Math.max(-limitY, Math.min(limitY, y)) };
   }
 
   function startDrag(event: ReactPointerEvent<HTMLDivElement>) {
     if (!sourceUrl) return;
-    const point = { x: event.clientX, y: event.clientY };
-    dragRef.current = { x: point.x, y: point.y, originX: offset.x, originY: offset.y };
+    dragRef.current = { x: event.clientX, y: event.clientY, originX: offset.x, originY: offset.y };
     setDragging(true);
     event.currentTarget.setPointerCapture(event.pointerId);
   }
 
   function moveDrag(event: ReactPointerEvent<HTMLDivElement>) {
     if (!dragging) return;
-    const next = clampPosition(
+    setOffset(clampPosition(
       dragRef.current.originX + event.clientX - dragRef.current.x,
       dragRef.current.originY + event.clientY - dragRef.current.y,
-    );
-    setOffset(next);
+    ));
+    setDirty(true);
   }
 
   function endDrag(event: ReactPointerEvent<HTMLDivElement>) {
     setDragging(false);
-    event.currentTarget.releasePointerCapture?.(event.pointerId);
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
   }
 
   function setZoomSafe(nextZoom: number) {
-    const metric = metrics();
     const next = Math.max(1, Math.min(2.8, nextZoom));
-    if (!metric) {
-      setZoom(next);
-      return;
-    }
     setZoom(next);
     requestAnimationFrame(() => setOffset((current) => clampPosition(current.x, current.y)));
     setDirty(true);
@@ -158,16 +142,13 @@ export default function RavineMediaPicker({ aspect, locale, value, existingUrl, 
     const image = imageRef.current;
     if (!image) return;
 
-    const outputWidth = output[0];
-    const outputHeight = output[1];
     const cropSourceWidth = metric.width / metric.scale;
     const cropSourceHeight = metric.height / metric.scale;
     const sourceX = (naturalSize.width - cropSourceWidth) / 2 - offset.x / metric.scale;
     const sourceY = (naturalSize.height - cropSourceHeight) / 2 - offset.y / metric.scale;
-
     const canvas = document.createElement("canvas");
-    canvas.width = outputWidth;
-    canvas.height = outputHeight;
+    canvas.width = output[0];
+    canvas.height = output[1];
     const context = canvas.getContext("2d");
     if (!context) return;
     context.imageSmoothingEnabled = true;
@@ -180,14 +161,13 @@ export default function RavineMediaPicker({ aspect, locale, value, existingUrl, 
       cropSourceHeight,
       0,
       0,
-      outputWidth,
-      outputHeight,
+      output[0],
+      output[1],
     );
 
     const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/webp", 0.9));
     if (!blob) return;
-    const file = new File([blob], aspect === "square" ? "ravine-avatar.webp" : "ravine-cover.webp", { type: "image/webp" });
-    onChange(file);
+    onChange(new File([blob], aspect === "square" ? "ravine-avatar.webp" : "ravine-cover.webp", { type: "image/webp" }));
     setDirty(false);
   }
 
@@ -195,12 +175,7 @@ export default function RavineMediaPicker({ aspect, locale, value, existingUrl, 
     ? (() => {
         const metric = metrics();
         if (!metric) return undefined;
-        return {
-          width: metric.imageWidth,
-          height: metric.imageHeight,
-          left: `calc(50% - ${metric.imageWidth / 2}px + ${offset.x}px)`,
-          top: `calc(50% - ${metric.imageHeight / 2}px + ${offset.y}px)`,
-        };
+        return { width: metric.imageWidth, height: metric.imageHeight, left: `calc(50% - ${metric.imageWidth / 2}px + ${offset.x}px)`, top: `calc(50% - ${metric.imageHeight / 2}px + ${offset.y}px)` };
       })()
     : undefined;
 
@@ -208,32 +183,17 @@ export default function RavineMediaPicker({ aspect, locale, value, existingUrl, 
     <div className={`ravine-media-picker ravine-media-picker--${aspect}`} dir={ar ? "rtl" : "ltr"}>
       <input ref={inputRef} className="ravine-media-picker-input" type="file" accept="image/jpeg,image/png,image/webp" onChange={onFile} />
       <div className="ravine-media-picker-head">
-        <div>
-          <span>{aspect === "square" ? copy.avatar : copy.cover}</span>
-          <strong>{dirty ? copy.adjust : value ? copy.ready : (sourceUrl ? copy.change : copy.choose)}</strong>
-        </div>
+        <div><span>{aspect === "square" ? copy.avatar : copy.cover}</span><strong>{dirty ? copy.adjust : value ? copy.ready : (sourceUrl ? copy.change : copy.choose)}</strong></div>
         <span className="ravine-media-ratio">{aspect === "square" ? "1:1" : "16:9"}</span>
       </div>
 
       {!sourceUrl ? (
-        <button type="button" className="ravine-media-empty" onClick={() => inputRef.current?.click()}>
-          <span className="ravine-media-empty-icon"><ImagePlus size={20} /></span>
-          <strong>{copy.choose}</strong>
-          <small>{copy.drag}</small>
-        </button>
+        <button type="button" className="ravine-media-empty" onClick={() => inputRef.current?.click()}><span className="ravine-media-empty-icon"><ImagePlus size={20} /></span><strong>{copy.choose}</strong><small>{copy.drag}</small></button>
       ) : (
         <>
-          <div
-            ref={viewportRef}
-            className="ravine-media-crop"
-            onPointerDown={startDrag}
-            onPointerMove={moveDrag}
-            onPointerUp={endDrag}
-            onPointerCancel={endDrag}
-            style={{ aspectRatio: `${ratio}` }}
-          >
+          <div ref={viewportRef} className="ravine-media-crop" onPointerDown={startDrag} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={endDrag} style={{ aspectRatio: `${ratio}` }}>
             <img ref={imageRef} src={sourceUrl} alt="" onLoad={onLoad} className="ravine-media-crop-image" style={previewStyle} draggable={false} />
-            <div className="ravine-media-crop-frame" aria-hidden="true"><span /></div>
+            <div className="ravine-media-crop-frame" aria-hidden="true" />
             <div className="ravine-media-crop-hint">{copy.drag}</div>
           </div>
           <div className="ravine-media-controls">
