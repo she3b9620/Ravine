@@ -23,6 +23,7 @@ import "./ravine-public-profile.css";
 import "./guest-cinematic-backdrop.css";
 import "./ravine-light-identity-fix.css";
 import "./ravine-light-motion-fix.css";
+import "./ravine-responsive-brand.css";
 import "../community-system.css";
 
 const locales = ["ar", "en"] as const;
