@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, LogOut, RotateCcw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import styles from "@/app/[locale]/account/account.module.css";
@@ -36,6 +35,7 @@ export default function AccountSettings({ profile, locale }: Props) {
   const [website, setWebsite] = useState(profile?.website_url || "");
   const [avatar, setAvatar] = useState<File | null>(null);
   const [cover, setCover] = useState<File | null>(null);
+  const [mediaRevision, setMediaRevision] = useState(0);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -51,6 +51,21 @@ export default function AccountSettings({ profile, locale }: Props) {
     if (uploadError) throw uploadError;
     const { data } = supabase.storage.from(bucket).getPublicUrl(path);
     return { url: data.publicUrl, path };
+  }
+
+  function cancelChanges() {
+    if (busy) return;
+    setDisplayName(profile?.display_name || "");
+    setUsername(profile?.username || "");
+    setBio(profile?.bio || "");
+    setCountry(profile?.country || "");
+    setLanguage(profile?.language === "en" ? "en" : "ar");
+    setWebsite(profile?.website_url || "");
+    setAvatar(null);
+    setCover(null);
+    setMessage("");
+    setError("");
+    setMediaRevision((value) => value + 1);
   }
 
   async function save() {
@@ -98,6 +113,7 @@ export default function AccountSettings({ profile, locale }: Props) {
 
       setAvatar(null);
       setCover(null);
+      setMediaRevision((value) => value + 1);
       setMessage(ar ? "تم حفظ بيانات الحساب." : "Account details saved.");
       router.refresh();
     } catch (saveError) {
@@ -109,9 +125,16 @@ export default function AccountSettings({ profile, locale }: Props) {
   }
 
   async function signOut() {
+    if (busy) return;
     setBusy(true);
+    setError("");
     const supabase = createClient();
-    await supabase.auth.signOut();
+    const { error: signOutError } = await supabase.auth.signOut();
+    if (signOutError) {
+      setError(ar ? "تعذر تسجيل الخروج." : "Could not sign out.");
+      setBusy(false);
+      return;
+    }
     router.replace(`/${locale}`);
     router.refresh();
   }
@@ -124,7 +147,7 @@ export default function AccountSettings({ profile, locale }: Props) {
           <h2 className={styles.settingsTitle}>{ar ? "إدارة هويتك داخل RAVINE." : "Shape your RAVINE identity."}</h2>
           <p className={styles.settingsNote}>{ar ? "المعلومات التي تظهر لك وللمجتمع، منظمة في مساحة واحدة واضحة." : "Your public identity and account details, organized in one clear workspace."}</p>
         </div>
-        <Link className={styles.actionLink} href={`/${locale}/dashboard`}><span>{ar ? "لوحة المستخدم" : "User dashboard"}</span><ArrowUpRight size={14} /></Link>
+        <a className={styles.actionLink} href={`/${locale}/dashboard`}><span>{ar ? "لوحة المستخدم" : "User dashboard"}</span><ArrowUpRight size={14} /></a>
       </div>
 
       <section className={styles.sectionBlock}>
@@ -157,19 +180,30 @@ export default function AccountSettings({ profile, locale }: Props) {
       <section className={styles.sectionBlock}>
         <h3 className={styles.sectionLabel}>{ar ? "الصور" : "Media"}</h3>
         <div className={styles.mediaGrid}>
-          <RavineMediaPicker aspect="square" locale={locale} existingUrl={profile?.avatar_url} value={avatar} onChange={setAvatar} />
-          <RavineMediaPicker aspect="cover" locale={locale} existingUrl={profile?.cover_url} value={cover} onChange={setCover} />
+          <RavineMediaPicker key={`avatar-${mediaRevision}`} aspect="square" locale={locale} existingUrl={profile?.avatar_url} value={avatar} onChange={setAvatar} />
+          <RavineMediaPicker key={`cover-${mediaRevision}`} aspect="cover" locale={locale} existingUrl={profile?.cover_url} value={cover} onChange={setCover} />
         </div>
       </section>
 
-      {error ? <div className={styles.feedback}><strong>{ar ? "تعذر الحفظ" : "Could not save"}</strong><span>{error}</span></div> : null}
+      {error ? <div className={styles.feedback}><strong>{ar ? "تعذر التنفيذ" : "Action failed"}</strong><span>{error}</span></div> : null}
       {message ? <div className={styles.feedback}><strong>{ar ? "تم الحفظ" : "Saved"}</strong><span>{message}</span></div> : null}
 
       <div className={styles.actions}>
-        <Link className={styles.actionLink} href={`/${locale}/dashboard`}>{ar ? "العودة للوحة المستخدم" : "Back to dashboard"}<ArrowUpRight size={14} /></Link>
+        <a className={styles.actionLink} href={`/${locale}/dashboard`}>{ar ? "العودة للوحة المستخدم" : "Back to dashboard"}<ArrowUpRight size={14} /></a>
         <div className={styles.actionsRight}>
-          <button className={`${styles.button} ${styles.danger}`} type="button" onClick={signOut} disabled={busy}>{ar ? "تسجيل الخروج" : "Sign out"}</button>
-          <button className={`${styles.button} ${styles.buttonPrimary}`} type="button" onClick={save} disabled={busy}>{busy ? (ar ? "جارٍ الحفظ…" : "Saving…") : (ar ? "حفظ التغييرات" : "Save changes")}</button>
+          <div className={styles.actionsRight}>
+            <button className={`${styles.button} ${styles.secondaryButton}`} type="button" onClick={cancelChanges} disabled={busy} title={ar ? "إلغاء كل التعديلات والعودة لآخر نسخة محفوظة" : "Discard all changes and return to the last saved version"}>
+              <RotateCcw size={14} />
+              <span>{ar ? "إلغاء التعديلات" : "Discard changes"}</span>
+            </button>
+            <button className={`${styles.button} ${styles.danger}`} type="button" onClick={signOut} disabled={busy} title={ar ? "إنهاء جلسة تسجيل الدخول والخروج من RAVINE" : "End your signed-in session and leave RAVINE"}>
+              <LogOut size={14} />
+              <span>{ar ? "تسجيل الخروج" : "Sign out"}</span>
+            </button>
+            <button className={`${styles.button} ${styles.buttonPrimary}`} type="button" onClick={save} disabled={busy}>
+              <span>{busy ? (ar ? "جارٍ التنفيذ…" : "Working…") : (ar ? "حفظ التغييرات" : "Save changes")}</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
