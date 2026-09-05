@@ -1,0 +1,16 @@
+/* Final search typography lock: Arabic glyphs must use Thmanyah, including on /en. */
+html body .ravine-search-input input,
+html body .ravine-search-input input::placeholder,
+html body .ravine-search-select-trigger,
+html body .ravine-search-select-menu,
+html body .ravine-search-select-menu button,
+html body .ravine-advanced-search-toggle,
+html body .ravine-search-actions .button {
+  font-family: "Thmanyah Sans", Satoshi, sans-serif !important;
+  font-synthesis: none !important;
+}
+
+html body .ravine-shell[lang="en"] .ravine-language {
+  font-family: "Thmanyah Sans", Satoshi, sans-serif !important;
+  font-synthesis: none !important;
+}
