@@ -47,6 +47,27 @@ function qualityLabel(value: string | null, locale: Locale) {
   return value ? labels[value.toLowerCase()] || value : "";
 }
 
+function isYouTubeUrl(value: string | null) {
+  if (!value) return false;
+  try {
+    const host = new URL(value).hostname.toLowerCase().replace(/^www\./, "");
+    return host === "youtube.com" || host === "youtu.be" || host.endsWith(".youtube.com");
+  } catch {
+    return false;
+  }
+}
+
+function previewSource(work: HomeWork) {
+  if (!work.video_url || isYouTubeUrl(work.video_url)) return null;
+  try {
+    const url = new URL(work.video_url);
+    if (url.pathname.includes("/storage/v1/object/public/videos/")) return `/api/media/video/${work.id}`;
+  } catch {
+    return null;
+  }
+  return work.video_url;
+}
+
 export default function HomeWorkCard({ work, locale, compact = false }: { work: HomeWork; locale: Locale; compact?: boolean }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const hoverTimerRef = useRef<number | null>(null);
@@ -57,6 +78,7 @@ export default function HomeWorkCard({ work, locale, compact = false }: { work: 
 
   const starts = [0, 9, 18, 30, 45];
   const segmentIndexRef = useRef(0);
+  const previewSrc = previewSource(work);
 
   const clearTimers = useCallback(() => {
     if (hoverTimerRef.current) window.clearTimeout(hoverTimerRef.current);
@@ -100,7 +122,7 @@ export default function HomeWorkCard({ work, locale, compact = false }: { work: 
   }, [work.duration]);
 
   const startPreview = useCallback(() => {
-    if (!work.video_url || !videoRef.current) return;
+    if (!previewSrc || !videoRef.current) return;
     clearTimers();
     setPreviewing(true);
     const video = videoRef.current;
@@ -111,10 +133,10 @@ export default function HomeWorkCard({ work, locale, compact = false }: { work: 
     if (video.readyState >= 1) begin();
     else video.addEventListener("loadedmetadata", begin, { once: true });
     video.load();
-  }, [clearTimers, playSegment, work.video_url]);
+  }, [clearTimers, playSegment, previewSrc]);
 
   const onEnter = () => {
-    if (!work.video_url) return;
+    if (!previewSrc) return;
     clearTimers();
     hoverTimerRef.current = window.setTimeout(startPreview, 1000);
   };
@@ -139,8 +161,8 @@ export default function HomeWorkCard({ work, locale, compact = false }: { work: 
     >
       <div className={`home-work-thumb${previewing ? " is-previewing" : ""}`}>
         <img className="home-work-thumb-image" src={work.thumbnail_url || "/RAVINE.png"} alt="" loading="lazy" />
-        {work.video_url ? (
-          <video ref={videoRef} className={`home-work-preview${previewing ? " visible" : ""}${fading ? " fading" : ""}`} muted playsInline preload="none" poster={work.thumbnail_url || undefined} aria-hidden="true" />
+        {previewSrc ? (
+          <video ref={videoRef} src={previewSrc} className={`home-work-preview${previewing ? " visible" : ""}${fading ? " fading" : ""}`} muted playsInline preload="none" poster={work.thumbnail_url || undefined} aria-hidden="true" />
         ) : null}
         <span className="home-work-preview-wash" aria-hidden="true" />
         <span className="home-work-duration">{formatDuration(work.duration)}</span>
