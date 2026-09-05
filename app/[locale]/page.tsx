@@ -15,6 +15,7 @@ const copy = {
 
 type Locale = "ar" | "en";
 type Creator = { id: number; name: string | null; username: string | null; avatar_url: string | null; specialty: string | null; followers: number | null };
+type ViewerProfile = { display_name: string | null; username: string | null; avatar_url: string | null };
 export const dynamic = "force-dynamic";
 
 function getCreator(creator: HomeWork["creators"]) { return Array.isArray(creator) ? creator[0] ?? null : creator; }
@@ -29,34 +30,36 @@ function Rail({ title, eyebrow, action, href, works, locale, compact = false }: 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: rawLocale } = await params; const locale: Locale = rawLocale === "en" ? "en" : "ar"; const t = copy[locale];
   const supabase = await createClient(); const { data: authData } = await supabase.auth.getUser(); const user = authData.user;
-  let works: HomeWork[] = []; let creators: Creator[] = []; let followingWorks: HomeWork[] = []; let displayName = "";
+  let works: HomeWork[] = []; let creators: Creator[] = []; let followingWorks: HomeWork[] = []; let viewer: ViewerProfile | null = null;
   try {
     const [profileResult, worksResult, creatorsResult] = await Promise.all([
-      user ? supabase.from("profiles").select("display_name,username").eq("id", user.id).maybeSingle() : Promise.resolve({ data: null }),
+      user ? supabase.from("profiles").select("display_name,username,avatar_url").eq("id", user.id).maybeSingle() : Promise.resolve({ data: null }),
       supabase.from("videos").select("id,title,description,thumbnail_url,video_url,duration,views,likes,content_type,quality,creator_id,creators(name,username)").eq("published", true).order("created_at", { ascending: false }).limit(60),
       supabase.from("creators").select("id,name,username,avatar_url,specialty,followers").order("followers", { ascending: false, nullsFirst: false }).limit(10)
     ]);
-    works = (worksResult.data ?? []) as HomeWork[]; creators = (creatorsResult.data ?? []) as Creator[]; displayName = profileResult.data?.display_name || profileResult.data?.username || user?.email?.split("@")[0] || "";
+    viewer = (profileResult.data ?? null) as ViewerProfile | null;
+    works = (worksResult.data ?? []) as HomeWork[]; creators = (creatorsResult.data ?? []) as Creator[];
     if (user) {
       const followResult = await supabase.from("follows").select("creator_id").eq("follower_id", user.id).limit(30);
       const ids = (followResult.data ?? []).map((item) => item.creator_id).filter((id): id is number => typeof id === "number");
       if (ids.length) { const followingResult = await supabase.from("videos").select("id,title,description,thumbnail_url,video_url,duration,views,likes,content_type,quality,creator_id,creators(name,username)").eq("published", true).in("creator_id", ids).order("created_at", { ascending: false }).limit(18); if (!followingResult.error) followingWorks = (followingResult.data ?? []) as HomeWork[]; }
     }
-  } catch { works = []; creators = []; followingWorks = []; }
+  } catch { works = []; creators = []; followingWorks = []; viewer = null; }
   const publicWorks = works.filter((work) => work.content_type !== "live" && work.content_type !== "podcast");
   const liveWorks = works.filter((work) => work.content_type === "live").slice(0, 4); const podcastWorks = works.filter((work) => work.content_type === "podcast").slice(0, 4); const shortsWorks = works.filter((work) => work.content_type === "short").slice(0, 10);
   const latestWorks = publicWorks.slice(0, 12); const trendingWorks = [...publicWorks].sort((a, b) => Number(b.views || 0) - Number(a.views || 0)).slice(0, 12); const hiddenGemWorks = [...publicWorks].sort((a, b) => Number(a.views || 0) - Number(b.views || 0)).slice(0, 12);
+  const displayName = viewer?.display_name || viewer?.username || user?.email?.split("@")[0] || "";
 
   if (user) return <div className="home-viewer">
-    <section className="hero home-viewer-hero"><div className="hero-inner home-viewer-hero-inner"><div className="home-state-kicker">{t.viewerEyebrow}</div><h1>{displayName ? (locale === "ar" ? `أهلًا ${displayName}.` : `Welcome, ${displayName}.`) : t.viewerTitle}</h1><p>{t.viewerBody}</p></div></section>
-    <div className="home-viewer-discovery-bar">
-      <Link href={`/${locale}`} className="is-active">{locale === "ar" ? "الرئيسية" : "Home"}</Link>
-      <Link href={`/${locale}/discover`}>{t.discover}</Link>
-      <Link href={`/${locale}/creators`}>{locale === "ar" ? "المبدعون" : "Creators"}</Link>
-      <Link href={`/${locale}/community`}>{locale === "ar" ? "المجتمع" : "Community"}</Link>
-      <Link href={`/${locale}/live`}>{locale === "ar" ? "مباشر" : "Live"}</Link>
-      <Link href={`/${locale}/podcasts`}>{locale === "ar" ? "بودكاست" : "Podcasts"}</Link>
-    </div>
+    <section className="hero home-viewer-hero">
+      <div className="hero-inner home-viewer-hero-inner">
+        <div className="home-viewer-welcome-copy"><div className="home-state-kicker">{t.viewerEyebrow}</div><h1>{displayName ? (locale === "ar" ? `أهلًا ${displayName}.` : `Welcome, ${displayName}.`) : t.viewerTitle}</h1><p>{t.viewerBody}</p></div>
+        <div className="home-viewer-profile" aria-label={locale === "ar" ? "هوية الحساب" : "Account identity"}>
+          <div className="home-viewer-profile-halo"><div className="home-viewer-profile-avatar">{viewer?.avatar_url ? <img src={viewer.avatar_url} alt={locale === "ar" ? `صورة ${displayName}` : `${displayName} profile`} /> : <span>{displayName.slice(0, 1).toUpperCase() || "R"}</span>}</div></div>
+          <div className="home-viewer-profile-copy"><strong>{displayName || (locale === "ar" ? "حسابك" : "Your account")}</strong><span>{viewer?.username ? `@${viewer.username}` : (locale === "ar" ? "مساحتك الشخصية" : "Your personal space")}</span></div>
+        </div>
+      </div>
+    </section>
     <section className="section home-primary-feed home-feed-section"><div className="home-feed-head"><div><div className="home-feed-label">{locale === "ar" ? "رَافِين / الموجز" : "RAVINE / FEED"}</div><h1>{t.forYou}</h1><p className="home-feed-intro">{locale === "ar" ? "أعمال مختارة من أحدث الإصدارات، مع المعاينة الصامتة عند الوقوف على الصورة." : "Recent work with silent hover previews when you pause over a thumbnail."}</p></div><Link className="button secondary" href={`/${locale}/discover`}>{t.more}</Link></div>{latestWorks.length ? <div className="home-feed-grid home-dense-grid">{latestWorks.map((work) => <WorkCard key={work.id} work={work} locale={locale} />)}</div> : <div className="empty-state"><strong>{t.empty}</strong></div>}</section>
     <Rail title={t.trending} eyebrow={locale === "ar" ? "رَافِين / الآن" : "RAVINE / NOW"} action={t.more} href={`/${locale}/discover?sort=trending`} works={trendingWorks} locale={locale} />
     {followingWorks.length ? <Rail title={t.following} eyebrow={locale === "ar" ? "رَافِين / تتابعهم" : "RAVINE / FOLLOWING"} action={t.browseCreators} href={`/${locale}/creators`} works={followingWorks} locale={locale} /> : <section className="section home-following-nudge"><div><div className="home-feed-label">{locale === "ar" ? "رَافِين / المتابَعة" : "RAVINE / FOLLOWING"}</div><h2>{t.following}</h2><p>{t.followingEmpty}</p></div><Link className="button secondary" href={`/${locale}/creators`}>{t.browseCreators}</Link></section>}
