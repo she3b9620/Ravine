@@ -102,7 +102,7 @@ export default async function RavineShell({ locale, children }: { locale: Locale
           <span>{isArabic ? "لا شيء زخرفي بلا معنى" : "Nothing Decorative Without Meaning"}</span>
           <span>© {new Date().getFullYear()} RAVINE</span>
         </div>
-      </div>
+      </footer>
       <AuthModal locale={locale} />
     </div>
   );
