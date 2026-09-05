@@ -10,11 +10,18 @@ type Props = {
   creatorUserId: string | null;
 };
 
+function localizeFollowError(error: { message?: string } | null, ar: boolean) {
+  const message = error?.message ?? "";
+  if (ar && /permission denied for table follows/i.test(message)) return "لا تملك صلاحية تنفيذ هذه العملية حاليًا.";
+  return ar ? "تعذر تحديث المتابعة حاليًا." : message || "Unable to update the follow state right now.";
+}
+
 export default function FollowCreator({ creatorId, locale, creatorUserId }: Props) {
   const ar = locale === "ar";
   const [userId, setUserId] = useState<string | null>(null);
   const [following, setFollowing] = useState(false);
   const [busy, setBusy] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -30,19 +37,22 @@ export default function FollowCreator({ creatorId, locale, creatorUserId }: Prop
           return;
         }
 
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from("follows")
           .select("creator_id")
           .eq("follower_id", auth.user.id)
           .eq("creator_id", creatorId)
           .maybeSingle();
 
+        if (!active) return;
+        setFollowing(Boolean(data));
+        if (error) setErrorMessage(localizeFollowError(error, ar));
+        setBusy(false);
+      } catch (error) {
         if (active) {
-          setFollowing(Boolean(data));
+          setErrorMessage(error instanceof Error && ar ? "تعذر تحميل حالة المتابعة حاليًا." : "Unable to load follow state right now.");
           setBusy(false);
         }
-      } catch {
-        if (active) setBusy(false);
       }
     }
 
@@ -50,7 +60,7 @@ export default function FollowCreator({ creatorId, locale, creatorUserId }: Prop
     return () => {
       active = false;
     };
-  }, [creatorId]);
+  }, [creatorId, ar]);
 
   async function toggle() {
     if (!userId) {
@@ -59,15 +69,24 @@ export default function FollowCreator({ creatorId, locale, creatorUserId }: Prop
     }
 
     setBusy(true);
+    setErrorMessage("");
     const supabase = createClient();
 
     try {
       if (following) {
         const { error } = await supabase.from("follows").delete().eq("follower_id", userId).eq("creator_id", creatorId);
-        if (!error) setFollowing(false);
+        if (error) {
+          setErrorMessage(localizeFollowError(error, ar));
+        } else {
+          setFollowing(false);
+        }
       } else {
         const { error } = await supabase.from("follows").insert({ follower_id: userId, creator_id: creatorId });
-        if (!error) setFollowing(true);
+        if (error) {
+          setErrorMessage(localizeFollowError(error, ar));
+        } else {
+          setFollowing(true);
+        }
       }
     } finally {
       setBusy(false);
@@ -75,8 +94,11 @@ export default function FollowCreator({ creatorId, locale, creatorUserId }: Prop
   }
 
   return (
-    <button className={`button ${following ? "secondary" : "primary"}`} type="button" onClick={() => void toggle()} disabled={busy}>
-      {busy ? "…" : following ? (ar ? "تتابعه" : "Following") : (ar ? "متابعة المبدع" : "Follow creator")}
-    </button>
+    <div className="ravine-follow-control">
+      <button className={`button ${following ? "secondary" : "primary"}`} type="button" onClick={() => void toggle()} disabled={busy}>
+        {busy ? "…" : following ? (ar ? "تتابعه" : "Following") : (ar ? "متابعة المبدع" : "Follow creator")}
+      </button>
+      {errorMessage ? <p className="ravine-inline-error" role="alert">{errorMessage}</p> : null}
+    </div>
   );
 }
