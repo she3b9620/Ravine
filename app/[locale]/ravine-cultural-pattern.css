@@ -2,6 +2,7 @@
   --ravine-cultural-pattern: url('/ravine-cultural-pattern-dark.svg');
   --ravine-cultural-pattern-opacity:.065;
   --ravine-cultural-pattern-size:320px 320px;
+  --ravine-cultural-pattern-top-fade:rgba(9,9,9,.72);
 }
 
 .ravine-shell{
@@ -26,16 +27,38 @@
   background-size:var(--ravine-cultural-pattern-size);
   background-position:center center;
   opacity:var(--ravine-cultural-pattern-opacity);
+  -webkit-mask-image:linear-gradient(to bottom,transparent 0,rgba(0,0,0,.18) 48px,rgba(0,0,0,.72) 112px,black 190px,black 100%);
+  mask-image:linear-gradient(to bottom,transparent 0,rgba(0,0,0,.18) 48px,rgba(0,0,0,.72) 112px,black 190px,black 100%);
+}
+
+.ravine-shell::after{
+  content:"";
+  position:absolute;
+  inset:0 0 auto;
+  height:180px;
+  z-index:0;
+  pointer-events:none;
+  background:linear-gradient(to bottom,var(--ravine-cultural-pattern-top-fade) 0,rgba(9,9,9,.22) 34%,rgba(9,9,9,0) 100%);
 }
 
 html[data-theme="light"]{
   --ravine-cultural-pattern:url('/ravine-cultural-pattern-light.svg');
   --ravine-cultural-pattern-opacity:.075;
+  --ravine-cultural-pattern-top-fade:rgba(241,233,220,.82);
 }
 
 html[data-theme="light"] .ravine-shell{
   background-color:var(--obsidian)!important;
   background-image:var(--ravine-cultural-pattern)!important;
+}
+
+html[data-theme="light"] .ravine-shell::before{
+  -webkit-mask-image:linear-gradient(to bottom,transparent 0,rgba(0,0,0,.16) 48px,rgba(0,0,0,.68) 112px,black 190px,black 100%);
+  mask-image:linear-gradient(to bottom,transparent 0,rgba(0,0,0,.16) 48px,rgba(0,0,0,.68) 112px,black 190px,black 100%);
+}
+
+html[data-theme="light"] .ravine-shell::after{
+  background:linear-gradient(to bottom,rgba(241,233,220,.82) 0,rgba(241,233,220,.30) 34%,rgba(241,233,220,0) 100%);
 }
 
 .ravine-main,
@@ -47,6 +70,9 @@ html[data-theme="light"] .ravine-shell{
 @media(max-width:980px){
   :root{--ravine-cultural-pattern-opacity:.055}
   html[data-theme="light"]{--ravine-cultural-pattern-opacity:.065}
+  .ravine-shell::before{-webkit-mask-image:linear-gradient(to bottom,transparent 0,rgba(0,0,0,.2) 34px,rgba(0,0,0,.72) 92px,black 150px,black 100%);mask-image:linear-gradient(to bottom,transparent 0,rgba(0,0,0,.2) 34px,rgba(0,0,0,.72) 92px,black 150px,black 100%)}
+  .ravine-shell::after{height:145px}
+  html[data-theme="light"] .ravine-shell::before{-webkit-mask-image:linear-gradient(to bottom,transparent 0,rgba(0,0,0,.18) 34px,rgba(0,0,0,.68) 92px,black 150px,black 100%);mask-image:linear-gradient(to bottom,transparent 0,rgba(0,0,0,.18) 34px,rgba(0,0,0,.68) 92px,black 150px,black 100%)}
 }
 
 @media(prefers-reduced-motion:reduce){
