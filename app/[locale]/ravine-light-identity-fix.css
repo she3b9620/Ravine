@@ -1,0 +1,4 @@
+/* RAVINE light-mode identity card: keep the identity name bright on the light canvas. */
+html[data-theme="light"] .ravine-shell .home-viewer-profile-copy strong {
+  color: #ffffff !important;
+}
