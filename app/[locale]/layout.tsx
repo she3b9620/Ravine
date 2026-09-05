@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import RavineShell from "../../components/RavineShell";
+import RavineUiEnhancer from "../../components/RavineUiEnhancer";
 import "./ravine-overrides.css";
 import "./home-spacing.css";
 import "./ravine-final-visual-fixes.css";
@@ -12,4 +13,4 @@ import "./ravine-font-authority.css";
 const locales = ["ar", "en"] as const;
 type Locale = (typeof locales)[number];
 export function generateStaticParams(){return locales.map((locale)=>({locale}))}
-export default async function LocaleLayout({children,params}:{children:ReactNode;params:Promise<{locale:string}>}){const {locale}=await params;if(!locales.includes(locale as Locale))notFound();return <RavineShell locale={locale as Locale}>{children}</RavineShell>}
+export default async function LocaleLayout({children,params}:{children:ReactNode;params:Promise<{locale:string}>}){const {locale}=await params;if(!locales.includes(locale as Locale))notFound();return <RavineShell locale={locale as Locale}><RavineUiEnhancer />{children}</RavineShell>}
