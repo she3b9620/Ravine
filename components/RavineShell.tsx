@@ -71,18 +71,21 @@ export default async function RavineShell({ locale, children }: { locale: Locale
             <SearchLauncher locale={locale} categories={categories} />
             {isAuthenticated ? (
               <>
-                <NotificationBell locale={locale} />
-                <ChatLauncher locale={locale} />
+                <div className="ravine-header-social" aria-label={isArabic ? "التنبيهات والمحادثات" : "Notifications and messages"}>
+                  <NotificationBell locale={locale} />
+                  <ChatLauncher locale={locale} />
+                </div>
                 <AccountMenu locale={locale} displayName={displayName} username={profile?.username || null} avatarUrl={profile?.avatar_url || null} isCreator={Boolean(profile?.is_creator)} />
               </>
             ) : (
-              <>
-                <AuthTrigger locale={locale} label={isArabic ? "دخول" : "Sign in"} mode="signin" />
-                <AuthTrigger locale={locale} label={isArabic ? "أنشئ حسابك" : "Create account"} mode="signup" primary />
-              </>
+              <AuthTrigger locale={locale} label={isArabic ? "دخول" : "Sign in"} mode="signin" />
             )}
-            <ThemeToggle locale={locale} />
-            <Suspense fallback={<span className="ravine-language" aria-hidden="true">{locale === "ar" ? "EN" : "عربي"}</span>}><LanguageSwitcher locale={locale} /></Suspense>
+            <div className="ravine-header-preferences">
+              <ThemeToggle locale={locale} />
+              <Suspense fallback={<span className="ravine-language" aria-hidden="true">{locale === "ar" ? "العربية" : "English"}</span>}>
+                <LanguageSwitcher locale={locale} />
+              </Suspense>
+            </div>
           </div>
         </div>
       </header>
