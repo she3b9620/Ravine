@@ -3,8 +3,30 @@
 import { useEffect } from "react";
 
 const FOLLOW_PERMISSION = /permission denied for table follows/i;
+const ARABIC_DIGITS = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
+const USER_IDENTITY_SELECTOR = [
+  "[data-preserve-numerals]",
+  "[data-username]",
+  "[data-user-name]",
+  "[data-handle]",
+  "[data-user-handle]",
+  ".username",
+  ".user-name",
+  ".user_name",
+  ".handle",
+  ".user-handle",
+  ".creator-username",
+  ".creator-handle",
+  ".handleLine",
+  ".nameRow",
+  ".profile-name",
+  ".profile-username",
+  "[class*="username"]",
+  "[class*="user-name"]",
+  "[class*="handle"]",
+].join(",");
 
-function walkTextNodes(root: Node, replace: (value: string) => string) {
+function walkTextNodes(root: Node, replace: (value: string, node: Text) => string) {
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
   const nodes: Text[] = [];
   let current: Node | null = walker.nextNode();
@@ -13,9 +35,34 @@ function walkTextNodes(root: Node, replace: (value: string) => string) {
     current = walker.nextNode();
   }
   for (const node of nodes) {
-    const next = replace(node.nodeValue || "");
+    const next = replace(node.nodeValue || "", node);
     if (next !== node.nodeValue) node.nodeValue = next;
   }
+}
+
+function toArabicIndicDigits(value: string) {
+  return value.replace(/[0-9]/g, (digit) => ARABIC_DIGITS[Number(digit)]);
+}
+
+function shouldPreserveNumerals(node: Text) {
+  const parent = node.parentElement;
+  if (!parent) return true;
+
+  if (parent.closest(USER_IDENTITY_SELECTOR)) return true;
+  if (parent.closest("input, textarea, code, pre, kbd, samp, script, style")) return true;
+  if (parent.closest("[data-numeric-literal]")) return true;
+
+  return false;
+}
+
+function localizeArabicNumerals() {
+  const shell = document.querySelector('.ravine-shell[lang="ar"]');
+  if (!shell) return;
+
+  walkTextNodes(shell, (value, node) => {
+    if (shouldPreserveNumerals(node)) return value;
+    return toArabicIndicDigits(value);
+  });
 }
 
 function localizeFollowErrors() {
@@ -69,11 +116,13 @@ function appendGuestAbout() {
 
 export default function RavineUiEnhancer() {
   useEffect(() => {
+    localizeArabicNumerals();
     localizeFollowErrors();
     enhanceSelectionTabs();
     appendGuestAbout();
 
     const observer = new MutationObserver(() => {
+      localizeArabicNumerals();
       localizeFollowErrors();
       enhanceSelectionTabs();
       appendGuestAbout();
