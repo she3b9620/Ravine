@@ -21,7 +21,7 @@ const groups: Group[] = [
     ["creators?tab=following", "Following", "تتابعهم", Users],
     ["library", "Library", "المكتبة", Library],
     ["history", "Watch history", "سجل المشاهدة", History],
-    ["likes", "Liked work", "الأعمال التي أعجبتك", Heart],
+    ["library?tab=liked", "Liked work", "الأعمال التي أعجبتك", Heart],
     ["messages", "Messages", "الرسائل", MessagesSquare],
   ]],
   ["CREATE & MANAGE", "إنشاء وإدارة", [
@@ -45,8 +45,8 @@ export default function SidebarNav({ locale }: { locale: Locale }) {
           <div className="ravine-sidebar-nav-list">
             {items.map(([slug, en, ar, Icon]) => {
               const active = isActive(slug);
-              const href = `/${locale}/${slug}`.replace(`/${locale}/?`, `/${locale}/`);
-              return <Link key={slug} href={slug ? href : `/${locale}`} className={`ravine-sidebar-link${active ? " is-active" : ""}${slug === "live" ? " is-live-link" : ""}`} aria-current={active ? "page" : undefined}>
+              const href = slug ? `/${locale}/${slug}` : `/${locale}`;
+              return <Link key={slug} href={href} className={`ravine-sidebar-link${active ? " is-active" : ""}${slug === "live" ? " is-live-link" : ""}`} aria-current={active ? "page" : undefined}>
                 <span className="ravine-sidebar-link-icon"><Icon size={18} strokeWidth={1.8} aria-hidden="true" /></span>
                 <span className="ravine-sidebar-link-label">{locale === "ar" ? ar : en}</span>
                 {slug === "live" ? <span className="ravine-sidebar-live-dot" aria-hidden="true" /> : null}
