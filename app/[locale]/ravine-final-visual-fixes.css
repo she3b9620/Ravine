@@ -239,12 +239,35 @@ html[data-theme="light"] .ravine-search-dialog[dir="rtl"] .ravine-search-input i
   box-shadow: 0 0 12px rgba(196, 122, 82, 0.22);
 }
 
+/* Guest hero: slightly smaller and lifted as one coherent block. */
+.ravine-shell .home-guest-hero .hero-inner {
+  transform: translateY(-28px) scale(0.94) !important;
+  transform-origin: center center !important;
+}
+
+.ravine-shell .home-guest-hero .home-state-kicker,
+.ravine-shell .home-guest-hero .hero h1,
+.ravine-shell .home-guest-hero .hero p,
+.ravine-shell .home-guest-hero .hero .hero-actions,
+.ravine-shell .home-guest-hero .hero .button {
+  position: relative;
+  z-index: 1;
+}
+
 .ravine-shell .home-guest-hero .home-state-kicker {
   font-size: 15px !important;
   line-height: 1.45 !important;
   letter-spacing: 0.12em !important;
   font-weight: 700 !important;
-  margin-bottom: 28px !important;
+  margin-bottom: 24px !important;
+}
+
+.ravine-shell[lang="ar"] .home-guest-hero .hero h1 {
+  margin-bottom: 30px !important;
+}
+
+.ravine-shell[lang="ar"] .home-guest-hero .hero p {
+  line-height: 1.9 !important;
 }
 
 @media (max-width: 820px) {
@@ -259,6 +282,10 @@ html[data-theme="light"] .ravine-search-dialog[dir="rtl"] .ravine-search-input i
 
   .ravine-nav-link.is-active::after {
     bottom: -8px;
+  }
+
+  .ravine-shell .home-guest-hero .hero-inner {
+    transform: translateY(-18px) scale(0.96) !important;
   }
 }
 
@@ -284,6 +311,16 @@ html[data-theme="light"] .ravine-search-dialog[dir="rtl"] .ravine-search-input i
 
 .ravine-shell[lang="ar"] .hero p {
   line-height: 2 !important;
+}
+
+/* Guest-only spacing must win over the generic hero rules above. */
+.ravine-shell[lang="ar"] .home-guest-hero .hero h1 {
+  margin-bottom: 30px !important;
+}
+
+.ravine-shell[lang="ar"] .home-guest-hero .hero .home-state-kicker,
+.ravine-shell[lang="ar"] .home-guest-hero .hero .eyebrow {
+  margin-bottom: 24px !important;
 }
 
 .home-viewer-hero-inner {
@@ -343,5 +380,9 @@ html[data-theme="light"] .ravine-search-dialog[dir="rtl"] .ravine-search-input i
     animation: none !important;
     filter: none !important;
     transform: none !important;
+  }
+
+  .ravine-shell .home-guest-hero .hero-inner {
+    transform: translateY(-22px) scale(0.96) !important;
   }
 }
