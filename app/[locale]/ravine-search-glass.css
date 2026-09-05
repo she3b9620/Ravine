@@ -1,0 +1,24 @@
+.ravine-search-overlay{
+  background:rgba(9,9,9,.42) !important;
+  -webkit-backdrop-filter:blur(18px) saturate(112%) !important;
+  backdrop-filter:blur(18px) saturate(112%) !important;
+}
+
+html[data-theme="light"] .ravine-search-overlay{
+  background:rgba(241,233,220,.46) !important;
+  -webkit-backdrop-filter:blur(18px) saturate(108%) !important;
+  backdrop-filter:blur(18px) saturate(108%) !important;
+}
+
+.ravine-search-dialog{
+  position:relative;
+  z-index:1;
+}
+
+@media(prefers-reduced-motion:reduce){
+  .ravine-search-overlay,
+  html[data-theme="light"] .ravine-search-overlay{
+    -webkit-backdrop-filter:none !important;
+    backdrop-filter:none !important;
+  }
+}
