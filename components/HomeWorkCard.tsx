@@ -129,6 +129,12 @@ export default function HomeWorkCard({ work, locale, compact = false }: { work: 
     video.muted = true;
     video.volume = 0;
     video.playsInline = true;
+    video.autoplay = true;
+    video.controls = false;
+    video.disablePictureInPicture = true;
+    video.controlsList.add("nodownload");
+    video.controlsList.add("noplaybackrate");
+    video.controlsList.add("nofullscreen");
     const begin = () => playSegment(0);
     if (video.readyState >= 1) begin();
     else video.addEventListener("loadedmetadata", begin, { once: true });
@@ -162,7 +168,7 @@ export default function HomeWorkCard({ work, locale, compact = false }: { work: 
       <div className={`home-work-thumb${previewing ? " is-previewing" : ""}`}>
         <img className="home-work-thumb-image" src={work.thumbnail_url || "/RAVINE.png"} alt="" loading="lazy" />
         {previewSrc ? (
-          <video ref={videoRef} src={previewSrc} className={`home-work-preview${previewing ? " visible" : ""}${fading ? " fading" : ""}`} muted playsInline preload="none" poster={work.thumbnail_url || undefined} aria-hidden="true" />
+          <video ref={videoRef} src={previewSrc} className={`home-work-preview${previewing ? " visible" : ""}${fading ? " fading" : ""}`} muted playsInline autoPlay={false} controls={false} preload="none" poster={work.thumbnail_url || undefined} disablePictureInPicture controlsList="nodownload noplaybackrate nofullscreen" aria-hidden="true" tabIndex={-1} />
         ) : null}
         <span className="home-work-preview-wash" aria-hidden="true" />
         <span className="home-work-duration">{formatDuration(work.duration)}</span>
