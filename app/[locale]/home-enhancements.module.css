@@ -4,6 +4,13 @@
 :global(.selection-tab){display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:0 12px;border:1px solid rgba(241,233,220,.12);border-radius:999px;color:#9A9690;font-size:11px;font-weight:700;letter-spacing:.04em;transition:color .24s ease,border-color .24s ease,background .24s ease,transform .24s ease}
 :global(.selection-tab:hover){transform:translateY(-1px);border-color:rgba(212,154,120,.45);color:#F1E9DC}
 :global(.selection-tab.active){border-color:rgba(196,122,82,.55);background:rgba(196,122,82,.09);color:#C47A52}
+:global(.ravine-period-tab){position:relative;gap:7px}
+:global(.ravine-period-tab:before){font-size:12px;line-height:1;color:#C47A52;opacity:.9}
+:global(.ravine-period-tab[data-ravine-period="daily"]:before){content:"◷"}
+:global(.ravine-period-tab[data-ravine-period="weekly"]:before){content:"⌁"}
+:global(.ravine-period-tab[data-ravine-period="monthly"]:before){content:"◫"}
+:global(.ravine-period-tab[data-ravine-period="yearly"]:before){content:"◍"}
+:global(.ravine-period-tab.active:before){text-shadow:0 0 10px rgba(196,122,82,.35)}
 :global(.pathway-grid){display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
 :global(.pathway-card){min-height:180px;padding:22px;border:1px solid rgba(241,233,220,.1);border-radius:20px;background:#151719;display:flex;flex-direction:column;justify-content:space-between;transition:transform .35s cubic-bezier(.22,.61,.36,1),border-color .35s ease,background .35s ease,box-shadow .35s ease;position:relative;overflow:hidden}
 :global(.pathway-card:after){content:"";position:absolute;inset:-30%;background:radial-gradient(circle at 75% 25%,rgba(24,63,70,.24),transparent 35%);opacity:0;transform:translate3d(4%,2%,0);transition:opacity .45s ease,transform .55s cubic-bezier(.22,.61,.36,1);pointer-events:none}
@@ -29,6 +36,7 @@
 :global(.mini-grid .video-card){display:grid;grid-template-columns:42% 1fr;border-radius:18px}
 :global(.mini-grid .video-meta){padding:14px}
 :global(.about-section){padding-top:90px;padding-bottom:100px}
+:global(.ravine-guest-about){border-top:1px solid rgba(241,233,220,.08)}
 :global(.about-grid){display:grid;grid-template-columns:minmax(280px,.8fr) minmax(0,1.2fr);gap:64px;padding-top:34px;border-top:1px solid rgba(241,233,220,.1)}
 :global(.about-grid h2){max-width:620px;margin:0;font-size:clamp(42px,6vw,86px);line-height:.9;letter-spacing:-.055em}
 :global(.about-lead){max-width:760px;margin:0;color:#9A9690;font-size:18px;line-height:1.75}
@@ -40,3 +48,11 @@
 @media(max-width:820px){:global(.selection-tabs){justify-content:flex-start}:global(.media-section){grid-template-columns:1fr}:global(.creator-strip){grid-template-columns:1fr}:global(.mini-grid .video-card){grid-template-columns:1fr}:global(.about-section){padding-top:64px}:global(.about-principles>div){grid-template-columns:1fr;gap:8px}}
 @media(max-width:560px){:global(.pathway-grid){grid-template-columns:1fr}:global(.selection-tabs){width:100%}:global(.selection-tab){flex:1}:global(.about-grid h2){font-size:clamp(42px,15vw,68px)}}
 @media(prefers-reduced-motion:reduce){:global(.selection-tab),:global(.pathway-card),:global(.creator-feature),:global(.creator-feature-avatar img){transition:none}:global(.pathway-card:hover),:global(.creator-feature:hover),:global(.selection-tab:hover),:global(.creator-feature:hover .creator-feature-avatar img){transform:none}}
+
+/* Navigation icon treatment and Live status marker. */
+:global(.ravine-nav-link){display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+:global(.ravine-nav-icon){flex:0 0 auto;opacity:.72;transition:opacity .2s ease,transform .2s ease}
+:global(.ravine-nav-link:hover .ravine-nav-icon),:global(.ravine-nav-link.is-active .ravine-nav-icon){opacity:1;transform:translateY(-.5px)}
+:global(.ravine-live-dot){width:7px;height:7px;border-radius:50%;background:#ef3f3f;box-shadow:0 0 0 2px rgba(239,63,63,.13),0 0 9px rgba(239,63,63,.75),0 0 18px rgba(239,63,63,.35);animation:ravineLivePulse 1.35s ease-in-out infinite}
+@keyframes ravineLivePulse{0%,100%{transform:scale(.92);opacity:.8}50%{transform:scale(1.16);opacity:1}}
+@media(prefers-reduced-motion:reduce){:global(.ravine-live-dot){animation:none}}
