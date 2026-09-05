@@ -3,18 +3,21 @@
 import { MessageCircle, Send, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { ravineErrorMessage } from "@/lib/ravine-error";
 
 type Locale = "ar" | "en";
 type Conversation = { id: string; participant_a: string; participant_b: string; requester_id: string; creator_id: number | null; status: string; requester_message_count: number; creator_message_count: number; last_message_at: string | null };
 type Message = { id: string; conversation_id: string; sender_id: string; body: string; created_at: string };
 type Person = { id: string; username: string | null; display_name: string | null; avatar_url: string | null; is_creator: boolean | null };
 
-function friendlyError(error: unknown, ar: boolean) {
-  const text = error instanceof Error ? error.message : String(error ?? "");
-  if (/infinite recursion detected in policy for relation [\"']videos[\"']/i.test(text)) {
-    return ar ? "تعذر الوصول إلى بعض الأعمال مؤقتًا بسبب خطأ في صلاحيات قاعدة البيانات. تم إصلاح المشكلة، جرّب مرة أخرى." : "Some works were temporarily unavailable because of a database access-policy error. The issue has been fixed; please try again.";
-  }
-  return text || (ar ? "تعذر تنفيذ العملية." : "The action could not be completed.");
+function localizedStatus(status: string, ar: boolean) {
+  const value = status.toLowerCase();
+  if (!ar) return status;
+  if (value === "pending") return "في انتظار الرد";
+  if (value === "blocked") return "متوقفة";
+  if (value === "closed") return "مغلقة";
+  if (value === "active") return "نشطة";
+  return "حالة المحادثة";
 }
 
 export default function DirectMessages({ locale, initialRecipient, initialCreatorId, compact = false }: { locale: Locale; initialRecipient?: string; initialCreatorId?: number; compact?: boolean }) {
@@ -43,13 +46,13 @@ export default function DirectMessages({ locale, initialRecipient, initialCreato
       setUserId(auth.user.id);
       const { data, error: conversationsError } = await supabase.from("direct_conversations").select("id,participant_a,participant_b,requester_id,creator_id,status,requester_message_count,creator_message_count,last_message_at").order("last_message_at", { ascending: false, nullsFirst: false });
       if (!mounted) return;
-      if (conversationsError) setError(friendlyError(conversationsError, ar));
+      if (conversationsError) setError(ravineErrorMessage(conversationsError, locale));
       const rows = (data || []) as Conversation[];
       setConversations(rows);
       const ids = Array.from(new Set(rows.flatMap((row) => [row.participant_a, row.participant_b])));
       if (ids.length) {
         const { data: profiles, error: profilesError } = await supabase.from("profiles").select("id,username,display_name,avatar_url,is_creator").in("id", ids);
-        if (profilesError) setError(friendlyError(profilesError, ar));
+        if (profilesError) setError(ravineErrorMessage(profilesError, locale));
         const mapped: Record<string, Person> = {};
         for (const person of (profiles || []) as Person[]) mapped[person.id] = person;
         if (mounted) setPeople(mapped);
@@ -66,7 +69,7 @@ export default function DirectMessages({ locale, initialRecipient, initialCreato
     let channel: ReturnType<typeof supabase.channel> | null = null;
     async function load() {
       const { data, error: messagesError } = await supabase.from("direct_messages").select("id,conversation_id,sender_id,body,created_at").eq("conversation_id", selectedId).order("created_at", { ascending: true });
-      if (messagesError && mounted) setError(friendlyError(messagesError, ar));
+      if (messagesError && mounted) setError(ravineErrorMessage(messagesError, locale));
       if (mounted) setMessages((data || []) as Message[]);
       channel = supabase.channel(`ravine-dm:${selectedId}`).on("postgres_changes", { event: "INSERT", schema: "public", table: "direct_messages", filter: `conversation_id=eq.${selectedId}` }, (payload) => {
         const message = payload.new as Message;
@@ -98,11 +101,11 @@ export default function DirectMessages({ locale, initialRecipient, initialCreato
     if (!recipientId) { setError(ar ? "اختر مستخدمًا أو افتح صفحة مبدع أولًا." : "Select a user or open a creator profile first."); return; }
     setError("");
     const { data, error: rpcError } = await supabase.rpc("start_direct_conversation", { p_recipient_id: recipientId, p_creator_id: creatorId ?? null, p_body: body });
-    if (rpcError || !data) { setError(friendlyError(rpcError, ar)); return; }
+    if (rpcError || !data) { setError(ravineErrorMessage(rpcError, locale)); return; }
     setDraft("");
     setSelectedId(String(data));
     const { data: rows, error: conversationsError } = await supabase.from("direct_conversations").select("id,participant_a,participant_b,requester_id,creator_id,status,requester_message_count,creator_message_count,last_message_at").order("last_message_at", { ascending: false, nullsFirst: false });
-    if (conversationsError) setError(friendlyError(conversationsError, ar));
+    if (conversationsError) setError(ravineErrorMessage(conversationsError, locale));
     setConversations((rows || []) as Conversation[]);
   }
 
@@ -111,7 +114,7 @@ export default function DirectMessages({ locale, initialRecipient, initialCreato
     const handle = username.trim().replace(/^@/, "");
     if (!handle) return;
     const { data, error: searchError } = await supabase.from("profiles").select("id,username,display_name,avatar_url,is_creator").eq("username", handle).maybeSingle();
-    if (searchError) { setError(friendlyError(searchError, ar)); return; }
+    if (searchError) { setError(ravineErrorMessage(searchError, locale)); return; }
     if (!data) { setError(ar ? "لم يتم العثور على المستخدم." : "User not found."); return; }
     const person = data as Person;
     setPeople((current) => ({ ...current, [person.id]: person }));
@@ -139,7 +142,7 @@ export default function DirectMessages({ locale, initialRecipient, initialCreato
             {conversations.length ? conversations.map((conversation) => {
               const other = userId ? (conversation.participant_a === userId ? conversation.participant_b : conversation.participant_a) : "";
               const person = people[other];
-              return <button key={conversation.id} type="button" className={`direct-conversation ${selectedId === conversation.id ? "active" : ""}`} onClick={() => setSelectedId(conversation.id)}><span className="direct-avatar">{person?.avatar_url ? <img src={person.avatar_url} alt=""/> : (person?.display_name || person?.username || "R").slice(0,1).toUpperCase()}</span><span><strong>{person?.display_name || person?.username || (ar ? "مستخدم" : "User")}</strong><small>{conversation.creator_id && conversation.status === "pending" ? (ar ? "في انتظار رد المبدع" : "Waiting for creator reply") : conversation.status}</small></span></button>;
+              return <button key={conversation.id} type="button" className={`direct-conversation ${selectedId === conversation.id ? "active" : ""}`} onClick={() => setSelectedId(conversation.id)}><span className="direct-avatar">{person?.avatar_url ? <img src={person.avatar_url} alt=""/> : (person?.display_name || person?.username || "R").slice(0,1).toUpperCase()}</span><span><strong>{person?.display_name || person?.username || (ar ? "مستخدم" : "User")}</strong><small>{conversation.creator_id && conversation.status === "pending" ? (ar ? "في انتظار رد المبدع" : "Waiting for creator reply") : localizedStatus(conversation.status, ar)}</small></span></button>;
             }) : <div className="direct-empty">{ar ? "ابدأ محادثة من اسم مستخدم أو من صفحة مبدع." : "Start a conversation from a username or a creator profile."}</div>}
           </div>
         </aside>
