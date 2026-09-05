@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { ArrowUpRight, Check, MonitorCog, Moon, Sun, UserRound } from "lucide-react";
 import { use, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import styles from "../account/account.module.css";
 
 export default function GeneralSettingsPage({ params }: { params: Promise<{ locale: string }> }) {
@@ -10,6 +10,7 @@ export default function GeneralSettingsPage({ params }: { params: Promise<{ loca
   const locale = rawLocale === "en" ? "en" : "ar";
   const ar = locale === "ar";
   const alternateLocale = locale === "ar" ? "en" : "ar";
+  const router = useRouter();
   const [theme, setTheme] = useState<"dark" | "light">("dark");
 
   useEffect(() => {
@@ -23,6 +24,13 @@ export default function GeneralSettingsPage({ params }: { params: Promise<{ loca
     setTheme(next);
     document.documentElement.dataset.theme = next;
     window.localStorage.setItem("ravine-theme", next);
+  };
+
+  const switchLocale = (nextLocale: "ar" | "en") => {
+    if (nextLocale === locale) return;
+    const nextPath = `/${nextLocale}/settings`;
+    router.replace(nextPath);
+    router.refresh();
   };
 
   return (
@@ -57,16 +65,16 @@ export default function GeneralSettingsPage({ params }: { params: Promise<{ loca
           <h2 className={styles.sectionLabel}>{ar ? "اللغة" : "Language"}</h2>
           <p className={styles.settingsNote}>{ar ? "غيّر واجهة RAVINE مع الحفاظ على الصفحة التي تتصفحها الآن." : "Switch the RAVINE interface while staying on the page you are viewing."}</p>
           <div className={styles.generalOptionGrid}>
-            <Link href={`/${locale}/settings`} className={`${styles.generalOption} ${ar ? styles.generalOptionActive : ""}`}>
+            <button type="button" onClick={() => switchLocale("ar")} className={`${styles.generalOption} ${ar ? styles.generalOptionActive : ""}`} aria-current={ar ? "page" : undefined}>
               <span className={styles.generalOptionIcon}><MonitorCog size={18} /></span>
               <span><strong>العربية</strong><small>واجهة RAVINE بالعربية</small></span>
               {ar ? <Check size={15} /> : <ArrowUpRight size={15} />}
-            </Link>
-            <Link href={`/${alternateLocale}/settings`} className={`${styles.generalOption} ${!ar ? styles.generalOptionActive : ""}`}>
+            </button>
+            <button type="button" onClick={() => switchLocale("en")} className={`${styles.generalOption} ${!ar ? styles.generalOptionActive : ""}`} aria-current={!ar ? "page" : undefined}>
               <span className={styles.generalOptionIcon}><MonitorCog size={18} /></span>
               <span><strong>English</strong><small>RAVINE interface in English</small></span>
               {!ar ? <Check size={15} /> : <ArrowUpRight size={15} />}
-            </Link>
+            </button>
           </div>
         </section>
 
@@ -74,8 +82,8 @@ export default function GeneralSettingsPage({ params }: { params: Promise<{ loca
           <h2 className={styles.sectionLabel}>{ar ? "هويتك" : "Your identity"}</h2>
           <p className={styles.settingsNote}>{ar ? "تعديل الاسم والاسم المستخدم والنبذة والصور من مساحة تعديل الملف." : "Edit your name, username, bio, and media from the dedicated profile editor."}</p>
           <div className={styles.actions}>
-            <Link className={styles.actionLink} href={`/${locale}/account`}><UserRound size={14} />{ar ? "دخول إلى الحساب" : "Open account"}</Link>
-            <Link className={styles.actionLink} href={`/${locale}/account/edit`}>{ar ? "تعديل الملف الشخصي" : "Edit profile"}<ArrowUpRight size={14} /></Link>
+            <a className={styles.actionLink} href={`/${locale}/account`}><UserRound size={14} />{ar ? "دخول إلى الحساب" : "Open account"}</a>
+            <a className={styles.actionLink} href={`/${locale}/account/edit`}>{ar ? "تعديل الملف الشخصي" : "Edit profile"}<ArrowUpRight size={14} /></a>
           </div>
         </section>
       </div>
