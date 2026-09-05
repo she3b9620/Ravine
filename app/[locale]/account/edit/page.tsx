@@ -13,9 +13,11 @@ type Profile = {
   bio: string | null;
   avatar_url: string | null;
   cover_url: string | null;
+  website_url: string | null;
   country: string | null;
   language: string | null;
-  website_url: string | null;
+  is_creator: boolean | null;
+  trailer_url: string | null;
 };
 
 export default async function EditAccountPage({ params }: { params: Promise<{ locale: string }> }) {
@@ -28,7 +30,7 @@ export default async function EditAccountPage({ params }: { params: Promise<{ lo
 
   const { data } = await supabase
     .from("profiles")
-    .select("display_name,username,bio,avatar_url,cover_url,country,language,website_url")
+    .select("display_name,username,bio,avatar_url,cover_url,country,language,website_url,is_creator,trailer_url")
     .eq("id", auth.user.id)
     .maybeSingle();
 
