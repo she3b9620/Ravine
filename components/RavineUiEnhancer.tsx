@@ -21,9 +21,9 @@ const USER_IDENTITY_SELECTOR = [
   ".nameRow",
   ".profile-name",
   ".profile-username",
-  "[class*="username"]",
-  "[class*="user-name"]",
-  "[class*="handle"]",
+  '[class*="username"]',
+  '[class*="user-name"]',
+  '[class*="handle"]',
 ].join(",");
 
 function walkTextNodes(root: Node, replace: (value: string, node: Text) => string) {
