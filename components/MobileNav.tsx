@@ -10,7 +10,7 @@ const navigation = [
   ["discover", "Discover", "اكتشف"],
   ["cuts", "Cuts", "كِتس"],
   ["videos", "Videos", "الفيديو"],
-  ["podcasts", "Podcasts", "البودكاست"],
+  ["podcasts", "Podcasts & Documentaries", "البودكاست والوثائقي"],
   ["live", "Live", "مباشر"],
   ["creators", "Creators", "المبدعون"],
 ] as const;
@@ -37,7 +37,7 @@ export default function MobileNav({ locale, authenticated }: { locale: Locale; a
             <Link href={`/${locale}/discover`} onClick={close}>{ar ? "اكتشف" : "Discover"}</Link>
             {!authenticated && GUEST_GATED.has("cuts") ? <button type="button" onClick={() => { close(); window.setTimeout(() => requestRavineAuth(`/${locale}`), CLOSE_MS); }}>{ar ? "كِتس — سجّل للدخول" : "Cuts — Sign in"}</button> : <Link href={`/${locale}/cuts`} onClick={close}>{ar ? "كِتس" : "Cuts"}</Link>}
             {!authenticated && GUEST_GATED.has("videos") ? <button type="button" onClick={() => { close(); window.setTimeout(() => requestRavineAuth(`/${locale}`), CLOSE_MS); }}>{ar ? "الفيديو — سجّل للدخول" : "Videos — Sign in"}</button> : <Link href={`/${locale}/videos`} onClick={close}>{ar ? "الفيديو" : "Videos"}</Link>}
-            {!authenticated && GUEST_GATED.has("podcasts") ? <button type="button" onClick={() => { close(); window.setTimeout(() => requestRavineAuth(`/${locale}`), CLOSE_MS); }}>{ar ? "البودكاست — سجّل للدخول" : "Podcasts — Sign in"}</button> : <Link href={`/${locale}/podcasts`} onClick={close}>{ar ? "البودكاست" : "Podcasts"}</Link>}
+            {!authenticated && GUEST_GATED.has("podcasts") ? <button type="button" onClick={() => { close(); window.setTimeout(() => requestRavineAuth(`/${locale}`), CLOSE_MS); }}>{ar ? "البودكاست والوثائقي — سجّل للدخول" : "Podcasts & Documentaries — Sign in"}</button> : <Link href={`/${locale}/podcasts`} onClick={close}>{ar ? "البودكاست والوثائقي" : "Podcasts & Documentaries"}</Link>}
             {!authenticated && GUEST_GATED.has("live") ? <button type="button" onClick={() => { close(); window.setTimeout(() => requestRavineAuth(`/${locale}`), CLOSE_MS); }}>{ar ? "مباشر — سجّل للدخول" : "Live — Sign in"}</button> : <Link href={`/${locale}/live`} onClick={close}>{ar ? "مباشر" : "Live"}</Link>}
             <Link href={`/${locale}/creators`} onClick={close}>{ar ? "المبدعون" : "Creators"}</Link>
             {!authenticated ? <button type="button" onClick={() => { close(); window.setTimeout(() => requestRavineAuth(`/${locale}`), CLOSE_MS); }}>{ar ? "دخول" : "Sign in"}</button> : <><Link href={`/${locale}/library`} onClick={close}>{ar ? "المكتبة" : "Library"}</Link><Link href={`/${locale}/account`} onClick={close}>{ar ? "الحساب" : "Account"}</Link></>}
