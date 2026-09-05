@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowUpRight, RotateCcw, LocateFixed } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import styles from "@/app/[locale]/account/account.module.css";
 import RavineMediaPicker from "@/components/RavineMediaPicker";
 import RavineSelect from "@/components/RavineSelect";
