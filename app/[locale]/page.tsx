@@ -18,7 +18,6 @@ type Creator = { id: number; name: string | null; username: string | null; avata
 type ViewerProfile = { display_name: string | null; username: string | null; avatar_url: string | null };
 export const dynamic = "force-dynamic";
 
-function getCreator(creator: HomeWork["creators"]) { return Array.isArray(creator) ? creator[0] ?? null : creator; }
 function WorkCard({ work, locale, compact = false }: { work: HomeWork; locale: Locale; compact?: boolean }) { return <HomeWorkCard work={work} locale={locale} compact={compact} />; }
 function CreatorCard({ creator, locale }: { creator: Creator; locale: Locale }) {
   return <Link href={`/${locale}/creators/${creator.id}`} className="creator-feature"><div className="creator-feature-avatar"><img src={creator.avatar_url || "/RAVINE.png"} alt="" loading="lazy" /></div><div><div className="video-kicker">{locale === "ar" ? "مبدع" : (creator.specialty || "CREATOR")}</div><strong>{creator.name || (locale === "ar" ? `مبدع ${creator.id}` : `Creator ${creator.id}`)}</strong><span>@{creator.username || `creator-${creator.id}`}</span></div></Link>;
@@ -54,10 +53,10 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     <section className="hero home-viewer-hero">
       <div className="hero-inner home-viewer-hero-inner">
         <div className="home-viewer-welcome-copy"><div className="home-state-kicker">{t.viewerEyebrow}</div><h1>{displayName ? (locale === "ar" ? `أهلًا ${displayName}.` : `Welcome, ${displayName}.`) : t.viewerTitle}</h1><p>{t.viewerBody}</p></div>
-        <div className="home-viewer-profile" aria-label={locale === "ar" ? "هوية الحساب" : "Account identity"}>
+        <Link href={`/${locale}/account`} className="home-viewer-profile" aria-label={locale === "ar" ? "فتح الحساب" : "Open account"}>
           <div className="home-viewer-profile-halo"><div className="home-viewer-profile-avatar">{viewer?.avatar_url ? <img src={viewer.avatar_url} alt={locale === "ar" ? `صورة ${displayName}` : `${displayName} profile`} /> : <span>{displayName.slice(0, 1).toUpperCase() || "R"}</span>}</div></div>
           <div className="home-viewer-profile-copy"><strong>{displayName || (locale === "ar" ? "حسابك" : "Your account")}</strong><span>{viewer?.username ? `@${viewer.username}` : (locale === "ar" ? "مساحتك الشخصية" : "Your personal space")}</span></div>
-        </div>
+        </Link>
       </div>
     </section>
     <section className="section home-primary-feed home-feed-section"><div className="home-feed-head"><div><div className="home-feed-label">{locale === "ar" ? "رَافِين / الموجز" : "RAVINE / FEED"}</div><h1>{t.forYou}</h1><p className="home-feed-intro">{locale === "ar" ? "أعمال مختارة من أحدث الإصدارات، مع المعاينة الصامتة عند الوقوف على الصورة." : "Recent work with silent hover previews when you pause over a thumbnail."}</p></div><Link className="button secondary" href={`/${locale}/discover`}>{t.more}</Link></div>{latestWorks.length ? <div className="home-feed-grid home-dense-grid">{latestWorks.map((work) => <WorkCard key={work.id} work={work} locale={locale} />)}</div> : <div className="empty-state"><strong>{t.empty}</strong></div>}</section>
