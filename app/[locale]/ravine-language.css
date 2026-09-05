@@ -12,7 +12,6 @@
 .ravine-language-chevron{font-size:15px;line-height:.8;opacity:.62;transform:translateY(-1px);transition:transform .25s ease,opacity .25s ease}
 .ravine-language-menu[open] .ravine-language-chevron{transform:translateY(1px) rotate(180deg);opacity:1}
 
-/* Clear, unmistakable flag glyphs without relying on OS emoji rendering. */
 .ravine-flag-eg{background:linear-gradient(to bottom,#ce1126 0 33.33%,#fff 33.33% 66.66%,#111 66.66%)}
 .ravine-flag-eg:after{content:"";position:absolute;left:50%;top:50%;width:6px;height:6px;transform:translate(-50%,-50%);background:#c9a227;border-radius:1px;opacity:.9}
 .ravine-flag-sa{background:#006c35}
@@ -37,6 +36,11 @@
 .ravine-language-option-copy{display:grid;gap:3px;min-width:0}
 .ravine-language-option-copy strong{font-family:var(--font-latin);font-size:13px;line-height:1.1}
 .ravine-language-option-copy small{color:var(--stone);font-family:var(--font-latin);font-size:10px;line-height:1.2}
+
+/* Mixed-script typography: Arabic labels remain Thmanyah even when the shell locale is English. */
+.ravine-language-option[dir="rtl"] .ravine-language-option-copy strong,.ravine-language-option[dir="rtl"] .ravine-language-option-copy small{font-family:var(--font-arabic-ui)!important}
+.ravine-language-option[dir="ltr"] .ravine-language-option-copy strong,.ravine-language-option[dir="ltr"] .ravine-language-option-copy small{font-family:var(--font-latin)!important}
+
 .ravine-language-check,.ravine-language-open{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;font-size:12px;color:var(--copper);opacity:.9}
 .ravine-language-open{color:var(--stone);opacity:.65}
 .ravine-language-note{margin-top:6px;padding:9px 8px 3px;border-top:1px solid rgba(241,233,220,.07);color:var(--stone);font-size:10px;line-height:1.55}
