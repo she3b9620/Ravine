@@ -1,0 +1,51 @@
+/* Search is a deliberate typography exception: use a Thmanyah family in the search UI so Arabic never falls back to Arial. */
+html body .ravine-search-overlay,
+html body .ravine-search-overlay *,
+html body .ravine-search-dialog,
+html body .ravine-search-dialog * {
+  font-family: "Thmanyah Sans", sans-serif !important;
+  font-synthesis: none !important;
+}
+
+html body .ravine-search-dialog input,
+html body .ravine-search-dialog textarea,
+html body .ravine-search-dialog input::placeholder,
+html body .ravine-search-dialog textarea::placeholder,
+html body .ravine-search-select-trigger,
+html body .ravine-search-select-menu button,
+html body .ravine-search-actions .button,
+html body .ravine-advanced-search-toggle {
+  font-family: "Thmanyah Sans", sans-serif !important;
+}
+
+html body .ravine-search-dialog input,
+html body .ravine-search-dialog textarea {
+  direction: auto;
+  unicode-bidi: plaintext;
+  text-rendering: optimizeLegibility;
+}
+
+.ravine-search-overlay {
+  animation: ravine-search-overlay-in .2s ease both;
+}
+.ravine-search-overlay.is-closing {
+  animation: ravine-search-overlay-out .22s ease both;
+}
+.ravine-search-dialog {
+  animation: ravine-search-dialog-in .22s cubic-bezier(.22,1,.36,1) both;
+}
+.ravine-search-dialog.is-closing {
+  animation: ravine-search-dialog-out .2s cubic-bezier(.4,0,.8,.2) both;
+}
+
+@keyframes ravine-search-overlay-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ravine-search-overlay-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes ravine-search-dialog-in { from { opacity: 0; transform: translateY(-10px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes ravine-search-dialog-out { from { opacity: 1; transform: translateY(0) scale(1); } to { opacity: 0; transform: translateY(-7px) scale(.985); } }
+
+@media(prefers-reduced-motion:reduce){
+  .ravine-search-overlay,
+  .ravine-search-overlay.is-closing,
+  .ravine-search-dialog,
+  .ravine-search-dialog.is-closing{animation:none!important;transition:none!important}
+}
