@@ -33,7 +33,14 @@ export default async function EditAccountPage({params}:{params:Promise<{locale:s
         <div className={styles.identityPreviewCover}>{profile?.cover_url?<img src={profile.cover_url} alt=""/>:null}<div className={styles.identityPreviewCoverWash}/></div>
         <div className={styles.identityPreviewBody}>
           <div className={styles.identityPreviewAvatar}>{profile?.avatar_url?<img src={profile.avatar_url} alt=""/>:<span>{name.slice(0,1).toUpperCase()}</span>}<span className={styles.identityPreviewAvatarBadge}><Camera size={11}/></span></div>
-          <div className={styles.identityPreviewText}><strong>{name}</strong><span>{username||"@ravine"}</span><small>{profile?.is_creator?(ar?"مبدع RAVINE":"RAVINE Creator"):(ar?"حساب شخصي":"Personal account")}{profile?.is_creator&&profile.trailer_url?<><i/> <Clapperboard size={11}/> {ar?"تريلر جاهز":"Trailer ready"}</>:null}</small></div>
+          <div className={styles.identityPreviewText}>
+            <strong>{name}</strong>
+            <span>{username||"@ravine"}</span>
+            <small>
+              {profile?.is_creator?(ar?"مبدع RAVINE":"RAVINE Creator"):(ar?"حساب شخصي":"Personal account")}
+              {profile?.is_creator&&profile.trailer_url ? <><i/> <Clapperboard size={11}/> {ar?"تريلر جاهز":"Trailer ready"}</> : null}
+            </small>
+          </div>
         </div>
       </div>
     </div>
