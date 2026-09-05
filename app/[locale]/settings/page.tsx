@@ -2,28 +2,22 @@
 
 import Link from "next/link";
 import { ArrowUpRight, Check, MonitorCog, Moon, Sun, UserRound } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { use, useEffect, useState } from "react";
 import styles from "../account/account.module.css";
 
 export default function GeneralSettingsPage({ params }: { params: Promise<{ locale: string }> }) {
-  const router = useRouter();
-  const [locale, setLocale] = useState<"ar" | "en">("ar");
+  const { locale: rawLocale } = use(params);
+  const locale = rawLocale === "en" ? "en" : "ar";
+  const ar = locale === "ar";
   const [theme, setTheme] = useState<"dark" | "light">("dark");
 
   useEffect(() => {
-    let active = true;
-    void params.then(({ locale: raw }) => {
-      if (active) setLocale(raw === "en" ? "en" : "ar");
-    });
     const stored = window.localStorage.getItem("ravine-theme");
     const next = stored === "light" ? "light" : "dark";
     setTheme(next);
     document.documentElement.dataset.theme = next;
-    return () => { active = false; };
-  }, [params]);
+  }, []);
 
-  const ar = locale === "ar";
   const setThemeAndPersist = (next: "dark" | "light") => {
     setTheme(next);
     document.documentElement.dataset.theme = next;
