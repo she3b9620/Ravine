@@ -9,7 +9,7 @@ type Locale = "ar" | "en";
 type Notification = { id: string; title: string | null; body: string | null; is_read: boolean | null; created_at: string; video_id: number | null };
 
 function formatNotificationTime(value: string, locale: Locale) {
-  return new Date(value).toLocaleString(locale === "ar" ? "en-EG" : "en-US", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  return new Date(value).toLocaleString(locale === "ar" ? "ar-EG" : "en-US", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 }
 
 const CLOSE_MS = 200;
@@ -46,7 +46,6 @@ export default function NotificationBell({ locale }: { locale: Locale }) {
 
   function close() { if (!open || closing) return; setClosing(true); window.setTimeout(() => { setOpen(false); setClosing(false); }, CLOSE_MS); }
   function toggle() { if (open) close(); else { setClosing(false); setOpen(true); } }
-
   async function markRead(id: string) { const supabase = createClient(); await supabase.from("notifications").update({ is_read: true }).eq("id", id); setItems((current) => current.map((item) => item.id === id ? { ...item, is_read: true } : item)); setCount((current) => Math.max(0, current - 1)); }
   async function markAllRead() { const supabase = createClient(); const { data: auth } = await supabase.auth.getUser(); if (!auth.user) return; await supabase.from("notifications").update({ is_read: true }).eq("user_id", auth.user.id).eq("is_read", false); setItems((current) => current.map((item) => ({ ...item, is_read: true }))); setCount(0); }
 
@@ -57,10 +56,7 @@ export default function NotificationBell({ locale }: { locale: Locale }) {
       </button>
       {open || closing ? (
         <div className={`ravine-notification-popover${closing ? " is-closing" : ""}`} dir={ar ? "rtl" : "ltr"} role="dialog" aria-label={ar ? "معاينة الإشعارات" : "Notification preview"}>
-          <div className="ravine-notification-popover-head">
-            <div><span>{ar ? "RAVINE / الإشعارات" : "RAVINE / NOTIFICATIONS"}</span><strong>{ar ? "آخر التحديثات" : "Latest updates"}</strong></div>
-            {count > 0 ? <button type="button" className="ravine-notification-mark" onClick={() => void markAllRead()}><Check size={13} />{ar ? "قراءة الكل" : "Mark all read"}</button> : null}
-          </div>
+          <div className="ravine-notification-popover-head"><div><span>{ar ? "RAVINE / الإشعارات" : "RAVINE / NOTIFICATIONS"}</span><strong>{ar ? "آخر التحديثات" : "Latest updates"}</strong></div>{count > 0 ? <button type="button" className="ravine-notification-mark" onClick={() => void markAllRead()}><Check size={13} />{ar ? "قراءة الكل" : "Mark all read"}</button> : null}</div>
           <div className="ravine-notification-popover-list">
             {items.length ? items.map((item) => {
               const content = <div className={`ravine-notification-preview-item${item.is_read ? "" : " is-unread"}`}><span className="ravine-notification-dot" aria-hidden="true" /><div><strong>{item.title || (ar ? "تحديث جديد" : "New update")}</strong>{item.body ? <p>{item.body}</p> : null}<time>{formatNotificationTime(item.created_at, locale)}</time></div></div>;
