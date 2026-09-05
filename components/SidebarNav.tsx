@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Compass, Users, History, Library, Heart, MessagesSquare, Radio, Mic2, LayoutDashboard, UserRound, Clapperboard, Settings } from "lucide-react";
+import { Home, Compass, Users, History, Library, Heart, MessagesSquare, Radio, Mic2, Film, LayoutDashboard, UserRound, Clapperboard, Settings } from "lucide-react";
 import { requestRavineAuth } from "./AuthModal";
 
 type Locale = "ar" | "en";
@@ -16,7 +16,7 @@ const publicGroups: Group[] = [
     ["creators", "Creators", "المبدعون", Users],
     ["community", "Community", "المجتمع", MessagesSquare],
     ["live", "Live", "مباشر", Radio],
-    ["podcasts", "Podcasts", "البودكاست", Mic2],
+    ["podcasts", "Podcasts & Documentaries", "البودكاست والوثائقي", Mic2],
   ]],
 ];
 
@@ -54,6 +54,7 @@ export default function SidebarNav({ locale, authenticated }: { locale: Locale; 
               const active = isActive(slug);
               const href = slug ? `/${locale}/${slug}` : `/${locale}`;
               const gated = !authenticated && GUEST_GATED.has(slug);
+              const combinedContentIcon = slug === "podcasts";
               return gated ? (
                 <button
                   key={slug}
@@ -62,13 +63,13 @@ export default function SidebarNav({ locale, authenticated }: { locale: Locale; 
                   onClick={() => requestRavineAuth(`/${locale}`)}
                   aria-label={locale === "ar" ? `${ar} — سجّل للدخول` : `${en} — sign in to continue`}
                 >
-                  <span className="ravine-sidebar-link-icon"><Icon size={18} strokeWidth={1.8} aria-hidden="true" /></span>
+                  <span className="ravine-sidebar-link-icon">{combinedContentIcon ? <><Mic2 size={18} strokeWidth={1.8} aria-hidden="true" /><Film className="ravine-sidebar-dual-icon" size={10} strokeWidth={1.9} aria-hidden="true" /></> : <Icon size={18} strokeWidth={1.8} aria-hidden="true" />}</span>
                   <span className="ravine-sidebar-link-label">{locale === "ar" ? ar : en}</span>
                   {slug === "live" ? <span className="ravine-sidebar-live-dot" aria-hidden="true" /> : null}
                 </button>
               ) : (
                 <Link key={slug} href={href} className={`ravine-sidebar-link${active ? " is-active" : ""}${slug === "live" ? " is-live-link" : ""}`} aria-current={active ? "page" : undefined}>
-                  <span className="ravine-sidebar-link-icon"><Icon size={18} strokeWidth={1.8} aria-hidden="true" /></span>
+                  <span className="ravine-sidebar-link-icon">{combinedContentIcon ? <><Mic2 size={18} strokeWidth={1.8} aria-hidden="true" /><Film className="ravine-sidebar-dual-icon" size={10} strokeWidth={1.9} aria-hidden="true" /></> : <Icon size={18} strokeWidth={1.8} aria-hidden="true" />}</span>
                   <span className="ravine-sidebar-link-label">{locale === "ar" ? ar : en}</span>
                   {slug === "live" ? <span className="ravine-sidebar-live-dot" aria-hidden="true" /> : null}
                 </Link>
