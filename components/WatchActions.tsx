@@ -4,14 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Bookmark, Check, Heart, LogIn, Maximize2, Minimize2, Share2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { requestRavineAuth } from "./AuthModal";
+import { localizeSupabaseError } from "@/lib/localizeSupabaseError";
 import "./WatchActions.module.css";
-
-function localizeActionError(error: { message?: string } | null, ar: boolean) {
-  const message = error?.message ?? "";
-  if (ar && /permission denied for table follows/i.test(message)) return "لا تملك صلاحية الوصول إلى المتابعات حاليًا.";
-  if (ar && /permission denied/i.test(message)) return "لا تملك صلاحية تنفيذ هذه العملية حاليًا.";
-  return ar ? "تعذر تنفيذ العملية حاليًا." : message || "Unable to complete the action right now.";
-}
 
 export default function WatchActions({ videoId, duration, locale }: { videoId: number; duration: number | null; locale: "ar" | "en" }) {
   const ar = locale === "ar";
@@ -41,10 +35,12 @@ export default function WatchActions({ videoId, duration, locale }: { videoId: n
       setLiked(Boolean(like.data));
       setSaved(Boolean(save.data));
       setProgress(Number(history.data?.progress_seconds || 0));
+      if (like.error) setMessage(localizeSupabaseError(like.error, locale, "تعذر تحميل حالة الإعجاب حاليًا."));
+      else if (save.error) setMessage(localizeSupabaseError(save.error, locale, "تعذر تحميل حالة الحفظ حاليًا."));
     }).catch(() => undefined);
 
     return () => { mounted = false; };
-  }, [videoId]);
+  }, [videoId, locale]);
 
   function requireAuth() {
     if (userId) return true;
@@ -61,7 +57,7 @@ export default function WatchActions({ videoId, duration, locale }: { videoId: n
     const result = liked
       ? await supabase.from("video_likes").delete().eq("user_id", userId!).eq("video_id", videoId)
       : await supabase.from("video_likes").insert({ user_id: userId!, video_id: videoId });
-    if (result.error) setMessage(localizeActionError(result.error, ar)); else setLiked(!liked);
+    if (result.error) setMessage(localizeSupabaseError(result.error, locale)); else setLiked(!liked);
     setBusy(null);
   }
 
@@ -73,7 +69,7 @@ export default function WatchActions({ videoId, duration, locale }: { videoId: n
     const result = saved
       ? await supabase.from("video_saves").delete().eq("user_id", userId!).eq("video_id", videoId)
       : await supabase.from("video_saves").insert({ user_id: userId!, video_id: videoId });
-    if (result.error) setMessage(localizeActionError(result.error, ar)); else setSaved(!saved);
+    if (result.error) setMessage(localizeSupabaseError(result.error, locale)); else setSaved(!saved);
     setBusy(null);
   }
 
