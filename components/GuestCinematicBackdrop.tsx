@@ -10,6 +10,7 @@ type GuestCinematicBackdropProps = {
 
 type YouTubePlayer = {
   destroy: () => void;
+  playVideo?: () => void;
 };
 
 type YouTubeApi = {
@@ -103,6 +104,11 @@ export default function GuestCinematicBackdrop({ locale }: GuestCinematicBackdro
     let player: YouTubePlayer | null = null;
     let previousReadyHandler: (() => void) | undefined;
 
+    const resumePlayback = () => {
+      if (cancelled) return;
+      player?.playVideo?.();
+    };
+
     const handleStateChange = (event: { data: number }) => {
       if (cancelled) return;
       const playingState = window.YT?.PlayerState?.PLAYING ?? 1;
@@ -112,6 +118,7 @@ export default function GuestCinematicBackdrop({ locale }: GuestCinematicBackdro
     const createPlayer = () => {
       if (cancelled || !window.YT?.Player) return;
       player = new window.YT.Player(PLAYER_ID, { events: { onStateChange: handleStateChange } });
+      window.setTimeout(resumePlayback, 150);
     };
 
     if (window.YT?.Player) {
@@ -131,8 +138,17 @@ export default function GuestCinematicBackdrop({ locale }: GuestCinematicBackdro
       }
     }
 
+    document.addEventListener("visibilitychange", resumePlayback);
+    window.addEventListener("focus", resumePlayback);
+    window.addEventListener("pageshow", resumePlayback);
+    window.addEventListener("blur", resumePlayback);
+
     return () => {
       cancelled = true;
+      document.removeEventListener("visibilitychange", resumePlayback);
+      window.removeEventListener("focus", resumePlayback);
+      window.removeEventListener("pageshow", resumePlayback);
+      window.removeEventListener("blur", resumePlayback);
       if (window.onYouTubeIframeAPIReady === previousReadyHandler || previousReadyHandler === undefined) window.onYouTubeIframeAPIReady = previousReadyHandler;
       player?.destroy();
       player = null;
