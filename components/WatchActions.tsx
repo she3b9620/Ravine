@@ -6,6 +6,13 @@ import { createClient } from "@/lib/supabase/client";
 import { requestRavineAuth } from "./AuthModal";
 import "./WatchActions.module.css";
 
+function localizeActionError(error: { message?: string } | null, ar: boolean) {
+  const message = error?.message ?? "";
+  if (ar && /permission denied for table follows/i.test(message)) return "لا تملك صلاحية تنفيذ هذه العملية حاليًا.";
+  if (ar && /permission denied/i.test(message)) return "لا تملك صلاحية تنفيذ هذه العملية حاليًا.";
+  return ar ? "تعذر تنفيذ العملية حاليًا." : message || "Unable to complete the action right now.";
+}
+
 export default function WatchActions({ videoId, duration, locale }: { videoId: number; duration: number | null; locale: "ar" | "en" }) {
   const ar = locale === "ar";
   const [userId, setUserId] = useState<string | null>(null);
@@ -49,22 +56,24 @@ export default function WatchActions({ videoId, duration, locale }: { videoId: n
   async function toggleLike() {
     if (!requireAuth() || busy) return;
     setBusy("like");
+    setMessage("");
     const supabase = createClient();
     const result = liked
       ? await supabase.from("video_likes").delete().eq("user_id", userId!).eq("video_id", videoId)
       : await supabase.from("video_likes").insert({ user_id: userId!, video_id: videoId });
-    if (result.error) setMessage(result.error.message); else setLiked(!liked);
+    if (result.error) setMessage(localizeActionError(result.error, ar)); else setLiked(!liked);
     setBusy(null);
   }
 
   async function toggleSave() {
     if (!requireAuth() || busy) return;
     setBusy("save");
+    setMessage("");
     const supabase = createClient();
     const result = saved
       ? await supabase.from("video_saves").delete().eq("user_id", userId!).eq("video_id", videoId)
       : await supabase.from("video_saves").insert({ user_id: userId!, video_id: videoId });
-    if (result.error) setMessage(result.error.message); else setSaved(!saved);
+    if (result.error) setMessage(localizeActionError(result.error, ar)); else setSaved(!saved);
     setBusy(null);
   }
 
@@ -134,7 +143,7 @@ export default function WatchActions({ videoId, duration, locale }: { videoId: n
         </div>
       )}
 
-      {message && <p className="watch-action-message">{message}</p>}
+      {message && <p className="watch-action-message" role="alert">{message}</p>}
       <WatchVideoBridge onTimeUpdate={markProgress} resumeSeconds={progress} duration={duration} />
     </div>
   );
