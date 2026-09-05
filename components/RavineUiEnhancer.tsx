@@ -100,11 +100,23 @@ function enhanceSelectionTabs() {
   });
 }
 
-function appendGuestAbout() {
+function isHomeRoute() {
+  const path = window.location.pathname.replace(/\/$/, "");
+  return path === "/ar" || path === "/en";
+}
+
+function syncGuestAbout() {
+  const existing = document.querySelectorAll(".ravine-guest-about");
+
+  if (!isHomeRoute()) {
+    existing.forEach((section) => section.remove());
+    return;
+  }
+
   const main = document.querySelector(".guest-shell .ravine-main");
   if (!main || main.querySelector(".ravine-guest-about")) return;
-  const locale = document.documentElement.lang === "en" ? "en" : "ar";
 
+  const locale = document.documentElement.lang === "en" ? "en" : "ar";
   const section = document.createElement("section");
   section.className = "section about-section ravine-guest-about";
   section.innerHTML = locale === "ar"
@@ -119,13 +131,13 @@ export default function RavineUiEnhancer() {
     localizeArabicNumerals();
     localizeFollowErrors();
     enhanceSelectionTabs();
-    appendGuestAbout();
+    syncGuestAbout();
 
     const observer = new MutationObserver(() => {
       localizeArabicNumerals();
       localizeFollowErrors();
       enhanceSelectionTabs();
-      appendGuestAbout();
+      syncGuestAbout();
     });
     observer.observe(document.body, { childList: true, subtree: true, characterData: true });
     return () => observer.disconnect();
