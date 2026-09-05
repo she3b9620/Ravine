@@ -8,7 +8,7 @@ type Locale = "ar" | "en";
 type Item = readonly [slug: string, en: string, ar: string, icon: typeof Home];
 type Group = readonly [titleEn: string, titleAr: string, items: Item[]];
 
-const groups: Group[] = [
+const publicGroups: Group[] = [
   ["RAVINE", "رَافِين", [
     ["", "Home", "الرئيسية", Home],
     ["discover", "Explore work", "استكشف الأعمال", Compass],
@@ -17,6 +17,9 @@ const groups: Group[] = [
     ["live", "Live", "مباشر", Radio],
     ["podcasts", "Podcasts", "البودكاست", Mic2],
   ]],
+];
+
+const privateGroups: Group[] = [
   ["YOUR SPACE", "مساحتك", [
     ["creators?tab=following", "Following", "تتابعهم", Users],
     ["library", "Library", "المكتبة", Library],
@@ -31,8 +34,9 @@ const groups: Group[] = [
   ]],
 ];
 
-export default function SidebarNav({ locale }: { locale: Locale }) {
+export default function SidebarNav({ locale, authenticated }: { locale: Locale; authenticated: boolean }) {
   const pathname = usePathname() || `/${locale}`;
+  const groups = authenticated ? [...publicGroups, ...privateGroups] : publicGroups;
   const isActive = (slug: string) => {
     const [path] = slug.split("?");
     return !path ? pathname === `/${locale}` : pathname === `/${locale}/${path}` || pathname.startsWith(`/${locale}/${path}/`);
