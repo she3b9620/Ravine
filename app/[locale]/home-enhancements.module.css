@@ -56,3 +56,9 @@
 :global(.ravine-live-dot){width:7px;height:7px;border-radius:50%;background:#ef3f3f;box-shadow:0 0 0 2px rgba(239,63,63,.13),0 0 9px rgba(239,63,63,.75),0 0 18px rgba(239,63,63,.35);animation:ravineLivePulse 1.35s ease-in-out infinite}
 @keyframes ravineLivePulse{0%,100%{transform:scale(.92);opacity:.8}50%{transform:scale(1.16);opacity:1}}
 @media(prefers-reduced-motion:reduce){:global(.ravine-live-dot){animation:none}}
+
+/* Guest mode: keep the public window intentionally small without changing authenticated Home. */
+:global(.guest-shell .home-work-card:nth-child(n+5)){display:none}
+:global(.guest-shell .creator-feature:nth-child(n+4)){display:none}
+:global(.guest-shell .mini-grid .video-card:nth-child(n+3)){display:none}
+:global(.guest-shell .pathway-card:nth-child(n+5)){display:none}
