@@ -1,24 +1,22 @@
 /* Final shell polish: the top header stays a true header; the contextual home navigation lives in the collapsible sidebar. */
 .ravine-header-inner{grid-template-columns:auto minmax(0,1fr) auto!important;column-gap:clamp(20px,3vw,42px)!important;padding-inline:clamp(20px,3vw,34px)!important}
 .ravine-header-start{gap:15px!important;min-width:0}.ravine-header-start .ravine-brand{flex:0 0 auto}
-.ravine-nav{min-width:0;display:flex!important;align-items:center;justify-content:center;gap:clamp(14px,1.5vw,24px)!important;overflow-x:auto;scrollbar-width:none}.ravine-nav::-webkit-scrollbar{display:none}
-.ravine-nav-link{white-space:nowrap!important}
+.ravine-nav{min-width:0;display:flex!important;align-items:center;justify-content:center;gap:clamp(14px,1.5vw,24px)!important;overflow-x:auto;scrollbar-width:none}.ravine-nav::-webkit-scrollbar{display:none}.ravine-nav-link{white-space:nowrap!important}
 .ravine-header-actions{gap:clamp(9px,1vw,14px)!important;padding-inline-start:clamp(4px,1vw,10px)!important;min-width:0}.ravine-header-actions>*{flex:0 0 auto}.ravine-header-actions .ravine-search-trigger{max-width:min(280px,24vw)}
-.ravine-sidebar{will-change:transform,opacity}
-.ravine-sidebar-toggle{position:relative;z-index:2}
-/* The old Home discovery strip is intentionally removed; its links now live in SidebarNav. */
+.ravine-sidebar{will-change:transform,opacity}.ravine-sidebar-toggle{position:relative;z-index:2}
 .home-viewer-discovery-bar{display:none!important}
-/* Authenticated Home welcome identity: heading and the owner's avatar share one balanced hero composition. */
 .home-viewer-hero .hero-inner{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:clamp(34px,7vw,100px);width:min(1320px,100%)}
 .home-viewer-welcome-copy{min-width:0}.home-viewer-profile{width:min(260px,24vw);min-width:210px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:22px 20px;border:1px solid rgba(241,233,220,.11);border-radius:26px;background:linear-gradient(145deg,rgba(24,63,70,.22),rgba(21,23,25,.72));box-shadow:0 28px 70px rgba(0,0,0,.24),inset 0 1px 0 rgba(241,233,220,.045);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 .home-viewer-profile-halo{width:118px;height:118px;padding:7px;border-radius:50%;background:radial-gradient(circle at 35% 30%,rgba(212,154,120,.34),transparent 38%),linear-gradient(145deg,rgba(196,122,82,.7),rgba(24,63,70,.75));box-shadow:0 0 0 1px rgba(241,233,220,.08),0 20px 46px rgba(0,0,0,.34),0 0 36px rgba(196,122,82,.12)}
 .home-viewer-profile-avatar{width:100%;height:100%;display:grid;place-items:center;overflow:hidden;border-radius:50%;background:#183f46;border:1px solid rgba(241,233,220,.15);color:#f1e9dc;font-size:28px;font-weight:800;box-shadow:inset 0 0 0 5px rgba(9,9,9,.16)}.home-viewer-profile-avatar img{width:100%;height:100%;display:block;object-fit:cover}
 .home-viewer-profile-copy{display:grid;gap:5px;text-align:center;min-width:0}.home-viewer-profile-copy strong{font-size:16px;line-height:1.25;max-width:210px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.home-viewer-profile-copy span{color:var(--stone);font-size:10px;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-/* Popup entrance/exit rhythm. */
 .ravine-notification-popover{transform-origin:top right;will-change:transform,opacity}.ravine-shell[dir="rtl"] .ravine-notification-popover{transform-origin:top left}.ravine-notification-popover.is-closing{animation:ravine-popover-out .2s cubic-bezier(.4,0,.8,.2) both}
 .ravine-message-center-overlay{will-change:opacity}.ravine-message-center{transform-origin:center center;will-change:transform,opacity}.ravine-message-center-overlay.is-closing{animation:ravine-overlay-out .2s ease both}.ravine-message-center.is-closing{animation:ravine-popover-out .2s cubic-bezier(.4,0,.8,.2) both}
 [class*="popover"].is-closing,[class*="modal"].is-closing,[class*="dialog"].is-closing{animation:ravine-popover-out .2s cubic-bezier(.4,0,.8,.2) both}[class*="overlay"].is-closing{animation:ravine-overlay-out .2s ease both}
 @keyframes ravine-popover-out{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(-6px) scale(.985)}}@keyframes ravine-overlay-out{from{opacity:1}to{opacity:0}}
+/* Language switcher follows the actual script: EN is Latin/Satoshi; عربي is Arabic/Thmanyah. */
+.ravine-shell[lang="ar"] .ravine-language{font-family:Satoshi,sans-serif!important;unicode-bidi:isolate}
+.ravine-shell[lang="en"] .ravine-language{font-family:"Thmanyah Sans",sans-serif!important;unicode-bidi:isolate}
 @media(max-width:1180px){.ravine-header-inner{column-gap:18px!important;padding-inline:20px!important}.ravine-header-actions{gap:8px!important}.ravine-header-actions .ravine-search-trigger{max-width:220px}}
 @media(max-width:980px){.home-viewer-hero .hero-inner{grid-template-columns:1fr}.home-viewer-profile{width:min(360px,100%);min-width:0;justify-self:start}.ravine-nav{justify-content:flex-start}}
 @media(max-width:820px){.ravine-header-inner{grid-template-columns:auto minmax(0,1fr)!important;column-gap:10px!important;padding-inline:16px!important}.ravine-header-start{gap:9px!important}.ravine-header-actions{gap:7px!important;padding-inline-start:0!important}.ravine-header-actions .ravine-search-trigger{max-width:none}.home-viewer-hero .hero-inner{gap:28px}.home-viewer-profile{justify-self:stretch;width:100%;padding:18px}.home-viewer-profile-halo{width:96px;height:96px}}
