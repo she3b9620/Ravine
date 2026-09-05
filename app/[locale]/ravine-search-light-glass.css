@@ -1,0 +1,38 @@
+.ravine-search-overlay{
+  background:rgba(9,9,9,.16)!important;
+  background-image:none!important;
+  -webkit-backdrop-filter:blur(20px) saturate(112%) contrast(102%)!important;
+  backdrop-filter:blur(20px) saturate(112%) contrast(102%)!important;
+}
+
+html[data-theme="light"] .ravine-search-overlay{
+  background:rgba(241,233,220,.34)!important;
+  background-image:none!important;
+  -webkit-backdrop-filter:blur(22px) saturate(106%)!important;
+  backdrop-filter:blur(22px) saturate(106%)!important;
+}
+
+html[data-theme="light"] .ravine-search-overlay::before{
+  content:""!important;
+  position:absolute!important;
+  inset:0!important;
+  pointer-events:none!important;
+  background:radial-gradient(circle at 18% 12%,rgba(196,122,82,.10),transparent 30%),radial-gradient(circle at 82% 78%,rgba(24,63,70,.08),transparent 34%)!important;
+  opacity:1!important;
+}
+
+html[data-theme="light"] .ravine-search-dialog{
+  background:rgba(255,253,251,.82)!important;
+  -webkit-backdrop-filter:blur(10px) saturate(108%)!important;
+  backdrop-filter:blur(10px) saturate(108%)!important;
+  border-color:rgba(23,23,23,.14)!important;
+  box-shadow:0 28px 90px rgba(43,35,29,.16),0 0 0 1px rgba(255,255,255,.30) inset!important;
+}
+
+@media(prefers-reduced-motion:reduce){
+  .ravine-search-overlay,
+  html[data-theme="light"] .ravine-search-overlay{
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+  }
+}
