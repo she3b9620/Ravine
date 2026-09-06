@@ -110,7 +110,8 @@ function syncGuestAbout() {
   if (!isHomeRoute()) { existing.forEach((section) => section.remove()); return; }
   const main = document.querySelector(".guest-shell .ravine-main");
   if (!main || main.querySelector(".ravine-guest-about")) return;
-  const locale = document.documentElement.lang === "en" ? "en" : "ar";
+  const shell = document.querySelector(".ravine-shell");
+  const locale = shell?.getAttribute("lang") === "en" ? "en" : "ar";
   const section = document.createElement("section");
   section.className = "section about-section ravine-guest-about";
   section.innerHTML = locale === "ar"
