@@ -2,6 +2,7 @@ import Link from "next/link";
 import { randomInt } from "node:crypto";
 import { createClient } from "@/lib/supabase/server";
 import AuthTrigger from "@/components/AuthTrigger";
+import GuestCinematicBackdrop from "@/components/GuestCinematicBackdrop";
 import HomeWorkCard, { type HomeWork } from "@/components/HomeWorkCard";
 import "./home-enhancements.module.css";
 
@@ -81,7 +82,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   </div>;
 
   return <div className="home-guest">
-    <section className="hero home-guest-hero"><div className="hero-inner"><div className="home-state-kicker">{t.guestEyebrow}</div><h1>{t.guestTitle}</h1><p>{t.guestBody}</p><div className="home-state-actions"><AuthTrigger locale={locale} label={t.signup} /><Link className="button secondary" href={`/${locale}/discover`}>{t.discover}</Link></div></div></section>
+    <section className="hero home-guest-hero"><GuestCinematicBackdrop locale={locale} /><div className="hero-inner"><div className="home-state-kicker">{t.guestEyebrow}</div><h1>{t.guestTitle}</h1><p>{t.guestBody}</p><div className="home-state-actions"><AuthTrigger locale={locale} label={t.signup} /><Link className="button secondary" href={`/${locale}/discover`}>{t.discover}</Link></div></div></section>
     <section className="section"><div className="home-guest-preview"><div><div className="eyebrow">{locale === "ar" ? "رَافِين / معاينة" : "RAVINE / PREVIEW"}</div><h2>{t.guestPreview}</h2><p className="home-guest-intro">{t.guestPreviewBody}</p><div className="video-grid">{shuffleWorks(publicWorks.slice(0, 6)).map((work) => <WorkCard key={work.id} work={work} locale={locale} />)}</div></div><div className="home-guest-note"><strong>{locale === "ar" ? "شاهد، تعرّف، ثم انضم." : "See it. Understand it. Then join."}</strong><p>{locale === "ar" ? "التصفح العام متاح للضيوف، بينما الإعجاب والحفظ والمتابعة والتقييم والمجتمعات والموجز الشخصي تحتاج إلى حساب." : "Public browsing stays open to guests; liking, saving, following, rating, community actions and a personal feed require an account."}</p></div></div></section>
     <section className="section"><div className="section-head"><div><div className="eyebrow">{locale === "ar" ? "رَافِين / المبدعون" : "RAVINE / PEOPLE"}</div><h2>{t.creatorsTitle}</h2><p className="section-note">{t.creatorsBody}</p></div></div>{creators.length ? <div className="creator-strip">{creators.slice(0, 6).map((creator) => <CreatorCard key={creator.id} creator={creator} locale={locale} />)}</div> : <div className="empty-state"><strong>{t.emptyCreators}</strong></div>}</section>
     <section className="section"><div className="section-head"><div><div className="eyebrow">{locale === "ar" ? "رَافِين / أفكار" : "RAVINE / IDEAS"}</div><h2>{t.ideas}</h2></div><Link className="button secondary" href={`/${locale}/discover`}>{t.discover}</Link></div><div className="home-gated-row"><div className="home-gated-item"><span>01</span><strong>{t.quality}</strong><p>{t.qualityBody}</p></div><div className="home-gated-item"><span>02</span><strong>{t.identity}</strong><p>{t.identityBody}</p></div><div className="home-gated-item"><span>03</span><strong>{t.graph}</strong><p>{t.graphBody}</p></div></div></section>
