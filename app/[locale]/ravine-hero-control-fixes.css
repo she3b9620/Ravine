@@ -27,6 +27,18 @@
 /* Only the volume popover gets the slower disappearance. Do not change the timing of
    the main Hero controls/buttons. */
 
+/* RAVINE Guest Hero kicker — the same readable shadow/glow treatment in Arabic and English. */
+.guest-shell .home-guest-hero .home-state-kicker{
+  color:#D49A78!important;
+  font-weight:800!important;
+  letter-spacing:.08em!important;
+  text-shadow:
+    0 2px 0 rgba(9,9,9,.56),
+    0 5px 16px rgba(9,9,9,.38),
+    0 0 8px rgba(241,233,220,.12),
+    0 0 16px rgba(196,122,82,.10)!important;
+}
+
 /* RAVINE Guest Hero intro copy — lock typography metrics across Light/Dark and AR/EN.
    Theme changes only the text color/shadow; locale changes only the established font. */
 .guest-shell .home-guest-hero p{
