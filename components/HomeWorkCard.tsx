@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { formatRavineNumber } from "@/lib/ravine-number-formatter";
 import {
   loadYouTubeIframeApi,
@@ -138,7 +138,10 @@ export default function HomeWorkCard({
   const [previewing, setPreviewing] = useState(false);
   const [fading, setFading] = useState(false);
 
-  const source = previewSource(work);
+  const source = useMemo(
+    () => previewSource(work),
+    [work.id, work.video_url]
+  );
 
   const clearTimers = useCallback(() => {
     if (hoverTimerRef.current) window.clearTimeout(hoverTimerRef.current);
@@ -173,41 +176,38 @@ export default function HomeWorkCard({
     setPreviewing(false);
   }, [clearTimers, destroyYouTubePreview]);
 
-  const startLocalPreview = useCallback(
-    (src: string) => {
-      const video = videoRef.current;
-      if (!video) return;
+  const startLocalPreview = useCallback((src: string) => {
+    const video = videoRef.current;
+    if (!video) return;
 
-      setFading(false);
-      setPreviewing(true);
+    setFading(false);
+    setPreviewing(true);
 
-      video.muted = true;
-      video.volume = 0;
-      video.playsInline = true;
-      video.autoplay = true;
-      video.controls = false;
-      video.disablePictureInPicture = true;
+    video.muted = true;
+    video.volume = 0;
+    video.playsInline = true;
+    video.autoplay = true;
+    video.controls = false;
+    video.disablePictureInPicture = true;
 
-      const begin = () => {
-        try {
-          video.currentTime = 0;
-        } catch {
-          // Ignore media reset races.
-        }
-        void video.play().catch(() => undefined);
-      };
-
-      if (video.src !== new URL(src, window.location.origin).href) {
-        video.src = src;
+    const begin = () => {
+      try {
+        video.currentTime = 0;
+      } catch {
+        // Ignore media reset races.
       }
+      void video.play().catch(() => undefined);
+    };
 
-      if (video.readyState >= 1) begin();
-      else video.addEventListener("loadedmetadata", begin, { once: true });
+    if (video.src !== new URL(src, window.location.origin).href) {
+      video.src = src;
+    }
 
-      video.load();
-    },
-    []
-  );
+    if (video.readyState >= 1) begin();
+    else video.addEventListener("loadedmetadata", begin, { once: true });
+
+    video.load();
+  }, []);
 
   const startYouTubePreview = useCallback(
     async (videoId: string) => {
