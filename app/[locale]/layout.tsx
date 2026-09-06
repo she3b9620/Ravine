@@ -8,6 +8,7 @@ import SelectionTabsEnhancer from "../../components/SelectionTabsEnhancer";
 import VideoAudioToggle from "../../components/VideoAudioToggle";
 import LocalePersistence from "../../components/LocalePersistence";
 import EnglishAboutLocaleFix from "../../components/EnglishAboutLocaleFix";
+import SearchLiveEnhancer from "../../components/SearchLiveEnhancer";
 import "./ravine-overrides.css";
 import "./home-spacing.css";
 import "./ravine-final-visual-fixes.css";
@@ -46,6 +47,7 @@ import "./ravine-cinematic-motion.css";
 import "./hero-video-control-safe-area.css";
 import "./ravine-hero-control-fixes.css";
 import "./ravine-search-light-visual-fix.css";
+import "./ravine-search-results.css";
 
 const locales = ["ar", "en"] as const;
 type Locale = (typeof locales)[number];
@@ -66,6 +68,7 @@ export default async function LocaleLayout({children,params}:{children:ReactNode
       <RavineUiEnhancer />
       <RavineLogoMotion />
       <SelectionTabsEnhancer />
+      <SearchLiveEnhancer />
       <RavinePageTransition>{children}</RavinePageTransition>
     </RavineShell>
   );
