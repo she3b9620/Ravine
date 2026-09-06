@@ -363,3 +363,39 @@ html[data-theme="light"] .guest-shell .ravine-hero-video-controls .ravine-video-
     height:18px!important;
   }
 }
+
+/* FINAL VIDEO CONTROLS POSITION — opposite side of sidebar */
+.guest-shell .ravine-hero-video-controls{
+  position:fixed!important;
+  top:104px!important;
+  width:max-content!important;
+  max-width:none!important;
+  margin:0!important;
+  transform:none!important;
+}
+
+.guest-shell .ravine-hero-video-controls.is-rtl{
+  left:32px!important;
+  right:auto!important;
+  inset:104px auto auto 32px!important;
+}
+
+.guest-shell .ravine-hero-video-controls.is-ltr{
+  right:32px!important;
+  left:auto!important;
+  inset:104px 32px auto auto!important;
+}
+
+@media(max-width:820px){
+  .guest-shell .ravine-hero-video-controls.is-rtl{
+    left:14px!important;
+    right:auto!important;
+    inset:88px auto auto 14px!important;
+  }
+
+  .guest-shell .ravine-hero-video-controls.is-ltr{
+    right:14px!important;
+    left:auto!important;
+    inset:88px 14px auto auto!important;
+  }
+}
