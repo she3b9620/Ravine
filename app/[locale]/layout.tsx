@@ -8,7 +8,6 @@ import SelectionTabsEnhancer from "../../components/SelectionTabsEnhancer";
 import VideoAudioToggle from "../../components/VideoAudioToggle";
 import LocalePersistence from "../../components/LocalePersistence";
 import EnglishAboutLocaleFix from "../../components/EnglishAboutLocaleFix";
-import SearchLiveEnhancer from "../../components/SearchLiveEnhancer";
 import "./ravine-overrides.css";
 import "./home-spacing.css";
 import "./ravine-final-visual-fixes.css";
@@ -69,7 +68,6 @@ export default async function LocaleLayout({children,params}:{children:ReactNode
       <RavineUiEnhancer />
       <RavineLogoMotion />
       <SelectionTabsEnhancer />
-      <SearchLiveEnhancer />
       <RavinePageTransition>{children}</RavinePageTransition>
     </RavineShell>
   );
