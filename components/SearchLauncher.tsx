@@ -10,6 +10,19 @@ type Category = { id: number; name: string; slug: string | null };
 type Props = { locale: Locale; categories: Category[] };
 type Option = { value: string; ar: string; en: string };
 
+type SearchState = {
+  open: boolean;
+  locale: Locale;
+  query: string;
+  category: string;
+  type: string;
+  duration: string;
+  format: string;
+  quality: string;
+};
+
+const SEARCH_STATE_EVENT = "ravine-search-state";
+
 const TYPES: Option[] = [
   { value: "video", ar: "فيديو", en: "Video" },
   { value: "short", ar: "قصير", en: "Short" },
@@ -79,6 +92,21 @@ export default function SearchLauncher({ locale, categories }: Props) {
   const [duration, setDuration] = useState("");
   const [format, setFormat] = useState("");
   const [quality, setQuality] = useState("");
+
+  useEffect(() => {
+    const detail: SearchState = {
+      open,
+      locale,
+      query,
+      category,
+      type,
+      duration: advanced ? duration : "",
+      format: advanced ? format : "",
+      quality: advanced ? quality : "",
+    };
+
+    window.dispatchEvent(new CustomEvent<SearchState>(SEARCH_STATE_EVENT, { detail }));
+  }, [open, locale, query, category, type, duration, format, quality, advanced]);
 
   function close() {
     if (!open || closing) return;
@@ -154,6 +182,7 @@ export default function SearchLauncher({ locale, categories }: Props) {
         aria-modal="true"
         aria-labelledby="ravine-search-title"
         dir={ar ? "rtl" : "ltr"}
+        onPointerDown={(event) => event.stopPropagation()}
       >
         <div className="ravine-search-dialog-head">
           <div>
@@ -166,7 +195,14 @@ export default function SearchLauncher({ locale, categories }: Props) {
         <form className="ravine-search-form" onSubmit={submit}>
           <div className="ravine-search-input">
             <Search size={18} aria-hidden="true" />
-            <input value={query} onChange={(event) => setQuery(event.target.value)} autoFocus placeholder={ar ? "اسم عمل، فكرة، مبدع، موضوع..." : "A work, idea, creator, topic..."} />
+            <input
+              name="q"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              autoFocus
+              dir="auto"
+              placeholder={ar ? "اسم عمل، فكرة، مبدع، موضوع..." : "A work, idea, creator, topic..."}
+            />
           </div>
 
           <div className="ravine-search-field-grid two">
@@ -197,7 +233,18 @@ export default function SearchLauncher({ locale, categories }: Props) {
 
   return (
     <>
-      <button type="button" className="ravine-minor-link ravine-search-trigger" onClick={() => { setClosing(false); setOpen(true); }} aria-label={ar ? "بحث" : "Search"}>
+      <button
+        type="button"
+        className="ravine-minor-link ravine-search-trigger"
+        onPointerDown={(event) => {
+          event.stopPropagation();
+        }}
+        onClick={() => {
+          setClosing(false);
+          setOpen(true);
+        }}
+        aria-label={ar ? "بحث" : "Search"}
+      >
         <Search size={15} aria-hidden="true" /><span>{ar ? "بحث" : "Search"}</span>
       </button>
       {modal && typeof document !== "undefined" ? createPortal(modal, document.body) : null}
