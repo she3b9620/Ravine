@@ -48,27 +48,15 @@ import "./ravine-hero-control-fixes.css";
 import "./ravine-guest-volume-direction-fix.css";
 import "./ravine-search-light-visual-fix.css";
 import "./ravine-search-results.css";
+import "./ravine-final-batch-polish.css";
 
 const locales = ["ar", "en"] as const;
 type Locale = (typeof locales)[number];
 
-export function generateStaticParams(){
-  return locales.map((locale)=>({locale}));
-}
+export function generateStaticParams(){ return locales.map((locale)=>({locale})); }
 
 export default async function LocaleLayout({children,params}:{children:ReactNode;params:Promise<{locale:string}>}){
   const {locale}=await params;
   if(!locales.includes(locale as Locale)) notFound();
-
-  return (
-    <RavineShell locale={locale as Locale}>
-      <LocalePersistence locale={locale as Locale}/>
-      <EnglishAboutLocaleFix />
-      <VideoAudioToggle locale={locale as Locale}/>
-      <RavineUiEnhancer />
-      <RavineLogoMotion />
-      <SelectionTabsEnhancer />
-      <RavinePageTransition>{children}</RavinePageTransition>
-    </RavineShell>
-  );
+  return <RavineShell locale={locale as Locale}><LocalePersistence locale={locale as Locale}/><EnglishAboutLocaleFix /><VideoAudioToggle locale={locale as Locale}/><RavineUiEnhancer /><RavineLogoMotion /><SelectionTabsEnhancer /><RavinePageTransition>{children}</RavinePageTransition></RavineShell>;
 }
