@@ -75,21 +75,110 @@ const VIDEO_IDS = [
 const YOUTUBE_API_SRC = "https://www.youtube.com/iframe_api";
 const PLAYER_ID = "ravine-guest-cinematic-player";
 const DEFAULT_VOLUME = 60;
+const VIDEO_SHUFFLE_STORAGE_KEY = "ravine:guest-hero-video-shuffle:v1";
+
+type VideoShuffleState = {
+  remaining: number[];
+  last: number | null;
+};
+
+function secureRandomInt(maxExclusive: number) {
+  if (maxExclusive <= 1) return 0;
+
+  if (typeof window !== "undefined" && window.crypto?.getRandomValues) {
+    const values = new Uint32Array(1);
+    window.crypto.getRandomValues(values);
+    return values[0] % maxExclusive;
+  }
+
+  return Math.floor(Math.random() * maxExclusive);
+}
+
+function createVideoPool(length: number) {
+  return Array.from({ length }, (_, index) => index);
+}
+
+function isValidVideoIndex(value: unknown, length: number): value is number {
+  return (
+    typeof value === "number" &&
+    Number.isInteger(value) &&
+    value >= 0 &&
+    value < length
+  );
+}
+
+function readVideoShuffleState(length: number): VideoShuffleState {
+  const fallback: VideoShuffleState = {
+    remaining: createVideoPool(length),
+    last: null,
+  };
+
+  if (typeof window === "undefined") return fallback;
+
+  try {
+    const raw = window.localStorage.getItem(VIDEO_SHUFFLE_STORAGE_KEY);
+    if (!raw) return fallback;
+
+    const parsed = JSON.parse(raw) as Partial<VideoShuffleState> | null;
+    if (!parsed || !Array.isArray(parsed.remaining)) return fallback;
+
+    const remaining = parsed.remaining.filter((value): value is number =>
+      isValidVideoIndex(value, length)
+    );
+
+    const last = isValidVideoIndex(parsed.last, length)
+      ? parsed.last
+      : null;
+
+    const uniqueRemaining = [...new Set(remaining)];
+    if (!uniqueRemaining.length && last === null) return fallback;
+
+    return {
+      remaining: uniqueRemaining,
+      last,
+    };
+  } catch {
+    return fallback;
+  }
+}
+
+function persistVideoShuffleState(state: VideoShuffleState) {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.localStorage.setItem(
+      VIDEO_SHUFFLE_STORAGE_KEY,
+      JSON.stringify(state)
+    );
+  } catch {
+    // Ignore storage restrictions and keep runtime randomness working.
+  }
+}
 
 function randomVideoIndex(length: number) {
   if (length <= 1) return 0;
 
-  if (
-    typeof window === "undefined" ||
-    !window.crypto?.getRandomValues
-  ) {
-    return Math.floor(Math.random() * length);
+  const state = readVideoShuffleState(length);
+  let pool = state.remaining.length
+    ? state.remaining
+    : createVideoPool(length);
+
+  if (pool.length > 1 && state.last !== null) {
+    const withoutLast = pool.filter((index) => index !== state.last);
+    if (withoutLast.length) {
+      pool = withoutLast;
+    }
   }
 
-  const values = new Uint32Array(1);
-  window.crypto.getRandomValues(values);
+  const selected = pool[secureRandomInt(pool.length)];
+  const nextRemaining = pool.filter((index) => index !== selected);
 
-  return values[0] % length;
+  persistVideoShuffleState({
+    remaining: nextRemaining,
+    last: selected,
+  });
+
+  return selected;
 }
 
 type VideoControlEvent = CustomEvent<{
