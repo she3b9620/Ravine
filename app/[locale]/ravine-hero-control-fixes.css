@@ -179,8 +179,9 @@ html[data-theme="light"] .guest-shell .home-guest-hero .home-state-actions .butt
   backdrop-filter:blur(14px) saturate(115%)!important;
   box-shadow:0 16px 38px rgba(0,0,0,.25),0 0 0 1px rgba(196,122,82,.025)!important;
   opacity:0!important;
-  transform:translate3d(-50%,6px,0) scale(.94)!important;
   visibility:hidden!important;
+  translate:none!important;
+  transform:translate3d(-50%,6px,0) scale(.94)!important;
   transition:
     opacity .22s ease 1s,
     transform .22s cubic-bezier(.22,1,.36,1) 1s,
