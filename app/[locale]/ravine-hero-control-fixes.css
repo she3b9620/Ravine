@@ -1,0 +1,29 @@
+/* RAVINE Hero-only finishing overrides.
+   Scoped to Light Mode so Dark Mode remains untouched. */
+
+/* Arabic RTL must not reverse the vertical volume control: low stays at the bottom,
+   high stays at the top, matching standard media-player behavior. */
+html[data-theme="light"] .ravine-home-video-control-shell .ravine-video-volume-popover input[type="range"]{
+  direction:rtl!important;
+  writing-mode:vertical-lr!important;
+}
+
+/* Give the Hero controls enough breathing room before they disappear so the volume
+   control remains easy to grab and adjust. */
+html[data-theme="light"] .ravine-home-video-control-shell .ravine-hero-video-controls-panel,
+html[data-theme="light"] .ravine-home-video-control-shell .ravine-hero-video-controls,
+html[data-theme="light"] .ravine-home-video-control-shell .ravine-video-volume-popover{
+  transition-duration:1.25s!important;
+}
+
+/* Light Hero title: preserve the existing copper silhouette/weight, but remove the
+   white outline and replace it with a very restrained ivory glow + soft shadow. */
+html[data-theme="light"] .home-guest-hero h1{
+  -webkit-text-stroke:0 transparent!important;
+  paint-order:normal!important;
+  text-shadow:
+    0 1px 0 rgba(9,9,9,.24),
+    0 0 5px rgba(241,233,220,.16),
+    0 0 14px rgba(241,233,220,.09),
+    0 3px 18px rgba(9,9,9,.16)!important;
+}
