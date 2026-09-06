@@ -146,8 +146,103 @@ html[data-theme="light"] .ravine-shell .home-guest-hero .ravine-guest-cinematic-
 
 /* RAVINE guest paragraph exact Light-mode parity */
 
-/* The Light Mode treatment is the visual reference.
-   Dark Mode keeps the exact same effect; only text color remains light. */
+/* =========================================================
+   VIDEO CONTROLS
+   AR  = LEFT
+   EN  = RIGHT
+   These values intentionally use physical left/right so
+   language direction cannot flip them unexpectedly.
+   ========================================================= */
+
+.guest-shell .ravine-hero-video-controls.is-rtl{
+  position:fixed!important;
+  top:104px!important;
+  left:32px!important;
+  right:auto!important;
+  inset-inline-start:auto!important;
+  inset-inline-end:auto!important;
+  margin:0!important;
+}
+
+.guest-shell .ravine-hero-video-controls.is-ltr{
+  position:fixed!important;
+  top:104px!important;
+  right:32px!important;
+  left:auto!important;
+  inset-inline-start:auto!important;
+  inset-inline-end:auto!important;
+  margin:0!important;
+}
+
+@media(max-width:820px){
+  .guest-shell .ravine-hero-video-controls.is-rtl{
+    left:14px!important;
+    right:auto!important;
+  }
+
+  .guest-shell .ravine-hero-video-controls.is-ltr{
+    right:14px!important;
+    left:auto!important;
+  }
+}
+
+/* =========================================================
+   GUEST PARAGRAPHS
+   LIGHT MODE IS THE MASTER VISUAL REFERENCE.
+   Dark mode uses the same typography/effect values.
+   Only readable text color follows the background.
+   ========================================================= */
+
+.ravine-shell .home-guest-hero p,
+.guest-shell .home-guest-note p{
+  font-size:inherit!important;
+  font-weight:inherit!important;
+  line-height:inherit!important;
+  letter-spacing:inherit!important;
+  opacity:1!important;
+  filter:none!important;
+  -webkit-text-stroke:0!important;
+  text-shadow:
+    0 2px 14px rgba(255,255,255,.38),
+    0 0 1px rgba(23,23,23,.09)!important;
+}
+
+/* Dark: same Light effect, same strength, same softness. */
+html[data-theme="dark"] .ravine-shell .home-guest-hero p,
+html[data-theme="dark"] .guest-shell .home-guest-note p{
+  text-shadow:
+    0 2px 14px rgba(255,255,255,.38),
+    0 0 1px rgba(23,23,23,.09)!important;
+}
+
+/* Light: exact reference treatment. */
+html[data-theme="light"] .ravine-shell .home-guest-hero p,
+html[data-theme="light"] .guest-shell .home-guest-note p{
+  text-shadow:
+    0 2px 14px rgba(255,255,255,.38),
+    0 0 1px rgba(23,23,23,.09)!important;
+}
+
+/* =========================================================
+   GUEST CTA
+   Light Mode labels and arrows stay WHITE.
+   ========================================================= */
+
+html[data-theme="light"] .home-guest-hero .home-state-actions .ravine-auth-trigger,
+html[data-theme="light"] .home-guest-hero .home-state-actions .button{
+  color:#FFFFFF!important;
+  -webkit-text-fill-color:#FFFFFF!important;
+}
+
+html[data-theme="light"] .home-guest-hero .home-state-actions .ravine-auth-trigger::after,
+html[data-theme="light"] .home-guest-hero .home-state-actions .button::after{
+  color:#FFFFFF!important;
+  opacity:1!important;
+}
+
+
+/* FINAL: Light Mode is the exact visual reference for Guest body copy.
+   Dark Mode and English use the same typography and effect. */
 .ravine-shell .home-guest-hero p{
   text-shadow:
     0 2px 14px rgba(255,255,255,.38),
@@ -155,7 +250,7 @@ html[data-theme="light"] .ravine-shell .home-guest-hero .ravine-guest-cinematic-
 }
 
 html[data-theme="dark"] .ravine-shell .home-guest-hero p{
-  color:#F1E9DC!important;
+  color:#171717!important;
   text-shadow:
     0 2px 14px rgba(255,255,255,.38),
     0 0 1px rgba(23,23,23,.09)!important;
@@ -166,4 +261,28 @@ html[data-theme="light"] .ravine-shell .home-guest-hero p{
   text-shadow:
     0 2px 14px rgba(255,255,255,.38),
     0 0 1px rgba(23,23,23,.09)!important;
+}
+
+/* RESTORE: Guest hero paragraph to original visual behavior. */
+.ravine-shell .home-guest-hero p{
+  position:relative!important;
+  color:inherit!important;
+  text-shadow:0 2px 16px rgba(0,0,0,.22),0 0 1px rgba(0,0,0,.12)!important;
+}
+
+html[data-theme="light"] .ravine-shell .home-guest-hero p{
+  color:inherit!important;
+  text-shadow:0 2px 14px rgba(255,255,255,.38),0 0 1px rgba(23,23,23,.09)!important;
+}
+
+html[data-theme="dark"] .ravine-shell .home-guest-hero p{
+  color:inherit!important;
+  text-shadow:0 2px 16px rgba(0,0,0,.22),0 0 1px rgba(0,0,0,.12)!important;
+}
+
+/* Guest hero body copy: slightly larger and slightly lower. */
+.ravine-shell .home-guest-hero p{
+  font-size:clamp(17px,1.35vw,21px)!important;
+  margin-top:6px!important;
+  transform:translateY(6px)!important;
 }
