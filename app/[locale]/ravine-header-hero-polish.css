@@ -112,21 +112,24 @@ html[data-theme="light"] .ravine-shell .home-guest-hero .ravine-guest-cinematic-
   }
 }
 
-/* RAVINE final guest visual parity */
 
-/* Video controls: always on the page side opposite the sidebar. */
+/* Video controls: opposite side of the sidebar by locale. */
 .guest-shell .ravine-hero-video-controls.is-rtl{
+  position:fixed!important;
   left:32px!important;
   right:auto!important;
   inset-inline-start:auto!important;
   inset-inline-end:auto!important;
+  top:104px!important;
 }
 
 .guest-shell .ravine-hero-video-controls.is-ltr{
+  position:fixed!important;
   right:32px!important;
   left:auto!important;
   inset-inline-start:auto!important;
   inset-inline-end:auto!important;
+  top:104px!important;
 }
 
 @media(max-width:820px){
@@ -141,29 +144,26 @@ html[data-theme="light"] .ravine-shell .home-guest-hero .ravine-guest-cinematic-
   }
 }
 
-/* Guest explanatory text: same Light treatment in every theme and locale. */
-.ravine-shell .home-guest-hero p,
-.guest-shell .home-guest-note p{
-  text-shadow:
-    0 2px 14px rgba(255,255,255,.38),
-    0 0 1px rgba(255,255,255,.09)!important;
-}
+/* RAVINE guest paragraph exact Light-mode parity */
 
-html[data-theme="light"] .ravine-shell .home-guest-hero p,
-html[data-theme="light"] .guest-shell .home-guest-note p{
+/* The Light Mode treatment is the visual reference.
+   Dark Mode keeps the exact same effect; only text color remains light. */
+.ravine-shell .home-guest-hero p{
   text-shadow:
     0 2px 14px rgba(255,255,255,.38),
     0 0 1px rgba(23,23,23,.09)!important;
 }
 
-/* Light Mode: both Guest CTA labels/arrows are white. */
-html[data-theme="light"] .home-guest-hero .home-state-actions .ravine-auth-trigger,
-html[data-theme="light"] .home-guest-hero .home-state-actions .button{
-  color:#FFFFFF!important;
+html[data-theme="dark"] .ravine-shell .home-guest-hero p{
+  color:#F1E9DC!important;
+  text-shadow:
+    0 2px 14px rgba(255,255,255,.38),
+    0 0 1px rgba(23,23,23,.09)!important;
 }
 
-html[data-theme="light"] .home-guest-hero .home-state-actions .ravine-auth-trigger:after,
-html[data-theme="light"] .home-guest-hero .home-state-actions .button:after{
-  color:#FFFFFF!important;
-  opacity:1!important;
+html[data-theme="light"] .ravine-shell .home-guest-hero p{
+  color:#171717!important;
+  text-shadow:
+    0 2px 14px rgba(255,255,255,.38),
+    0 0 1px rgba(23,23,23,.09)!important;
 }
