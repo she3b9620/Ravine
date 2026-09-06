@@ -1,10 +1,26 @@
 /* RAVINE Hero-only finishing overrides.
    Scoped to Light Mode so Dark Mode remains untouched. */
 
-/* Reverse only the Light Mode vertical volume slider direction. */
-html[data-theme="light"] .ravine-home-video-control-shell .ravine-video-volume-popover input[type="range"]{
-  direction:ltr!important;
+/* Hero volume: bottom is low volume, top is high volume in both locales/themes. */
+.guest-shell .ravine-home-video-control-shell .ravine-video-volume-popover input[type="range"]{
+  direction:rtl!important;
   writing-mode:vertical-lr!important;
+}
+
+/* Keep the volume popover directly above its audio button. */
+.guest-shell .ravine-home-video-control-shell .ravine-video-audio-wrap{
+  position:relative!important;
+  overflow:visible!important;
+}
+
+.guest-shell .ravine-home-video-control-shell .ravine-video-volume-popover{
+  top:auto!important;
+  right:auto!important;
+  bottom:calc(100% + 10px)!important;
+  left:50%!important;
+  transform:translateX(-50%)!important;
+  transform-origin:center bottom!important;
+  z-index:160!important;
 }
 
 /* Give the Hero controls enough breathing room before they disappear so the volume
@@ -15,16 +31,17 @@ html[data-theme="light"] .ravine-home-video-control-shell .ravine-video-volume-p
   transition-duration:1.25s!important;
 }
 
-/* Light Hero title: preserve the existing copper silhouette/weight, but remove the
-   white outline and replace it with a very restrained ivory glow + soft shadow. */
+/* Light Hero title: keep the copper fill, remove the stroke, and make the black
+   shadow clearly visible while keeping only a restrained glow. */
 html[data-theme="light"] .home-guest-hero h1{
   -webkit-text-stroke:0 transparent!important;
   paint-order:normal!important;
   text-shadow:
-    0 2px 0 rgba(9,9,9,.42),
-    0 5px 18px rgba(9,9,9,.34),
-    0 0 16px rgba(241,233,220,.10),
-    0 0 20px rgba(196,122,82,.10)!important;
+    0 2px 0 rgba(9,9,9,.58),
+    0 6px 22px rgba(9,9,9,.46),
+    0 10px 34px rgba(9,9,9,.22),
+    0 0 12px rgba(241,233,220,.10),
+    0 0 22px rgba(196,122,82,.08)!important;
 }
 
 /* RAVINE Guest Hero — keep the intro copy on one visual system in both locales/modes.
