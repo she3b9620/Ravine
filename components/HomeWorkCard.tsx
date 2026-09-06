@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { formatRavineNumber } from "@/lib/ravine-number-formatter";
 
 type Locale = "ar" | "en";
 
@@ -71,22 +72,20 @@ function previewSource(work: HomeWork) {
 export default function HomeWorkCard({ work, locale, compact = false }: { work: HomeWork; locale: Locale; compact?: boolean }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const hoverTimerRef = useRef<number | null>(null);
-  const segmentTimerRef = useRef<number | null>(null);
-  const fadeTimerRef = useRef<number | null>(null);
+  const stopTimerRef = useRef<number | null>(null);
+  const fadeOutTimerRef = useRef<number | null>(null);
   const [previewing, setPreviewing] = useState(false);
   const [fading, setFading] = useState(false);
 
-  const starts = [0, 9, 18, 30, 45];
-  const segmentIndexRef = useRef(0);
   const previewSrc = previewSource(work);
 
   const clearTimers = useCallback(() => {
     if (hoverTimerRef.current) window.clearTimeout(hoverTimerRef.current);
-    if (segmentTimerRef.current) window.clearTimeout(segmentTimerRef.current);
-    if (fadeTimerRef.current) window.clearTimeout(fadeTimerRef.current);
+    if (stopTimerRef.current) window.clearTimeout(stopTimerRef.current);
+    if (fadeOutTimerRef.current) window.clearTimeout(fadeOutTimerRef.current);
     hoverTimerRef.current = null;
-    segmentTimerRef.current = null;
-    fadeTimerRef.current = null;
+    stopTimerRef.current = null;
+    fadeOutTimerRef.current = null;
   }, []);
 
   const stopPreview = useCallback(() => {
@@ -98,45 +97,37 @@ export default function HomeWorkCard({ work, locale, compact = false }: { work: 
     }
     setFading(false);
     setPreviewing(false);
-    segmentIndexRef.current = 0;
   }, [clearTimers]);
 
-  const playSegment = useCallback((index: number) => {
-    const video = videoRef.current;
-    if (!video) return;
-    segmentIndexRef.current = index;
-    const start = starts[index % starts.length];
-    const duration = Number.isFinite(work.duration) && work.duration ? work.duration : 180;
-    const safeStart = Math.max(0, Math.min(start, Math.max(0, duration - 3.1)));
-    try { video.currentTime = safeStart; } catch {}
-    setFading(false);
-    void video.play().catch(() => undefined);
-    segmentTimerRef.current = window.setTimeout(() => {
-      setFading(true);
-      fadeTimerRef.current = window.setTimeout(() => {
-        const next = (segmentIndexRef.current + 1) % starts.length;
-        setFading(false);
-        playSegment(next);
-      }, 240);
-    }, 3000);
-  }, [work.duration]);
-
   const startPreview = useCallback(() => {
-    if (!previewSrc || !videoRef.current) return;
-    clearTimers();
-    setPreviewing(true);
     const video = videoRef.current;
+    if (!previewSrc || !video) return;
+
+    clearTimers();
+    setFading(false);
+    setPreviewing(true);
+
     video.muted = true;
     video.volume = 0;
     video.playsInline = true;
     video.autoplay = true;
     video.controls = false;
     video.disablePictureInPicture = true;
-    const begin = () => playSegment(0);
+
+    const begin = () => {
+      try { video.currentTime = 0; } catch {}
+      void video.play().catch(() => undefined);
+    };
+
     if (video.readyState >= 1) begin();
     else video.addEventListener("loadedmetadata", begin, { once: true });
     video.load();
-  }, [clearTimers, playSegment, previewSrc]);
+
+    stopTimerRef.current = window.setTimeout(() => {
+      setFading(true);
+      fadeOutTimerRef.current = window.setTimeout(stopPreview, 520);
+    }, 5000);
+  }, [clearTimers, previewSrc, stopPreview]);
 
   const onEnter = () => {
     if (!previewSrc) return;
@@ -175,8 +166,8 @@ export default function HomeWorkCard({ work, locale, compact = false }: { work: 
         <h3>{title}</h3>
         <p className="home-work-creator">{creatorName}</p>
         <div className="home-work-meta">
-          <span>{Number(work.views || 0).toLocaleString()} {locale === "ar" ? "مشاهدة" : "views"}</span>
-          <span>{Number(work.likes || 0).toLocaleString()} {locale === "ar" ? "إعجاب" : "likes"}</span>
+          <span>{formatRavineNumber(Number(work.views || 0), locale)} {locale === "ar" ? "مشاهدة" : "views"}</span>
+          <span>{formatRavineNumber(Number(work.likes || 0), locale)} {locale === "ar" ? "إعجاب" : "likes"}</span>
         </div>
       </div>
     </Link>
