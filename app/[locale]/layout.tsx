@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import RavineShell from "../../components/RavineShell";
 import RavineUiEnhancer from "../../components/RavineUiEnhancer";
 import RavineLogoMotion from "../../components/RavineLogoMotion";
+import RavinePageTransition from "../../components/RavinePageTransition";
 import SelectionTabsEnhancer from "../../components/SelectionTabsEnhancer";
 import VideoAudioToggle from "../../components/VideoAudioToggle";
 import LocalePersistence from "../../components/LocalePersistence";
@@ -40,8 +41,27 @@ import "../community-system.css";
 import "./ravine-hero-overlay-fix.css";
 import "./ravine-video-finish.css";
 import "./ravine-header-underline-fix.css";
+import "./ravine-cinematic-motion.css";
 
 const locales = ["ar", "en"] as const;
 type Locale = (typeof locales)[number];
-export function generateStaticParams(){return locales.map((locale)=>({locale}))}
-export default async function LocaleLayout({children,params}:{children:ReactNode;params:Promise<{locale:string}>}){const {locale}=await params;if(!locales.includes(locale as Locale))notFound();return <RavineShell locale={locale as Locale}><LocalePersistence locale={locale as Locale}/><VideoAudioToggle locale={locale as Locale}/><RavineUiEnhancer /><RavineLogoMotion /><SelectionTabsEnhancer />{children}</RavineShell>}
+
+export function generateStaticParams(){
+  return locales.map((locale)=>({locale}));
+}
+
+export default async function LocaleLayout({children,params}:{children:ReactNode;params:Promise<{locale:string}>}){
+  const {locale}=await params;
+  if(!locales.includes(locale as Locale)) notFound();
+
+  return (
+    <RavineShell locale={locale as Locale}>
+      <LocalePersistence locale={locale as Locale}/>
+      <VideoAudioToggle locale={locale as Locale}/>
+      <RavineUiEnhancer />
+      <RavineLogoMotion />
+      <SelectionTabsEnhancer />
+      <RavinePageTransition>{children}</RavinePageTransition>
+    </RavineShell>
+  );
+}
