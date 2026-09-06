@@ -4,24 +4,12 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import { ChevronDown, Search, SlidersHorizontal, X } from "lucide-react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
+import SearchResultsPanel from "./SearchResultsPanel";
 
 type Locale = "ar" | "en";
 type Category = { id: number; name: string; slug: string | null };
 type Props = { locale: Locale; categories: Category[] };
 type Option = { value: string; ar: string; en: string };
-
-type SearchState = {
-  open: boolean;
-  locale: Locale;
-  query: string;
-  category: string;
-  type: string;
-  duration: string;
-  format: string;
-  quality: string;
-};
-
-const SEARCH_STATE_EVENT = "ravine-search-state";
 
 const TYPES: Option[] = [
   { value: "video", ar: "فيديو", en: "Video" },
@@ -92,21 +80,6 @@ export default function SearchLauncher({ locale, categories }: Props) {
   const [duration, setDuration] = useState("");
   const [format, setFormat] = useState("");
   const [quality, setQuality] = useState("");
-
-  useEffect(() => {
-    const detail: SearchState = {
-      open,
-      locale,
-      query,
-      category,
-      type,
-      duration: advanced ? duration : "",
-      format: advanced ? format : "",
-      quality: advanced ? quality : "",
-    };
-
-    window.dispatchEvent(new CustomEvent<SearchState>(SEARCH_STATE_EVENT, { detail }));
-  }, [open, locale, query, category, type, duration, format, quality, advanced]);
 
   function close() {
     if (!open || closing) return;
@@ -227,6 +200,16 @@ export default function SearchLauncher({ locale, categories }: Props) {
             <button type="submit" className="button primary">{ar ? "بحث" : "Search"}</button>
           </div>
         </form>
+
+        <SearchResultsPanel
+          locale={locale}
+          query={query}
+          category={category}
+          type={type}
+          duration={advanced ? duration : ""}
+          format={advanced ? format : ""}
+          quality={advanced ? quality : ""}
+        />
       </div>
     </div>
   ) : null;
