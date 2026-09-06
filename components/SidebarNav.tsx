@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Compass, Users, History, Library, Heart, MessagesSquare, Radio, Mic2, Film, LayoutDashboard, UserRound, Clapperboard, Settings } from "lucide-react";
+import { Home, Compass, Scissors, Clapperboard, Users, History, Library, Heart, MessagesSquare, Radio, Mic2, Film, LayoutDashboard, UserRound, Settings } from "lucide-react";
 import { requestRavineAuth } from "./AuthModal";
 
 type Locale = "ar" | "en";
@@ -12,11 +12,14 @@ type Group = readonly [titleEn: string, titleAr: string, items: Item[]];
 const publicGroups: Group[] = [
   ["RAVINE", "رَافِين", [
     ["", "Home", "الرئيسية", Home],
-    ["discover", "Explore work", "استكشف الأعمال", Compass],
+    ["discover", "Discover", "اكتشف", Compass],
+    ["cuts", "Cuts", "كتس", Scissors],
+    ["videos", "Videos", "الفيديوهات", Clapperboard],
+    ["live", "Live", "مباشر", Radio],
+    ["podcasts", "Podcasts", "البودكاست", Mic2],
+    ["documentary", "Documentary", "الوثائقي", Film],
     ["creators", "Creators", "المبدعون", Users],
     ["community", "Community", "المجتمع", MessagesSquare],
-    ["live", "Live", "مباشر", Radio],
-    ["podcasts", "Podcasts & Documentaries", "البودكاست والوثائقي", Mic2],
   ]],
 ];
 
@@ -35,7 +38,7 @@ const privateGroups: Group[] = [
   ]],
 ];
 
-const GUEST_GATED = new Set(["community", "live", "podcasts"]);
+const GUEST_GATED = new Set(["community", "cuts", "videos", "live", "podcasts", "documentary"]);
 
 export default function SidebarNav({ locale, authenticated }: { locale: Locale; authenticated: boolean }) {
   const pathname = usePathname() || `/${locale}`;
