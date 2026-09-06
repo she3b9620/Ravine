@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -113,6 +113,8 @@ export default function GuestCinematicBackdrop({
   locale,
 }: GuestCinematicBackdropProps) {
   const pathname = usePathname();
+  const playerRef = useRef<YouTubePlayer | null>(null);
+  const playerGenerationRef = useRef(0);
 
   const [isGuestHome, setIsGuestHome] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -153,6 +155,7 @@ export default function GuestCinematicBackdrop({
       return;
     }
 
+    const generation = ++playerGenerationRef.current;
     let cancelled = false;
     let player: YouTubePlayer | null = null;
     let previousReadyHandler: (() => void) | undefined;
@@ -163,7 +166,12 @@ export default function GuestCinematicBackdrop({
     let volume = DEFAULT_VOLUME;
     let muted = true;
 
+    const isCurrentEffect = () =>
+      !cancelled && playerGenerationRef.current === generation;
+
     const dispatchPlaybackState = (playing: boolean) => {
+      if (!isCurrentEffect()) return;
+
       setIsPlaying(playing);
 
       window.dispatchEvent(
@@ -178,6 +186,8 @@ export default function GuestCinematicBackdrop({
     };
 
     const dispatchTimelineState = () => {
+      if (!isCurrentEffect()) return;
+
       window.dispatchEvent(
         new CustomEvent("ravine-video-timeline-state", {
           detail: {
@@ -189,6 +199,8 @@ export default function GuestCinematicBackdrop({
     };
 
     const dispatchAudioState = () => {
+      if (!isCurrentEffect()) return;
+
       window.dispatchEvent(
         new CustomEvent("ravine-video-audio-state", {
           detail: {
@@ -200,6 +212,8 @@ export default function GuestCinematicBackdrop({
     };
 
     const dispatchRepeatState = () => {
+      if (!isCurrentEffect()) return;
+
       window.dispatchEvent(
         new CustomEvent("ravine-video-repeat-state", {
           detail: {
@@ -213,6 +227,8 @@ export default function GuestCinematicBackdrop({
       nextMuted = muted,
       nextVolume = volume
     ) => {
+      if (!isCurrentEffect()) return;
+
       muted = nextMuted;
       volume = Math.min(100, Math.max(0, nextVolume));
 
@@ -229,10 +245,12 @@ export default function GuestCinematicBackdrop({
     };
 
     const loadCurrentVideo = () => {
+      if (!isCurrentEffect()) return;
+
       player?.loadVideoById?.(VIDEO_IDS[currentIndex]);
 
       window.setTimeout(() => {
-        if (cancelled) return;
+        if (!isCurrentEffect()) return;
 
         applyAudioState(muted, volume);
         dispatchTimelineState();
@@ -244,6 +262,8 @@ export default function GuestCinematicBackdrop({
     };
 
     const goNext = () => {
+      if (!isCurrentEffect()) return;
+
       currentIndex =
         (currentIndex + 1) % VIDEO_IDS.length;
 
@@ -251,6 +271,8 @@ export default function GuestCinematicBackdrop({
     };
 
     const goPrevious = () => {
+      if (!isCurrentEffect()) return;
+
       currentIndex =
         (currentIndex - 1 + VIDEO_IDS.length) %
         VIDEO_IDS.length;
@@ -259,12 +281,12 @@ export default function GuestCinematicBackdrop({
     };
 
     const resumePlayback = () => {
-      if (cancelled || userPaused) return;
+      if (!isCurrentEffect() || userPaused) return;
       player?.playVideo?.();
     };
 
     const handleStateChange = (event: { data: number }) => {
-      if (cancelled) return;
+      if (!isCurrentEffect()) return;
 
       const playingState =
         window.YT?.PlayerState?.PLAYING ?? 1;
@@ -300,7 +322,7 @@ export default function GuestCinematicBackdrop({
     };
 
     const handleControl = (event: Event) => {
-      if (cancelled || !player) return;
+      if (!isCurrentEffect() || !player) return;
 
       const detail = (event as VideoControlEvent).detail;
       const action = detail?.action;
@@ -402,10 +424,18 @@ export default function GuestCinematicBackdrop({
     };
 
     const createPlayer = () => {
-      if (
-        cancelled ||
-        !window.YT?.Player
-      ) {
+      if (!isCurrentEffect() || !window.YT?.Player) {
+        return;
+      }
+
+      if (playerRef.current) {
+        return;
+      }
+
+      const container = document.getElementById(PLAYER_ID);
+      if (!container) return;
+
+      if (container.querySelector("iframe")) {
         return;
       }
 
@@ -431,11 +461,12 @@ export default function GuestCinematicBackdrop({
           },
           events: {
             onReady: () => {
-              if (cancelled) return;
+              if (!isCurrentEffect()) return;
 
               muted = true;
               volume = DEFAULT_VOLUME;
 
+              playerRef.current = player;
               player?.setVolume?.(volume);
               player?.mute?.();
 
@@ -452,6 +483,8 @@ export default function GuestCinematicBackdrop({
           },
         }
       );
+
+      playerRef.current = player;
     };
 
     if (window.YT?.Player) {
@@ -487,7 +520,7 @@ export default function GuestCinematicBackdrop({
 
     const timelineTimer =
       window.setInterval(() => {
-        if (!cancelled && player) {
+        if (isCurrentEffect() && player) {
           dispatchTimelineState();
         }
       }, 250);
@@ -543,9 +576,19 @@ export default function GuestCinematicBackdrop({
           previousReadyHandler;
       }
 
+      if (playerRef.current === player) {
+        playerRef.current = null;
+      }
+
       player?.destroy();
       player = null;
-      setIsPlaying(false);
+
+      const container = document.getElementById(PLAYER_ID);
+      container?.replaceChildren();
+
+      if (playerGenerationRef.current === generation) {
+        setIsPlaying(false);
+      }
     };
   }, [
     isGuestHome,
