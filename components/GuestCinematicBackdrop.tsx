@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -22,14 +22,26 @@ type YouTubePlayer = {
     allowSeekAhead?: boolean
   ) => void;
   loadVideoById?: (videoId: string) => void;
-  nextVideo?: () => void;
-  previousVideo?: () => void;
 };
 
 type YouTubeApi = {
   Player: new (
     element: string,
     options: {
+      videoId: string;
+      playerVars: {
+        autoplay: number;
+        mute: number;
+        controls: number;
+        loop: number;
+        playsinline: number;
+        modestbranding: number;
+        rel: number;
+        iv_load_policy: number;
+        disablekb: number;
+        fs: number;
+        origin: string;
+      };
       events: {
         onReady?: () => void;
         onStateChange: (event: { data: number }) => void;
@@ -108,32 +120,6 @@ export default function GuestCinematicBackdrop({
     null
   );
 
-  const embedUrl = useMemo(() => {
-    if (startIndex === null) return null;
-
-    const first = VIDEO_IDS[startIndex];
-
-    const params = new URLSearchParams({
-      autoplay: "1",
-      mute: "1",
-      controls: "0",
-      loop: "0",
-      playsinline: "1",
-      modestbranding: "1",
-      rel: "0",
-      iv_load_policy: "3",
-      disablekb: "1",
-      fs: "0",
-      enablejsapi: "1",
-      origin:
-        typeof window !== "undefined"
-          ? window.location.origin
-          : "",
-    });
-
-    return `https://www.youtube-nocookie.com/embed/${first}?${params.toString()}`;
-  }, [startIndex]);
-
   useEffect(() => {
     if (pathname !== `/${locale}`) {
       setIsGuestHome(false);
@@ -163,7 +149,7 @@ export default function GuestCinematicBackdrop({
   }, [locale, pathname]);
 
   useEffect(() => {
-    if (!isGuestHome || !embedUrl || startIndex === null) {
+    if (!isGuestHome || startIndex === null) {
       return;
     }
 
@@ -426,6 +412,23 @@ export default function GuestCinematicBackdrop({
       player = new window.YT.Player(
         PLAYER_ID,
         {
+          videoId: VIDEO_IDS[startIndex],
+          playerVars: {
+            autoplay: 1,
+            mute: 1,
+            controls: 0,
+            loop: 0,
+            playsinline: 1,
+            modestbranding: 1,
+            rel: 0,
+            iv_load_policy: 3,
+            disablekb: 1,
+            fs: 0,
+            origin:
+              typeof window !== "undefined"
+                ? window.location.origin
+                : "",
+          },
           events: {
             onReady: () => {
               if (cancelled) return;
@@ -440,14 +443,9 @@ export default function GuestCinematicBackdrop({
               dispatchRepeatState();
               dispatchTimelineState();
 
-              window.setTimeout(() => {
-                if (
-                  !cancelled &&
-                  !userPaused
-                ) {
-                  player?.playVideo?.();
-                }
-              }, 150);
+              if (!userPaused) {
+                player?.playVideo?.();
+              }
             },
 
             onStateChange: handleStateChange,
@@ -551,11 +549,10 @@ export default function GuestCinematicBackdrop({
     };
   }, [
     isGuestHome,
-    embedUrl,
     startIndex,
   ]);
 
-  if (!isGuestHome || !embedUrl) {
+  if (!isGuestHome || startIndex === null) {
     return null;
   }
 
@@ -566,13 +563,9 @@ export default function GuestCinematicBackdrop({
       }`}
       aria-hidden="true"
     >
-      <iframe
+      <div
         id={PLAYER_ID}
-        src={embedUrl}
-        title="RAVINE cinematic background"
-        loading="eager"
-        allow="autoplay; encrypted-media; picture-in-picture"
-        referrerPolicy="strict-origin-when-cross-origin"
+        className="ravine-guest-cinematic-player"
       />
 
       <div className="ravine-guest-cinematic-wash" />
