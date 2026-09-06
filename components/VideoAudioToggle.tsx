@@ -7,13 +7,29 @@ type VideoAudioToggleProps = {
   locale: "ar" | "en";
 };
 
+type VideoControlAction =
+  | "play"
+  | "pause"
+  | "next"
+  | "previous"
+  | "toggle-audio"
+  | "set-volume"
+  | "toggle-repeat"
+  | "seek"
+  | "replay";
+
 function sendControl(
-  action: "play" | "pause" | "next" | "previous" | "toggle-audio",
-  muted?: boolean
+  action: VideoControlAction,
+  detail: {
+    muted?: boolean;
+    volume?: number;
+    repeat?: boolean;
+    time?: number;
+  } = {}
 ) {
   window.dispatchEvent(
     new CustomEvent("ravine-video-control", {
-      detail: { action, muted },
+      detail: { action, ...detail },
     })
   );
 }
@@ -53,6 +69,24 @@ function PauseIcon() {
   );
 }
 
+function RepeatIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M7 7h10l-2.5-2.5M17 17H7l2.5 2.5" />
+      <path d="M17 7a5 5 0 0 1 2 4M7 17a5 5 0 0 1-2-4" />
+    </svg>
+  );
+}
+
+function ReplayIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4.5 9.5A8 8 0 1 1 6.7 17" />
+      <path d="M4.5 9.5V5.5M4.5 9.5H8.5" />
+    </svg>
+  );
+}
+
 export default function VideoAudioToggle({
   locale,
 }: VideoAudioToggleProps) {
@@ -60,6 +94,10 @@ export default function VideoAudioToggle({
   const [visible, setVisible] = useState(false);
   const [muted, setMuted] = useState(true);
   const [playing, setPlaying] = useState(true);
+  const [repeat, setRepeat] = useState(false);
+  const [volume, setVolume] = useState(60);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
 
   useEffect(() => {
     if (pathname !== `/${locale}`) {
@@ -72,18 +110,60 @@ export default function VideoAudioToggle({
 
   useEffect(() => {
     const syncAudioState = (event: Event) => {
-      const customEvent = event as CustomEvent<{ muted?: boolean }>;
+      const customEvent = event as CustomEvent<{
+        muted?: boolean;
+        volume?: number;
+      }>;
 
       if (typeof customEvent.detail?.muted === "boolean") {
         setMuted(customEvent.detail.muted);
       }
+
+      if (typeof customEvent.detail?.volume === "number") {
+        setVolume(customEvent.detail.volume);
+      }
     };
 
     const syncPlaybackState = (event: Event) => {
-      const customEvent = event as CustomEvent<{ playing?: boolean }>;
+      const customEvent = event as CustomEvent<{
+        playing?: boolean;
+        currentTime?: number;
+        duration?: number;
+      }>;
 
       if (typeof customEvent.detail?.playing === "boolean") {
         setPlaying(customEvent.detail.playing);
+      }
+
+      if (typeof customEvent.detail?.currentTime === "number") {
+        setCurrentTime(customEvent.detail.currentTime);
+      }
+
+      if (typeof customEvent.detail?.duration === "number") {
+        setDuration(customEvent.detail.duration);
+      }
+    };
+
+    const syncTimelineState = (event: Event) => {
+      const customEvent = event as CustomEvent<{
+        currentTime?: number;
+        duration?: number;
+      }>;
+
+      if (typeof customEvent.detail?.currentTime === "number") {
+        setCurrentTime(customEvent.detail.currentTime);
+      }
+
+      if (typeof customEvent.detail?.duration === "number") {
+        setDuration(customEvent.detail.duration);
+      }
+    };
+
+    const syncRepeatState = (event: Event) => {
+      const customEvent = event as CustomEvent<{ repeat?: boolean }>;
+
+      if (typeof customEvent.detail?.repeat === "boolean") {
+        setRepeat(customEvent.detail.repeat);
       }
     };
 
@@ -92,6 +172,11 @@ export default function VideoAudioToggle({
       "ravine-video-playback-state",
       syncPlaybackState
     );
+    window.addEventListener(
+      "ravine-video-timeline-state",
+      syncTimelineState
+    );
+    window.addEventListener("ravine-video-repeat-state", syncRepeatState);
 
     return () => {
       window.removeEventListener(
@@ -101,6 +186,14 @@ export default function VideoAudioToggle({
       window.removeEventListener(
         "ravine-video-playback-state",
         syncPlaybackState
+      );
+      window.removeEventListener(
+        "ravine-video-timeline-state",
+        syncTimelineState
+      );
+      window.removeEventListener(
+        "ravine-video-repeat-state",
+        syncRepeatState
       );
     };
   }, []);
@@ -129,6 +222,22 @@ export default function VideoAudioToggle({
   const nextLabel =
     locale === "ar" ? "الفيديو التالي" : "Next video";
 
+  const repeatLabel = repeat
+    ? locale === "ar"
+      ? "إيقاف إعادة الفيديو"
+      : "Turn repeat off"
+    : locale === "ar"
+      ? "إعادة الفيديو الحالي"
+      : "Repeat current video";
+
+  const replayLabel =
+    locale === "ar" ? "إعادة الفيديو من البداية" : "Replay video";
+
+  const progress =
+    duration > 0
+      ? Math.min(100, Math.max(0, (currentTime / duration) * 100))
+      : 0;
+
   return (
     <div
       className={`ravine-hero-video-controls ${
@@ -137,70 +246,183 @@ export default function VideoAudioToggle({
       dir="ltr"
       aria-label={locale === "ar" ? "تحكم الفيديو" : "Video controls"}
     >
-      <button
-        type="button"
-        className="ravine-video-control ravine-video-control-prev"
-        aria-label={previousLabel}
-        onClick={() => sendControl("previous", muted)}
-      >
-        <span className="ravine-video-control-icon" aria-hidden="true">
-          <PreviousIcon />
-        </span>
-      </button>
-
-      <button
-        type="button"
-        className="ravine-video-control ravine-video-control-play"
-        aria-label={playbackLabel}
-        aria-pressed={!playing}
-        onClick={() =>
-          sendControl(playing ? "pause" : "play", muted)
-        }
-      >
-        <span className="ravine-video-control-icon" aria-hidden="true">
-          {playing ? <PauseIcon /> : <PlayIcon />}
-        </span>
-      </button>
-
-      <button
-        type="button"
-        className="ravine-video-control ravine-hero-video-audio-toggle"
-        aria-label={audioLabel}
-        aria-pressed={!muted}
-        onClick={() => {
-          const nextMuted = !muted;
-          setMuted(nextMuted);
-          sendControl("toggle-audio", nextMuted);
-        }}
-      >
-        <span
-          className="ravine-hero-video-audio-icon"
-          aria-hidden="true"
+      <div className="ravine-video-controls-row">
+        <button
+          type="button"
+          className="ravine-video-control ravine-video-control-prev"
+          aria-label={previousLabel}
+          onClick={() => sendControl("previous", { muted, volume })}
         >
-          {muted ? (
-            <svg viewBox="0 0 24 24">
-              <path d="M4 10h4l5-4v12l-5-4H4z" />
-              <path d="m17 9 4 6M21 9l-4 6" />
-            </svg>
-          ) : (
-            <svg viewBox="0 0 24 24">
-              <path d="M4 10h4l5-4v12l-5-4H4z" />
-              <path d="M17 9a4.5 4.5 0 0 1 0 6M19.5 6.5a8 8 0 0 1 0 11" />
-            </svg>
-          )}
-        </span>
-      </button>
+          <span className="ravine-video-control-icon" aria-hidden="true">
+            <PreviousIcon />
+          </span>
+        </button>
 
-      <button
-        type="button"
-        className="ravine-video-control ravine-video-control-next"
-        aria-label={nextLabel}
-        onClick={() => sendControl("next", muted)}
-      >
-        <span className="ravine-video-control-icon" aria-hidden="true">
-          <NextIcon />
-        </span>
-      </button>
+        <button
+          type="button"
+          className="ravine-video-control ravine-video-control-play"
+          aria-label={playbackLabel}
+          aria-pressed={!playing}
+          onClick={() =>
+            sendControl(playing ? "pause" : "play", {
+              muted,
+              volume,
+            })
+          }
+        >
+          <span className="ravine-video-control-icon" aria-hidden="true">
+            {playing ? <PauseIcon /> : <PlayIcon />}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          className="ravine-video-control ravine-video-control-repeat"
+          aria-label={repeatLabel}
+          aria-pressed={repeat}
+          onClick={() => {
+            const nextRepeat = !repeat;
+            setRepeat(nextRepeat);
+
+            sendControl("toggle-repeat", {
+              muted,
+              volume,
+              repeat: nextRepeat,
+            });
+          }}
+        >
+          <span className="ravine-video-control-icon" aria-hidden="true">
+            <RepeatIcon />
+          </span>
+        </button>
+
+        <div className="ravine-video-audio-wrap">
+          <button
+            type="button"
+            className="ravine-video-control ravine-hero-video-audio-toggle"
+            aria-label={audioLabel}
+            aria-pressed={!muted}
+            onClick={() => {
+              const nextMuted = !muted;
+              setMuted(nextMuted);
+
+              sendControl("toggle-audio", {
+                muted: nextMuted,
+                volume,
+              });
+            }}
+          >
+            <span
+              className="ravine-hero-video-audio-icon"
+              aria-hidden="true"
+            >
+              {muted ? (
+                <svg viewBox="0 0 24 24">
+                  <path d="M4 10h4l5-4v12l-5-4H4z" />
+                  <path d="m17 9 4 6M21 9l-4 6" />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 24 24">
+                  <path d="M4 10h4l5-4v12l-5-4H4z" />
+                  <path d="M17 9a4.5 4.5 0 0 1 0 6M19.5 6.5a8 8 0 0 1 0 11" />
+                </svg>
+              )}
+            </span>
+          </button>
+
+          <div className="ravine-video-volume-popover">
+            <label>
+              <span className="ravine-sr-only">
+                {locale === "ar" ? "مستوى الصوت" : "Volume"}
+              </span>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                step="1"
+                value={volume}
+                aria-label={locale === "ar" ? "مستوى الصوت" : "Volume"}
+                onChange={(event) => {
+                  const nextVolume = Number(event.target.value);
+
+                  setVolume(nextVolume);
+
+                  if (nextVolume === 0) {
+                    setMuted(true);
+                    sendControl("set-volume", {
+                      volume: 0,
+                      muted: true,
+                    });
+                    return;
+                  }
+
+                  setMuted(false);
+
+                  sendControl("set-volume", {
+                    volume: nextVolume,
+                    muted: false,
+                  });
+                }}
+              />
+            </label>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          className="ravine-video-control ravine-video-control-replay"
+          aria-label={replayLabel}
+          onClick={() =>
+            sendControl("replay", {
+              muted,
+              volume,
+            })
+          }
+        >
+          <span className="ravine-video-control-icon" aria-hidden="true">
+            <ReplayIcon />
+          </span>
+        </button>
+
+        <button
+          type="button"
+          className="ravine-video-control ravine-video-control-next"
+          aria-label={nextLabel}
+          onClick={() => sendControl("next", { muted, volume })}
+        >
+          <span className="ravine-video-control-icon" aria-hidden="true">
+            <NextIcon />
+          </span>
+        </button>
+      </div>
+
+      <div className="ravine-home-video-timeline">
+        <input
+          type="range"
+          min="0"
+          max={duration || 1}
+          step="0.1"
+          value={Math.min(currentTime, duration || 1)}
+          aria-label={
+            locale === "ar" ? "التحكم في وقت الفيديو" : "Video timeline"
+          }
+          style={
+            {
+              "--ravine-video-progress": `${progress}%`,
+            } as React.CSSProperties
+          }
+          onChange={(event) => {
+            const nextTime = Number(event.target.value);
+            setCurrentTime(nextTime);
+
+            sendControl("seek", {
+              time: nextTime,
+              muted,
+              volume,
+            });
+          }}
+        />
+      </div>
     </div>
   );
 }
