@@ -7,6 +7,7 @@ import RavinePageTransition from "../../components/RavinePageTransition";
 import SelectionTabsEnhancer from "../../components/SelectionTabsEnhancer";
 import VideoAudioToggle from "../../components/VideoAudioToggle";
 import LocalePersistence from "../../components/LocalePersistence";
+import EnglishAboutLocaleFix from "../../components/EnglishAboutLocaleFix";
 import "./ravine-overrides.css";
 import "./home-spacing.css";
 import "./ravine-final-visual-fixes.css";
@@ -57,6 +58,7 @@ export default async function LocaleLayout({children,params}:{children:ReactNode
   return (
     <RavineShell locale={locale as Locale}>
       <LocalePersistence locale={locale as Locale}/>
+      <EnglishAboutLocaleFix />
       <VideoAudioToggle locale={locale as Locale}/>
       <RavineUiEnhancer />
       <RavineLogoMotion />
