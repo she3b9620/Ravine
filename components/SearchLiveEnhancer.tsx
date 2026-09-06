@@ -1,7 +1,7 @@
 "use client";
 
 import { createRoot, type Root } from "react-dom/client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import SearchResultsPanel from "./SearchResultsPanel";
 
 export default function SearchLiveEnhancer() {
