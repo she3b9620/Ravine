@@ -94,9 +94,18 @@ export default function SearchResultsPanel(props: SearchResultsPanelProps) {
   }, [queryString, props.query]);
 
   const hasInput = Boolean(props.query.trim() || props.category || props.type || props.duration || props.format || props.quality);
+  const discoverHref = `/${locale}/discover${queryString ? `?${queryString}` : ""}`;
 
   if (error) {
-    return <div className="ravine-search-live-state is-error">{ar ? "تعذر تحديث النتائج الآن." : "Results could not be updated right now."}</div>;
+    return (
+      <div className="ravine-search-live-state is-error">
+        {ar ? "تعذر تحديث النتائج الآن." : "Results could not be updated right now."}
+        <Link href={discoverHref} className="ravine-search-discover-cta">
+          <span>{ar ? "اكتشف شيئًا أكبر" : "Discover something bigger"}</span>
+          <span aria-hidden="true">→</span>
+        </Link>
+      </div>
+    );
   }
 
   if (loading && !hasLoaded) {
@@ -159,6 +168,11 @@ export default function SearchResultsPanel(props: SearchResultsPanelProps) {
           <div className="ravine-search-live-empty">{ar ? "مفيش نتيجة مطابقة حاليًا. جرّب كلمة أو تصنيف مختلف." : "No matching work yet. Try another word or category."}</div>
         )}
       </section>
+
+      <Link href={discoverHref} className="ravine-search-discover-cta" aria-label={ar ? "اكتشف شيئًا أكبر" : "Discover something bigger"}>
+        <span>{ar ? "اكتشف شيئًا أكبر" : "Discover something bigger"}</span>
+        <span aria-hidden="true">→</span>
+      </Link>
     </div>
   );
 }
