@@ -9,3 +9,7 @@
 .volume input::-moz-range-progress{width:4px;border-radius:999px;background:var(--copper,#c47a52)}
 .volume input::-moz-range-thumb{width:11px;height:11px;border:1px solid rgba(241,233,220,.8);border-radius:50%;background:var(--copper,#c47a52);box-shadow:0 0 0 3px rgba(196,122,82,.1)}
 @media(max-width:620px){.volume{width:32px;height:84px;flex-basis:32px}.volume input{width:20px;height:72px}.volume input::-webkit-slider-runnable-track,.volume input::-moz-range-track{height:66px}}
+
+.timelineTrack{position:relative;min-width:0;height:18px;display:flex;align-items:center}
+.timelineTrack input{position:relative;z-index:2;width:100%;margin:0}
+.timelineHoverLine{position:absolute;z-index:3;top:50%;width:2px;height:16px;transform:translate(-50%,-50%);border-radius:999px;background:var(--ivory,#f1e9dc);box-shadow:0 0 0 1px rgba(9,9,9,.3),0 0 8px rgba(241,233,220,.35);pointer-events:none}
