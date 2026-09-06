@@ -46,6 +46,7 @@ import "./ravine-header-underline-fix.css";
 import "./ravine-cinematic-motion.css";
 import "./hero-video-control-safe-area.css";
 import "./ravine-hero-control-fixes.css";
+import "./ravine-guest-volume-direction-fix.css";
 import "./ravine-search-light-visual-fix.css";
 import "./ravine-search-results.css";
 
