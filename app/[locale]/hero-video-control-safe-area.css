@@ -1,0 +1,41 @@
+/* RAVINE guest Hero video controls: preserve a soft, expanded clearance at the header edge. */
+.guest-shell .ravine-home-video-control-shell{
+  position:fixed!important;
+  z-index:120!important;
+  overflow:visible!important;
+}
+
+.guest-shell .ravine-home-video-control-shell .ravine-hero-video-controls-panel,
+.guest-shell .ravine-home-video-control-shell .ravine-hero-video-controls{
+  overflow:visible!important;
+  isolation:isolate;
+}
+
+/* Give the upward-opening control surface a quiet visual buffer instead of a hard cut. */
+.guest-shell .ravine-home-video-control-shell.is-open::before{
+  content:"";
+  position:absolute;
+  top:-20px;
+  left:-16px;
+  right:-16px;
+  height:34px;
+  border-radius:999px;
+  pointer-events:none;
+  z-index:-1;
+  background:linear-gradient(180deg,transparent 0%,rgba(9,9,9,.08) 52%,rgba(9,9,9,0) 100%);
+  filter:blur(7px);
+}
+
+html[data-theme="light"] .guest-shell .ravine-home-video-control-shell.is-open::before{
+  background:linear-gradient(180deg,transparent 0%,rgba(241,233,220,.11) 52%,rgba(241,233,220,0) 100%);
+}
+
+@media(max-width:820px){
+  .guest-shell .ravine-home-video-control-shell.is-open::before{
+    top:-16px;
+    left:-10px;
+    right:-10px;
+    height:30px;
+    filter:blur(6px);
+  }
+}
