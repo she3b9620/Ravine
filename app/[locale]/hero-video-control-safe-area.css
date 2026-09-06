@@ -39,10 +39,3 @@ html[data-theme="light"] .guest-shell .ravine-home-video-control-shell.is-open::
     filter:blur(6px);
   }
 }
-
-/* Guest Hero is a cinematic background. Hide its auxiliary playback layer entirely:
-   no central pause/play surface, no previous/next/repeat/replay controls, and no
-   floating control toggle. Playback remains driven by the background player/API. */
-.guest-shell .ravine-home-video-control-shell{
-  display:none!important;
-}
