@@ -111,19 +111,13 @@ export default function GuestCinematicBackdrop({
   const embedUrl = useMemo(() => {
     if (startIndex === null) return null;
 
-    const orderedIds = [
-      ...VIDEO_IDS.slice(startIndex),
-      ...VIDEO_IDS.slice(0, startIndex),
-    ];
-
-    const [first, ...playlistIds] = orderedIds;
+    const first = VIDEO_IDS[startIndex];
 
     const params = new URLSearchParams({
       autoplay: "1",
       mute: "1",
       controls: "0",
       loop: "0",
-      playlist: playlistIds.concat(first).join(","),
       playsinline: "1",
       modestbranding: "1",
       rel: "0",
