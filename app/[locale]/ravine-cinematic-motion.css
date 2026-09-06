@@ -1,0 +1,40 @@
+/* RAVINE Design & Motion System — page transition layer.
+   Grammar: Reveal. Restraint-first, no bounce, no scroll hijack. */
+.ravine-page-transition{
+  animation:ravinePageReveal .58s cubic-bezier(.22,1,.36,1) both;
+  transform-origin:50% 18%;
+  will-change:opacity,transform,filter;
+}
+
+@keyframes ravinePageReveal{
+  0%{
+    opacity:0;
+    transform:translate3d(0,10px,0) scale(.996);
+    filter:blur(2px);
+  }
+  38%{
+    opacity:.96;
+    transform:translate3d(0,2px,0) scale(.999);
+    filter:blur(.45px);
+  }
+  100%{
+    opacity:1;
+    transform:translate3d(0,0,0) scale(1);
+    filter:blur(0);
+  }
+}
+
+/* A quieter reveal for dense/account surfaces. */
+.ravine-page-transition[data-ravine-route*="/account"]{
+  animation-duration:.44s;
+}
+
+@media (prefers-reduced-motion:reduce){
+  .ravine-page-transition,
+  .ravine-page-transition[data-ravine-route*="/account"]{
+    animation:none!important;
+    filter:none!important;
+    transform:none!important;
+    opacity:1!important;
+  }
+}
