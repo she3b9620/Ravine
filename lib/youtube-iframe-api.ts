@@ -53,11 +53,11 @@ type YouTubeApi = {
   };
 };
 
-declare global {
-  interface Window {
-    YT?: YouTubeApi;
-  }
-}
+type YouTubeWindow = Window & {
+  YT?: YouTubeApi;
+};
+
+const getYouTube = () => (window as YouTubeWindow).YT;
 
 const YOUTUBE_IFRAME_API_SRC = "https://www.youtube.com/iframe_api";
 const LOAD_TIMEOUT_MS = 15000;
@@ -69,8 +69,9 @@ export function loadYouTubeIframeApi(): Promise<YouTubeApi> {
     return Promise.reject(new Error("YouTube IFrame API requires a browser"));
   }
 
-  if (window.YT?.Player) {
-    return Promise.resolve(window.YT);
+  const currentYouTube = getYouTube();
+  if (currentYouTube?.Player) {
+    return Promise.resolve(currentYouTube);
   }
 
   if (apiPromise) {
@@ -101,8 +102,10 @@ export function loadYouTubeIframeApi(): Promise<YouTubeApi> {
     };
 
     const check = () => {
-      if (window.YT?.Player) {
-        finish(() => resolve(window.YT as YouTubeApi));
+      const youtube = getYouTube();
+
+      if (youtube?.Player) {
+        finish(() => resolve(youtube));
         return;
       }
 
@@ -115,9 +118,13 @@ export function loadYouTubeIframeApi(): Promise<YouTubeApi> {
       const script = document.createElement("script");
       script.src = YOUTUBE_IFRAME_API_SRC;
       script.async = true;
-      script.addEventListener("error", () => {
-        finish(() => reject(new Error("Failed to load YouTube IFrame API")));
-      }, { once: true });
+      script.addEventListener(
+        "error",
+        () => {
+          finish(() => reject(new Error("Failed to load YouTube IFrame API")));
+        },
+        { once: true }
+      );
       document.head.appendChild(script);
     }
 
