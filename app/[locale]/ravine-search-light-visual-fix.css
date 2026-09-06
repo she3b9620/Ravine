@@ -123,3 +123,5 @@ html[data-theme="light"] body > .ravine-search-overlay .ravine-search-dialog .ey
     transition:none!important;
   }
 }
+
+/* Preview deployment trigger: keep this branch's latest verified UI state deployable. */
