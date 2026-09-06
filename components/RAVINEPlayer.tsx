@@ -39,6 +39,7 @@ export default function RAVINEPlayer({ src, poster, title, contentType, duration
   const [showChapters, setShowChapters] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showControls, setShowControls] = useState(true);
+  const [timelineHover, setTimelineHover] = useState<number | null>(null);
   const [introChoice, setIntroChoice] = useState<"main" | "trailer" | "preview">(assets.some((a) => a.kind === "trailer" || a.kind === "preview") ? "main" : "main");
 
   const trailer = useMemo(() => assets.find((asset) => asset.kind === "trailer"), [assets]);
@@ -78,6 +79,7 @@ export default function RAVINEPlayer({ src, poster, title, contentType, duration
     if (!video) return;
     video.load();
     setCurrent(0);
+    setTimelineHover(null);
     syncPlaying(false);
   }, [activeSrc, syncPlaying]);
 
@@ -112,6 +114,15 @@ export default function RAVINEPlayer({ src, poster, title, contentType, duration
     video.currentTime = seconds;
     revealControls();
     if (video.paused) void video.play().catch(() => undefined);
+  }
+
+  function handleTimelineHover(event: React.PointerEvent<HTMLDivElement>) {
+    const durationValue = activeDuration || 0;
+    if (!durationValue) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    if (!rect.width) return;
+    const progress = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
+    setTimelineHover(progress * 100);
   }
 
   async function toggleFullscreen() {
@@ -180,7 +191,14 @@ export default function RAVINEPlayer({ src, poster, title, contentType, duration
       <div className={`${styles.controls} ${!showControls && playing ? styles.quietControls : ""}`} aria-hidden={!showControls && playing}>
         <div className={styles.timelineRow}>
           <span>{formatTime(current)}</span>
-          <input aria-label={ar ? "موضع التشغيل" : "Playback position"} type="range" min="0" max={activeDuration || 0} step="0.1" value={Math.min(current, activeDuration || 0)} onChange={(event) => seekTo(Number(event.target.value))} />
+          <div
+            className={styles.timelineTrack}
+            onPointerMove={handleTimelineHover}
+            onPointerLeave={() => setTimelineHover(null)}
+          >
+            {timelineHover !== null ? <span className={styles.timelineHoverLine} style={{ left: `${timelineHover}%` }} aria-hidden="true" /> : null}
+            <input aria-label={ar ? "موضع التشغيل" : "Playback position"} type="range" min="0" max={activeDuration || 0} step="0.1" value={Math.min(current, activeDuration || 0)} onChange={(event) => seekTo(Number(event.target.value))} />
+          </div>
           <span>{formatTime(activeDuration || 0)}</span>
         </div>
         <div className={styles.controlRow}>
