@@ -1,30 +1,48 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useTransition, type FormEvent } from "react";
 import { Check, ChevronDown, RotateCcw, SlidersHorizontal, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 type Category = { id: number; name: string; slug: string | null };
 type Locale = "ar" | "en";
 type FilterKey = "category" | "type";
 type Props = { locale: Locale; query: string; category: string; type: string; duration: string; format: string; quality: string; sort: string; categories: Category[] };
 
-const types = [
+type Option = { value: string; ar: string; en: string };
+
+const types: Option[] = [
   { value: "video", ar: "فيديو", en: "Video" }, { value: "short", ar: "قصير", en: "Short" }, { value: "film", ar: "فيلم", en: "Film" },
   { value: "documentary", ar: "وثائقي", en: "Documentary" }, { value: "podcast", ar: "بودكاست", en: "Podcast" }, { value: "live", ar: "مباشر", en: "Live" },
 ];
-const durations = [
+const durations: Option[] = [
   { value: "under-5", ar: "أقل من 5 دقائق", en: "Under 5 min" }, { value: "5-20", ar: "5–20 دقيقة", en: "5–20 min" },
   { value: "20-60", ar: "20–60 دقيقة", en: "20–60 min" }, { value: "over-60", ar: "أكثر من 60 دقيقة", en: "Over 60 min" },
 ];
-const formats = [
+const formats: Option[] = [
   { value: "16:9", ar: "أفقي · 16:9", en: "Landscape · 16:9" }, { value: "9:16", ar: "عمودي · 9:16", en: "Portrait · 9:16" },
   { value: "1:1", ar: "مربع · 1:1", en: "Square · 1:1" }, { value: "other", ar: "نسبة أخرى", en: "Other ratio" },
 ];
 const qualities = [{ value: "1080p", ar: "1080p", en: "1080p" }, { value: "1440p", ar: "1440p", en: "1440p" }, { value: "4K", ar: "4K", en: "4K" }];
 const sorts = [{ value: "newest", ar: "الأحدث", en: "Newest" }, { value: "oldest", ar: "الأقدم", en: "Oldest" }];
 
-export default function DiscoverFilters({ locale, query, category, type, duration, format, quality, sort, categories }: Props) {
+function buildDiscoverHref(locale: Locale, query: string, category: string, type: string, duration: string, format: string, quality: string, sort: string) {
+  const params = new URLSearchParams();
+  const cleanQuery = query.trim();
+  if (cleanQuery) params.set("q", cleanQuery);
+  if (category) params.set("category", category);
+  if (type) params.set("type", type);
+  if (duration) params.set("duration", duration);
+  if (format) params.set("format", format);
+  if (quality) params.set("quality", quality);
+  if (sort && sort !== "newest") params.set("sort", sort);
+  const search = params.toString();
+  return `/${locale}/discover${search ? `?${search}` : ""}`;
+}
+
+export default function DiscoverFilters({ locale, query: initialQuery, category, type, duration, format, quality, sort, categories }: Props) {
   const isArabic = locale === "ar";
+  const router = useRouter();
   const [open, setOpen] = useState<FilterKey | null>(null);
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(category);
@@ -33,7 +51,15 @@ export default function DiscoverFilters({ locale, query, category, type, duratio
   const [selectedFormat, setSelectedFormat] = useState(format);
   const [selectedQuality, setSelectedQuality] = useState(quality);
   const [selectedSort, setSelectedSort] = useState(sort || "newest");
+  const [query, setQuery] = useState(initialQuery);
+  const [isPending, startTransition] = useTransition();
   const rootRef = useRef<HTMLFormElement>(null);
+  const debounceRef = useRef<number | null>(null);
+  const skipInitialRef = useRef(true);
+
+  useEffect(() => {
+    setQuery(initialQuery);
+  }, [initialQuery]);
 
   useEffect(() => {
     const onPointerDown = (event: PointerEvent) => {
@@ -51,15 +77,35 @@ export default function DiscoverFilters({ locale, query, category, type, duratio
     return () => { document.removeEventListener("pointerdown", onPointerDown); document.removeEventListener("keydown", onKeyDown); };
   }, []);
 
+  useEffect(() => {
+    if (skipInitialRef.current) {
+      skipInitialRef.current = false;
+      return;
+    }
+    if (debounceRef.current) window.clearTimeout(debounceRef.current);
+    debounceRef.current = window.setTimeout(() => {
+      const href = buildDiscoverHref(locale, query, selectedCategory, selectedType, selectedDuration, selectedFormat, selectedQuality, selectedSort);
+      startTransition(() => router.replace(href, { scroll: false }));
+    }, 320);
+    return () => { if (debounceRef.current) window.clearTimeout(debounceRef.current); };
+  }, [query, selectedCategory, selectedType, selectedDuration, selectedFormat, selectedQuality, selectedSort, locale, router]);
+
   const categoryLabel = selectedCategory ? categories.find((item) => String(item.id) === selectedCategory)?.name ?? (isArabic ? "تصنيف" : "Category") : isArabic ? "كل التصنيفات" : "All categories";
   const typeLabel = selectedType ? types.find((item) => item.value === selectedType)?.[locale] ?? selectedType : isArabic ? "كل الأنواع" : "All types";
   const advancedCount = [selectedDuration, selectedFormat, selectedQuality].filter(Boolean).length;
 
   function clearFilters() { setSelectedCategory(""); setSelectedType(""); setSelectedDuration(""); setSelectedFormat(""); setSelectedQuality(""); setSelectedSort("newest"); }
 
+  function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const href = buildDiscoverHref(locale, query, selectedCategory, selectedType, selectedDuration, selectedFormat, selectedQuality, selectedSort);
+    startTransition(() => router.push(href, { scroll: false }));
+    window.setTimeout(() => document.getElementById("discover-results")?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
+  }
+
   return (
-    <form ref={rootRef} className="discover-filters" action={`/${locale}/discover`}>
-      <label className="discover-search"><span aria-hidden="true">⌕</span><input name="q" defaultValue={query} placeholder={isArabic ? "ابحث عن عمل أو فكرة..." : "Search work or ideas..."} /></label>
+    <form ref={rootRef} className="discover-filters" action={`/${locale}/discover`} onSubmit={submit}>
+      <label className="discover-search"><span aria-hidden="true">⌕</span><input name="q" value={query} onChange={(event) => setQuery(event.target.value)} placeholder={isArabic ? "ابحث عن عمل أو فكرة..." : "Search work or ideas..."} /><span className={`discover-live-indicator${isPending ? " is-pending" : query.trim() ? " has-query" : ""}`} aria-hidden="true" /></label>
       <div className="discover-filter-field">
         <button className={`discover-filter-trigger${open === "category" ? " is-open" : ""}`} type="button" aria-expanded={open === "category"} onClick={() => { setAdvancedOpen(false); setOpen(open === "category" ? null : "category"); }}>
           <span className="discover-filter-copy"><small>{isArabic ? "التصنيف" : "Category"}</small><strong>{categoryLabel}</strong></span><span className="discover-chevron" aria-hidden="true"><ChevronDown size={16} /></span>
@@ -81,7 +127,7 @@ export default function DiscoverFilters({ locale, query, category, type, duratio
         <input type="hidden" name="type" value={selectedType} />
       </div>
       <button className={`discover-more-trigger${advancedOpen ? " is-open" : ""}${advancedCount ? " has-active" : ""}`} type="button" aria-expanded={advancedOpen} onClick={() => { setOpen(null); setAdvancedOpen(!advancedOpen); }}><SlidersHorizontal size={17} /><span>{isArabic ? "فلاتر إضافية" : "More filters"}</span>{advancedCount > 0 ? <b>{advancedCount}</b> : null}</button>
-      <button className="button primary discover-submit" type="submit">{isArabic ? "اكتشف" : "Discover"}</button>
+      <button className="button primary discover-submit" type="submit" disabled={isPending}>{isPending ? (isArabic ? "جارٍ الاكتشاف…" : "Discovering…") : (isArabic ? "اكتشف" : "Discover")}</button>
       <div className={`discover-filter-sheet${advancedOpen ? " is-open" : ""}`} aria-hidden={!advancedOpen}>
         <div className="discover-filter-backdrop" onClick={() => setAdvancedOpen(false)} />
         <aside className="discover-filter-panel" role="dialog" aria-modal="true" aria-label={isArabic ? "فلاتر الاكتشاف" : "Discover filters"}>
@@ -92,7 +138,7 @@ export default function DiscoverFilters({ locale, query, category, type, duratio
             <FilterSelect locale={locale} label={isArabic ? "الجودة" : "Quality"} value={selectedQuality} options={qualities} onChange={setSelectedQuality} />
             <FilterSelect locale={locale} label={isArabic ? "الترتيب" : "Order"} value={selectedSort} options={sorts} onChange={setSelectedSort} />
           </div>
-          <div className="discover-filter-panel-foot"><button type="button" className="discover-clear" onClick={clearFilters}><RotateCcw size={15} />{isArabic ? "مسح الفلاتر" : "Reset filters"}</button><button type="button" className="button primary discover-apply" onClick={() => setAdvancedOpen(false)}>{isArabic ? "تم" : "Done"}</button></div>
+          <div className="discover-filter-panel-foot"><button type="button" className="discover-clear" onClick={clearFilters}><RotateCcw size={15} />{isArabic ? "مسح الفلاتر" : "Reset filters"}</button><button type="button" className="button primary discover-apply" onClick={() => { setAdvancedOpen(false); const href = buildDiscoverHref(locale, query, selectedCategory, selectedType, selectedDuration, selectedFormat, selectedQuality, selectedSort); startTransition(() => router.push(href, { scroll: false })); }}>{isArabic ? "تم" : "Done"}</button></div>
         </aside>
       </div>
       <input type="hidden" name="duration" value={selectedDuration} /><input type="hidden" name="format" value={selectedFormat} /><input type="hidden" name="quality" value={selectedQuality} /><input type="hidden" name="sort" value={selectedSort} />
