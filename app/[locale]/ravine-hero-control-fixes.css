@@ -1,10 +1,9 @@
 /* RAVINE Hero-only finishing overrides.
    Scoped to Light Mode so Dark Mode remains untouched. */
 
-/* Arabic RTL must not reverse the vertical volume control: low stays at the bottom,
-   high stays at the top, matching standard media-player behavior. */
+/* Reverse only the Light Mode vertical volume slider direction. */
 html[data-theme="light"] .ravine-home-video-control-shell .ravine-video-volume-popover input[type="range"]{
-  direction:rtl!important;
+  direction:ltr!important;
   writing-mode:vertical-lr!important;
 }
 
