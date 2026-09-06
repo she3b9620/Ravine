@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Compass, Users, MessagesSquare, LockKeyhole } from "lucide-react";
+import { Home, Compass, Scissors, Clapperboard, Radio, Mic2, Film, Users, MessagesSquare, LockKeyhole } from "lucide-react";
 import { requestRavineAuth } from "./AuthModal";
 
 type Locale = "ar" | "en";
@@ -11,11 +11,16 @@ type Item = readonly [slug: string, en: string, ar: string, icon: typeof Home];
 const navigation: Item[] = [
   ["", "Home", "الرئيسية", Home],
   ["discover", "Discover", "اكتشف", Compass],
+  ["cuts", "Cuts", "كتس", Scissors],
+  ["videos", "Videos", "الفيديوهات", Clapperboard],
+  ["live", "Live", "مباشر", Radio],
+  ["podcasts", "Podcasts", "البودكاست", Mic2],
+  ["documentary", "Documentary", "الوثائقي", Film],
   ["creators", "Creators", "المبدعون", Users],
   ["community", "Community", "المجتمع", MessagesSquare],
 ];
 
-const GUEST_GATED = new Set(["community"]);
+const GUEST_GATED = new Set(["community", "cuts", "videos", "live", "podcasts", "documentary"]);
 
 export default function PrimaryNav({ locale, authenticated = false }: { locale: Locale; authenticated?: boolean }) {
   const pathname = usePathname() || `/${locale}`;
