@@ -771,3 +771,437 @@ html[data-theme="light"] .guest-shell .ravine-home-video-timeline input[type="ra
     transition:none!important;
   }
 }
+/* RAVINE HOME — timeline below controls */
+.guest-shell .ravine-hero-video-controls{
+  flex-direction:column!important;
+  align-items:center!important;
+  gap:0!important;
+}
+
+.guest-shell .ravine-video-controls-row{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:8px!important;
+}
+
+.guest-shell .ravine-home-video-timeline{
+  width:100%!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding-top:9px!important;
+  padding-bottom:0!important;
+  pointer-events:auto!important;
+}
+
+.guest-shell .ravine-home-video-timeline input[type="range"]{
+  width:220px!important;
+  max-width:none!important;
+  height:3px!important;
+  margin:0!important;
+  padding:0!important;
+  appearance:none!important;
+  -webkit-appearance:none!important;
+  background:linear-gradient(
+    to right,
+    var(--copper) 0%,
+    var(--copper) var(--ravine-video-progress),
+    rgba(241,233,220,.24) var(--ravine-video-progress),
+    rgba(241,233,220,.24) 100%
+  )!important;
+  border-radius:999px!important;
+  outline:none!important;
+  cursor:pointer!important;
+  opacity:.78!important;
+
+  /* Only the bar changes size; the transition is short enough to remain easy to grab. */
+  transition:
+    height .14s ease,
+    opacity .14s ease,
+    width .14s ease!important;
+}
+
+.guest-shell .ravine-home-video-timeline input[type="range"]:hover,
+.guest-shell .ravine-home-video-timeline input[type="range"]:focus-visible{
+  width:240px!important;
+  height:6px!important;
+  opacity:1!important;
+}
+
+.guest-shell .ravine-home-video-timeline input[type="range"]::-webkit-slider-runnable-track{
+  height:3px!important;
+  background:transparent!important;
+  border-radius:999px!important;
+}
+
+.guest-shell .ravine-home-video-timeline input[type="range"]:hover::-webkit-slider-runnable-track,
+.guest-shell .ravine-home-video-timeline input[type="range"]:focus-visible::-webkit-slider-runnable-track{
+  height:6px!important;
+}
+
+.guest-shell .ravine-home-video-timeline input[type="range"]::-moz-range-track{
+  height:3px!important;
+  background:transparent!important;
+  border-radius:999px!important;
+}
+
+.guest-shell .ravine-home-video-timeline input[type="range"]:hover::-moz-range-track,
+.guest-shell .ravine-home-video-timeline input[type="range"]:focus-visible::-moz-range-track{
+  height:6px!important;
+}
+
+.guest-shell .ravine-home-video-timeline input[type="range"]::-webkit-slider-thumb{
+  appearance:none!important;
+  -webkit-appearance:none!important;
+  width:0!important;
+  height:0!important;
+  margin-top:0!important;
+  border:0!important;
+  background:transparent!important;
+  transition:
+    width .10s ease,
+    height .10s ease!important;
+}
+
+.guest-shell .ravine-home-video-timeline input[type="range"]:hover::-webkit-slider-thumb,
+.guest-shell .ravine-home-video-timeline input[type="range"]:focus-visible::-webkit-slider-thumb{
+  width:10px!important;
+  height:10px!important;
+  border-radius:50%!important;
+  background:var(--copper)!important;
+}
+
+.guest-shell .ravine-home-video-timeline input[type="range"]::-moz-range-thumb{
+  width:0!important;
+  height:0!important;
+  border:0!important;
+  border-radius:50%!important;
+  background:transparent!important;
+}
+
+.guest-shell .ravine-home-video-timeline input[type="range"]:hover::-moz-range-thumb,
+.guest-shell .ravine-home-video-timeline input[type="range"]:focus-visible::-moz-range-thumb{
+  width:10px!important;
+  height:10px!important;
+  border:0!important;
+  border-radius:50%!important;
+  background:var(--copper)!important;
+}
+
+html[data-theme="light"] .guest-shell .ravine-home-video-timeline input[type="range"]{
+  background:linear-gradient(
+    to right,
+    var(--copper) 0%,
+    var(--copper) var(--ravine-video-progress),
+    rgba(23,23,23,.20) var(--ravine-video-progress),
+    rgba(23,23,23,.20) 100%
+  )!important;
+}
+
+@media(max-width:820px){
+  .guest-shell .ravine-home-video-timeline{
+    padding-top:7px!important;
+  }
+
+  .guest-shell .ravine-home-video-timeline input[type="range"]{
+    width:190px!important;
+  }
+
+  .guest-shell .ravine-home-video-timeline input[type="range"]:hover,
+  .guest-shell .ravine-home-video-timeline input[type="range"]:focus-visible{
+    width:206px!important;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .guest-shell .ravine-home-video-timeline input[type="range"]{
+    transition:none!important;
+  }
+}
+/* RAVINE HOME — restore inline timeline beside controls */
+.guest-shell .ravine-hero-video-controls{
+  flex-direction:row!important;
+  align-items:center!important;
+  gap:8px!important;
+}
+
+.guest-shell .ravine-video-controls-row{
+  display:contents!important;
+}
+
+.guest-shell .ravine-home-video-timeline{
+  width:220px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:0!important;
+  margin:0!important;
+  pointer-events:auto!important;
+}
+
+.guest-shell .ravine-home-video-timeline input[type="range"]{
+  width:220px!important;
+  height:4px!important;
+  margin:0!important;
+  padding:0!important;
+  appearance:none!important;
+  -webkit-appearance:none!important;
+  background:linear-gradient(
+    to right,
+    var(--copper) 0%,
+    var(--copper) var(--ravine-video-progress),
+    rgba(241,233,220,.24) var(--ravine-video-progress),
+    rgba(241,233,220,.24) 100%
+  )!important;
+  border-radius:999px!important;
+  outline:none!important;
+  cursor:pointer!important;
+  opacity:.78!important;
+  transition:
+    width .13s ease,
+    height .13s ease,
+    opacity .13s ease,
+    filter .13s ease!important;
+}
+
+.guest-shell .ravine-home-video-timeline input[type="range"]:hover,
+.guest-shell .ravine-home-video-timeline input[type="range"]:focus-visible{
+  width:290px!important;
+  height:9px!important;
+  opacity:1!important;
+  filter:drop-shadow(0 0 5px rgba(196,122,82,.20))!important;
+}
+
+.guest-shell .ravine-home-video-timeline input[type="range"]::-webkit-slider-runnable-track{
+  height:4px!important;
+  background:transparent!important;
+  border-radius:999px!important;
+}
+
+.guest-shell .ravine-home-video-timeline input[type="range"]:hover::-webkit-slider-runnable-track,
+.guest-shell .ravine-home-video-timeline input[type="range"]:focus-visible::-webkit-slider-runnable-track{
+  height:9px!important;
+}
+
+.guest-shell .ravine-home-video-timeline input[type="range"]::-moz-range-track{
+  height:4px!important;
+  background:transparent!important;
+  border-radius:999px!important;
+}
+
+.guest-shell .ravine-home-video-timeline input[type="range"]:hover::-moz-range-track,
+.guest-shell .ravine-home-video-timeline input[type="range"]:focus-visible::-moz-range-track{
+  height:9px!important;
+}
+
+.guest-shell .ravine-home-video-timeline input[type="range"]::-webkit-slider-thumb{
+  appearance:none!important;
+  -webkit-appearance:none!important;
+  width:0!important;
+  height:0!important;
+  margin:0!important;
+  border:0!important;
+  background:transparent!important;
+  transition:width .08s ease,height .08s ease!important;
+}
+
+.guest-shell .ravine-home-video-timeline input[type="range"]:hover::-webkit-slider-thumb,
+.guest-shell .ravine-home-video-timeline input[type="range"]:focus-visible::-webkit-slider-thumb{
+  width:12px!important;
+  height:12px!important;
+  border-radius:50%!important;
+  background:var(--copper)!important;
+}
+
+.guest-shell .ravine-home-video-timeline input[type="range"]::-moz-range-thumb{
+  width:0!important;
+  height:0!important;
+  border:0!important;
+  border-radius:50%!important;
+  background:transparent!important;
+}
+
+.guest-shell .ravine-home-video-timeline input[type="range"]:hover::-moz-range-thumb,
+.guest-shell .ravine-home-video-timeline input[type="range"]:focus-visible::-moz-range-thumb{
+  width:12px!important;
+  height:12px!important;
+  border:0!important;
+  border-radius:50%!important;
+  background:var(--copper)!important;
+}
+
+html[data-theme="light"] .guest-shell .ravine-home-video-timeline input[type="range"]{
+  background:linear-gradient(
+    to right,
+    var(--copper) 0%,
+    var(--copper) var(--ravine-video-progress),
+    rgba(23,23,23,.20) var(--ravine-video-progress),
+    rgba(23,23,23,.20) 100%
+  )!important;
+}
+
+@media(max-width:820px){
+  .guest-shell .ravine-hero-video-controls{
+    gap:6px!important;
+  }
+
+  .guest-shell .ravine-home-video-timeline{
+    width:155px!important;
+  }
+
+  .guest-shell .ravine-home-video-timeline input[type="range"]{
+    width:155px!important;
+  }
+
+  .guest-shell .ravine-home-video-timeline input[type="range"]:hover,
+  .guest-shell .ravine-home-video-timeline input[type="range"]:focus-visible{
+    width:195px!important;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .guest-shell .ravine-home-video-timeline input[type="range"]{
+    transition:none!important;
+  }
+}
+/* RAVINE HOME — compact master control */
+.guest-shell .ravine-home-video-control-shell{
+  position:fixed!important;
+  top:104px!important;
+  z-index:45!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+}
+
+.guest-shell .ravine-home-video-control-shell.is-rtl{
+  left:32px!important;
+  right:auto!important;
+}
+
+.guest-shell .ravine-home-video-control-shell.is-ltr{
+  right:32px!important;
+  left:auto!important;
+}
+
+.guest-shell .ravine-home-video-control-toggle{
+  width:42px!important;
+  height:42px!important;
+  display:grid!important;
+  place-items:center!important;
+  padding:0!important;
+  border:1px solid rgba(241,233,220,.16)!important;
+  border-radius:999px!important;
+  background:rgba(9,9,9,.34)!important;
+  color:#F1E9DC!important;
+  -webkit-backdrop-filter:blur(12px) saturate(110%)!important;
+  backdrop-filter:blur(12px) saturate(110%)!important;
+  box-shadow:0 10px 30px rgba(0,0,0,.18)!important;
+  cursor:pointer!important;
+  transition:
+    transform .20s ease,
+    border-color .20s ease,
+    background .20s ease,
+    color .20s ease,
+    box-shadow .20s ease!important;
+}
+
+.guest-shell .ravine-home-video-control-toggle:hover,
+.guest-shell .ravine-home-video-control-toggle:focus-visible{
+  transform:translateY(-1px)!important;
+  border-color:rgba(196,122,82,.58)!important;
+  background:rgba(196,122,82,.09)!important;
+  color:#F1E9DC!important;
+  box-shadow:0 12px 34px rgba(0,0,0,.22),0 0 18px rgba(196,122,82,.08)!important;
+  outline:none!important;
+}
+
+.guest-shell .ravine-home-video-control-toggle svg{
+  width:19px!important;
+  height:19px!important;
+  fill:none!important;
+  stroke:currentColor!important;
+  stroke-width:1.65!important;
+  stroke-linecap:round!important;
+  stroke-linejoin:round!important;
+}
+
+.guest-shell .ravine-home-video-control-shell.is-open .ravine-home-video-control-toggle{
+  border-color:rgba(196,122,82,.58)!important;
+  color:#D49A78!important;
+  background:rgba(196,122,82,.09)!important;
+}
+
+.guest-shell .ravine-hero-video-controls-panel{
+  display:grid!important;
+  grid-template-rows:0fr!important;
+  opacity:0!important;
+  margin-top:8px!important;
+  transform:translateY(-5px) scale(.98)!important;
+  transform-origin:top center!important;
+  pointer-events:none!important;
+  transition:
+    grid-template-rows .18s ease,
+    opacity .16s ease,
+    transform .18s ease,
+    margin-top .18s ease!important;
+}
+
+.guest-shell .ravine-home-video-control-shell.is-open .ravine-hero-video-controls-panel{
+  grid-template-rows:1fr!important;
+  opacity:1!important;
+  transform:translateY(0) scale(1)!important;
+  pointer-events:auto!important;
+}
+
+.guest-shell .ravine-hero-video-controls-panel > .ravine-hero-video-controls{
+  min-height:0!important;
+  overflow:hidden!important;
+}
+
+html[data-theme="light"] .guest-shell .ravine-home-video-control-toggle{
+  background:rgba(241,233,220,.48)!important;
+  border-color:rgba(23,23,23,.14)!important;
+  color:#171717!important;
+  box-shadow:0 10px 28px rgba(23,23,23,.08)!important;
+}
+
+html[data-theme="light"] .guest-shell .ravine-home-video-control-toggle:hover,
+html[data-theme="light"] .guest-shell .ravine-home-video-control-toggle:focus-visible,
+html[data-theme="light"] .guest-shell .ravine-home-video-control-shell.is-open .ravine-home-video-control-toggle{
+  border-color:rgba(169,93,56,.48)!important;
+  background:rgba(255,250,246,.78)!important;
+  color:#70402F!important;
+}
+
+@media(max-width:820px){
+  .guest-shell .ravine-home-video-control-shell{
+    top:88px!important;
+  }
+
+  .guest-shell .ravine-home-video-control-shell.is-rtl{
+    left:14px!important;
+  }
+
+  .guest-shell .ravine-home-video-control-shell.is-ltr{
+    right:14px!important;
+  }
+
+  .guest-shell .ravine-home-video-control-toggle{
+    width:38px!important;
+    height:38px!important;
+  }
+
+  .guest-shell .ravine-home-video-control-toggle svg{
+    width:17px!important;
+    height:17px!important;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .guest-shell .ravine-hero-video-controls-panel,
+  .guest-shell .ravine-home-video-control-toggle{
+    transition:none!important;
+  }
+}
