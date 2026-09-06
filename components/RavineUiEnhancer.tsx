@@ -5,38 +5,25 @@ import { useEffect } from "react";
 const FOLLOW_PERMISSION = /permission denied for table follows/i;
 const VIDEOS_RECURSION = /infinite recursion detected in policy for relation [\"']videos[\"']/i;
 const ARABIC_DIGITS = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
-const USER_IDENTITY_SELECTOR = [
-  "[data-preserve-numerals]", "[data-username]", "[data-user-name]", "[data-display-name]", "[data-handle]", "[data-user-handle]",
-  ".username", ".user-name", ".user_name", ".handle", ".user-handle", ".creator-username", ".creator-handle",
-  ".handleLine", ".nameRow", ".profile-name", ".profile-username", '[class*="username"]', '[class*="user-name"]', '[class*="handle"]',
-].join(",");
-const HEADING_SELECTOR = "h1,h2,h3,h4,h5,h6";
+const USER_IDENTITY_SELECTOR = ["[data-preserve-numerals]", "[data-username]", "[data-user-name]", "[data-display-name]", "[data-handle]", "[data-user-handle]", ".username", ".user-name", ".user_name", ".handle", ".user-handle", ".creator-username", ".creator-handle", ".handleLine", ".nameRow", ".profile-name", ".profile-username", "[class*='username']", "[class*='user-name']", "[class*='handle']"].join(",");
 
 function walkTextNodes(root: Node, replace: (value: string, node: Text) => string) {
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
   const nodes: Text[] = [];
   let current: Node | null = walker.nextNode();
-  while (current) {
-    if (current.nodeValue) nodes.push(current as Text);
-    current = walker.nextNode();
-  }
-  for (const node of nodes) {
-    const next = replace(node.nodeValue || "", node);
-    if (next !== node.nodeValue) node.nodeValue = next;
-  }
+  while (current) { if (current.nodeValue) nodes.push(current as Text); current = walker.nextNode(); }
+  for (const node of nodes) { const next = replace(node.nodeValue || "", node); if (next !== node.nodeValue) node.nodeValue = next; }
 }
 
-function toArabicIndicDigits(value: string) {
-  return value.replace(/[0-9]/g, (digit) => ARABIC_DIGITS[Number(digit)]);
-}
+function toArabicIndicDigits(value: string) { return value.replace(/[0-9]/g, (digit) => ARABIC_DIGITS[Number(digit)]); }
 
 function shouldPreserveNumerals(node: Text) {
   const parent = node.parentElement;
   if (!parent) return true;
   if (parent.closest(USER_IDENTITY_SELECTOR)) return true;
-  if (parent.closest(HEADING_SELECTOR)) return true;
   if (parent.closest("input, textarea, code, pre, kbd, samp, script, style")) return true;
   if (parent.closest("[data-numeric-literal]")) return true;
+  if (parent.closest("a[href]") && parent.textContent?.trim() === node.nodeValue?.trim() && /(?:https?:\/\/|\/\b(?:ar|en)\b\/|^@)/i.test(node.nodeValue || "")) return true;
   return false;
 }
 
@@ -63,6 +50,7 @@ const PAGE_ICONS: Record<string, string> = {
   videos: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3z"/></svg>',
   cuts: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 4 12 16M18 4 6 20"/><circle cx="6" cy="4" r="2"/><circle cx="18" cy="4" r="2"/><path d="M9 9h3m-3 6h3"/></svg>',
   podcasts: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="3" width="8" height="12" rx="4"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M9 21h6"/></svg>',
+  documentaries: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="m9 8 6 4-6 4z"/></svg>',
   live: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="16" height="12" rx="2"/><path d="m10 9 5 3-5 3z"/><path d="M8 3 6 5M16 3l2 2"/></svg>',
   creators: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0M15 11a3 3 0 1 0 0-6M15 15.5a5.5 5.5 0 0 1 5.5 4.5"/></svg>',
   community: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17H5a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3v2"/><path d="M10 21h8a3 3 0 0 0 3-3v-3a3 3 0 0 0-3-3h-5a3 3 0 0 0-3 3v6z"/></svg>',
@@ -76,34 +64,21 @@ function enhanceContentPageHeadingIcons() {
   const heading = Array.from(candidates).find((item) => !item.classList.contains("ravine-page-heading"));
   if (!(heading instanceof HTMLElement)) return;
   heading.classList.add("ravine-page-heading");
-  const icon = document.createElement("span");
-  icon.className = "ravine-page-heading-icon";
-  icon.innerHTML = iconMarkup;
-  heading.prepend(icon);
+  const icon = document.createElement("span"); icon.className = "ravine-page-heading-icon"; icon.innerHTML = iconMarkup; heading.prepend(icon);
 }
 
 function enhanceSelectionTabs() {
   const labels = new Map([["يومية", "daily"], ["أسبوعية", "weekly"], ["شهرية", "monthly"], ["سنوية", "yearly"], ["Daily", "daily"], ["Weekly", "weekly"], ["Monthly", "monthly"], ["Yearly", "yearly"]]);
   document.querySelectorAll(".selection-tabs button, .selection-tabs a").forEach((element) => {
-    const key = labels.get(element.textContent?.trim() || "");
-    if (!key) return;
-    if (!(element instanceof HTMLElement)) return;
-    element.classList.add("ravine-period-tab");
-    element.setAttribute("data-ravine-period", key);
-    if (!element.hasAttribute("aria-pressed")) element.setAttribute("aria-pressed", element.classList.contains("active") ? "true" : "false");
+    const key = labels.get(element.textContent?.trim() || ""); if (!key || !(element instanceof HTMLElement)) return;
+    element.classList.add("ravine-period-tab"); element.setAttribute("data-ravine-period", key); if (!element.hasAttribute("aria-pressed")) element.setAttribute("aria-pressed", element.classList.contains("active") ? "true" : "false");
     if (element.dataset.ravineBound === "1") return;
     element.dataset.ravineBound = "1";
-    element.addEventListener("click", () => {
-      const container = element.closest(".selection-tabs");
-      container?.querySelectorAll(".ravine-period-tab").forEach((tab) => { const active = tab === element; tab.classList.toggle("active", active); tab.setAttribute("aria-pressed", active ? "true" : "false"); });
-    });
+    element.addEventListener("click", () => { const container = element.closest(".selection-tabs"); container?.querySelectorAll(".ravine-period-tab").forEach((tab) => { const active = tab === element; tab.classList.toggle("active", active); tab.setAttribute("aria-pressed", active ? "true" : "false"); }); });
   });
 }
 
-function isHomeRoute() {
-  const path = window.location.pathname.replace(/\/$/, "");
-  return path === "/ar" || path === "/en";
-}
+function isHomeRoute() { const path = window.location.pathname.replace(/\/$/, ""); return path === "/ar" || path === "/en"; }
 
 function syncGuestAbout() {
   const existing = document.querySelectorAll(".ravine-guest-about");
