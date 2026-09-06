@@ -21,8 +21,12 @@ type HeaderProfile = { display_name: string | null; username: string | null; ava
 function RavineLockup({ compact = false }: { compact?: boolean }) {
   return (
     <span className={`ravine-lockup${compact ? " compact" : ""}`} aria-hidden="true">
-      <img src="/اللوجو.png" alt="" className="ravine-lockup-mark" />
-      <img src="/التايبو.png" alt="" className="ravine-lockup-wordmark" />
+      <span className="ravine-lockup-mark-wrap">
+        <img src="/اللوجو.png" alt="" className="ravine-lockup-mark" />
+      </span>
+      <span className="ravine-lockup-wordmark-wrap">
+        <img src="/التايبو.png" alt="" className="ravine-lockup-wordmark" />
+      </span>
     </span>
   );
 }
