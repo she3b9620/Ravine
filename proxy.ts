@@ -5,7 +5,21 @@ import { routing } from "./i18n/routing";
 import { supabasePublishableKey, supabaseUrl } from "./lib/supabase/config";
 
 const intlMiddleware = createMiddleware(routing);
-const protectedRoutes = ["/account", "/library", "/notifications", "/creator", "/studio", "/onboarding", "/security"];
+
+// Authenticated routes: these contain personal data, account state, or gated
+// platform areas and must never be reachable by guests.
+const protectedRoutes = [
+  "/account",
+  "/dashboard",
+  "/history",
+  "/library",
+  "/notifications",
+  "/settings",
+  "/creator",
+  "/studio",
+  "/onboarding",
+  "/security",
+];
 
 function isProtectedPath(pathname: string) {
   const segments = pathname.split("/").filter(Boolean);
