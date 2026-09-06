@@ -10,6 +10,8 @@ html[data-theme="light"] .home-work-card:focus-visible h3{color:#171717!importan
 .home-work-preview{position:absolute;inset:0;z-index:2;width:100%;height:100%;object-fit:cover;display:block;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .55s cubic-bezier(.22,1,.36,1),visibility 0s linear .55s}
 .home-work-preview.visible{opacity:1;visibility:visible;transition:opacity .55s cubic-bezier(.22,1,.36,1),visibility 0s linear 0s}
 .home-work-preview.fading{opacity:0;visibility:hidden;transition:opacity .52s ease,visibility 0s linear .52s}
+.home-work-preview-youtube{overflow:hidden;background:#090909}
+.home-work-preview-youtube iframe{position:absolute;inset:-1px;width:calc(100% + 2px);height:calc(100% + 2px);border:0;display:block;pointer-events:none}
 .home-work-thumb.is-previewing .home-work-thumb-image{transform:scale(1.018);filter:saturate(.92) brightness(.86)}
 .home-work-preview-wash{position:absolute;inset:0;z-index:3;pointer-events:none;opacity:0;transition:opacity .45s ease;background:linear-gradient(180deg,rgba(9,9,9,.02),rgba(9,9,9,.16))}
 .home-work-thumb.is-previewing .home-work-preview-wash{opacity:1}
