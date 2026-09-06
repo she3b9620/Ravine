@@ -1,0 +1,14 @@
+/* RAVINE active navigation underline: render inside the active link box so it cannot be clipped by horizontal nav scrolling. */
+@media (min-width:981px){
+  .guest-shell .ravine-nav-link.is-active{
+    padding-bottom:11px!important;
+    margin-bottom:-11px!important;
+    background-image:linear-gradient(var(--copper),var(--copper))!important;
+    background-repeat:no-repeat!important;
+    background-position:center bottom!important;
+    background-size:18px 2px!important;
+  }
+  .guest-shell .ravine-nav-link.is-active::after{
+    display:none!important;
+  }
+}
