@@ -29,7 +29,7 @@ export default async function HistoryPage({ params }: { params: Promise<{ locale
         <div className="video-grid">
           {items.map((item) => item.videos && (
             <Link className="video-card" href={`/${locale}/watch/${item.videos.id}`} key={item.id}>
-              <div className="video-thumb"><img src={item.videos.thumbnail_url || "/RAVINE.png"} alt="" /><span className="duration">{item.videos.duration ? `${Math.floor(item.videos.duration / 60)}:${String(Math.round(item.videos.duration % 60)).padStart(2, "0")}` : "—"}</span></div>
+              <div className="video-thumb"><img src={item.videos.thumbnail_url || "/RAVINE.PNG"} alt="" /><span className="duration">{item.videos.duration ? `${Math.floor(item.videos.duration / 60)}:${String(Math.round(item.videos.duration % 60)).padStart(2, "0")}` : "—"}</span></div>
               <div className="video-meta"><div className="video-kicker"><History size={11} /> {ar ? "من السجل" : "HISTORY"}</div><h2>{item.videos.title || (ar ? "عمل بدون عنوان" : "Untitled work")}</h2><div className="video-stats"><span>{ravineNumber(item.videos.views, locale)} {ar ? "مشاهدة" : "views"}</span><span><PlayCircle size={12} /> {ar ? "استكمال" : "Continue"}</span></div></div>
             </Link>
           ))}

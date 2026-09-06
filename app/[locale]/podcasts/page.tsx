@@ -32,7 +32,7 @@ function WorkCard({ locale, work }: { locale: "ar" | "en"; work: Work }) {
   return (
     <Link href={`/${locale}/watch/${work.id}`} className={styles.card}>
       <div className={styles.thumb}>
-        <img src={work.thumbnail_url || "/RAVINE.png"} alt="" loading="lazy" />
+        <img src={work.thumbnail_url || "/RAVINE.PNG"} alt="" loading="lazy" />
         <span className={styles.duration}>{formatDuration(work.duration, "—")}</span>
         <span className={styles.typePill}><Mic2 size={11} aria-hidden="true" />{ar ? "بودكاست" : "Podcast"}</span>
       </div>

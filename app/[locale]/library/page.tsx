@@ -47,7 +47,7 @@ export default async function LibraryPage({ params }: { params: Promise<{ locale
         <div className="video-grid">
           {saved.map((item) => item.videos && (
             <Link className="video-card" href={`/${locale}/watch/${item.videos.id}`} key={item.video_id}>
-              <div className="video-thumb"><img src={item.videos.thumbnail_url || "/RAVINE.png"} alt="" /><span className="duration">{item.videos.duration ? `${Math.floor(item.videos.duration / 60)}:${String(Math.round(item.videos.duration % 60)).padStart(2, "0")}` : "—"}</span></div>
+              <div className="video-thumb"><img src={item.videos.thumbnail_url || "/RAVINE.PNG"} alt="" /><span className="duration">{item.videos.duration ? `${Math.floor(item.videos.duration / 60)}:${String(Math.round(item.videos.duration % 60)).padStart(2, "0")}` : "—"}</span></div>
               <div className="video-meta"><div className="video-kicker">WORK</div><h2>{item.videos.title || (ar ? "بدون عنوان" : "Untitled")}</h2><p>{item.videos.description || (ar ? "عمل محفوظ في مكتبتك." : "A work saved to your library.")}</p><div className="video-stats"><span>{Number(item.videos.views || 0).toLocaleString()} {ar ? "مشاهدة" : "views"}</span></div></div>
             </Link>
           ))}

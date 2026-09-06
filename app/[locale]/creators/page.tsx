@@ -59,7 +59,7 @@ export default async function CreatorsPage({ params }: { params: Promise<{ local
           {creators.map((creator) => (
             <Link href={`/${locale}/creators/${creator.id}`} className="video-card creator-card" key={creator.id}>
               <div className="video-thumb creator-avatar-wrap">
-                <img src={creator.avatar_url || "/RAVINE.png"} alt="" className="creator-avatar" />
+                <img src={creator.avatar_url || "/RAVINE.PNG"} alt="" className="creator-avatar" />
               </div>
               <div className="video-meta">
                 <div className="video-kicker">{creator.specialty || "CREATOR"}</div>

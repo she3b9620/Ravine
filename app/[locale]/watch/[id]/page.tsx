@@ -87,7 +87,7 @@ export default async function WatchPage({ params }: { params: Promise<{ locale: 
           </div>
           {creatorRecord && (
             <Link className={styles.creator} href={`/${locale}/creators/${creatorRecord.id}`}>
-              <img src={creatorRecord.avatar_url || "/RAVINE.png"} alt="" />
+              <img src={creatorRecord.avatar_url || "/RAVINE.PNG"} alt="" />
               <span>
                 <small>{ar ? "المبدع" : "Creator"}</small>
                 <strong>{creatorRecord.name || creatorRecord.username || `creator-${creatorRecord.id}`}</strong>

@@ -65,7 +65,7 @@ export default async function DocumentariesPage({ params }: { params: Promise<{ 
           {documentaries.map((work) => (
             <Link href={`/${locale}/watch/${work.id}`} className="video-card" key={work.id}>
               <div className="video-thumb">
-                <img src={work.thumbnail_url || "/RAVINE.png"} alt="" loading="lazy" />
+                <img src={work.thumbnail_url || "/RAVINE.PNG"} alt="" loading="lazy" />
                 <span className="duration">{formatDuration(work.duration)}</span>
                 <span className="documentary-pill"><Film size={12} />{ar ? "وثائقي" : "Documentary"}</span>
               </div>
