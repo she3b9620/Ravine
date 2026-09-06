@@ -43,6 +43,7 @@ import "./ravine-hero-overlay-fix.css";
 import "./ravine-video-finish.css";
 import "./ravine-header-underline-fix.css";
 import "./ravine-cinematic-motion.css";
+import "./hero-video-control-safe-area.css";
 
 const locales = ["ar", "en"] as const;
 type Locale = (typeof locales)[number];
