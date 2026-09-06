@@ -18,23 +18,14 @@
   right:auto!important;
   bottom:calc(100% + 6px)!important;
   left:50%!important;
-  transform:translateX(-50%)!important;
+  translate:-50% 0!important;
   transform-origin:center bottom!important;
   z-index:160!important;
   transition-duration:1.25s!important;
 }
 
-/* Only the volume popover gets the slower disappearance. The main Hero controls keep
-   their normal animation timing so the buttons are not slowed down. */
-html[data-theme="light"] .ravine-home-video-control-shell .ravine-hero-video-controls-panel,
-html[data-theme="light"] .ravine-home-video-control-shell .ravine-hero-video-controls{
-  transition-duration:unset!important;
-}
-
-html[data-theme="dark"] .ravine-home-video-control-shell .ravine-hero-video-controls-panel,
-html[data-theme="dark"] .ravine-home-video-control-shell .ravine-hero-video-controls{
-  transition-duration:unset!important;
-}
+/* Only the volume popover gets the slower disappearance. Do not change the timing of
+   the main Hero controls/buttons. */
 
 /* RAVINE Guest Hero intro copy — lock typography metrics across Light/Dark and AR/EN.
    Theme changes only the text color/shadow; locale changes only the established font. */
