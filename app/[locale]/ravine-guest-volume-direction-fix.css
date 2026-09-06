@@ -1,0 +1,75 @@
+/* RAVINE Guest Hero Volume Slider — 90° orientation + gentler dismissal. */
+
+.guest-shell .ravine-home-video-control-shell .ravine-video-volume-popover{
+  width:132px!important;
+  height:34px!important;
+  padding:0 9px!important;
+  bottom:calc(100% + 6px)!important;
+  left:50%!important;
+  translate:none!important;
+  transform:translate3d(-50%,6px,0) scale(.94)!important;
+  transform-origin:center bottom!important;
+  transition:
+    opacity .30s ease .14s,
+    transform .30s cubic-bezier(.22,1,.36,1) .14s,
+    visibility 0s linear .44s!important;
+  pointer-events:auto!important;
+}
+
+.guest-shell .ravine-home-video-control-shell .ravine-video-audio-wrap.volume-open .ravine-video-volume-popover{
+  opacity:1!important;
+  visibility:visible!important;
+  transform:translate3d(-50%,0,0) scale(1)!important;
+  transition-delay:0s!important;
+  pointer-events:auto!important;
+}
+
+.guest-shell .ravine-home-video-control-shell .ravine-video-volume-popover input[type="range"]{
+  width:116px!important;
+  height:22px!important;
+  margin:0!important;
+  writing-mode:horizontal-tb!important;
+  direction:ltr!important;
+}
+
+.guest-shell .ravine-home-video-control-shell .ravine-video-volume-popover input[type="range"]::-webkit-slider-runnable-track{
+  width:108px!important;
+  height:4px!important;
+}
+
+.guest-shell .ravine-home-video-control-shell .ravine-video-volume-popover input[type="range"]::-webkit-slider-thumb{
+  margin-top:-4px!important;
+}
+
+.guest-shell .ravine-home-video-control-shell .ravine-video-volume-popover input[type="range"]::-moz-range-track{
+  width:108px!important;
+  height:4px!important;
+}
+
+.guest-shell .ravine-home-video-control-shell .ravine-video-volume-popover input[type="range"]::-moz-range-progress{
+  height:4px!important;
+}
+
+@media(max-width:820px){
+  .guest-shell .ravine-home-video-control-shell .ravine-video-volume-popover{
+    width:118px!important;
+    height:32px!important;
+    padding:0 8px!important;
+  }
+
+  .guest-shell .ravine-home-video-control-shell .ravine-video-volume-popover input[type="range"]{
+    width:104px!important;
+    height:22px!important;
+  }
+
+  .guest-shell .ravine-home-video-control-shell .ravine-video-volume-popover input[type="range"]::-webkit-slider-runnable-track,
+  .guest-shell .ravine-home-video-control-shell .ravine-video-volume-popover input[type="range"]::-moz-range-track{
+    width:96px!important;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .guest-shell .ravine-home-video-control-shell .ravine-video-volume-popover{
+    transition:none!important;
+  }
+}
