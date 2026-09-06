@@ -111,3 +111,255 @@ html[data-theme="light"] .guest-shell .ravine-hero-video-audio-toggle[aria-press
 @media(prefers-reduced-motion:reduce){
   .guest-shell .ravine-hero-video-audio-toggle{transition:none}
 }
+
+
+/* RAVINE video controls — additive only. */
+.guest-shell .ravine-hero-video-controls{
+  position:fixed;
+  top:104px;
+  inset-inline-end:32px;
+  z-index:45;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  direction:ltr;
+  padding:0;
+}
+
+.guest-shell .ravine-hero-video-controls .ravine-video-control{
+  width:42px;
+  height:42px;
+  display:grid;
+  place-items:center;
+  padding:0;
+  border:1px solid rgba(241,233,220,.16);
+  border-radius:999px;
+  background:rgba(9,9,9,.34);
+  color:#F1E9DC;
+  -webkit-backdrop-filter:blur(12px) saturate(110%);
+  backdrop-filter:blur(12px) saturate(110%);
+  box-shadow:0 10px 30px rgba(0,0,0,.18);
+  cursor:pointer;
+  transition:transform .24s ease,border-color .24s ease,background .24s ease,color .24s ease,box-shadow .24s ease;
+}
+
+.guest-shell .ravine-hero-video-controls .ravine-video-control:hover,
+.guest-shell .ravine-hero-video-controls .ravine-video-control:focus-visible{
+  transform:translateY(-1px);
+  border-color:rgba(196,122,82,.58);
+  background:rgba(196,122,82,.09);
+  color:#F1E9DC;
+  box-shadow:0 12px 34px rgba(0,0,0,.22),0 0 18px rgba(196,122,82,.08);
+  outline:none;
+}
+
+.guest-shell .ravine-hero-video-controls .ravine-video-control[aria-pressed="true"]{
+  border-color:rgba(196,122,82,.58);
+  color:#D49A78;
+  background:rgba(196,122,82,.09);
+}
+
+.guest-shell .ravine-hero-video-controls .ravine-video-control-icon,
+.guest-shell .ravine-hero-video-controls .ravine-hero-video-audio-icon{
+  width:18px;
+  height:18px;
+  display:grid;
+  place-items:center;
+}
+
+.guest-shell .ravine-hero-video-controls .ravine-video-control-icon svg,
+.guest-shell .ravine-hero-video-controls .ravine-hero-video-audio-icon svg{
+  width:18px;
+  height:18px;
+  display:block;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.7;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+.guest-shell .ravine-hero-video-controls .ravine-video-control-play svg{
+  fill:currentColor;
+  stroke:none;
+}
+
+html[data-theme="light"] .guest-shell .ravine-hero-video-controls .ravine-video-control{
+  background:rgba(241,233,220,.48);
+  border-color:rgba(23,23,23,.14);
+  color:#171717;
+  box-shadow:0 10px 28px rgba(23,23,23,.08);
+}
+
+html[data-theme="light"] .guest-shell .ravine-hero-video-controls .ravine-video-control:hover,
+html[data-theme="light"] .guest-shell .ravine-hero-video-controls .ravine-video-control:focus-visible,
+html[data-theme="light"] .guest-shell .ravine-hero-video-controls .ravine-video-control[aria-pressed="true"]{
+  border-color:rgba(169,93,56,.48);
+  background:rgba(255,250,246,.78);
+  color:#70402F;
+}
+
+@media(max-width:820px){
+  .guest-shell .ravine-hero-video-controls{
+    top:88px;
+    inset-inline-end:14px;
+    gap:6px;
+  }
+
+  .guest-shell .ravine-hero-video-controls .ravine-video-control{
+    width:38px;
+    height:38px;
+  }
+
+  .guest-shell .ravine-hero-video-controls .ravine-video-control-icon,
+  .guest-shell .ravine-hero-video-controls .ravine-video-control-icon svg,
+  .guest-shell .ravine-hero-video-controls .ravine-hero-video-audio-icon,
+  .guest-shell .ravine-hero-video-controls .ravine-hero-video-audio-icon svg{
+    width:17px;
+    height:17px;
+  }
+}
+
+/* RAVINE video controls final positioning + icon visibility */
+.guest-shell .ravine-hero-video-controls{
+  position:fixed!important;
+  top:104px!important;
+  z-index:45!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:8px!important;
+  direction:ltr!important;
+  padding:0!important;
+}
+
+.guest-shell .ravine-hero-video-controls.is-rtl{
+  left:32px!important;
+  right:auto!important;
+  inset-inline-start:auto!important;
+  inset-inline-end:auto!important;
+}
+
+.guest-shell .ravine-hero-video-controls.is-ltr{
+  right:32px!important;
+  left:auto!important;
+  inset-inline-start:auto!important;
+  inset-inline-end:auto!important;
+}
+
+.guest-shell .ravine-hero-video-controls .ravine-video-control{
+  position:relative!important;
+  inset:auto!important;
+  width:42px!important;
+  height:42px!important;
+  flex:0 0 42px!important;
+  display:grid!important;
+  place-items:center!important;
+  padding:0!important;
+}
+
+.guest-shell .ravine-hero-video-controls .ravine-hero-video-audio-toggle{
+  position:relative!important;
+  top:auto!important;
+  right:auto!important;
+  left:auto!important;
+  inset-inline-end:auto!important;
+  inset-inline-start:auto!important;
+}
+
+.guest-shell .ravine-hero-video-controls .ravine-video-control-icon{
+  width:20px!important;
+  height:20px!important;
+  display:grid!important;
+  place-items:center!important;
+}
+
+.guest-shell .ravine-hero-video-controls .ravine-video-control-icon svg{
+  width:20px!important;
+  height:20px!important;
+  display:block!important;
+  overflow:visible!important;
+}
+
+.guest-shell .ravine-hero-video-controls .ravine-video-control-play .ravine-video-control-icon svg{
+  width:21px!important;
+  height:21px!important;
+  fill:currentColor!important;
+  stroke:none!important;
+}
+
+.guest-shell .ravine-hero-video-controls .ravine-video-control-play .ravine-video-control-icon svg polygon{
+  fill:currentColor!important;
+  stroke:none!important;
+}
+
+.guest-shell .ravine-hero-video-controls .ravine-video-control-play .ravine-video-control-icon svg rect{
+  fill:currentColor!important;
+  stroke:none!important;
+}
+
+.guest-shell .ravine-hero-video-controls .ravine-video-control-prev .ravine-video-control-icon svg,
+.guest-shell .ravine-hero-video-controls .ravine-video-control-next .ravine-video-control-icon svg{
+  fill:none!important;
+  stroke:currentColor!important;
+  stroke-width:1.8!important;
+  stroke-linecap:round!important;
+  stroke-linejoin:round!important;
+}
+
+.guest-shell .ravine-hero-video-controls .ravine-hero-video-audio-icon{
+  width:20px!important;
+  height:20px!important;
+  display:grid!important;
+  place-items:center!important;
+}
+
+.guest-shell .ravine-hero-video-controls .ravine-hero-video-audio-icon svg{
+  width:19px!important;
+  height:19px!important;
+  display:block!important;
+  fill:none!important;
+  stroke:currentColor!important;
+  stroke-width:1.7!important;
+  stroke-linecap:round!important;
+  stroke-linejoin:round!important;
+}
+
+@media(max-width:820px){
+  .guest-shell .ravine-hero-video-controls{
+    top:88px!important;
+    gap:6px!important;
+  }
+
+  .guest-shell .ravine-hero-video-controls.is-rtl{
+    left:14px!important;
+    right:auto!important;
+  }
+
+  .guest-shell .ravine-hero-video-controls.is-ltr{
+    right:14px!important;
+    left:auto!important;
+  }
+
+  .guest-shell .ravine-hero-video-controls .ravine-video-control{
+    width:38px!important;
+    height:38px!important;
+    flex-basis:38px!important;
+  }
+
+  .guest-shell .ravine-hero-video-controls .ravine-video-control-icon,
+  .guest-shell .ravine-hero-video-controls .ravine-video-control-icon svg{
+    width:18px!important;
+    height:18px!important;
+  }
+
+  .guest-shell .ravine-hero-video-controls .ravine-video-control-play .ravine-video-control-icon svg{
+    width:19px!important;
+    height:19px!important;
+  }
+
+  .guest-shell .ravine-hero-video-controls .ravine-hero-video-audio-icon,
+  .guest-shell .ravine-hero-video-controls .ravine-hero-video-audio-icon svg{
+    width:18px!important;
+    height:18px!important;
+  }
+}
