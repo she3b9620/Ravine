@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 
 type VideoAudioToggleProps = {
@@ -105,17 +105,47 @@ export default function VideoAudioToggle({
 
   const [visible, setVisible] = useState(false);
   const [controlsOpen, setControlsOpen] = useState(false);
+  const [volumeOpen, setVolumeOpen] = useState(false);
   const [muted, setMuted] = useState(true);
   const [playing, setPlaying] = useState(true);
   const [repeat, setRepeat] = useState(false);
   const [volume, setVolume] = useState(60);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const volumeCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const openVolume = () => {
+    if (volumeCloseTimerRef.current) {
+      clearTimeout(volumeCloseTimerRef.current);
+      volumeCloseTimerRef.current = null;
+    }
+    setVolumeOpen(true);
+  };
+
+  const scheduleVolumeClose = () => {
+    if (volumeCloseTimerRef.current) {
+      clearTimeout(volumeCloseTimerRef.current);
+    }
+
+    volumeCloseTimerRef.current = setTimeout(() => {
+      setVolumeOpen(false);
+      volumeCloseTimerRef.current = null;
+    }, 480);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (volumeCloseTimerRef.current) {
+        clearTimeout(volumeCloseTimerRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (pathname !== `/${locale}`) {
       setVisible(false);
       setControlsOpen(false);
+      setVolumeOpen(false);
       return;
     }
 
@@ -361,13 +391,24 @@ export default function VideoAudioToggle({
               </span>
             </button>
 
-            <div className="ravine-video-audio-wrap">
+            <div
+              className={`ravine-video-audio-wrap ${volumeOpen ? "volume-open" : ""}`}
+              onMouseEnter={openVolume}
+              onMouseLeave={scheduleVolumeClose}
+              onFocus={openVolume}
+              onBlur={(event) => {
+                if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+                  scheduleVolumeClose();
+                }
+              }}
+            >
               <button
                 type="button"
                 className="ravine-video-control ravine-hero-video-audio-toggle"
                 aria-label={audioLabel}
                 aria-pressed={!muted}
                 onClick={() => {
+                  openVolume();
                   const nextMuted = !muted;
                   setMuted(nextMuted);
 
