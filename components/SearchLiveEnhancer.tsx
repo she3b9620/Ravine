@@ -1,41 +1,50 @@
 "use client";
 
 import { createRoot, type Root } from "react-dom/client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import SearchResultsPanel from "./SearchResultsPanel";
 
 export default function SearchLiveEnhancer() {
   const rootRef = useRef<Root | null>(null);
-  const hostRef = useRef<HTMLElement | null>(null);
-  const [mountReady, setMountReady] = useState(0);
+  const hostRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    let active = true;
+    let disposed = false;
+
     const ensureMount = () => {
+      if (disposed) return;
       const dialog = document.querySelector<HTMLElement>(".ravine-search-dialog");
       const form = dialog?.querySelector(".ravine-search-form");
-      if (!dialog || !form) return;
+      if (!dialog || !form) {
+        if (hostRef.current && !hostRef.current.isConnected) {
+          rootRef.current?.unmount();
+          rootRef.current = null;
+          hostRef.current = null;
+        }
+        return;
+      }
+
       let mount = dialog.querySelector<HTMLDivElement>(":scope > .ravine-search-live-mount");
       if (!mount) {
         mount = document.createElement("div");
         mount.className = "ravine-search-live-mount";
         form.insertAdjacentElement("afterend", mount);
       }
-      if (hostRef.current !== mount) {
-        if (rootRef.current) rootRef.current.unmount();
-        hostRef.current = mount;
-        rootRef.current = createRoot(mount);
-      }
-      if (active) setMountReady((value) => value + 1);
+
+      if (hostRef.current === mount && rootRef.current) return;
+      rootRef.current?.unmount();
+      hostRef.current = mount;
+      rootRef.current = createRoot(mount);
+      rootRef.current.render(<LiveSearchBridge />);
     };
 
     ensureMount();
     const observer = new MutationObserver(ensureMount);
     observer.observe(document.body, { childList: true, subtree: true });
-    const timer = window.setInterval(ensureMount, 180);
+    const timer = window.setInterval(ensureMount, 220);
 
     return () => {
-      active = false;
+      disposed = true;
       observer.disconnect();
       window.clearInterval(timer);
       rootRef.current?.unmount();
@@ -43,13 +52,6 @@ export default function SearchLiveEnhancer() {
       hostRef.current = null;
     };
   }, []);
-
-  useEffect(() => {
-    const mount = hostRef.current;
-    const root = rootRef.current;
-    if (!mount || !root) return;
-    root.render(<LiveSearchBridge />);
-  }, [mountReady]);
 
   return null;
 }
