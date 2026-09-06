@@ -21,3 +21,4 @@ The application prefers `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUB
 
 ## Rebuild rule
 Locked product decisions are carried forward. Open decisions remain open until explicitly decided.
+
