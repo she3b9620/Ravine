@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
@@ -14,6 +14,10 @@ type YouTubePlayer = {
   pauseVideo?: () => void;
   mute?: () => void;
   unMute?: () => void;
+  setVolume?: (volume: number) => void;
+  getCurrentTime?: () => number;
+  getDuration?: () => number;
+  seekTo?: (seconds: number, allowSeekAhead?: boolean) => void;
   loadVideoById?: (videoId: string) => void;
   nextVideo?: () => void;
   previousVideo?: () => void;
@@ -55,9 +59,11 @@ const VIDEO_IDS = [
 
 const YOUTUBE_API_SRC = "https://www.youtube.com/iframe_api";
 const PLAYER_ID = "ravine-guest-cinematic-player";
+const DEFAULT_VOLUME = 60;
 
 function randomVideoIndex(length: number) {
   if (length <= 1) return 0;
+
   if (typeof window === "undefined" || !window.crypto?.getRandomValues) {
     return Math.floor(Math.random() * length);
   }
@@ -68,8 +74,20 @@ function randomVideoIndex(length: number) {
 }
 
 type VideoControlEvent = CustomEvent<{
-  action: "play" | "pause" | "next" | "previous" | "toggle-audio";
+  action:
+    | "play"
+    | "pause"
+    | "next"
+    | "previous"
+    | "toggle-audio"
+    | "set-volume"
+    | "toggle-repeat"
+    | "seek"
+    | "replay";
   muted?: boolean;
+  volume?: number;
+  repeat?: boolean;
+  time?: number;
 }>;
 
 export default function GuestCinematicBackdrop({
@@ -94,7 +112,7 @@ export default function GuestCinematicBackdrop({
       autoplay: "1",
       mute: "1",
       controls: "0",
-      loop: "1",
+      loop: "0",
       playlist: playlistIds.concat(first).join(","),
       playsinline: "1",
       modestbranding: "1",
@@ -147,32 +165,89 @@ export default function GuestCinematicBackdrop({
 
     let currentIndex = startIndex;
     let userPaused = false;
+    let repeatEnabled = false;
+    let volume = DEFAULT_VOLUME;
+    let muted = true;
 
     const dispatchPlaybackState = (playing: boolean) => {
       setIsPlaying(playing);
+
+      const currentTime = player?.getCurrentTime?.() ?? 0;
+      const duration = player?.getDuration?.() ?? 0;
+
       window.dispatchEvent(
         new CustomEvent("ravine-video-playback-state", {
-          detail: { playing },
+          detail: {
+            playing,
+            currentTime,
+            duration,
+          },
         })
       );
     };
 
-    const dispatchAudioState = (muted: boolean) => {
+    const dispatchTimelineState = () => {
+      const currentTime = player?.getCurrentTime?.() ?? 0;
+      const duration = player?.getDuration?.() ?? 0;
+
+      window.dispatchEvent(
+        new CustomEvent("ravine-video-timeline-state", {
+          detail: {
+            currentTime,
+            duration,
+          },
+        })
+      );
+    };
+
+    const dispatchAudioState = () => {
       window.dispatchEvent(
         new CustomEvent("ravine-video-audio-state", {
-          detail: { muted },
+          detail: { muted, volume },
         })
       );
     };
 
-    const applyMuteState = (muted: boolean) => {
+    const dispatchRepeatState = () => {
+      window.dispatchEvent(
+        new CustomEvent("ravine-video-repeat-state", {
+          detail: { repeat: repeatEnabled },
+        })
+      );
+    };
+
+    const applyAudioState = (
+      nextMuted = muted,
+      nextVolume = volume
+    ) => {
+      muted = nextMuted;
+      volume = Math.min(100, Math.max(0, nextVolume));
+
+      player?.setVolume?.(volume);
+
       if (muted) {
         player?.mute?.();
       } else {
         player?.unMute?.();
+        player?.setVolume?.(volume);
       }
 
-      dispatchAudioState(muted);
+      dispatchAudioState();
+    };
+
+    const loadCurrentVideo = () => {
+      player?.loadVideoById?.(VIDEO_IDS[currentIndex]);
+
+      window.setTimeout(() => {
+        if (cancelled) return;
+
+        applyAudioState(muted, volume);
+        dispatchTimelineState();
+
+        if (!userPaused) {
+          player?.playVideo?.();
+        }
+      }, 250);
     };
 
     const resumePlayback = () => {
@@ -180,26 +255,50 @@ export default function GuestCinematicBackdrop({
       player?.playVideo?.();
     };
 
+    const goNext = () => {
+      currentIndex = (currentIndex + 1) % VIDEO_IDS.length;
+      loadCurrentVideo();
+    };
+
+    const goPrevious = () => {
+      currentIndex =
+        (currentIndex - 1 + VIDEO_IDS.length) % VIDEO_IDS.length;
+      loadCurrentVideo();
+    };
+
     const handleStateChange = (event: { data: number }) => {
       if (cancelled) return;
 
       const playingState = window.YT?.PlayerState?.PLAYING ?? 1;
       const pausedState = window.YT?.PlayerState?.PAUSED ?? 2;
+      const endedState = window.YT?.PlayerState?.ENDED ?? 0;
+
+      dispatchTimelineState();
 
       if (event.data === playingState) {
         dispatchPlaybackState(true);
       } else if (event.data === pausedState) {
         dispatchPlaybackState(false);
+      } else if (event.data === endedState) {
+        dispatchPlaybackState(false);
+
+        if (repeatEnabled) {
+          player?.seekTo?.(0, true);
+          player?.playVideo?.();
+        } else {
+          goNext();
+        }
       }
     };
 
     const handleControl = (event: Event) => {
-      if (cancelled) return;
+      if (cancelled || !player) return;
 
       const customEvent = event as VideoControlEvent;
-      const action = customEvent.detail?.action;
+      const detail = customEvent.detail;
+      const action = detail?.action;
 
-      if (!action || !player) return;
+      if (!action) return;
 
       if (action === "play") {
         userPaused = false;
@@ -214,47 +313,70 @@ export default function GuestCinematicBackdrop({
       }
 
       if (action === "toggle-audio") {
-        const muted = customEvent.detail?.muted ?? true;
-        applyMuteState(muted);
+        applyAudioState(
+          detail.muted ?? !muted,
+          typeof detail.volume === "number" ? detail.volume : volume
+        );
         return;
       }
 
-      const wasPlaying = !userPaused;
+      if (action === "set-volume") {
+        volume = Math.min(
+          100,
+          Math.max(
+            0,
+            typeof detail.volume === "number"
+              ? detail.volume
+              : volume
+          )
+        );
+
+        muted = detail.muted ?? volume === 0;
+
+        player.setVolume?.(volume);
+
+        if (muted) {
+          player.mute?.();
+        } else {
+          player.unMute?.();
+        }
+
+        dispatchAudioState();
+        return;
+      }
+
+      if (action === "toggle-repeat") {
+        repeatEnabled = detail.repeat ?? !repeatEnabled;
+        dispatchRepeatState();
+        return;
+      }
+
+      if (action === "seek") {
+        const nextTime =
+          typeof detail.time === "number" ? detail.time : 0;
+
+        player.seekTo?.(Math.max(0, nextTime), true);
+        dispatchTimelineState();
+        return;
+      }
+
+      if (action === "replay") {
+        userPaused = false;
+        player.seekTo?.(0, true);
+        player.playVideo?.();
+        dispatchPlaybackState(true);
+        dispatchTimelineState();
+        return;
+      }
 
       if (action === "next") {
-        currentIndex = (currentIndex + 1) % VIDEO_IDS.length;
-
-        if (player.nextVideo) {
-          player.nextVideo();
-        } else {
-          player.loadVideoById?.(VIDEO_IDS[currentIndex]);
-        }
+        goNext();
+        return;
       }
 
       if (action === "previous") {
-        currentIndex =
-          (currentIndex - 1 + VIDEO_IDS.length) % VIDEO_IDS.length;
-
-        if (player.previousVideo) {
-          player.previousVideo();
-        } else {
-          player.loadVideoById?.(VIDEO_IDS[currentIndex]);
-        }
+        goPrevious();
       }
-
-      window.setTimeout(() => {
-        if (cancelled) return;
-
-        const mutedDetail = customEvent.detail?.muted;
-        if (typeof mutedDetail === "boolean") {
-          applyMuteState(mutedDetail);
-        }
-
-        if (wasPlaying) {
-          userPaused = false;
-          player?.playVideo?.();
-        }
-      }, 250);
     };
 
     const createPlayer = () => {
@@ -265,8 +387,15 @@ export default function GuestCinematicBackdrop({
           onReady: () => {
             if (cancelled) return;
 
+            muted = true;
+            volume = DEFAULT_VOLUME;
+
+            player?.setVolume?.(volume);
             player?.mute?.();
-            dispatchAudioState(true);
+
+            dispatchAudioState();
+            dispatchRepeatState();
+            dispatchTimelineState();
 
             window.setTimeout(() => {
               if (!cancelled && !userPaused) {
@@ -302,6 +431,12 @@ export default function GuestCinematicBackdrop({
       handleControl as EventListener
     );
 
+    const timelineTimer = window.setInterval(() => {
+      if (!cancelled && player) {
+        dispatchTimelineState();
+      }
+    }, 250);
+
     document.addEventListener("visibilitychange", resumePlayback);
     window.addEventListener("focus", resumePlayback);
     window.addEventListener("pageshow", resumePlayback);
@@ -313,6 +448,8 @@ export default function GuestCinematicBackdrop({
         "ravine-video-control",
         handleControl as EventListener
       );
+
+      window.clearInterval(timelineTimer);
 
       document.removeEventListener("visibilitychange", resumePlayback);
       window.removeEventListener("focus", resumePlayback);
