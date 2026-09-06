@@ -13,6 +13,8 @@
   overflow:visible!important;
 }
 
+/* The volume control gets a normal, readable fade. Its short linger is handled in the
+   component so the user has time to move from the audio button to the slider. */
 .guest-shell .ravine-home-video-control-shell .ravine-video-volume-popover{
   top:auto!important;
   right:auto!important;
@@ -21,11 +23,20 @@
   translate:-50% 0!important;
   transform-origin:center bottom!important;
   z-index:160!important;
-  transition-duration:1.25s!important;
+  transition-duration:.22s!important;
+  transition-delay:0s!important;
 }
 
-/* Only the volume popover gets the slower disappearance. Do not change the timing of
-   the main Hero controls/buttons. */
+.guest-shell .ravine-home-video-control-shell .ravine-video-audio-wrap:not(.volume-open) .ravine-video-volume-popover{
+  pointer-events:none!important;
+}
+
+.guest-shell .ravine-home-video-control-shell .ravine-video-audio-wrap.volume-open .ravine-video-volume-popover{
+  pointer-events:auto!important;
+}
+
+/* Only the volume popover gets the dedicated interaction treatment. The main Hero
+   controls/buttons keep their existing animation timing. */
 
 /* RAVINE Guest Hero kicker — the same readable shadow/glow treatment in Arabic and English. */
 .guest-shell .home-guest-hero .home-state-kicker{
