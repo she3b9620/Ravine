@@ -19,3 +19,153 @@ html[data-theme="light"] .ravine-sidebar-settings-group{border-top-color:rgba(23
 @media (prefers-reduced-motion:reduce){
   .ravine-header .ravine-lockup-wordmark{transition:none!important}
 }
+
+/* RAVINE Logo Color Motion: a restrained identity layer using only the approved palette. */
+.ravine-lockup-mark-wrap,
+.ravine-lockup-wordmark-wrap{
+  position:relative;
+  display:block;
+  flex:0 0 auto;
+  line-height:0;
+}
+
+.ravine-lockup-mark-wrap::after,
+.ravine-lockup-wordmark-wrap::after{
+  content:"";
+  position:absolute;
+  inset:-8%;
+  z-index:2;
+  pointer-events:none;
+  opacity:0;
+  background:linear-gradient(
+    112deg,
+    rgba(196,122,82,0) 0%,
+    rgba(196,122,82,0) 23%,
+    rgba(212,154,120,.36) 40%,
+    rgba(24,63,70,.22) 52%,
+    rgba(196,122,82,.25) 66%,
+    rgba(196,122,82,0) 82%
+  );
+  background-size:240% 100%;
+  background-position:0% 50%;
+  mix-blend-mode:soft-light;
+  filter:saturate(108%);
+  transition:opacity .48s cubic-bezier(.22,1,.36,1);
+}
+
+.ravine-lockup-mark-wrap::after{
+  -webkit-mask:url("/اللوجو.png") center/contain no-repeat;
+  mask:url("/اللوجو.png") center/contain no-repeat;
+}
+
+.ravine-lockup-wordmark-wrap::after{
+  -webkit-mask:url("/التايبو.png") center/contain no-repeat;
+  mask:url("/التايبو.png") center/contain no-repeat;
+}
+
+html[data-ravine-logo-motion="on"] .ravine-lockup-mark-wrap::after,
+html[data-ravine-logo-motion="on"] .ravine-lockup-wordmark-wrap::after{
+  opacity:.92;
+  animation:ravineLogoColorFlow 8.5s ease-in-out infinite;
+}
+
+html[data-ravine-logo-motion="off"] .ravine-lockup-mark-wrap::after,
+html[data-ravine-logo-motion="off"] .ravine-lockup-wordmark-wrap::after{
+  opacity:0;
+  animation:none;
+}
+
+@keyframes ravineLogoColorFlow{
+  0%{background-position:0% 50%;filter:saturate(102%)}
+  34%{background-position:58% 50%;filter:saturate(110%)}
+  68%{background-position:100% 50%;filter:saturate(106%)}
+  100%{background-position:0% 50%;filter:saturate(102%)}
+}
+
+/* Soft state handoff when switching the preference. */
+html[data-ravine-logo-motion="on"] .ravine-lockup-mark,
+html[data-ravine-logo-motion="on"] .ravine-lockup-wordmark,
+html[data-ravine-logo-motion="off"] .ravine-lockup-mark,
+html[data-ravine-logo-motion="off"] .ravine-lockup-wordmark{
+  transition:opacity .42s ease,filter .42s ease;
+}
+
+.ravine-account-logo-motion{margin-top:4px}
+.ravine-account-logo-motion .ravine-account-section-label{margin-bottom:6px}
+.ravine-account-motion-toggle{
+  width:100%;
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr) auto;
+  align-items:center;
+  gap:10px;
+  padding:9px 10px;
+  border:1px solid rgba(241,233,220,.08);
+  border-radius:12px;
+  background:rgba(241,233,220,.025);
+  color:var(--stone);
+  text-align:start;
+  font:inherit;
+  cursor:pointer;
+  transition:background .24s ease,border-color .24s ease,color .24s ease,transform .22s ease,box-shadow .24s ease;
+}
+
+.ravine-account-motion-toggle:hover{
+  color:var(--ivory);
+  background:rgba(196,122,82,.05);
+  border-color:rgba(196,122,82,.24);
+  transform:translateY(-1px);
+}
+
+.ravine-account-motion-toggle.is-on{
+  color:var(--ivory);
+  background:linear-gradient(135deg,rgba(196,122,82,.075),rgba(24,63,70,.085));
+  border-color:rgba(196,122,82,.26);
+  box-shadow:0 8px 20px rgba(0,0,0,.12);
+}
+
+.ravine-account-motion-icon{
+  width:28px;
+  height:28px;
+  display:grid;
+  place-items:center;
+  border-radius:9px;
+  background:rgba(196,122,82,.06);
+  color:var(--copper);
+  transition:transform .34s cubic-bezier(.22,1,.36,1),background .24s ease;
+}
+
+.ravine-account-motion-toggle.is-on .ravine-account-motion-icon{
+  transform:rotate(8deg) scale(1.04);
+  background:rgba(196,122,82,.11);
+}
+
+.ravine-account-motion-state{
+  min-width:34px;
+  color:var(--stone);
+  font-size:10px;
+  font-weight:800;
+  text-align:end;
+}
+
+html[data-theme="light"] .ravine-account-motion-toggle{
+  color:#6f6962;
+  background:rgba(23,23,23,.025);
+  border-color:rgba(23,23,23,.07);
+}
+
+html[data-theme="light"] .ravine-account-motion-toggle:hover,
+html[data-theme="light"] .ravine-account-motion-toggle.is-on{
+  color:#171717;
+  background:rgba(196,122,82,.065);
+  border-color:rgba(169,93,56,.24);
+}
+
+@media(prefers-reduced-motion:reduce){
+  .ravine-lockup-mark-wrap::after,
+  .ravine-lockup-wordmark-wrap::after,
+  .ravine-account-motion-toggle,
+  .ravine-account-motion-icon{
+    animation:none!important;
+    transition:none!important;
+  }
+}
