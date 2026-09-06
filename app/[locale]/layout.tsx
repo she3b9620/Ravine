@@ -39,6 +39,7 @@ import "./ravine-selection-tabs.css";
 import "../community-system.css";
 import "./ravine-hero-overlay-fix.css";
 import "./ravine-video-finish.css";
+import "./ravine-header-underline-fix.css";
 
 const locales = ["ar", "en"] as const;
 type Locale = (typeof locales)[number];
