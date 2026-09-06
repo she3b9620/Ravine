@@ -18,8 +18,9 @@ export default function SidebarNav({ locale, authenticated }: { locale: Locale; 
   const groups = authenticated ? [...publicGroups, ...privateGroups] : publicGroups;
   const isActive = (slug: string) => { const [path] = slug.split("?"); return !path ? pathname === `/${locale}` : pathname === `/${locale}/${path}` || pathname.startsWith(`/${locale}/${path}/`); };
   const authDestination = () => pathname || `/${locale}`;
-  return (
-    <nav className="ravine-sidebar-nav" aria-label={locale === "ar" ? "التنقل الجانبي" : "Sidebar navigation"}>
+
+  const renderGroups = () => (
+    <div className="ravine-sidebar-scroll-content">
       {groups.map(([titleEn, titleAr, items]) => (
         <section className="ravine-sidebar-group" key={titleEn}>
           <div className="ravine-sidebar-nav-label">{locale === "ar" ? titleAr : titleEn}</div>
@@ -45,7 +46,13 @@ export default function SidebarNav({ locale, authenticated }: { locale: Locale; 
           </div>
         </section>
       ))}
-      {authenticated ? <section className="ravine-sidebar-group ravine-sidebar-settings-group"><div className="ravine-sidebar-nav-list"><Link href={`/${locale}/account/edit`} className={`ravine-sidebar-link${isActive("account/edit") ? " is-active" : ""}`} aria-current={isActive("account/edit") ? "page" : undefined}><span className="ravine-sidebar-link-icon"><Settings size={18} strokeWidth={1.8} aria-hidden="true" /></span><span className="ravine-sidebar-link-label">{locale === "ar" ? "الإعدادات" : "Settings"}</span></Link></div></section> : null}
+    </div>
+  );
+
+  return (
+    <nav className="ravine-sidebar-nav" aria-label={locale === "ar" ? "التنقل الجانبي" : "Sidebar navigation"}>
+      <div className="ravine-sidebar-scroll-area">{renderGroups()}</div>
+      {authenticated ? <section className="ravine-sidebar-settings-group"><div className="ravine-sidebar-nav-list"><Link href={`/${locale}/account/edit`} className={`ravine-sidebar-link${isActive("account/edit") ? " is-active" : ""}`} aria-current={isActive("account/edit") ? "page" : undefined}><span className="ravine-sidebar-link-icon"><Settings size={18} strokeWidth={1.8} aria-hidden="true" /></span><span className="ravine-sidebar-link-label">{locale === "ar" ? "الإعدادات" : "Settings"}</span></Link></div></section> : null}
     </nav>
   );
 }
