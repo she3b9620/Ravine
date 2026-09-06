@@ -1,0 +1,80 @@
+/* RAVINE Home experience: tighter editorial scale + cinematic welcome settlement + period switching. */
+
+/* The current Home composition was oversized on desktop. Tighten scale without changing the approved structure. */
+.home-viewer-hero{min-height:34vh!important;padding-block:56px 42px!important}
+.home-viewer-welcome-copy .home-state-kicker{font-size:clamp(16px,1.7vw,22px)!important;margin-bottom:14px!important}
+.home-viewer-welcome-copy h1{font-size:clamp(48px,5.6vw,78px)!important;max-width:820px!important;margin-bottom:18px!important}
+.home-viewer-welcome-copy p{max-width:620px!important;font-size:14px!important;line-height:1.7!important}
+.home-viewer-profile{width:min(360px,30vw)!important;min-width:0!important;min-height:360px!important;padding:30px 24px!important;border-radius:32px 18px 36px 22px!important}
+.home-viewer-profile-halo{width:clamp(210px,20vw,270px)!important;height:clamp(210px,20vw,270px)!important;min-width:210px!important;min-height:210px!important}
+.home-viewer-profile-copy strong{font-size:clamp(20px,1.7vw,25px)!important}
+.home-viewer-profile-copy span{font-size:11px!important}
+.home-primary-feed{padding-top:30px!important}
+.home-feed-head{margin-bottom:22px!important}
+.home-feed-intro{font-size:13px!important;line-height:1.65!important}
+.home-rail-section{padding-top:54px!important;padding-bottom:54px!important}
+.home-rail-head{margin-bottom:20px!important}
+.home-rail-head h2{font-size:clamp(26px,2.5vw,38px)!important}
+.home-viewer .section-head{margin-bottom:24px!important}
+.home-viewer .selection-section{padding-top:34px!important;padding-bottom:34px!important}
+
+/* First authenticated-home visit: the welcome scene resolves into the actual For You surface. */
+.home-viewer-hero{transition:min-height .9s cubic-bezier(.22,1,.36,1),padding-block .9s cubic-bezier(.22,1,.36,1)}
+.home-viewer-hero-inner{transition:grid-template-columns .9s cubic-bezier(.22,1,.36,1),gap .9s cubic-bezier(.22,1,.36,1)}
+.home-viewer-welcome-copy{overflow:hidden;transition:opacity .62s ease,transform .82s cubic-bezier(.22,1,.36,1),max-width .82s cubic-bezier(.22,1,.36,1)}
+.home-viewer-welcome-copy h1,.home-viewer-welcome-copy .home-state-kicker,.home-viewer-welcome-copy p{transition:opacity .55s ease,transform .72s cubic-bezier(.22,1,.36,1),margin .72s ease,max-height .72s ease}
+.home-viewer-profile{transition:width .9s cubic-bezier(.22,1,.36,1),min-height .9s cubic-bezier(.22,1,.36,1),padding .9s cubic-bezier(.22,1,.36,1),transform .9s cubic-bezier(.22,1,.36,1),border-radius .9s cubic-bezier(.22,1,.36,1),box-shadow .75s ease!important}
+.home-viewer-profile-halo{transition:width .9s cubic-bezier(.22,1,.36,1),height .9s cubic-bezier(.22,1,.36,1),min-width .9s cubic-bezier(.22,1,.36,1),min-height .9s cubic-bezier(.22,1,.36,1),transform .9s cubic-bezier(.22,1,.36,1),box-shadow .75s ease!important}
+.home-viewer-profile-copy{transition:opacity .55s ease,max-height .7s ease,transform .72s cubic-bezier(.22,1,.36,1)}
+.home-primary-feed{transition:padding-top .9s cubic-bezier(.22,1,.36,1)}
+
+.home-viewer-hero.ravine-home-welcome-settling{min-height:24vh!important;padding-block:36px 24px!important}
+.home-viewer-hero.ravine-home-welcome-settling .home-viewer-welcome-copy{opacity:0;transform:translateY(-12px) scale(.96);max-width:0;pointer-events:none}
+.home-viewer-hero.ravine-home-welcome-settling .home-viewer-welcome-copy h1,.home-viewer-hero.ravine-home-welcome-settling .home-viewer-welcome-copy .home-state-kicker,.home-viewer-hero.ravine-home-welcome-settling .home-viewer-welcome-copy p{opacity:0;max-height:0;margin-block:0;transform:translateY(-10px)}
+.home-viewer-hero.ravine-home-welcome-settling .home-viewer-profile{width:280px!important;min-height:250px!important;padding:18px!important;transform:translateY(-10px)!important;border-radius:26px 16px 28px 18px!important}
+.home-viewer-hero.ravine-home-welcome-settling .home-viewer-profile-halo{width:170px!important;height:170px!important;min-width:170px!important;min-height:170px!important;transform:rotate(-1deg)!important}
+.home-viewer-hero.ravine-home-welcome-settling .home-viewer-profile-copy{opacity:0;max-height:0;overflow:hidden;transform:translateY(10px)}
+
+.home-viewer-hero.ravine-home-welcome-settled{min-height:18vh!important;padding-block:22px 18px!important}
+.home-viewer-hero.ravine-home-welcome-settled .home-viewer-hero-inner{grid-template-columns:minmax(0,1fr) auto!important;gap:24px!important}
+.home-viewer-hero.ravine-home-welcome-settled .home-viewer-welcome-copy{opacity:0;transform:translateY(-16px) scale(.94);max-width:0;pointer-events:none;visibility:hidden}
+.home-viewer-hero.ravine-home-welcome-settled .home-viewer-welcome-copy h1,.home-viewer-hero.ravine-home-welcome-settled .home-viewer-welcome-copy .home-state-kicker,.home-viewer-hero.ravine-home-welcome-settled .home-viewer-welcome-copy p{opacity:0;max-height:0;margin-block:0}
+.home-viewer-hero.ravine-home-welcome-settled .home-viewer-profile{width:250px!important;min-height:170px!important;padding:12px!important;transform:translateY(-8px)!important;border-radius:22px 14px 24px 16px!important;justify-self:end!important;box-shadow:0 24px 62px rgba(0,0,0,.30),0 0 40px rgba(196,122,82,.08)!important}
+.home-viewer-hero.ravine-home-welcome-settled .home-viewer-profile-halo{width:120px!important;height:120px!important;min-width:120px!important;min-height:120px!important;transform:rotate(0)!important}
+.home-viewer-hero.ravine-home-welcome-settled .home-viewer-profile-copy{opacity:0;max-height:0;overflow:hidden}
+.home-viewer-hero.ravine-home-welcome-settled + .home-primary-feed{padding-top:22px!important}
+
+/* Selection tabs: the tab control is compact and the cards use FLIP positioning from SelectionTabsEnhancer. */
+.selection-section .selection-tabs{gap:6px!important;align-items:center}
+.selection-section .selection-tab{transition:background-color .25s ease,border-color .25s ease,color .25s ease,transform .25s cubic-bezier(.22,1,.36,1),box-shadow .25s ease!important}
+.selection-section .selection-tab:hover{transform:translateY(-1px)}
+.selection-section .video-grid{position:relative;overflow:visible}
+.selection-section .video-grid > .video-card{will-change:transform,opacity}
+.selection-section .video-grid[data-ravine-selection-animating="1"] > .video-card{pointer-events:none}
+
+@media(max-width:1100px){
+  .home-viewer-profile{width:min(330px,100%)!important;min-height:320px!important}
+  .home-viewer-profile-halo{width:230px!important;height:230px!important;min-width:230px!important;min-height:230px!important}
+  .home-viewer-hero.ravine-home-welcome-settled .home-viewer-profile{width:230px!important;min-height:155px!important}
+}
+
+@media(max-width:820px){
+  .home-viewer-hero{min-height:30vh!important;padding-block:48px 36px!important}
+  .home-viewer-welcome-copy h1{font-size:clamp(44px,11vw,68px)!important}
+  .home-viewer-profile{width:100%!important;min-height:310px!important;padding:24px 18px!important}
+  .home-viewer-profile-halo{width:210px!important;height:210px!important;min-width:190px!important;min-height:190px!important}
+  .home-rail-section{padding-top:44px!important;padding-bottom:44px!important}
+  .home-viewer .section-head{margin-bottom:20px!important}
+  .home-viewer-hero.ravine-home-welcome-settling{min-height:27vh!important;padding-block:28px 20px!important}
+  .home-viewer-hero.ravine-home-welcome-settling .home-viewer-profile{width:240px!important;min-height:180px!important}
+  .home-viewer-hero.ravine-home-welcome-settling .home-viewer-profile-halo{width:130px!important;height:130px!important;min-width:130px!important;min-height:130px!important}
+  .home-viewer-hero.ravine-home-welcome-settled{min-height:22vh!important;padding-block:20px 14px!important}
+  .home-viewer-hero.ravine-home-welcome-settled .home-viewer-hero-inner{grid-template-columns:1fr!important}
+  .home-viewer-hero.ravine-home-welcome-settled .home-viewer-profile{width:200px!important;min-height:142px!important;justify-self:end!important;margin-inline-start:auto}
+  .home-viewer-hero.ravine-home-welcome-settled .home-viewer-profile-halo{width:100px!important;height:100px!important;min-width:100px!important;min-height:100px!important}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .home-viewer-hero,.home-viewer-hero-inner,.home-viewer-welcome-copy,.home-viewer-welcome-copy h1,.home-viewer-welcome-copy .home-state-kicker,.home-viewer-welcome-copy p,.home-viewer-profile,.home-viewer-profile-halo,.home-viewer-profile-copy,.home-primary-feed,.selection-section .selection-tab{transition:none!important}
+  .home-viewer-hero.ravine-home-welcome-settling,.home-viewer-hero.ravine-home-welcome-settled{min-height:22vh!important}
+}
