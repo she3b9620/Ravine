@@ -122,7 +122,7 @@ export default function SearchResultsPanel(props: SearchResultsPanelProps) {
         <div className="ravine-search-discovery-grid">
           {videos.slice(0, 4).map((video) => (
             <Link href={`/${locale}/watch/${video.id}`} className="ravine-search-discovery-card" key={video.id}>
-              <div className="ravine-search-result-thumb"><img src={video.thumbnail_url || "/RAVINE.png"} alt="" /></div>
+              <div className="ravine-search-result-thumb"><img src={video.thumbnail_url || "/RAVINE.PNG"} alt="" /></div>
               <div><small>{video.content_type || "WORK"}{video.quality ? ` · ${video.quality}` : ""}</small><strong>{video.title || (ar ? "عمل بدون عنوان" : "Untitled work")}</strong></div>
             </Link>
           ))}
@@ -145,7 +145,7 @@ export default function SearchResultsPanel(props: SearchResultsPanelProps) {
           <div className="ravine-search-creators-row">
             {creators.map((creator) => (
               <Link href={`/${locale}/creators/${creator.id}`} className="ravine-search-creator-card" key={creator.id}>
-                <img src={creator.avatar_url || "/RAVINE.png"} alt="" />
+                <img src={creator.avatar_url || "/RAVINE.PNG"} alt="" />
                 <div><strong>{creator.name || creator.username || (ar ? "مبدع" : "Creator")}</strong><small>{creator.specialty || creator.username || "RAVINE"}</small></div>
               </Link>
             ))}
@@ -159,7 +159,7 @@ export default function SearchResultsPanel(props: SearchResultsPanelProps) {
           <div className="ravine-search-video-list">
             {videos.map((video) => (
               <Link href={`/${locale}/watch/${video.id}`} className="ravine-search-video-result" key={video.id}>
-                <div className="ravine-search-result-thumb"><img src={video.thumbnail_url || "/RAVINE.png"} alt="" /><span>{durationLabel(video.duration)}</span></div>
+                <div className="ravine-search-result-thumb"><img src={video.thumbnail_url || "/RAVINE.PNG"} alt="" /><span>{durationLabel(video.duration)}</span></div>
                 <div className="ravine-search-video-copy"><small>{video.content_type || "WORK"}{video.quality ? ` · ${video.quality}` : ""}</small><strong>{video.title || (ar ? "عمل بدون عنوان" : "Untitled work")}</strong><p>{shorten(video.description, 88)}</p><em>{Number(video.views || 0).toLocaleString()} {ar ? "مشاهدة" : "views"}</em></div>
               </Link>
             ))}

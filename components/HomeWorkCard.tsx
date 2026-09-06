@@ -306,7 +306,7 @@ export default function HomeWorkCard({
       <div className={`home-work-thumb${previewing ? " is-previewing" : ""}`}>
         <img
           className="home-work-thumb-image"
-          src={work.thumbnail_url || "/RAVINE.png"}
+          src={work.thumbnail_url || "/RAVINE.PNG"}
           alt=""
           loading="lazy"
         />
