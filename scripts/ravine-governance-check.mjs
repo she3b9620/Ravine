@@ -9,6 +9,10 @@ const required = [
   "app/[locale]/ravine-sidebar-position-finish.css",
   "app/[locale]/ravine-logo-motion-finish.css",
   "components/RavineLogoMotion.tsx",
+  "components/RAVINEPlayer.tsx",
+  "components/RAVINEPlayerRuntime.tsx",
+  "components/RAVINEPlayer.module.css",
+  "lib/ravine-playback-core.ts",
 ];
 
 for (const file of required) {
@@ -21,6 +25,9 @@ const layout = read("app/[locale]/layout.tsx");
 const sidebar = read("app/[locale]/ravine-sidebar-position-finish.css");
 const logo = read("app/[locale]/ravine-logo-motion-finish.css");
 const logoMotion = read("components/RavineLogoMotion.tsx");
+const watchPage = read("app/[locale]/watch/[id]/page.tsx");
+const playbackCore = read("lib/ravine-playback-core.ts");
+const playerRuntime = read("components/RAVINEPlayerRuntime.tsx");
 
 if (process.env.GITHUB_REF_NAME && process.env.GITHUB_REF_NAME !== "ravine/clean-rebuild") {
   throw new Error(`RAVINE build guard expected ravine/clean-rebuild, got ${process.env.GITHUB_REF_NAME}`);
@@ -54,6 +61,37 @@ if (!logo.includes('data-ravine-auth="authenticated"')) {
 }
 if (!logoMotion.includes("ravine-logo-motion-change")) {
   throw new Error("Logo motion state-change event wiring is missing.");
+}
+
+if (!watchPage.includes('import RAVINEPlayerRuntime from "@/components/RAVINEPlayerRuntime";')) {
+  throw new Error("Watch pages must use the deterministic RAVINE player runtime.");
+}
+if (!watchPage.includes("resolveWorkPlaybackUrl(videoId, video.video_url")) {
+  throw new Error("Watch pages must resolve main media through the RAVINE playback contract.");
+}
+if (!watchPage.includes("resolveAssetPlaybackUrl(asset)")) {
+  throw new Error("Watch pages must resolve auxiliary assets through the RAVINE playback contract.");
+}
+if (!playbackCore.includes("export function resolveWorkPlaybackUrl")) {
+  throw new Error("Shared RAVINE playback core is missing work source resolution.");
+}
+if (!playbackCore.includes("export function resolveAssetPlaybackUrl")) {
+  throw new Error("Shared RAVINE playback core is missing asset source resolution.");
+}
+if (!playbackCore.includes("toCloudinaryBrowserVideoUrl")) {
+  throw new Error("Shared RAVINE playback core is missing browser delivery normalization.");
+}
+if (!playerRuntime.includes('data-ravine-playback-runtime="deterministic"')) {
+  throw new Error("Deterministic RAVINE player runtime marker is missing.");
+}
+if (!playerRuntime.includes("}, [activeSrc, duration]);")) {
+  throw new Error("Player media lifecycle must be keyed to the media source, not playing state.");
+}
+if (playerRuntime.includes("[activeSrc, syncPlaying]")) {
+  throw new Error("Player must not reload media when the playing callback changes.");
+}
+if (!playerRuntime.includes("playingRef.current")) {
+  throw new Error("Player control visibility must use a stable playing ref to avoid media lifecycle coupling.");
 }
 
 const searchForbidden = [
