@@ -1,26 +1,17 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import RAVINEPlayer from "@/components/RAVINEPlayer";
+import RAVINEPlayerRuntime from "@/components/RAVINEPlayerRuntime";
 import WatchActions from "@/components/WatchActions";
 import styles from "./watch-creator.module.css";
+import { isYouTubeUrl, resolveAssetPlaybackUrl, resolveWorkPlaybackUrl, type RAVINEPlaybackAsset } from "@/lib/ravine-playback-core";
 
 export const dynamic = "force-dynamic";
 
 type Locale = "ar" | "en";
 type Creator = { id: number; name: string | null; username: string | null; avatar_url: string | null; specialty: string | null };
 type Chapter = { id: number; title: string; start_seconds: number; end_seconds: number | null; thumbnail_url: string | null };
-type Asset = { id: number; kind: string; media_url: string; duration: number | null; label: string | null; language: string | null; mime_type: string | null };
-
-function isYouTubeUrl(value: string | null) {
-  if (!value) return false;
-  try {
-    const host = new URL(value).hostname.toLowerCase().replace(/^www\./, "");
-    return host === "youtube.com" || host === "youtu.be" || host.endsWith(".youtube.com");
-  } catch {
-    return false;
-  }
-}
+type Asset = RAVINEPlaybackAsset;
 
 export default async function WatchPage({ params }: { params: Promise<{ locale: string; id: string }> }) {
   const { locale: rawLocale, id } = await params;
@@ -32,7 +23,7 @@ export default async function WatchPage({ params }: { params: Promise<{ locale: 
   const supabase = await createClient();
   const { data: video, error } = await supabase
     .from("videos")
-    .select("id,title,description,thumbnail_url,video_url,duration,views,likes,category,content_type,quality,published,creator_id")
+    .select("id,title,description,thumbnail_url,video_url,duration,views,likes,category,content_type,quality,published,visibility,discovery_enabled,creator_id")
     .eq("id", videoId)
     .eq("published", true)
     .maybeSingle();
@@ -46,29 +37,32 @@ export default async function WatchPage({ params }: { params: Promise<{ locale: 
     supabase.from("work_media_assets").select("id,kind,media_url,duration,label,language,mime_type").eq("work_id", videoId).order("sort_order", { ascending: true }),
   ]);
 
-  let playbackUrl = isYouTubeUrl(video.video_url as string | null) ? null : (video.video_url as string | null);
-  if (playbackUrl?.includes("/storage/v1/object/public/")) {
-    try {
-      const marker = "/storage/v1/object/public/";
-      const path = playbackUrl.split(marker)[1] ?? "";
-      const [bucket, ...parts] = path.split("/");
-      if (bucket && parts.length) {
-        const signed = await supabase.storage.from(bucket).createSignedUrl(parts.join("/"), 60 * 60);
-        if (!signed.error && signed.data?.signedUrl) playbackUrl = signed.data.signedUrl;
-      }
-    } catch {
-      // Keep non-standard media URLs unchanged.
-    }
-  }
+  const playbackUrl = video.visibility === "public" && video.discovery_enabled !== false
+    ? resolveWorkPlaybackUrl(videoId, video.video_url as string | null)
+    : null;
+
+  const assets = (assetsData ?? []).flatMap((assetRow) => {
+    const asset = assetRow as Asset;
+    const mediaUrl = resolveAssetPlaybackUrl(asset);
+    return mediaUrl ? [{ ...asset, media_url: mediaUrl }] : [];
+  });
 
   const creatorRecord = creator as Creator | null;
   const chapters = (chaptersData ?? []) as Chapter[];
-  const assets = (assetsData ?? []) as Asset[];
 
   return (
     <main className="watch-page" dir={ar ? "rtl" : "ltr"}>
       <div className="watch-frame">
-        <RAVINEPlayer src={playbackUrl} poster={video.thumbnail_url} title={video.title || "Untitled"} contentType={video.content_type || "video"} duration={video.duration} locale={locale} chapters={chapters} assets={assets} />
+        <RAVINEPlayerRuntime
+          src={playbackUrl}
+          poster={video.thumbnail_url}
+          title={video.title || "Untitled"}
+          contentType={video.content_type || "video"}
+          duration={video.duration}
+          locale={locale}
+          chapters={chapters}
+          assets={assets}
+        />
         {isYouTubeUrl(video.video_url as string | null) && (
           <div className="empty-state" style={{ margin: "16px 0" }}>
             <strong>{ar ? "هذا العمل يحتاج نسخة مستقلة داخل RAVINE قبل التشغيل." : "This work needs an independent RAVINE media asset before it can play."}</strong>
