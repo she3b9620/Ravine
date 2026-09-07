@@ -32,6 +32,7 @@ export default function RAVINEPlayer({ src, poster, title, contentType, duration
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const controlsTimerRef = useRef<number | null>(null);
   const [playing, setPlaying] = useState(false);
+  const [ended, setEnded] = useState(false);
   const [current, setCurrent] = useState(0);
   const [readyDuration, setReadyDuration] = useState(duration || 0);
   const [volume, setVolume] = useState(1);
@@ -63,8 +64,10 @@ export default function RAVINEPlayer({ src, poster, title, contentType, duration
 
   const syncPlaying = useCallback((nextPlaying: boolean) => {
     setPlaying(nextPlaying);
-    if (nextPlaying) revealControls();
-    else {
+    if (nextPlaying) {
+      setEnded(false);
+      revealControls();
+    } else {
       clearControlsTimer();
       setShowControls(true);
     }
@@ -79,6 +82,7 @@ export default function RAVINEPlayer({ src, poster, title, contentType, duration
     if (!video) return;
     video.load();
     setCurrent(0);
+    setEnded(false);
     setTimelineHover(null);
     syncPlaying(false);
   }, [activeSrc, syncPlaying]);
@@ -97,13 +101,16 @@ export default function RAVINEPlayer({ src, poster, title, contentType, duration
   function togglePlay() {
     const video = videoRef.current;
     if (!video) return;
-    if (video.paused) void video.play().catch(() => undefined);
-    else video.pause();
+    if (video.paused) {
+      setEnded(false);
+      void video.play().catch(() => undefined);
+    } else video.pause();
   }
 
   function seekBy(delta: number) {
     const video = videoRef.current;
     if (!video) return;
+    setEnded(false);
     video.currentTime = Math.max(0, Math.min(video.duration || activeDuration || 0, video.currentTime + delta));
     revealControls();
   }
@@ -111,6 +118,7 @@ export default function RAVINEPlayer({ src, poster, title, contentType, duration
   function seekTo(seconds: number) {
     const video = videoRef.current;
     if (!video) return;
+    setEnded(false);
     video.currentTime = seconds;
     revealControls();
     if (video.paused) void video.play().catch(() => undefined);
@@ -146,11 +154,18 @@ export default function RAVINEPlayer({ src, poster, title, contentType, duration
       onPointerDown={revealControls}
       onTouchStart={revealControls}
     >
-      <div className={styles.stage}>
+      <div
+        className={`${styles.stage} ${ended ? styles.ended : ""}`}
+        style={ended && poster ? { backgroundImage: `url(${poster})` } : undefined}
+      >
         {activeSrc ? (
           <video
             ref={videoRef}
             className="watch-video"
+            controls={false}
+            controlsList="nodownload noremoteplayback"
+            disablePictureInPicture
+            disableRemotePlayback
             playsInline
             preload="metadata"
             poster={poster || undefined}
@@ -161,6 +176,7 @@ export default function RAVINEPlayer({ src, poster, title, contentType, duration
             onLoadedMetadata={(event) => setReadyDuration(event.currentTarget.duration || duration || 0)}
             onVolumeChange={(event) => setVolume(event.currentTarget.volume)}
             onEnded={() => {
+              setEnded(true);
               syncPlaying(false);
               if (activeAuxiliary) setIntroChoice("main");
             }}
@@ -174,7 +190,7 @@ export default function RAVINEPlayer({ src, poster, title, contentType, duration
         {activeAuxiliary ? (
           <div className={styles.auxiliaryLabel}>
             {introChoice === "trailer" ? (ar ? "التريلر" : "TRAILER") : (ar ? "المعاينة" : "PREVIEW")}
-            <button type="button" onClick={() => { setIntroChoice("main"); revealControls(); }}>{ar ? "مشاهدة العمل" : "Watch full work"}</button>
+            <button type="button" onClick={() => { setIntroChoice("main"); setEnded(false); revealControls(); }}>{ar ? "مشاهدة العمل" : "Watch full work"}</button>
           </div>
         ) : null}
       </div>
@@ -182,9 +198,9 @@ export default function RAVINEPlayer({ src, poster, title, contentType, duration
       {(trailer || preview) && introChoice === "main" ? (
         <div className={styles.introBar}>
           <span>{ar ? "قبل المشاهدة" : "Before watching"}</span>
-          {trailer ? <button type="button" onClick={() => { setIntroChoice("trailer"); revealControls(); }}>{ar ? "شاهد التريلر" : "Watch trailer"}</button> : null}
-          {preview ? <button type="button" onClick={() => { setIntroChoice("preview"); revealControls(); }}>{ar ? "شاهد المعاينة" : "Watch preview"}</button> : null}
-          <button className={styles.primaryChoice} type="button" onClick={() => { setIntroChoice("main"); revealControls(); }}>{ar ? "ابدأ العمل" : "Start work"}</button>
+          {trailer ? <button type="button" onClick={() => { setIntroChoice("trailer"); setEnded(false); revealControls(); }}>{ar ? "شاهد التريلر" : "Watch trailer"}</button> : null}
+          {preview ? <button type="button" onClick={() => { setIntroChoice("preview"); setEnded(false); revealControls(); }}>{ar ? "شاهد المعاينة" : "Watch preview"}</button> : null}
+          <button className={styles.primaryChoice} type="button" onClick={() => { setIntroChoice("main"); setEnded(false); revealControls(); }}>{ar ? "ابدأ العمل" : "Start work"}</button>
         </div>
       ) : null}
 
