@@ -19,16 +19,8 @@ where c.username = 'ravine'
   and c.user_id is not null
 on conflict (user_id) do update set is_active = true;
 
--- The founder account is also a creator-capable account. The creator identity itself remains
--- the scoped public persona; the personal account owns it through creators.user_id.
-update public.profiles p
-set is_creator = true,
-    is_verified = true,
-    updated_at = now()
-from public.creators c
-where c.username = 'ravine'
-  and c.user_id = p.id;
-
+-- Keep founder administration as an account-level role while creator verification/selection
+-- is stored explicitly on the creator identity. No profile security fields are mutated here.
 insert into public.user_roles (user_id, role)
 select f.user_id, 'admin'
 from public.ravine_founders f
@@ -81,7 +73,6 @@ set search_path = public
 as $$
 declare
   actor uuid := auth.uid();
-  creator_owner uuid;
   founder boolean := false;
   unlimited boolean := false;
   current_used integer := 0;
@@ -98,10 +89,6 @@ begin
   if new.user_id <> actor and not is_ravine_admin() then
     raise exception 'RAVINE_UPLOAD_OWNER_MISMATCH' using errcode = '42501';
   end if;
-
-  select c.user_id into creator_owner
-  from public.creators c
-  where c.id = new.creator_id;
 
   founder := exists (
     select 1
