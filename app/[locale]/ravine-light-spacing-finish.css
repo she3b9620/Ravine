@@ -17,8 +17,9 @@ html[data-theme="light"] .ravine-main .about-section {
 html[data-theme="light"] .home-viewer-profile {
   background: linear-gradient(145deg, #ffffff, #fffaf6 62%, #f8f3ed) !important;
   border-color: rgba(23,23,23,.11) !important;
-  box-shadow: 0 28px 82px rgba(23,23,23,.075), inset 0 1px 0 rgba(255,255,255,.95) !important;
+  box-shadow: 0 22px 54px rgba(23,23,23,.07), inset 0 1px 0 rgba(255,255,255,.95) !important;
   color: #171717 !important;
+  overflow:visible !important;
 }
 
 html[data-theme="light"] .home-viewer-profile:before {
@@ -70,7 +71,75 @@ html[data-theme="light"] .selection-section .selection-tabs {
 .ravine-sidebar-nav-list { gap: 4px !important; }
 .ravine-sidebar-settings-group { margin-top: 13px !important; padding-top: 11px !important; }
 
-/* No sidebar placement override here: its fixed shell remains anchored at the original header boundary. */
+/* Compact final sidebar offset: move only the options, never the sidebar panel itself. */
+@media (min-width: 981px) {
+  .ravine-sidebar-scroll-content { transform: translateY(8px) !important; }
+}
+
+/* Light search popup: same timing, easing and reveal/close choreography as Dark Mode; only surfaces differ. */
+html[data-theme="light"] .ravine-search-overlay {
+  animation: ravineSearchGlassInLight .38s cubic-bezier(.22,.61,.36,1) both !important;
+}
+html[data-theme="light"] .ravine-search-overlay.is-closing {
+  animation: ravineSearchGlassOutLight .22s cubic-bezier(.4,0,.8,.2) both !important;
+  pointer-events: none !important;
+}
+html[data-theme="light"] .ravine-search-dialog {
+  animation: ravineSearchDialogIn .38s cubic-bezier(.22,.61,.36,1) both !important;
+}
+html[data-theme="light"] .ravine-search-dialog.is-closing {
+  animation: ravineSearchDialogOut .22s cubic-bezier(.4,0,.8,.2) both !important;
+}
+
+@keyframes ravineSearchGlassInLight {
+  from {
+    opacity: 0;
+    background: rgba(241,233,220,0);
+    -webkit-backdrop-filter: blur(0px) saturate(100%);
+    backdrop-filter: blur(0px) saturate(100%);
+  }
+  to {
+    opacity: 1;
+    background: rgba(241,233,220,.30);
+    -webkit-backdrop-filter: blur(20px) saturate(112%);
+    backdrop-filter: blur(20px) saturate(112%);
+  }
+}
+@keyframes ravineSearchGlassOutLight {
+  from {
+    opacity: 1;
+    background: rgba(241,233,220,.30);
+    -webkit-backdrop-filter: blur(20px) saturate(112%);
+    backdrop-filter: blur(20px) saturate(112%);
+  }
+  to {
+    opacity: 0;
+    background: rgba(241,233,220,0);
+    -webkit-backdrop-filter: blur(0px) saturate(100%);
+    backdrop-filter: blur(0px) saturate(100%);
+  }
+}
+
+/* Preserve Discover's enhanced layout; these are scoped guardrails only. */
+.discover-page {
+  width: min(var(--max), 100%);
+  margin-inline: auto;
+  padding-top: 78px;
+}
+.discover-page .discover-filters,
+.discover-page .video-grid {
+  position: relative;
+  z-index: 2;
+}
+
+/* RAVINE Radio: lift the trigger and keep the drawer fully interactive above its backdrop. */
+.ravine-radio-root { bottom: 74px !important; }
+.ravine-radio-drawer { pointer-events: auto !important; }
+.ravine-radio-actions,
+.ravine-radio-actions button,
+.ravine-radio-close,
+.ravine-radio-card { pointer-events: auto !important; }
+html[data-theme="light"] .ravine-radio-trigger { bottom: auto; }
 
 @media (max-width: 820px) {
   .home-viewer-hero-inner { gap: 26px !important; }
@@ -78,9 +147,18 @@ html[data-theme="light"] .selection-section .selection-tabs {
   .home-feed-head, .home-viewer .section-head { margin-bottom: 22px !important; }
   .home-rail { gap: 15px !important; }
   .home-feed-grid, .selection-section .video-grid { gap: 15px !important; }
-  .ravine-sidebar-scroll-content { gap: 19px !important; }
+  .ravine-sidebar-scroll-content { gap: 19px !important; transform: none !important; }
+  .ravine-radio-root { bottom: 60px !important; inset-inline-end: 14px !important; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .home-viewer-profile { margin-block: 0 !important; }
+  html[data-theme="light"] .ravine-search-overlay,
+  html[data-theme="light"] .ravine-search-overlay.is-closing,
+  html[data-theme="light"] .ravine-search-dialog,
+  html[data-theme="light"] .ravine-search-dialog.is-closing {
+    animation: none !important;
+    transition: none !important;
+  }
+  .ravine-radio-root { bottom: 60px !important; }
 }
