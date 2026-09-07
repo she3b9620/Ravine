@@ -51,6 +51,21 @@ html[data-theme="light"] .ravine-radio-root .ravine-radio-mini-art{color:#f1e9dc
 .ravine-shell[dir="rtl"] .ravine-radio-root .ravine-radio-drawer{left:18px;right:auto}
 @media(max-width:600px){.ravine-shell[dir="rtl"] .ravine-radio-root .ravine-radio-drawer{left:10px;right:10px}}
 
+/* YouTube requires a real player viewport; keep it off-canvas instead of collapsing it to 1x1. */
+.ravine-radio-root .ravine-radio-player,
+.ravine-radio-root .ravine-radio-player iframe{
+  width:200px!important;
+  height:200px!important;
+}
+.ravine-radio-root .ravine-radio-player{
+  position:fixed!important;
+  left:-10000px!important;
+  top:0!important;
+  opacity:.001!important;
+  pointer-events:none!important;
+  overflow:hidden!important;
+}
+
 /* The mini player is part of the shared radio state. Never leave it hidden by a stale mutation. */
 .ravine-radio-root .ravine-radio-mini[data-user-hidden="false"]{visibility:visible;opacity:1;pointer-events:auto}
 
@@ -68,6 +83,12 @@ html[data-theme="light"] .ravine-radio-root .ravine-radio-mini-art{color:#f1e9dc
   35%{opacity:.92;transform:translate3d(0,-3px,0);filter:blur(.3px)}
   100%{opacity:0;transform:translate3d(0,-18px,0);filter:blur(4px)}
 }
+
+/* Disable the old base-image filter animation while keeping the founder asset + Light inversion intact. */
+html[data-ravine-auth="authenticated"][data-ravine-logo-motion="on"][data-theme="dark"] .ravine-brand-lockup .ravine-lockup-mark,
+html[data-ravine-auth="authenticated"][data-ravine-logo-motion="on"][data-theme="dark"] .ravine-brand-lockup .ravine-lockup-wordmark{animation:none!important;filter:none!important}
+html[data-ravine-auth="authenticated"][data-ravine-logo-motion="on"][data-theme="light"] .ravine-brand-lockup .ravine-lockup-mark,
+html[data-ravine-auth="authenticated"][data-ravine-logo-motion="on"][data-theme="light"] .ravine-brand-lockup .ravine-lockup-wordmark{animation:none!important;filter:invert(1)!important}
 
 /* Logo halo only: soften the external air/shadow around the lockup rectangle. The rectangle itself is untouched. */
 .ravine-brand .ravine-lockup::before,
