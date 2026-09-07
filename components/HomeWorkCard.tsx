@@ -243,6 +243,14 @@ export default function HomeWorkCard({
               player.mute?.();
               player.playVideo?.();
             },
+            onStateChange: (event) => {
+              if (event.data !== 0 || youtubeHostRef.current !== host) return;
+              setFading(true);
+              if (fadeOutTimerRef.current) {
+                window.clearTimeout(fadeOutTimerRef.current);
+              }
+              fadeOutTimerRef.current = window.setTimeout(stopPreview, 220);
+            },
           },
         });
 
@@ -252,7 +260,7 @@ export default function HomeWorkCard({
         setPreviewing(false);
       }
     },
-    [destroyYouTubePreview]
+    [destroyYouTubePreview, stopPreview]
   );
 
   const startPreview = useCallback(() => {
