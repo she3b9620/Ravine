@@ -4,18 +4,13 @@ import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-const SESSION_KEY = "ravine-home-welcome-login-session-v2";
-const CONSUMED_KEY = "ravine-home-welcome-consumed-v2";
-const LEGACY_WELCOME_KEY = "ravine-home-welcome-seen-v1";
-const LEGACY_COLLAPSE_KEY = "ravine-home-welcome-collapse-v1";
+const SESSION_KEY = "ravine-home-welcome-login-session-v3";
+const USER_KEY = "ravine-home-welcome-user-v3";
+const CONSUMED_KEY = "ravine-home-welcome-consumed-v3";
 
 function isHomeRoute(pathname: string) {
   const path = pathname.replace(/\/$/, "");
   return path === "/ar" || path === "/en";
-}
-
-function isAuthenticated() {
-  return Boolean(document.querySelector(".ravine-shell:not(.guest-shell)"));
 }
 
 function applySettled(hero: HTMLElement) {
@@ -23,12 +18,22 @@ function applySettled(hero: HTMLElement) {
   hero.classList.add("ravine-home-welcome-settled");
 }
 
-function prepareFreshLoginSession() {
+function getHero() {
+  return document.querySelector<HTMLElement>(".home-viewer-hero");
+}
+
+function createLoginMarker(userId: string) {
   const token = `${Date.now()}-${crypto.randomUUID()}`;
   sessionStorage.setItem(SESSION_KEY, token);
+  sessionStorage.setItem(USER_KEY, userId);
   sessionStorage.removeItem(CONSUMED_KEY);
-  sessionStorage.removeItem(LEGACY_COLLAPSE_KEY);
   return token;
+}
+
+function clearWelcomeState() {
+  sessionStorage.removeItem(SESSION_KEY);
+  sessionStorage.removeItem(USER_KEY);
+  sessionStorage.removeItem(CONSUMED_KEY);
 }
 
 export default function HomeWelcomeMotion() {
@@ -39,50 +44,43 @@ export default function HomeWelcomeMotion() {
     let cancelled = false;
     let cleanupRun: (() => void) | undefined;
 
-    const runForHome = () => {
+    const runForHome = (userId: string) => {
       if (cancelled || !isHomeRoute(pathname)) return;
 
-      if (!isAuthenticated()) {
-        sessionStorage.removeItem(SESSION_KEY);
-        sessionStorage.removeItem(CONSUMED_KEY);
-        sessionStorage.removeItem(LEGACY_WELCOME_KEY);
-        sessionStorage.removeItem(LEGACY_COLLAPSE_KEY);
-        return;
-      }
-
-      const hero = document.querySelector<HTMLElement>(".home-viewer-hero");
-      if (!hero || hero.dataset.ravineWelcomeMotionBound === "1") return;
-      hero.dataset.ravineWelcomeMotionBound = "1";
+      const hero = getHero();
+      if (!hero) return;
 
       const loginSession = sessionStorage.getItem(SESSION_KEY);
+      const storedUserId = sessionStorage.getItem(USER_KEY);
       const consumedSession = sessionStorage.getItem(CONSUMED_KEY);
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-      sessionStorage.setItem(LEGACY_WELCOME_KEY, "1");
-
-      // No login session marker means auth has not been established in this tab yet.
-      // Do not collapse the hero early while Supabase is still resolving the session.
-      if (!loginSession) {
-        delete hero.dataset.ravineWelcomeMotionBound;
-        return;
+      if (!loginSession || storedUserId !== userId) {
+        createLoginMarker(userId);
+        hero.classList.remove("ravine-home-welcome-settling", "ravine-home-welcome-settled");
       }
 
-      if (consumedSession === loginSession || reduceMotion) {
+      const activeSession = sessionStorage.getItem(SESSION_KEY);
+      if (!activeSession) return;
+
+      if (consumedSession === activeSession || reduceMotion) {
         applySettled(hero);
         return;
       }
 
-      // Hold the complete welcome scene for exactly three seconds after login.
+      if (hero.dataset.ravineWelcomeMotionBound === activeSession) return;
+      hero.dataset.ravineWelcomeMotionBound = activeSession;
+
       const settleTimer = window.setTimeout(() => {
-        if (cancelled) return;
+        if (cancelled || sessionStorage.getItem(SESSION_KEY) !== activeSession) return;
         hero.classList.add("ravine-home-welcome-settling");
 
         const finishTimer = window.setTimeout(() => {
-          if (cancelled) return;
+          if (cancelled || sessionStorage.getItem(SESSION_KEY) !== activeSession) return;
           applySettled(hero);
-          const activeSession = sessionStorage.getItem(SESSION_KEY);
-          if (activeSession) sessionStorage.setItem(CONSUMED_KEY, activeSession);
-        }, 1400);
+          sessionStorage.setItem(CONSUMED_KEY, activeSession);
+          delete hero.dataset.ravineWelcomeFinishTimer;
+        }, 1500);
 
         hero.dataset.ravineWelcomeFinishTimer = String(finishTimer);
       }, 3000);
@@ -92,47 +90,48 @@ export default function HomeWelcomeMotion() {
         const finishTimer = hero.dataset.ravineWelcomeFinishTimer;
         if (finishTimer) window.clearTimeout(Number(finishTimer));
         delete hero.dataset.ravineWelcomeFinishTimer;
-        delete hero.dataset.ravineWelcomeMotionBound;
+        if (hero.dataset.ravineWelcomeMotionBound === activeSession) delete hero.dataset.ravineWelcomeMotionBound;
       };
     };
 
-    const { data: authListener } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "SIGNED_IN") {
-        prepareFreshLoginSession();
-        sessionStorage.removeItem(LEGACY_WELCOME_KEY);
-        window.setTimeout(() => runForHome(), 0);
-      } else if (event === "SIGNED_OUT") {
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_OUT") {
         cleanupRun?.();
         cleanupRun = undefined;
-        sessionStorage.removeItem(SESSION_KEY);
-        sessionStorage.removeItem(CONSUMED_KEY);
-        sessionStorage.removeItem(LEGACY_WELCOME_KEY);
-        sessionStorage.removeItem(LEGACY_COLLAPSE_KEY);
-        const hero = document.querySelector<HTMLElement>(".home-viewer-hero");
+        clearWelcomeState();
+        const hero = getHero();
         if (hero) {
           hero.classList.remove("ravine-home-welcome-settling", "ravine-home-welcome-settled");
           delete hero.dataset.ravineWelcomeMotionBound;
         }
+        return;
+      }
+
+      if (event === "SIGNED_IN" && session?.user) {
+        const existingSession = sessionStorage.getItem(SESSION_KEY);
+        const existingUserId = sessionStorage.getItem(USER_KEY);
+        if (!existingSession || existingUserId !== session.user.id) {
+          createLoginMarker(session.user.id);
+        }
+        window.setTimeout(() => runForHome(session.user.id), 0);
       }
     });
 
     let mounted = true;
     void supabase.auth.getSession().then(({ data }) => {
       if (!mounted || cancelled) return;
-
-      if (!data.session) {
-        sessionStorage.removeItem(SESSION_KEY);
-        sessionStorage.removeItem(CONSUMED_KEY);
+      const user = data.session?.user;
+      if (!user) {
+        clearWelcomeState();
         return;
       }
 
-      // On a reload inside the same authenticated session, keep the existing marker.
-      // Only create a new marker when this tab has no login marker at all.
-      if (!sessionStorage.getItem(SESSION_KEY)) {
-        prepareFreshLoginSession();
+      // sessionStorage survives reloads/navigation in the same tab. Do not invent a new login marker during reload.
+      if (sessionStorage.getItem(USER_KEY) !== user.id || !sessionStorage.getItem(SESSION_KEY)) {
+        createLoginMarker(user.id);
       }
 
-      window.setTimeout(() => runForHome(), 0);
+      window.setTimeout(() => runForHome(user.id), 0);
     });
 
     return () => {
