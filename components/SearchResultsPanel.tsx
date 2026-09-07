@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -49,6 +49,12 @@ function shorten(value: string | null, max = 92) {
   return value.length > max ? `${value.slice(0, max).trimEnd()}…` : value;
 }
 
+function formatPlatformNumber(value: number | null | undefined) {
+  return new Intl.NumberFormat("en-US", {
+    useGrouping: true,
+    maximumFractionDigits: 0,
+  }).format(Number(value ?? 0));
+}
 export default function SearchResultsPanel(props: SearchResultsPanelProps) {
   const { locale } = props;
   const ar = locale === "ar";
@@ -178,7 +184,7 @@ export default function SearchResultsPanel(props: SearchResultsPanelProps) {
                   </div>
                   <strong>{video.title || (ar ? "عمل بدون عنوان" : "Untitled work")}</strong>
                   <p>{shorten(video.description, 88)}</p>
-                  <em>{Number(video.views || 0).toLocaleString()} {ar ? "مشاهدة" : "views"}</em>
+                  <em>{formatPlatformNumber(video.views)} {ar ? "مشاهدة" : "views"}</em>
                 </div>
               </Link>
             ))}
