@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import RAVINEPlayerRuntime from "@/components/RAVINEPlayerRuntime";
+import RAVINEWorkPlayer from "@/components/RAVINEWorkPlayer";
 import WatchActions from "@/components/WatchActions";
 import styles from "./watch-creator.module.css";
-import { isYouTubeUrl, resolveAssetPlaybackUrl, resolveWorkPlaybackUrl, type RAVINEPlaybackAsset } from "@/lib/ravine-playback-core";
+import { isYouTubeUrl, resolveAssetPlaybackUrl, type RAVINEPlaybackAsset } from "@/lib/ravine-playback-core";
+import { isPlayableRAVINEWork, toRAVINEWork, type RAVINEWorkSource } from "@/lib/ravine-work-universe";
 
 export const dynamic = "force-dynamic";
 
@@ -37,15 +38,15 @@ export default async function WatchPage({ params }: { params: Promise<{ locale: 
     supabase.from("work_media_assets").select("id,kind,media_url,duration,label,language,mime_type").eq("work_id", videoId).order("sort_order", { ascending: true }),
   ]);
 
-  const playbackUrl = video.visibility === "public" && video.discovery_enabled !== false
-    ? resolveWorkPlaybackUrl(videoId, video.video_url as string | null)
-    : null;
-
-  const assets = (assetsData ?? []).flatMap((assetRow) => {
-    const asset = assetRow as Asset;
-    const mediaUrl = resolveAssetPlaybackUrl(asset);
-    return mediaUrl ? [{ ...asset, media_url: mediaUrl }] : [];
-  });
+  const work = toRAVINEWork(video as RAVINEWorkSource);
+  const playbackAllowed = isPlayableRAVINEWork(work);
+  const assets = playbackAllowed
+    ? (assetsData ?? []).flatMap((assetRow) => {
+        const asset = assetRow as Asset;
+        const mediaUrl = resolveAssetPlaybackUrl(asset);
+        return mediaUrl ? [{ ...asset, media_url: mediaUrl }] : [];
+      })
+    : [];
 
   const creatorRecord = creator as Creator | null;
   const chapters = (chaptersData ?? []) as Chapter[];
@@ -53,31 +54,28 @@ export default async function WatchPage({ params }: { params: Promise<{ locale: 
   return (
     <main className="watch-page" dir={ar ? "rtl" : "ltr"}>
       <div className="watch-frame">
-        <RAVINEPlayerRuntime
-          src={playbackUrl}
-          poster={video.thumbnail_url}
-          title={video.title || "Untitled"}
-          contentType={video.content_type || "video"}
-          duration={video.duration}
-          locale={locale}
-          chapters={chapters}
-          assets={assets}
-        />
+        <RAVINEWorkPlayer work={work} locale={locale} chapters={chapters} assets={assets} />
         {isYouTubeUrl(video.video_url as string | null) && (
           <div className="empty-state" style={{ margin: "16px 0" }}>
             <strong>{ar ? "هذا العمل يحتاج نسخة مستقلة داخل RAVINE قبل التشغيل." : "This work needs an independent RAVINE media asset before it can play."}</strong>
             <span>{ar ? "رابط YouTube يُحفظ كمصدر مرجعي فقط ولا يُستخدم كمشغل داخل RAVINE." : "The YouTube URL is retained as a reference source only and is not used as the RAVINE player source."}</span>
           </div>
         )}
+        {!playbackAllowed && !isYouTubeUrl(video.video_url as string | null) && (
+          <div className="empty-state" style={{ margin: "16px 0" }}>
+            <strong>{ar ? "هذا العمل غير متاح للتشغيل حاليًا." : "This work is not available for playback yet."}</strong>
+            <span>{ar ? "سيظهر العمل عندما تصبح سياسة الوصول ومصدر التشغيل صالحين." : "The work will become playable when its access policy and playback source are valid."}</span>
+          </div>
+        )}
         <div className="watch-copy">
-          <div className="watch-kicker">{video.content_type || "WORK"}{video.quality ? ` · ${video.quality}` : ""}</div>
-          <h1>{video.title || (ar ? "بدون عنوان" : "Untitled")}</h1>
-          <p>{video.description || (ar ? "عمل إبداعي من مجتمع RAVINE." : "A creative work from the RAVINE community.")}</p>
+          <div className="watch-kicker">{work.type.toUpperCase()}{video.quality ? ` · ${video.quality}` : ""}</div>
+          <h1>{work.title}</h1>
+          <p>{work.description || (ar ? "عمل إبداعي من مجتمع RAVINE." : "A creative work from the RAVINE community.")}</p>
           <div className="watch-meta">
             <span className="watch-pill">{Number(video.views || 0).toLocaleString()} {ar ? "مشاهدة" : "views"}</span>
             <span className="watch-pill">{Number(video.likes || 0).toLocaleString()} {ar ? "إعجاب" : "likes"}</span>
             {video.category && <span className="watch-pill">{video.category}</span>}
-            {video.duration && <span className="watch-pill">{Math.floor(video.duration / 60)}:{String(video.duration % 60).padStart(2, "0")}</span>}
+            {work.duration && <span className="watch-pill">{Math.floor(work.duration / 60)}:{String(work.duration % 60).padStart(2, "0")}</span>}
           </div>
           {creatorRecord && (
             <Link className={styles.creator} href={`/${locale}/creators/${creatorRecord.id}`}>
