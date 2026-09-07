@@ -1,70 +1,36 @@
-/* RAVINE Logo Color Motion — visible color movement without changing logo geometry. */
+/* RAVINE logo motion — restrained, authenticated-only color breathing. */
 .ravine-brand-lockup .ravine-lockup-mark-wrap,
-.ravine-brand-lockup .ravine-lockup-wordmark-wrap{
-  position:relative;
-  display:inline-block;
-  flex:0 0 auto;
-  line-height:0;
-}
+.ravine-brand-lockup .ravine-lockup-wordmark-wrap{position:relative;display:inline-block;flex:0 0 auto;line-height:0}
 
 .ravine-brand-lockup .ravine-lockup-mark-wrap::after,
 .ravine-brand-lockup .ravine-lockup-wordmark-wrap::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  pointer-events:none;
-  opacity:0;
-  background:linear-gradient(135deg,#c47a52 0%,#d49a78 24%,#183f46 52%,#c47a52 76%,#70402f 100%);
-  background-size:240% 240%;
-  -webkit-mask-repeat:no-repeat;
-  mask-repeat:no-repeat;
-  -webkit-mask-position:center;
-  mask-position:center;
-  -webkit-mask-size:100% 100%;
-  mask-size:100% 100%;
+  content:"";position:absolute;inset:-1px;pointer-events:none;opacity:0;
+  background:linear-gradient(110deg,#c47a52 0%,#d49a78 30%,#f1e9dc 48%,#183f46 68%,#c47a52 100%);
+  background-size:220% 100%;
+  -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+  -webkit-mask-position:center;mask-position:center;
+  -webkit-mask-size:100% 100%;mask-size:100% 100%;
+}
+.ravine-brand-lockup .ravine-lockup-mark-wrap::after{-webkit-mask-image:url('/اللوجو.png');mask-image:url('/اللوجو.png')}
+.ravine-brand-lockup .ravine-lockup-wordmark-wrap::after{-webkit-mask-image:url('/التايبو.png');mask-image:url('/التايبو.png')}
+
+/* The base founder assets remain visible; motion only adds a soft color sweep. */
+html[data-ravine-auth="authenticated"][data-ravine-logo-motion="on"] .ravine-brand-lockup .ravine-lockup-mark-wrap::after,
+html[data-ravine-auth="authenticated"][data-ravine-logo-motion="on"] .ravine-brand-lockup .ravine-lockup-wordmark-wrap::after{
+  opacity:.28;animation:ravineLogoQuietSweep 8.8s cubic-bezier(.22,.61,.36,1) infinite;will-change:background-position,opacity
 }
 
-.ravine-brand-lockup .ravine-lockup-mark-wrap::after{
-  -webkit-mask-image:url('/اللوجو.png');
-  mask-image:url('/اللوجو.png');
-}
+html[data-ravine-auth="guest"] .ravine-brand-lockup .ravine-lockup-mark-wrap::after,
+html[data-ravine-auth="guest"] .ravine-brand-lockup .ravine-lockup-wordmark-wrap::after,
+html[data-ravine-logo-motion="off"] .ravine-brand-lockup .ravine-lockup-mark-wrap::after,
+html[data-ravine-logo-motion="off"] .ravine-brand-lockup .ravine-lockup-wordmark-wrap::after{animation:none!important;opacity:0}
 
-.ravine-brand-lockup .ravine-lockup-wordmark-wrap::after{
-  -webkit-mask-image:url('/التايبو.png');
-  mask-image:url('/التايبو.png');
-}
-
-html[data-ravine-logo-motion="on"] .ravine-brand-lockup .ravine-lockup-mark-wrap::after,
-html[data-ravine-logo-motion="on"] .ravine-brand-lockup .ravine-lockup-wordmark-wrap::after{
-  opacity:1;
-  animation:ravineLogoColorFlow 5.8s ease-in-out infinite;
-}
-
-html[data-ravine-logo-motion="on"] .ravine-brand-lockup .ravine-lockup-mark,
-html[data-ravine-logo-motion="on"] .ravine-brand-lockup .ravine-lockup-wordmark{
-  opacity:0!important;
-}
-
-html[data-ravine-logo-motion="off"] .ravine-brand-lockup .ravine-lockup-mark,
-html[data-ravine-logo-motion="off"] .ravine-brand-lockup .ravine-lockup-wordmark{
-  opacity:1!important;
-}
-
-@keyframes ravineLogoColorFlow{
-  0%,100%{background-position:0% 50%;filter:saturate(1.05) brightness(1)}
-  50%{background-position:100% 50%;filter:saturate(1.35) brightness(1.04)}
-}
-
-html[data-theme="light"] .ravine-brand-lockup .ravine-lockup-mark-wrap::after,
-html[data-theme="light"] .ravine-brand-lockup .ravine-lockup-wordmark-wrap::after{
-  background:linear-gradient(135deg,#70402f 0%,#c47a52 24%,#183f46 52%,#d49a78 76%,#70402f 100%);
-  background-size:240% 240%;
+@keyframes ravineLogoQuietSweep{
+  0%,100%{background-position:12% 50%;opacity:.16;filter:saturate(1)}
+  50%{background-position:88% 50%;opacity:.42;filter:saturate(1.08)}
 }
 
 @media(prefers-reduced-motion:reduce){
-  html[data-ravine-logo-motion="on"] .ravine-brand-lockup .ravine-lockup-mark-wrap::after,
-  html[data-ravine-logo-motion="on"] .ravine-brand-lockup .ravine-lockup-wordmark-wrap::after{
-    animation:none!important;
-    background-position:50% 50%;
-  }
+  html[data-ravine-auth="authenticated"][data-ravine-logo-motion="on"] .ravine-brand-lockup .ravine-lockup-mark-wrap::after,
+  html[data-ravine-auth="authenticated"][data-ravine-logo-motion="on"] .ravine-brand-lockup .ravine-lockup-wordmark-wrap::after{animation:none!important;opacity:.2;background-position:50% 50%}
 }
