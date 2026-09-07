@@ -42,6 +42,7 @@ const required = [
   "app/[locale]/admin/page.tsx",
   "components/RAVINEWorkContext.tsx",
   "components/RAVINEWorkContext.module.css",
+  "app/actions/ravine-social.ts",
   "supabase/migrations/20260907120000_ravine_platform_domain_foundation.sql",
   "supabase/migrations/20260907130000_ravine_social_community_operations_foundation.sql",
 ];
@@ -68,6 +69,7 @@ const access = read("lib/ravine-access.ts");
 const live = read("lib/ravine-live-provider.ts");
 const economy = read("lib/ravine-economy.ts");
 const universe = read("components/RAVINEUniverseSurface.tsx");
+const socialActions = read("app/actions/ravine-social.ts");
 const socialMigration = read("supabase/migrations/20260907130000_ravine_social_community_operations_foundation.sql");
 const domainMigration = read("supabase/migrations/20260907120000_ravine_platform_domain_foundation.sql");
 
@@ -91,8 +93,12 @@ if (!access.includes("canAccessRAVINEWork") || !access.includes("canPublishAsCre
 if (!live.includes("RAVINELiveProviderAdapter") || !live.includes("assertRAVINELiveProviderConfigured")) throw new Error("Live provider must remain adapter-based while open.");
 if (!economy.includes("RAVINEEconomyAdapter") || !economy.includes("assertRAVINEEconomyConfigured")) throw new Error("Economy provider must remain adapter-based while open.");
 if (!universe.includes("RAVINE_PLATFORM_MODULES")) throw new Error("Universe surface must use canonical registry.");
+if (!socialActions.includes('"use server"') || !socialActions.includes("createClient") || socialActions.includes("service_role") || !socialActions.includes("toggleSaveWork") || !socialActions.includes("setWorkReaction") || !socialActions.includes("sendDirectMessage")) throw new Error("Authenticated social action guard failed.");
 if (!domainMigration.includes("alter table public.ravine_next_works enable row level security")) throw new Error("Staged domain migration RLS guard failed.");
 if (!socialMigration.includes("ravine_next_connections") || !socialMigration.includes("ravine_next_notifications") || !socialMigration.includes("ravine_next_messages") || !socialMigration.includes("ravine_next_community_posts") || !socialMigration.includes("ravine_next_spaces") || !socialMigration.includes("ravine_next_ai_audit_events")) throw new Error("Social/community/operations foundation guard failed.");
+if (socialMigration.includes("primary key (user_id, work_id, broadcast_id, reaction)")) throw new Error("Social reactions migration must not place nullable foreign keys in a primary key.");
+if (socialMigration.includes("create table if not exists public.ravine_next_opportunities")) throw new Error("Social migration must not redefine canonical opportunities table.");
+if (socialMigration.includes("create table if not exists public.ravine_next_ai_audit_events")) throw new Error("Social migration must not redefine canonical AI audit table.");
 
 const appDir = path.join(root, "app");
 const stack = [appDir];
