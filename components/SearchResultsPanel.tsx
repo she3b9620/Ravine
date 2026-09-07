@@ -70,27 +70,33 @@ export default function SearchResultsPanel(props: SearchResultsPanelProps) {
   }, [props.query, props.category, props.type, props.duration, props.format, props.quality]);
 
   useEffect(() => {
+    const controller = new AbortController();
     const timer = window.setTimeout(async () => {
       setLoading(true);
       setError(false);
       try {
-        const response = await fetch(`/api/search${queryString ? `?${queryString}` : ""}`, { cache: "no-store" });
+        const response = await fetch(`/api/search${queryString ? `?${queryString}` : ""}`, { cache: "no-store", signal: controller.signal });
         if (!response.ok) throw new Error("Search request failed");
         const payload = (await response.json()) as { videos?: Video[]; creators?: Creator[] };
+        if (controller.signal.aborted) return;
         setVideos(payload.videos ?? []);
         setCreators(payload.creators ?? []);
         setHasLoaded(true);
-      } catch {
+      } catch (requestError) {
+        if (controller.signal.aborted) return;
         setVideos([]);
         setCreators([]);
-        setError(true);
+        setError(Boolean(requestError));
         setHasLoaded(true);
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       }
     }, props.query.trim() ? 80 : 50);
 
-    return () => window.clearTimeout(timer);
+    return () => {
+      controller.abort();
+      window.clearTimeout(timer);
+    };
   }, [queryString, props.query]);
 
   const hasInput = Boolean(props.query.trim() || props.category || props.type || props.duration || props.format || props.quality);
