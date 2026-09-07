@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import RavineShell from "../../components/RavineShell";
+import RavineAuthStateSync from "../../components/RavineAuthStateSync";
 import RavineUiEnhancer from "../../components/RavineUiEnhancer";
 import RavineLogoMotion from "../../components/RavineLogoMotion";
 import RavinePageTransition from "../../components/RavinePageTransition";
@@ -70,5 +71,5 @@ export function generateStaticParams(){ return locales.map((locale)=>({locale}))
 export default async function LocaleLayout({children,params}:{children:ReactNode;params:Promise<{locale:string}>}){
   const {locale}=await params;
   if(!locales.includes(locale as Locale)) notFound();
-  return <RavineShell locale={locale as Locale}><LocalePersistence locale={locale as Locale}/><EnglishAboutLocaleFix /><VideoAudioToggle locale={locale as Locale}/><GuestInteractionPolish /><RavineUiEnhancer /><RavineLogoMotion /><SelectionTabsEnhancer /><HomeWelcomeMotion /><RavinePageTransition>{children}</RavinePageTransition></RavineShell>;
+  return <RavineShell locale={locale as Locale}><RavineAuthStateSync /><LocalePersistence locale={locale as Locale}/><EnglishAboutLocaleFix /><VideoAudioToggle locale={locale as Locale}/><GuestInteractionPolish /><RavineUiEnhancer /><RavineLogoMotion /><SelectionTabsEnhancer /><HomeWelcomeMotion /><RavinePageTransition>{children}</RavinePageTransition></RavineShell>;
 }

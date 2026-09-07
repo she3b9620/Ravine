@@ -27,13 +27,28 @@ function RavineLockup({ compact = false }: { compact?: boolean }) {
 
 export default async function RavineShell({ locale, children }: { locale: Locale; children: ReactNode }) {
   const isArabic = locale === "ar";
-  let user = null; let categories: HeaderCategory[] = []; let profile: HeaderProfile | null = null;
+  const supabase = await createClient();
+
+  let user = null;
   try {
-    const supabase = await createClient();
-    const [{ data: userData }, { data: categoryData }] = await Promise.all([supabase.auth.getUser(), supabase.from("categories").select("id,name,slug").order("name", { ascending: true }).limit(40)]);
-    user = userData.user; categories = (categoryData ?? []) as HeaderCategory[];
-    if (user) { const { data } = await supabase.from("profiles").select("display_name,username,avatar_url,is_creator").eq("id", user.id).maybeSingle(); profile = data as HeaderProfile | null; }
-  } catch { user = null; categories = []; profile = null; }
+    const { data, error } = await supabase.auth.getUser();
+    if (!error) user = data.user;
+  } catch {}
+
+  let categories: HeaderCategory[] = [];
+  try {
+    const { data, error } = await supabase.from("categories").select("id,name,slug").order("name", { ascending: true }).limit(40);
+    if (!error) categories = (data ?? []) as HeaderCategory[];
+  } catch {}
+
+  let profile: HeaderProfile | null = null;
+  if (user) {
+    try {
+      const { data, error } = await supabase.from("profiles").select("display_name,username,avatar_url,is_creator").eq("id", user.id).maybeSingle();
+      if (!error) profile = data as HeaderProfile | null;
+    } catch {}
+  }
+
   const isAuthenticated = Boolean(user);
   const displayName = profile?.display_name || profile?.username || user?.email?.split("@")[0] || (isArabic ? "مستخدم RAVINE" : "RAVINE user");
 
