@@ -70,6 +70,32 @@ html[data-theme="light"] .selection-section .selection-tabs {
 .ravine-sidebar-nav-list { gap: 4px !important; }
 .ravine-sidebar-settings-group { margin-top: 13px !important; padding-top: 11px !important; }
 
+/* Force the desktop sidebar to begin beneath the complete horizontal header/navigation band. */
+@media (min-width: 981px) {
+  .ravine-sidebar {
+    top: 112px !important;
+    inset-block-start: 112px !important;
+    height: calc(100dvh - 112px) !important;
+    padding-top: 20px !important;
+    z-index: 120 !important;
+  }
+
+  .ravine-shell[lang="ar"] .ravine-sidebar {
+    top: 112px !important;
+    inset-block-start: 112px !important;
+  }
+
+  html[data-ravine-sidebar="open"] .ravine-main {
+    padding-left: 292px !important;
+    padding-right: 0 !important;
+  }
+
+  html[data-ravine-sidebar="open"] .ravine-shell[lang="ar"] .ravine-main {
+    padding-left: 0 !important;
+    padding-right: 292px !important;
+  }
+}
+
 @media (max-width: 820px) {
   .home-viewer-hero-inner { gap: 26px !important; }
   .home-rail-section { padding-top: 48px !important; padding-bottom: 48px !important; }
