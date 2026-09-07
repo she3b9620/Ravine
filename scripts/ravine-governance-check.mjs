@@ -40,14 +40,17 @@ if (!sidebar.includes("height: calc(100dvh - 78px) !important")) {
 if (!sidebar.includes("padding-top: 36px !important")) {
   throw new Error("Sidebar options must use the approved 36px internal lift.");
 }
-if (!logo.includes("ravineLogoColorFlow")) {
-  throw new Error("Logo Color Motion animation is missing.");
+if (!logo.includes("ravineLogoQuietSweep")) {
+  throw new Error("Logo quiet motion animation is missing.");
 }
 if (!logo.includes("mask-image:url('/اللوجو.png')")) {
   throw new Error("Logo mark color-motion mask is missing.");
 }
 if (!logo.includes("mask-image:url('/التايبو.png')")) {
   throw new Error("Wordmark color-motion mask is missing.");
+}
+if (!logo.includes('data-ravine-auth="authenticated"')) {
+  throw new Error("Logo motion must be explicitly scoped to authenticated users.");
 }
 if (!logoMotion.includes("ravine-logo-motion-change")) {
   throw new Error("Logo motion state-change event wiring is missing.");
