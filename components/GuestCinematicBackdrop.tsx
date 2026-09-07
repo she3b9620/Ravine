@@ -9,6 +9,8 @@ type Work = { id: number; video_url: string | null; thumbnail_url: string | null
 type VideoControlEvent = CustomEvent<{ action: "play" | "pause" | "next" | "previous" | "toggle-audio" | "set-volume" | "toggle-repeat" | "seek" | "replay"; muted?: boolean; volume?: number; repeat?: boolean; time?: number }>;
 
 const DEFAULT_VOLUME = 60;
+const HERO_PAGE_SIZE = 500;
+
 function toPlaybackSource(work: Work) {
   if (!work.video_url) return null;
   try {
@@ -20,6 +22,24 @@ function toPlaybackSource(work: Work) {
   return work.video_url;
 }
 function shuffle<T>(items: T[]) { const result = [...items]; for (let i = result.length - 1; i > 0; i -= 1) { const j = Math.floor(Math.random() * (i + 1)); [result[i], result[j]] = [result[j], result[i]]; } return result; }
+
+async function loadAllGuestHeroWorks(supabase: ReturnType<typeof createClient>) {
+  const all: Work[] = [];
+  for (let from = 0; ; from += HERO_PAGE_SIZE) {
+    const { data, error } = await supabase
+      .from("videos")
+      .select("id,video_url,thumbnail_url,duration,content_type")
+      .eq("published", true)
+      .not("video_url", "is", null)
+      .order("created_at", { ascending: false })
+      .range(from, from + HERO_PAGE_SIZE - 1);
+    if (error) throw error;
+    const page = (data ?? []) as Work[];
+    all.push(...page);
+    if (page.length < HERO_PAGE_SIZE) break;
+  }
+  return all;
+}
 
 export default function GuestCinematicBackdrop({ locale }: GuestCinematicBackdropProps) {
   const pathname = usePathname();
@@ -45,7 +65,7 @@ export default function GuestCinematicBackdrop({ locale }: GuestCinematicBackdro
     if (!isGuestHome) return;
     let mounted = true;
     const supabase = createClient();
-    void supabase.from("videos").select("id,video_url,thumbnail_url,duration,content_type").eq("published", true).not("video_url", "is", null).order("created_at", { ascending: false }).limit(60).then(({ data }) => { if (mounted) setWorks((data ?? []) as Work[]); }, () => { if (mounted) setWorks([]); });
+    void loadAllGuestHeroWorks(supabase).then((data) => { if (mounted) setWorks(data); }, () => { if (mounted) setWorks([]); });
     return () => { mounted = false; };
   }, [isGuestHome]);
 
