@@ -12,13 +12,28 @@ export default function RadioPlayerLauncher({ locale }: { locale: Locale }) {
   useEffect(() => {
     const sync = () => {
       const player = document.querySelector<HTMLElement>(".ravine-radio-mini");
-      const next = Boolean(player && player.dataset.userHidden !== "true");
-      setVisible(next);
+      if (!player) return;
+      setVisible(player.dataset.userHidden !== "true");
     };
 
+    const hideInitially = () => {
+      const player = document.querySelector<HTMLElement>(".ravine-radio-mini");
+      if (!player) return;
+      player.dataset.userHidden = "true";
+      setVisible(false);
+    };
+
+    hideInitially();
     sync();
+
     const observer = new MutationObserver(sync);
-    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["data-user-hidden", "class"] });
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["data-user-hidden"],
+    });
+
     return () => observer.disconnect();
   }, []);
 
