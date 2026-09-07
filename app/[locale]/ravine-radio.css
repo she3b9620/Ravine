@@ -15,14 +15,27 @@
 .ravine-radio-close{width:38px;height:38px;flex:0 0 38px;display:grid;place-items:center;border:1px solid rgba(241,233,220,.1);border-radius:12px;background:rgba(241,233,220,.03);color:var(--ivory);cursor:pointer;transition:border-color .2s ease,background .2s ease,transform .2s ease}
 .ravine-radio-close:hover{border-color:rgba(196,122,82,.38);background:rgba(196,122,82,.07);transform:translateY(-1px)}
 
+/* Header controls: Radio remains its own control; Player sits beside it with visible spacing and a slight lift. */
+.ravine-header-social{display:flex;align-items:center;gap:12px}
+.ravine-header-social .ravine-header-icon{transform:translateY(-3px)}
+.ravine-header-social .ravine-header-icon:hover{transform:translateY(-5px)}
+.ravine-radio-launcher.is-active,.ravine-radio-player-launcher.is-active{border-color:rgba(212,154,120,.45);background:rgba(196,122,82,.09);color:var(--ivory);box-shadow:0 10px 28px rgba(0,0,0,.16)}
+
+/* The floating Radio trigger is retained as the legacy visual, but header Radio is now the primary entry point. */
 .ravine-radio-trigger{position:fixed;z-index:210;inset-inline-end:22px;bottom:22px;width:48px;height:48px;display:grid;place-items:center;border:1px solid rgba(241,233,220,.14);border-radius:15px;background:linear-gradient(145deg,rgba(24,63,70,.96),rgba(112,64,47,.94));color:#f1e9dc;box-shadow:0 18px 50px rgba(0,0,0,.28),0 0 0 1px rgba(196,122,82,.05) inset;cursor:pointer;transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease}
 .ravine-radio-trigger:hover{transform:translateY(-2px);border-color:rgba(212,154,120,.42);box-shadow:0 22px 56px rgba(0,0,0,.34),0 0 0 1px rgba(196,122,82,.08) inset}
 .ravine-radio-trigger:focus-visible{outline:1px solid rgba(212,154,120,.45);outline-offset:3px}
+
+/* Player mini-card can be hidden/revealed from its dedicated header control without stopping playback. */
+.ravine-radio-mini[data-user-hidden="true"]{opacity:0!important;visibility:hidden!important;pointer-events:none!important;transform:translateY(14px) scale(.985)!important;transition:opacity .2s ease,transform .2s ease,visibility 0s linear .2s!important}
+.ravine-radio-mini[data-user-hidden="false"]{opacity:1;visibility:visible;pointer-events:auto}
 
 html[data-theme="light"] .ravine-radio-backdrop{background:rgba(15,18,19,.28);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 html[data-theme="light"] .ravine-radio-drawer{background:linear-gradient(160deg,rgba(34,39,40,.98),rgba(21,23,25,.98));border-color:rgba(241,233,220,.12);box-shadow:0 30px 90px rgba(0,0,0,.2),0 0 0 1px rgba(196,122,82,.05) inset}
 
 @media(max-width:600px){
+  .ravine-header-social{gap:10px}
+  .ravine-header-social .ravine-header-icon{transform:translateY(-2px)}
   .ravine-radio-drawer{top:10px;right:10px;bottom:10px;left:10px;width:auto;padding:18px;border-radius:20px;transform:translate3d(0,108%,0)}
   .ravine-shell[dir="rtl"] .ravine-radio-drawer{left:10px;right:10px;transform:translate3d(0,108%,0)}
   .ravine-radio-drawer.is-open{transform:translate3d(0,0,0)}
@@ -30,5 +43,5 @@ html[data-theme="light"] .ravine-radio-drawer{background:linear-gradient(160deg,
 }
 
 @media(prefers-reduced-motion:reduce){
-  .ravine-radio-backdrop,.ravine-radio-drawer,.ravine-radio-trigger,.ravine-radio-close{transition:none}
+  .ravine-radio-backdrop,.ravine-radio-drawer,.ravine-radio-trigger,.ravine-radio-close,.ravine-header-social .ravine-header-icon,.ravine-radio-mini[data-user-hidden="true"]{transition:none}
 }
