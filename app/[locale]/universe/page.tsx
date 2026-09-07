@@ -1,7 +1,5 @@
-import RAVINEUniverseHub from "@/components/RAVINEUniverseHub";
-
+import { RAVINEUniverseSurface } from "@/components/RAVINEUniverseSurface";
 export default async function UniversePage({ params }: { params: Promise<{ locale: string }> }) {
-  const { locale: rawLocale } = await params;
-  const locale = rawLocale === "en" ? "en" : "ar";
-  return <RAVINEUniverseHub locale={locale} />;
+  const { locale: raw } = await params; const locale = raw === "en" ? "en" : "ar";
+  return <RAVINEUniverseSurface locale={locale} surface="universe" />;
 }
