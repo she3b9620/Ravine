@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { type CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Bookmark, Check, ExternalLink, List, Maximize2, Pause, Play, RotateCcw, RotateCw, Settings2, Volume2 } from "lucide-react";
 import styles from "./RAVINEPlayer.module.css";
 
@@ -205,7 +205,7 @@ export default function RAVINEPlayer({ src, poster, title, contentType, duration
           <button type="button" onClick={() => seekBy(-10)} title={ar ? "رجوع 10 ثوانٍ" : "Back 10 seconds"}><RotateCcw size={17} /></button>
           <button className={styles.play} type="button" onClick={togglePlay} title={playing ? (ar ? "إيقاف مؤقت" : "Pause") : (ar ? "تشغيل" : "Play")}>{playing ? <Pause size={18} /> : <Play size={18} fill="currentColor" />}</button>
           <button type="button" onClick={() => seekBy(30)} title={ar ? "تقدم 30 ثانية" : "Forward 30 seconds"}><RotateCw size={17} /></button>
-          <label className={styles.volume}><Volume2 size={16} /><input aria-label={ar ? "مستوى الصوت" : "Volume"} type="range" min="0" max="1" step="0.05" value={volume} onChange={(event) => { const value = Number(event.target.value); setVolume(value); if (videoRef.current) videoRef.current.volume = value; }} /></label>
+          <label className={styles.volume}><Volume2 size={16} /><input aria-label={ar ? "مستوى الصوت" : "Volume"} type="range" min="0" max="1" step="0.05" value={volume} style={{ "--volume-fill": `${volume * 100}%` } as CSSProperties} onChange={(event) => { const value = Number(event.target.value); setVolume(value); if (videoRef.current) videoRef.current.volume = value; }} /></label>
           <button type="button" onClick={() => { setShowChapters((value) => !value); revealControls(); }} aria-pressed={showChapters} title={ar ? "الفصول" : "Chapters"}><List size={17} /></button>
           <button type="button" onClick={() => { setShowSettings((value) => !value); revealControls(); }} aria-pressed={showSettings} title={ar ? "الإعدادات" : "Settings"}><Settings2 size={17} /></button>
           <button type="button" onClick={() => void toggleFullscreen()} title={ar ? "ملء الشاشة" : "Fullscreen"}><Maximize2 size={17} /></button>
