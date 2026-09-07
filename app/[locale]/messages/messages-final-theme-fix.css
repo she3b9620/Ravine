@@ -1,0 +1,19 @@
+/* Messages final theme layer — true Light Mode without changing dark mode. */
+html[data-theme="light"] .ravine-shell .direct-messages-layout{background:#fffdf9!important;color:#171717!important;border-color:rgba(23,23,23,.12)!important}
+html[data-theme="light"] .ravine-shell .direct-inbox{background:#fbf7f2!important;border-color:rgba(23,23,23,.1)!important}
+html[data-theme="light"] .ravine-shell .direct-thread{background:#fffdfb!important}
+html[data-theme="light"] .ravine-shell .direct-thread-head,
+html[data-theme="light"] .ravine-shell .direct-compose{background:#fffdf9!important;border-color:rgba(23,23,23,.1)!important}
+html[data-theme="light"] .ravine-shell .direct-conversation{color:#171717!important;background:transparent!important}
+html[data-theme="light"] .ravine-shell .direct-conversation:hover,
+html[data-theme="light"] .ravine-shell .direct-conversation.active{background:rgba(196,122,82,.08)!important;border-color:rgba(196,122,82,.22)!important}
+html[data-theme="light"] .ravine-shell .direct-new-user input,
+html[data-theme="light"] .ravine-shell .direct-compose textarea{background:#fffaf6!important;color:#171717!important;border-color:rgba(23,23,23,.13)!important}
+html[data-theme="light"] .ravine-shell .direct-bubble{background:#fffaf6!important;color:#171717!important;border-color:rgba(23,23,23,.1)!important}
+html[data-theme="light"] .ravine-shell .direct-bubble.mine{background:rgba(196,122,82,.1)!important;border-color:rgba(169,93,56,.22)!important}
+html[data-theme="light"] .ravine-shell .direct-thread-status,
+html[data-theme="light"] .ravine-shell .direct-thread-head span,
+html[data-theme="light"] .ravine-shell .direct-conversation small{color:#6f6962!important}
+html[data-theme="light"] .ravine-shell .direct-close{background:#fffaf6!important;color:#171717!important;border-color:rgba(23,23,23,.12)!important}
+html[data-theme="light"] .ravine-shell .direct-messages-head h1{color:#171717!important}
+@media(max-width:820px){html[data-theme="light"] .ravine-shell .direct-inbox{background:#fbf7f2!important}}
