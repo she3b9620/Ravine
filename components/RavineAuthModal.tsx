@@ -17,6 +17,10 @@ function safeNext(value: string | null | undefined, locale: Locale) {
   return value;
 }
 
+function markLoginCycleStarted() {
+  window.sessionStorage.setItem("ravine-login-cycle-started", "1");
+}
+
 export function requestRavineAuth(next?: string, mode: "signin" | "signup" = "signin") {
   window.dispatchEvent(new CustomEvent<Detail>("ravine:open-auth", { detail: { next, mode } }));
 }
@@ -98,6 +102,7 @@ export default function RavineAuthModal({ locale }: { locale: Locale }) {
         if (!factor || !challengeId || !/^\d{6,10}$/.test(code)) throw new Error(copy.wrongCode);
         const { error } = await supabase.auth.mfa.verify({ factorId: factor.id, challengeId, code });
         if (error) throw error;
+        markLoginCycleStarted();
         setOpen(false); setClosing(false); router.replace(next); router.refresh(); return;
       }
       const result = mode === "signin"
@@ -107,8 +112,10 @@ export default function RavineAuthModal({ locale }: { locale: Locale }) {
       if (mode === "signup") {
         setPendingVerification(email.trim());
         if (!result.data.session) { setMode("verify-email"); setMessage(copy.created); return; }
+        markLoginCycleStarted();
         setOpen(false); setClosing(false); router.replace(`/${locale}/onboarding`); router.refresh(); return;
       }
+      markLoginCycleStarted();
       const assurance = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
       if (assurance.error) throw assurance.error;
       if (assurance.data.nextLevel === "aal2" && assurance.data.currentLevel !== "aal2") { await startMfa(supabase); return; }
@@ -133,6 +140,7 @@ export default function RavineAuthModal({ locale }: { locale: Locale }) {
   async function google() {
     setLoading(true); setMessage("");
     try {
+      markLoginCycleStarted();
       const target = mode === "signup" ? `/${locale}/onboarding` : next;
       const { error } = await createClient().auth.signInWithOAuth({
         provider: "google",
