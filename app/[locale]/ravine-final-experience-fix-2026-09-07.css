@@ -1,0 +1,77 @@
+/* RAVINE final experience corrections — scoped, theme-safe, no geometry resets. */
+
+/* Radio drawer: true warm editorial Light Mode, plus deterministic RTL placement. */
+html[data-theme="light"] .ravine-radio-root .ravine-radio-drawer{
+  background:linear-gradient(160deg,#fffdf9 0%,#f7f0e8 100%)!important;
+  color:#171717!important;
+  border-color:rgba(23,23,23,.12)!important;
+  box-shadow:0 26px 76px rgba(23,23,23,.14),0 0 0 1px rgba(112,64,47,.045) inset!important;
+}
+html[data-theme="light"] .ravine-radio-root .ravine-radio-head,
+html[data-theme="light"] .ravine-radio-root .ravine-radio-head h2,
+html[data-theme="light"] .ravine-radio-root .ravine-radio-now strong,
+html[data-theme="light"] .ravine-radio-root .ravine-radio-catalog-title,
+html[data-theme="light"] .ravine-radio-root .ravine-radio-search-result,
+html[data-theme="light"] .ravine-radio-root .ravine-radio-actions button{
+  color:#171717!important;
+}
+html[data-theme="light"] .ravine-radio-root .ravine-radio-head,
+html[data-theme="light"] .ravine-radio-root .ravine-radio-thread,
+html[data-theme="light"] .ravine-radio-root .ravine-radio-card{
+  border-color:rgba(23,23,23,.1)!important;
+}
+html[data-theme="light"] .ravine-radio-root .ravine-radio-kicker,
+html[data-theme="light"] .ravine-radio-root .ravine-radio-search-box svg,
+html[data-theme="light"] .ravine-radio-root .ravine-radio-search-result-icon{color:#70402f!important}
+html[data-theme="light"] .ravine-radio-root .ravine-radio-search-box,
+html[data-theme="light"] .ravine-radio-root .ravine-radio-search-result,
+html[data-theme="light"] .ravine-radio-root .ravine-radio-actions button{
+  background:rgba(255,255,255,.58)!important;
+  border-color:rgba(23,23,23,.1)!important;
+}
+html[data-theme="light"] .ravine-radio-root .ravine-radio-search-box input{color:#171717!important}
+html[data-theme="light"] .ravine-radio-root .ravine-radio-search-box input::placeholder,
+html[data-theme="light"] .ravine-radio-root .ravine-radio-search-label,
+html[data-theme="light"] .ravine-radio-root .ravine-radio-search-result-subtitle,
+html[data-theme="light"] .ravine-radio-root .ravine-radio-catalog-count,
+html[data-theme="light"] .ravine-radio-root .ravine-radio-status,
+html[data-theme="light"] .ravine-radio-root .ravine-radio-progress-time{color:#6f6962!important}
+html[data-theme="light"] .ravine-radio-root .ravine-radio-backdrop{background:rgba(15,18,19,.22)!important}
+
+.ravine-shell[dir="rtl"] .ravine-radio-root .ravine-radio-drawer{left:18px;right:auto}
+@media(max-width:600px){.ravine-shell[dir="rtl"] .ravine-radio-root .ravine-radio-drawer{left:10px;right:10px}}
+
+/* The mini player is part of the shared radio state. Never leave it hidden by a stale mutation. */
+.ravine-radio-root .ravine-radio-mini[data-user-hidden="false"]{visibility:visible;opacity:1;pointer-events:auto}
+
+/* Authenticated Home welcome: the scene is normal immediately; only the exit has motion. */
+.home-viewer-hero .home-viewer-welcome-copy,
+.home-viewer-hero .home-viewer-profile{animation:none!important;opacity:1;transform:none;filter:none}
+.home-viewer-hero.ravine-home-welcome-settling .home-viewer-welcome-copy,
+.home-viewer-hero.ravine-home-welcome-settling .home-viewer-profile{
+  animation:ravineHomeWelcomeExit 3s cubic-bezier(.55,.08,.68,.53) both!important;
+}
+.home-viewer-hero.ravine-home-welcome-settled .home-viewer-welcome-copy,
+.home-viewer-hero.ravine-home-welcome-settled .home-viewer-profile{opacity:0!important;visibility:hidden!important;pointer-events:none!important}
+@keyframes ravineHomeWelcomeExit{
+  0%{opacity:1;transform:translate3d(0,0,0);filter:blur(0)}
+  35%{opacity:.92;transform:translate3d(0,-3px,0);filter:blur(.3px)}
+  100%{opacity:0;transform:translate3d(0,-18px,0);filter:blur(4px)}
+}
+
+/* Logo halo only: soften the external air/shadow around the lockup rectangle. The rectangle itself is untouched. */
+.ravine-brand .ravine-lockup::before,
+.ravine-brand .ravine-lockup::after,
+.ravine-footer-brand .ravine-lockup::before,
+.ravine-footer-brand .ravine-lockup::after{
+  box-shadow:none!important;
+}
+html[data-theme="dark"] .ravine-brand,
+html[data-theme="dark"] .ravine-footer-brand{filter:drop-shadow(0 0 12px rgba(9,9,9,.18))!important}
+html[data-theme="light"] .ravine-brand,
+html[data-theme="light"] .ravine-footer-brand{filter:drop-shadow(0 0 11px rgba(23,23,23,.10))!important}
+
+@media(prefers-reduced-motion:reduce){
+  .home-viewer-hero.ravine-home-welcome-settling .home-viewer-welcome-copy,
+  .home-viewer-hero.ravine-home-welcome-settling .home-viewer-profile{animation:none!important}
+}
