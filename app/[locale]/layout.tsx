@@ -7,6 +7,7 @@ import RavinePageTransition from "../../components/RavinePageTransition";
 import HomeWelcomeMotion from "../../components/HomeWelcomeMotion";
 import SelectionTabsEnhancer from "../../components/SelectionTabsEnhancer";
 import VideoAudioToggle from "../../components/VideoAudioToggle";
+import GuestInteractionPolish from "../../components/GuestInteractionPolish";
 import LocalePersistence from "../../components/LocalePersistence";
 import EnglishAboutLocaleFix from "../../components/EnglishAboutLocaleFix";
 import "./ravine-overrides.css";
@@ -56,6 +57,7 @@ import "./ravine-light-spacing-finish.css";
 import "./ravine-final-micro-polish.css";
 import "./ravine-radio.css";
 import "./ravine-creator-identity.css";
+import "./ravine-ui-runtime-fix.css";
 
 const locales = ["ar", "en"] as const;
 type Locale = (typeof locales)[number];
@@ -65,5 +67,5 @@ export function generateStaticParams(){ return locales.map((locale)=>({locale}))
 export default async function LocaleLayout({children,params}:{children:ReactNode;params:Promise<{locale:string}>}){
   const {locale}=await params;
   if(!locales.includes(locale as Locale)) notFound();
-  return <RavineShell locale={locale as Locale}><LocalePersistence locale={locale as Locale}/><EnglishAboutLocaleFix /><VideoAudioToggle locale={locale as Locale}/><RavineUiEnhancer /><RavineLogoMotion /><SelectionTabsEnhancer /><HomeWelcomeMotion /><RavinePageTransition>{children}</RavinePageTransition></RavineShell>;
+  return <RavineShell locale={locale as Locale}><LocalePersistence locale={locale as Locale}/><EnglishAboutLocaleFix /><VideoAudioToggle locale={locale as Locale}/><GuestInteractionPolish /><RavineUiEnhancer /><RavineLogoMotion /><SelectionTabsEnhancer /><HomeWelcomeMotion /><RavinePageTransition>{children}</RavinePageTransition></RavineShell>;
 }
