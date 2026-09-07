@@ -37,6 +37,16 @@ html[data-theme="light"] .ravine-radio-root .ravine-radio-catalog-count,
 html[data-theme="light"] .ravine-radio-root .ravine-radio-status,
 html[data-theme="light"] .ravine-radio-root .ravine-radio-progress-time{color:#6f6962!important}
 html[data-theme="light"] .ravine-radio-root .ravine-radio-backdrop{background:rgba(15,18,19,.22)!important}
+html[data-theme="light"] .ravine-radio-root .ravine-radio-mini{
+  background:linear-gradient(140deg,#fffdf9,#f3ece4)!important;
+  color:#171717!important;
+  border-color:rgba(23,23,23,.11)!important;
+  box-shadow:0 18px 55px rgba(23,23,23,.14),0 0 0 1px rgba(112,64,47,.045) inset!important;
+}
+html[data-theme="light"] .ravine-radio-root .ravine-radio-mini-title{color:#171717!important}
+html[data-theme="light"] .ravine-radio-root .ravine-radio-mini-subtitle{color:#6f6962!important}
+html[data-theme="light"] .ravine-radio-root .ravine-radio-mini-controls button{color:#171717!important;background:rgba(255,255,255,.62)!important;border-color:rgba(23,23,23,.1)!important}
+html[data-theme="light"] .ravine-radio-root .ravine-radio-mini-art{color:#f1e9dc!important}
 
 .ravine-shell[dir="rtl"] .ravine-radio-root .ravine-radio-drawer{left:18px;right:auto}
 @media(max-width:600px){.ravine-shell[dir="rtl"] .ravine-radio-root .ravine-radio-drawer{left:10px;right:10px}}
@@ -63,13 +73,11 @@ html[data-theme="light"] .ravine-radio-root .ravine-radio-backdrop{background:rg
 .ravine-brand .ravine-lockup::before,
 .ravine-brand .ravine-lockup::after,
 .ravine-footer-brand .ravine-lockup::before,
-.ravine-footer-brand .ravine-lockup::after{
-  box-shadow:none!important;
-}
+.ravine-footer-brand .ravine-lockup::after{box-shadow:none!important}
 html[data-theme="dark"] .ravine-brand,
-html[data-theme="dark"] .ravine-footer-brand{filter:drop-shadow(0 0 12px rgba(9,9,9,.18))!important}
+html[data-theme="dark"] .ravine-footer-brand{filter:drop-shadow(0 0 10px rgba(9,9,9,.15))!important}
 html[data-theme="light"] .ravine-brand,
-html[data-theme="light"] .ravine-footer-brand{filter:drop-shadow(0 0 11px rgba(23,23,23,.10))!important}
+html[data-theme="light"] .ravine-footer-brand{filter:drop-shadow(0 0 8px rgba(23,23,23,.08))!important}
 
 @media(prefers-reduced-motion:reduce){
   .home-viewer-hero.ravine-home-welcome-settling .home-viewer-welcome-copy,
