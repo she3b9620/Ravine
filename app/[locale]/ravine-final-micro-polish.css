@@ -93,15 +93,7 @@ html[data-theme="light"] .creatorFeatureCard :is(svg),
 html[data-theme="light"] .quickCard :is(svg),
 html[data-theme="light"] .mapCard :is(svg){color:#e0aa89!important;stroke:currentColor!important}
 
-html[data-theme="light"] .ravine-search-overlay .ravine-search-field-label,
-html[data-theme="light"] .ravine-search-overlay .ravine-advanced-search-toggle,
-html[data-theme="light"] .ravine-search-overlay .ravine-search-select-menu button,
-html[data-theme="light"] .ravine-search-overlay [class*="muted"],
-html[data-theme="light"] .ravine-search-dialog .ravine-search-field-label,
-html[data-theme="light"] .ravine-search-dialog .ravine-advanced-search-toggle,
-html[data-theme="light"] .ravine-search-dialog .ravine-search-select-menu button{color:#fff!important;-webkit-text-fill-color:#fff!important}
-
-/* Search in Light Mode: explicit premium in/out choreography, including dialog movement and opacity. */
+/* Search in Light Mode: explicit premium in/out choreography, with the overlay itself becoming the dark glass layer. */
 html[data-theme="light"] .ravine-search-overlay{
   animation:ravineSearchOverlayInPremium .42s cubic-bezier(.22,1,.36,1) both!important;
 }
