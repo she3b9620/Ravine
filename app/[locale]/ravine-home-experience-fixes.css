@@ -18,22 +18,22 @@
 .home-viewer .section-head{margin-bottom:24px!important}
 .home-viewer .selection-section{padding-top:34px!important;padding-bottom:34px!important}
 
-/* First authenticated-home visit: three-second welcome hold, then one continuous editorial collapse. */
-.home-viewer-hero{transition:min-height 1.2s cubic-bezier(.22,1,.36,1),padding-block 1.2s cubic-bezier(.22,1,.36,1)}
-.home-viewer-hero-inner{transition:grid-template-columns 1.2s cubic-bezier(.22,1,.36,1),gap 1.2s cubic-bezier(.22,1,.36,1),transform 1.2s cubic-bezier(.22,1,.36,1)}
-.home-viewer-welcome-copy{overflow:hidden;transition:opacity .7s ease,transform 1.05s cubic-bezier(.22,1,.36,1),max-width 1.05s cubic-bezier(.22,1,.36,1),max-height 1.05s cubic-bezier(.22,1,.36,1)}
-.home-viewer-welcome-copy h1,.home-viewer-welcome-copy .home-state-kicker,.home-viewer-welcome-copy p{transition:opacity .65s ease,transform .9s cubic-bezier(.22,1,.36,1),margin .9s ease,max-height .9s ease}
-.home-viewer-profile{transition:width 1.2s cubic-bezier(.22,1,.36,1),min-height 1.2s cubic-bezier(.22,1,.36,1),padding 1.2s cubic-bezier(.22,1,.36,1),transform 1.2s cubic-bezier(.22,1,.36,1),border-radius 1.2s cubic-bezier(.22,1,.36,1),box-shadow .95s ease!important}
-.home-viewer-profile-halo{transition:width 1.2s cubic-bezier(.22,1,.36,1),height 1.2s cubic-bezier(.22,1,.36,1),min-width 1.2s cubic-bezier(.22,1,.36,1),min-height 1.2s cubic-bezier(.22,1,.36,1),transform 1.2s cubic-bezier(.22,1,.36,1),box-shadow .95s ease!important}
-.home-viewer-profile-copy{transition:opacity .7s ease,max-height .95s ease,transform .9s cubic-bezier(.22,1,.36,1),margin .9s ease}
-.home-primary-feed{transition:padding-top 1.2s cubic-bezier(.22,1,.36,1),transform 1.2s cubic-bezier(.22,1,.36,1)}
+/* First authenticated-home visit: real three-second welcome hold, then one continuous editorial collapse. */
+.home-viewer-hero{transition:min-height 1.4s cubic-bezier(.22,1,.36,1),padding-block 1.4s cubic-bezier(.22,1,.36,1)}
+.home-viewer-hero-inner{transition:grid-template-columns 1.4s cubic-bezier(.22,1,.36,1),gap 1.4s cubic-bezier(.22,1,.36,1),transform 1.4s cubic-bezier(.22,1,.36,1)}
+.home-viewer-welcome-copy{overflow:hidden;transition:opacity .85s ease,transform 1.2s cubic-bezier(.22,1,.36,1),max-width 1.2s cubic-bezier(.22,1,.36,1),max-height 1.2s cubic-bezier(.22,1,.36,1)}
+.home-viewer-welcome-copy h1,.home-viewer-welcome-copy .home-state-kicker,.home-viewer-welcome-copy p{transition:opacity .75s ease,transform 1.15s cubic-bezier(.22,1,.36,1),margin 1.05s ease,max-height 1.05s ease}
+.home-viewer-profile{transition:width 1.4s cubic-bezier(.22,1,.36,1),min-height 1.4s cubic-bezier(.22,1,.36,1),padding 1.4s cubic-bezier(.22,1,.36,1),transform 1.4s cubic-bezier(.22,1,.36,1),border-radius 1.4s cubic-bezier(.22,1,.36,1),box-shadow 1.25s ease!important;box-shadow:0 22px 68px rgba(0,0,0,.2),0 0 38px rgba(196,122,82,.045)!important}
+.home-viewer-profile-halo{transition:width 1.4s cubic-bezier(.22,1,.36,1),height 1.4s cubic-bezier(.22,1,.36,1),min-width 1.4s cubic-bezier(.22,1,.36,1),min-height 1.4s cubic-bezier(.22,1,.36,1),transform 1.4s cubic-bezier(.22,1,.36,1),box-shadow 1.25s ease!important}
+.home-viewer-profile-copy{transition:opacity .85s ease,max-height 1.2s ease,transform 1.15s cubic-bezier(.22,1,.36,1),margin 1.05s ease}
+.home-primary-feed{transition:padding-top 1.4s cubic-bezier(.22,1,.36,1),transform 1.4s cubic-bezier(.22,1,.36,1)}
 
 /* The settling phase is one continuous scene: copy dissolves while the portrait leaves the side column and centers under the header. */
 .home-viewer-hero.ravine-home-welcome-settling{min-height:20vh!important;padding-block:26px 14px!important}
 .home-viewer-hero.ravine-home-welcome-settling .home-viewer-hero-inner{grid-template-columns:1fr!important;justify-items:center!important;gap:8px!important;transform:translateY(-8px)!important}
 .home-viewer-hero.ravine-home-welcome-settling .home-viewer-welcome-copy{opacity:0;transform:translate3d(0,-24px,0) scale(.965);max-width:0;max-height:0;pointer-events:none}
 .home-viewer-hero.ravine-home-welcome-settling .home-viewer-welcome-copy h1,.home-viewer-hero.ravine-home-welcome-settling .home-viewer-welcome-copy .home-state-kicker,.home-viewer-hero.ravine-home-welcome-settling .home-viewer-welcome-copy p{opacity:0;max-height:0;margin-block:0;transform:translate3d(0,-14px,0)}
-.home-viewer-hero.ravine-home-welcome-settling .home-viewer-profile{width:246px!important;min-height:184px!important;padding:12px!important;transform:translate3d(0,-20px,0) scale(.9)!important;border-radius:23px 14px 26px 17px!important;justify-self:center!important;margin-inline:auto!important}
+.home-viewer-hero.ravine-home-welcome-settling .home-viewer-profile{width:246px!important;min-height:184px!important;padding:12px!important;transform:translate3d(0,-20px,0) scale(.9)!important;border-radius:23px 14px 26px 17px!important;justify-self:center!important;margin-inline:auto!important;box-shadow:0 24px 74px rgba(0,0,0,.18),0 0 40px rgba(196,122,82,.04)!important}
 .home-viewer-hero.ravine-home-welcome-settling .home-viewer-profile-halo{width:136px!important;height:136px!important;min-width:136px!important;min-height:136px!important;transform:rotate(-.5deg)!important}
 .home-viewer-hero.ravine-home-welcome-settling .home-viewer-profile-copy{opacity:0;max-height:0;overflow:hidden;transform:translate3d(0,10px,0);margin:0}
 
@@ -42,7 +42,7 @@
 .home-viewer-hero.ravine-home-welcome-settled .home-viewer-hero-inner{grid-template-columns:1fr!important;gap:6px!important;justify-items:center!important;transform:translateY(-5px)!important}
 .home-viewer-hero.ravine-home-welcome-settled .home-viewer-welcome-copy{opacity:0;transform:translate3d(0,-22px,0) scale(.94);max-width:0;max-height:0;pointer-events:none;visibility:hidden}
 .home-viewer-hero.ravine-home-welcome-settled .home-viewer-welcome-copy h1,.home-viewer-hero.ravine-home-welcome-settled .home-viewer-welcome-copy .home-state-kicker,.home-viewer-hero.ravine-home-welcome-settled .home-viewer-welcome-copy p{opacity:0;max-height:0;margin-block:0}
-.home-viewer-hero.ravine-home-welcome-settled .home-viewer-profile{width:226px!important;min-height:138px!important;padding:8px!important;transform:translate3d(0,-2px,0)!important;border-radius:19px 12px 21px 14px!important;justify-self:center!important;margin-inline:auto!important;box-shadow:0 22px 56px rgba(0,0,0,.26),0 0 32px rgba(196,122,82,.07)!important;overflow:hidden!important}
+.home-viewer-hero.ravine-home-welcome-settled .home-viewer-profile{width:226px!important;min-height:138px!important;padding:8px!important;transform:translate3d(0,-2px,0)!important;border-radius:19px 12px 21px 14px!important;justify-self:center!important;margin-inline:auto!important;box-shadow:0 26px 78px rgba(0,0,0,.19),0 0 42px rgba(196,122,82,.045)!important;overflow:hidden!important}
 .home-viewer-hero.ravine-home-welcome-settled .home-viewer-profile-halo{width:118px!important;height:118px!important;min-width:118px!important;min-height:118px!important;transform:rotate(0)!important}
 .home-viewer-hero.ravine-home-welcome-settled .home-viewer-profile-copy{opacity:0;max-height:0;overflow:hidden;margin:0;transform:translate3d(0,6px,0)}
 .home-viewer-hero.ravine-home-welcome-settled + .home-primary-feed{padding-top:10px!important;transform:translateY(0)!important}
