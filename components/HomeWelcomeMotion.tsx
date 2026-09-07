@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-const COMPLETED_KEY = "ravine-home-welcome-completed-v4";
+const COMPLETED_KEY = "ravine-home-welcome-completed-v5";
 
 function isHomeRoute(pathname: string) {
   const path = pathname.replace(/\/$/, "");
@@ -24,22 +24,23 @@ export default function HomeWelcomeMotion() {
   const pathname = usePathname() || "/";
 
   useEffect(() => {
+    if (!isHomeRoute(pathname)) return;
+
     const supabase = createClient();
     let cancelled = false;
     let cleanupRun: (() => void) | undefined;
 
     const runForHome = () => {
       if (cancelled || !isHomeRoute(pathname)) return;
-
       const hero = getHero();
       if (!hero) return;
 
-      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (localStorage.getItem(COMPLETED_KEY) === "1") {
         applySettled(hero);
         return;
       }
 
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (reduceMotion) {
         applySettled(hero);
         localStorage.setItem(COMPLETED_KEY, "1");
@@ -68,13 +69,11 @@ export default function HomeWelcomeMotion() {
         const finishTimer = hero.dataset.ravineWelcomeFinishTimer;
         if (finishTimer) window.clearTimeout(Number(finishTimer));
         delete hero.dataset.ravineWelcomeFinishTimer;
-        if (hero.dataset.ravineWelcomeMotionBound === "1") {
-          delete hero.dataset.ravineWelcomeMotionBound;
-        }
+        delete hero.dataset.ravineWelcomeMotionBound;
       };
     };
 
-    const { data: authListener } = supabase.auth.onAuthStateChange((event) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_OUT") {
         cleanupRun?.();
         cleanupRun = undefined;
@@ -86,7 +85,7 @@ export default function HomeWelcomeMotion() {
         return;
       }
 
-      if (event === "SIGNED_IN") {
+      if (event === "SIGNED_IN" && session?.user) {
         window.setTimeout(runForHome, 0);
       }
     });
