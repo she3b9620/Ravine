@@ -57,7 +57,10 @@ export default function RAVINEPlayerRuntime({ src, poster, title, contentType, d
   const [introChoice, setIntroChoice] = useState<"main" | "trailer" | "preview">("main");
 
   const normalizedAssets = useMemo(
-    () => assets.map((asset) => ({ ...asset, media_url: resolveAssetPlaybackUrl(asset) })).filter((asset) => Boolean(asset.media_url)),
+    () => assets.flatMap((asset) => {
+      const media_url = resolveAssetPlaybackUrl(asset);
+      return media_url ? [{ ...asset, media_url }] : [];
+    }),
     [assets],
   );
   const trailer = useMemo(() => normalizedAssets.find((asset) => asset.kind === "trailer"), [normalizedAssets]);
