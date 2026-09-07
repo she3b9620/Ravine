@@ -17,7 +17,7 @@ html[data-theme="light"] .ravine-main .about-section {
 html[data-theme="light"] .home-viewer-profile {
   background: linear-gradient(145deg, #ffffff, #fffaf6 62%, #f8f3ed) !important;
   border-color: rgba(23,23,23,.11) !important;
-  box-shadow: 0 26px 70px rgba(23,23,23,.10), inset 0 1px 0 rgba(255,255,255,.95) !important;
+  box-shadow: 0 28px 82px rgba(23,23,23,.075), inset 0 1px 0 rgba(255,255,255,.95) !important;
   color: #171717 !important;
 }
 
