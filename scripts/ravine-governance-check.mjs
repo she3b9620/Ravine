@@ -19,6 +19,7 @@ const required = [
   "components/RAVINEPodcastPlayer.tsx",
   "components/RAVINEDocumentaryPlayer.tsx",
   "components/RAVINEUniverseHub.tsx",
+  "components/RAVINEUniverseSurface.tsx",
   "lib/ravine-playback-core.ts",
   "lib/ravine-work-universe.ts",
   "lib/ravine-platform.ts",
@@ -31,9 +32,18 @@ const required = [
   "app/[locale]/work/[id]/page.tsx",
   "app/[locale]/universe/page.tsx",
   "app/[locale]/universe/module/page.tsx",
+  "app/[locale]/messages/page.tsx",
+  "app/[locale]/collections/page.tsx",
+  "app/[locale]/events/page.tsx",
+  "app/[locale]/spaces/page.tsx",
+  "app/[locale]/opportunities/page.tsx",
+  "app/[locale]/intelligence/page.tsx",
+  "app/[locale]/trust/page.tsx",
+  "app/[locale]/admin/page.tsx",
   "components/RAVINEWorkContext.tsx",
   "components/RAVINEWorkContext.module.css",
   "supabase/migrations/20260907120000_ravine_platform_domain_foundation.sql",
+  "supabase/migrations/20260907130000_ravine_social_community_operations_foundation.sql",
 ];
 
 for (const file of required) {
@@ -57,6 +67,8 @@ const discovery = read("lib/ravine-discovery.ts");
 const access = read("lib/ravine-access.ts");
 const live = read("lib/ravine-live-provider.ts");
 const economy = read("lib/ravine-economy.ts");
+const universe = read("components/RAVINEUniverseSurface.tsx");
+const socialMigration = read("supabase/migrations/20260907130000_ravine_social_community_operations_foundation.sql");
 const domainMigration = read("supabase/migrations/20260907120000_ravine_platform_domain_foundation.sql");
 
 if (process.env.GITHUB_REF_NAME && process.env.GITHUB_REF_NAME !== "ravine/clean-rebuild") throw new Error(`Expected ravine/clean-rebuild, got ${process.env.GITHUB_REF_NAME}`);
@@ -78,22 +90,23 @@ if (!discovery.includes("rankRAVINEWithExplicitWeights")) throw new Error("Disco
 if (!access.includes("canAccessRAVINEWork") || !access.includes("canPublishAsCreator")) throw new Error("Access contract guard failed.");
 if (!live.includes("RAVINELiveProviderAdapter") || !live.includes("assertRAVINELiveProviderConfigured")) throw new Error("Live provider must remain adapter-based while open.");
 if (!economy.includes("RAVINEEconomyAdapter") || !economy.includes("assertRAVINEEconomyConfigured")) throw new Error("Economy provider must remain adapter-based while open.");
+if (!universe.includes("RAVINE_PLATFORM_MODULES")) throw new Error("Universe surface must use canonical registry.");
 if (!domainMigration.includes("alter table public.ravine_next_works enable row level security")) throw new Error("Staged domain migration RLS guard failed.");
+if (!socialMigration.includes("ravine_next_connections") || !socialMigration.includes("ravine_next_notifications") || !socialMigration.includes("ravine_next_messages") || !socialMigration.includes("ravine_next_community_posts") || !socialMigration.includes("ravine_next_spaces") || !socialMigration.includes("ravine_next_ai_audit_events")) throw new Error("Social/community/operations foundation guard failed.");
 
 const appDir = path.join(root, "app");
 const stack = [appDir];
-const textFiles = [];
 while (stack.length) {
   const current = stack.pop();
   for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
     const full = path.join(current, entry.name);
     if (entry.isDirectory()) stack.push(full);
-    else if (/\.(tsx|ts|css|md|json)$/.test(entry.name)) textFiles.push(full);
+    else if (/\.(tsx|ts|css|md|json)$/.test(entry.name)) {
+      const source = fs.readFileSync(full, "utf8");
+      for (const phrase of ["مساحة للاكتشاف، مش مجرد بحث.", "A discovery layer, not just a search box."]) {
+        if (source.includes(phrase)) throw new Error(`Forbidden Search copy found in ${path.relative(root, full)}: ${phrase}`);
+      }
+    }
   }
-}
-const searchForbidden = ["مساحة للاكتشاف، مش مجرد بحث.", "A discovery layer, not just a search box."];
-for (const file of textFiles) {
-  const source = fs.readFileSync(file, "utf8");
-  for (const phrase of searchForbidden) if (source.includes(phrase)) throw new Error(`Forbidden Search copy found in ${path.relative(root, file)}: ${phrase}`);
 }
 console.log("RAVINE governance checks passed.");
