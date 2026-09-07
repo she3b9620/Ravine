@@ -128,32 +128,6 @@ function syncGuestAbout() {
   main.appendChild(section);
 }
 
-function enhanceViewerWelcome() {
-  if (!isHomeRoute() || window.location.pathname.includes("/discover")) return;
-  const block = document.querySelector<HTMLElement>(".home-viewer-welcome-copy");
-  if (!block || block.dataset.ravineWelcomeBound === "1") return;
-  if (!document.querySelector(".ravine-shell:not(.guest-shell)")) return;
-  block.dataset.ravineWelcomeBound = "1";
-  const seenKey = "ravine-home-welcome-seen-v1";
-  const paragraph = block.querySelector<HTMLParagraphElement>("p");
-  if (!paragraph || sessionStorage.getItem(seenKey) === "1") {
-    if (paragraph) paragraph.classList.add("is-settled");
-    return;
-  }
-  const ar = getHomeLocale() === "ar";
-  window.setTimeout(() => {
-    paragraph.classList.add("is-fading");
-    window.setTimeout(() => {
-      paragraph.textContent = ar
-        ? "نرشّح لك أهم ما يستحق المشاهدة الآن، بناءً على جودة العمل وسياقه والإشارات التي تساعدك على اكتشاف شيء جديد."
-        : "Here are the most important works to watch now, guided by craft, context, and signals that help you discover something new.";
-      paragraph.classList.remove("is-fading");
-      paragraph.classList.add("is-recommendation", "is-settled");
-      sessionStorage.setItem(seenKey, "1");
-    }, 620);
-  }, 3000);
-}
-
 export default function RavineUiEnhancer() {
   useEffect(() => {
     localizeArabicNumerals();
@@ -162,7 +136,6 @@ export default function RavineUiEnhancer() {
     enhanceSelectionTabs();
     syncGuestAbout();
     enhanceContentPageHeadingIcons();
-    enhanceViewerWelcome();
 
     const observer = new MutationObserver(() => {
       localizeArabicNumerals();
@@ -171,7 +144,6 @@ export default function RavineUiEnhancer() {
       enhanceSelectionTabs();
       syncGuestAbout();
       enhanceContentPageHeadingIcons();
-      enhanceViewerWelcome();
     });
     observer.observe(document.body, { childList: true, subtree: true, characterData: true });
     return () => observer.disconnect();
