@@ -77,6 +77,7 @@ export default function HomeWelcomeMotion() {
       if (event === "SIGNED_OUT") {
         cleanupRun?.();
         cleanupRun = undefined;
+        localStorage.removeItem(COMPLETED_KEY);
         const hero = getHero();
         if (hero) {
           hero.classList.remove("ravine-home-welcome-settling", "ravine-home-welcome-settled");
