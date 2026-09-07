@@ -1,0 +1,13 @@
+/* RAVINE sidebar position finish: move only the options, never the sidebar surface. */
+@media (min-width: 981px) {
+  .ravine-sidebar {
+    inset-block-start: 78px !important;
+    height: calc(100dvh - 78px) !important;
+    padding-top: 24px !important;
+  }
+
+  .ravine-sidebar-scroll-content {
+    transform: none !important;
+    padding-top: 36px !important;
+  }
+}
