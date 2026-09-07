@@ -47,6 +47,7 @@ export default function RavineRadio({ locale }: Props) {
   const [closing, setClosing] = useState(false);
   const [closeDirection, setCloseDirection] = useState<CloseDirection>("right");
   const [playing, setPlaying] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
   const [active, setActive] = useState(RADIO_CATALOG[0]);
   const [query, setQuery] = useState("");
   const [currentTime, setCurrentTime] = useState(0);
@@ -66,6 +67,20 @@ export default function RavineRadio({ locale }: Props) {
   useEffect(() => {
     playingRef.current = playing;
   }, [playing]);
+
+  useEffect(() => {
+    const onToggle = () => {
+      setClosing(false);
+      setOpen((value) => !value);
+    };
+
+    window.addEventListener("ravine:radio-toggle", onToggle);
+    return () => window.removeEventListener("ravine:radio-toggle", onToggle);
+  }, []);
+
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent("ravine:radio-state", { detail: { open } }));
+  }, [open]);
 
   useEffect(() => {
     let cancelled = false;
@@ -103,6 +118,7 @@ export default function RavineRadio({ locale }: Props) {
 
               if (event.data === playingState) {
                 setPlaying(true);
+                setHasStarted(true);
               } else if (event.data === pausedState || event.data === endedState) {
                 setPlaying(false);
               }
@@ -185,7 +201,12 @@ export default function RavineRadio({ locale }: Props) {
   const activeIndex = RADIO_CATALOG.findIndex((track) => track.id === active.id);
 
   const selectTrack = (track: RadioTrack) => {
+    if (track.id === active.id && hasStarted) {
+      togglePlayback();
+      return;
+    }
     setActive(track);
+    setHasStarted(true);
     setPlaying(true);
   };
 
@@ -230,6 +251,7 @@ export default function RavineRadio({ locale }: Props) {
 
   const togglePlayback = () => {
     const nextPlaying = !playing;
+    setHasStarted(true);
     setPlaying(nextPlaying);
     if (nextPlaying) {
       playerRef.current?.playVideo?.();
@@ -446,7 +468,7 @@ export default function RavineRadio({ locale }: Props) {
           <div className="ravine-radio-actions">
             <button type="button" onClick={() => moveTrack(-1)} aria-label={ar ? "المسار السابق" : "Previous track"} title={ar ? "السابق" : "Previous"}><ChevronLeft size={16} /></button>
             <button type="button" onClick={() => seekBy(-10)} aria-label={ar ? "رجوع 10 ثواني" : "Back 10 seconds"} title={ar ? "رجوع 10 ثواني" : "Back 10s"}><SkipBack size={15} /></button>
-            <button type="button" onClick={togglePlayback} aria-pressed={playing}>{playing ? <Pause size={15} /> : <Play size={15} />} {playing ? (ar ? "إيقاف" : "Pause") : ar ? "تشغيل" : "Play"}</button>
+            <button type="button" onClick={togglePlayback} aria-pressed={playing}>{playing ? <Pause size={15} /> : <Play size={15} />} {playing ? (ar ? "إيقاف" : "Pause") : (ar ? "تشغيل" : "Play")}</button>
             <button type="button" onClick={() => seekBy(10)} aria-label={ar ? "تقديم 10 ثواني" : "Forward 10 seconds"} title={ar ? "تقديم 10 ثواني" : "Forward 10s"}><SkipForward size={15} /></button>
             <button type="button" onClick={() => moveTrack(1)} aria-label={ar ? "المسار التالي" : "Next track"} title={ar ? "التالي" : "Next"}><ChevronRight size={16} /></button>
           </div>
@@ -469,18 +491,7 @@ export default function RavineRadio({ locale }: Props) {
         </div>
       </aside>
 
-      <button
-        type="button"
-        className="ravine-radio-trigger"
-        onClick={toggleDrawer}
-        aria-expanded={open}
-        aria-label={ar ? "فتح راديو رَافِين" : "Open RAVINE Radio"}
-        title={ar ? "راديو رَافِين" : "RAVINE Radio"}
-      >
-        <Radio size={20} strokeWidth={1.8} />
-      </button>
-
-      {active ? (
+      {hasStarted ? (
         <div className="ravine-radio-mini" role="region" aria-label={ar ? "مشغل راديو مصغر" : "Mini Radio Player"}>
           <div className="ravine-radio-mini-art" aria-hidden="true"><Radio size={18} strokeWidth={1.8} /></div>
           <div className="ravine-radio-mini-copy">
