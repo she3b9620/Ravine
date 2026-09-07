@@ -5,7 +5,8 @@ import { useEffect } from "react";
 const FOLLOW_PERMISSION = /permission denied for table follows/i;
 const VIDEOS_RECURSION = /infinite recursion detected in policy for relation [\"']videos[\"']/i;
 const ARABIC_DIGITS = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
-const USER_IDENTITY_SELECTOR = ["[data-preserve-numerals]", "[data-username]", "[data-user-name]", "[data-display-name]", "[data-handle]", "[data-user-handle]", ".username", ".user-name", ".user_name", ".handle", ".user-handle", ".creator-username", ".creator-handle", ".handleLine", ".nameRow", ".profile-name", ".profile-username", "[class*='username']", "[class*='user-name']", "[class*='handle']"].join(",");
+const USER_IDENTITY_SELECTOR = ["[data-preserve-numerals]", "[data-system-number]", "[data-username]", "[data-user-name]", "[data-display-name]", "[data-handle]", "[data-user-handle]", ".username", ".user-name", ".user_name", ".handle", ".user-handle", ".creator-username", ".creator-handle", ".handleLine", ".nameRow", ".profile-name", ".profile-username", "[class*='username']", "[class*='user-name']", "[class*='handle']"].join(",");
+const SYSTEM_NUMERAL_SELECTOR = ["[data-preserve-numerals]", "[data-system-number]", "[data-id]", ".ravine-system-number", ".duration", ".views", ".likes", ".count", ".rating", ".score", "[class*='duration']", "[class*='-views']", "[class*='-likes']", "[class*='-count']", "[class*='-rating']", "[class*='-score']"].join(",");
 
 function walkTextNodes(root: Node, replace: (value: string, node: Text) => string) {
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
@@ -22,7 +23,16 @@ function walkTextNodes(root: Node, replace: (value: string, node: Text) => strin
 }
 
 function toArabicIndicDigits(value: string) { return value.replace(/[0-9]/g, (digit) => ARABIC_DIGITS[Number(digit)]); }
-function shouldPreserveNumerals(node: Text) { const parent = node.parentElement; if (!parent) return true; if (parent.closest(USER_IDENTITY_SELECTOR)) return true; if (parent.closest("input, textarea, code, pre, kbd, samp, script, style")) return true; if (parent.closest("[data-numeric-literal]")) return true; if (parent.closest("a[href]") && parent.textContent?.trim() === node.nodeValue?.trim() && /(?:https?:\/\/|\/\b(?:ar|en)\b\/|^@)/i.test(node.nodeValue || "")) return true; return false; }
+function shouldPreserveNumerals(node: Text) {
+  const parent = node.parentElement;
+  if (!parent) return true;
+  if (parent.closest(USER_IDENTITY_SELECTOR)) return true;
+  if (parent.closest(SYSTEM_NUMERAL_SELECTOR)) return true;
+  if (parent.closest("input, textarea, code, pre, kbd, samp, script, style")) return true;
+  if (parent.closest("[data-numeric-literal]")) return true;
+  if (parent.closest("a[href]") && parent.textContent?.trim() === node.nodeValue?.trim() && /(?:https?:\/\/|\/\b(?:ar|en)\b\/|^@)/i.test(node.nodeValue || "")) return true;
+  return false;
+}
 function localizeArabicNumerals() { const shell = document.querySelector('.ravine-shell[lang="ar"]'); if (!shell) return; walkTextNodes(shell, (value, node) => shouldPreserveNumerals(node) ? value : toArabicIndicDigits(value)); }
 function localizeFollowErrors() { const shell = document.querySelector('.ravine-shell[lang="ar"]'); if (!shell) return; walkTextNodes(shell, (value) => FOLLOW_PERMISSION.test(value) ? value.replace(FOLLOW_PERMISSION, "لا تملك صلاحية الوصول إلى المتابعات حاليًا.") : value); }
 function localizeVideosPolicyError() { if (document.documentElement.lang !== "ar") return; const root = document.querySelector('.ravine-shell[lang="ar"]') || document.body; walkTextNodes(root, (value) => VIDEOS_RECURSION.test(value) ? "تعذر تحميل بعض الأعمال مؤقتًا بسبب خطأ في صلاحيات قاعدة البيانات. تم إصلاح المشكلة، حدّث الصفحة وحاول مرة أخرى." : value); }
@@ -39,7 +49,7 @@ const PAGE_ICONS: Record<string, string> = {
 };
 
 function enhanceContentPageHeadingIcons() { const path = window.location.pathname.split("/").filter(Boolean).pop() || ""; const iconMarkup = PAGE_ICONS[path]; if (!iconMarkup) return; const candidates = document.querySelectorAll(".section > h1, .discover-page h1, .live-page h1, .creators-page h1, .cuts-page h1"); const heading = Array.from(candidates).find((item) => !item.classList.contains("ravine-page-heading")); if (!(heading instanceof HTMLElement)) return; heading.classList.add("ravine-page-heading"); const icon = document.createElement("span"); icon.className = "ravine-page-heading-icon"; icon.innerHTML = iconMarkup; heading.prepend(icon); }
-function enhanceSelectionTabs() { const labels = new Map([["يومية", "daily"], ["أسبوعية", "weekly"], ["شهرية", "monthly"], ["سنوية", "yearly"], ["Daily", "daily"], ["Weekly", "weekly"], ["Monthly", "monthly"], ["Yearly", "yearly"]]); document.querySelectorAll(".selection-tabs button, .selection-tabs a").forEach((element) => { const key = labels.get(element.textContent?.trim() || ""); if (!key || !(element instanceof HTMLElement)) return; element.classList.add("ravine-period-tab"); element.setAttribute("data-ravine-period", key); if (!element.hasAttribute("aria-pressed")) element.setAttribute("aria-pressed", element.classList.contains("active") ? "true" : "false"); if (element.dataset.ravineBound === "1") return; element.dataset.ravineBound = "1"; element.addEventListener("click", () => { const container = element.closest(".selection-tabs"); container?.querySelectorAll(".ravine-period-tab").forEach((tab) => { const active = tab === element; tab.classList.toggle("active", active); tab.setAttribute("aria-pressed", active ? "true" : "false"); }); }); }); }
+function enhanceSelectionTabs() { const labels = new Map([["يومية", "daily"], ["أسبوعية", "weekly"], ["شهرية", "monthly"], ["سنوية", "yearly"], ["Daily", "daily"], ["Weekly", "weekly"], ["Monthly", "monthly"], ["Yearly", "yearly"]]); document.querySelectorAll(".selection-tabs button, .selection-tabs a").forEach((element) => { const key = labels.get(element.textContent?.trim() || ""); if (!key || !(element instanceof HTMLElement)) return; element.classList.add("ravine-period-tab"); element.setAttribute("data-ravine-period", key); if (!element.hasAttribute("aria-selected")) element.setAttribute("aria-selected", element.classList.contains("active") ? "true" : "false"); }); }
 function isHomeRoute() { const path = window.location.pathname.replace(/\/$/, ""); return path === "/ar" || path === "/en"; }
 function getHomeLocale(): "ar" | "en" { const firstSegment = window.location.pathname.split("/").filter(Boolean)[0]; return firstSegment === "en" ? "en" : "ar"; }
 
