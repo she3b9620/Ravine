@@ -4,20 +4,24 @@ import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-const COMPLETED_KEY = "ravine-home-welcome-completed-v5";
+const COMPLETED_KEY = "ravine-home-welcome-login-cycle-v1";
+const SETTLE_DELAY_MS = 3000;
+const EXIT_DURATION_MS = 3000;
 
 function isHomeRoute(pathname: string) {
   const path = pathname.replace(/\/$/, "");
   return path === "/ar" || path === "/en";
 }
 
-function applySettled(hero: HTMLElement) {
-  hero.classList.remove("ravine-home-welcome-settling");
-  hero.classList.add("ravine-home-welcome-settled");
-}
-
 function getHero() {
   return document.querySelector<HTMLElement>(".home-viewer-hero");
+}
+
+function clearHero(hero?: HTMLElement | null) {
+  if (!hero) return;
+  hero.classList.remove("ravine-home-welcome-settling", "ravine-home-welcome-settled");
+  delete hero.dataset.ravineWelcomeMotionBound;
+  delete hero.dataset.ravineWelcomeFinishTimer;
 }
 
 export default function HomeWelcomeMotion() {
@@ -28,79 +32,73 @@ export default function HomeWelcomeMotion() {
 
     const supabase = createClient();
     let cancelled = false;
-    let cleanupRun: (() => void) | undefined;
+    let settleTimer: number | null = null;
+    let finishTimer: number | null = null;
 
-    const runForHome = () => {
+    const reset = () => {
+      if (settleTimer !== null) window.clearTimeout(settleTimer);
+      if (finishTimer !== null) window.clearTimeout(finishTimer);
+      settleTimer = null;
+      finishTimer = null;
+      clearHero(getHero());
+    };
+
+    const runAfterLogin = (userId: string) => {
       if (cancelled || !isHomeRoute(pathname)) return;
       const hero = getHero();
       if (!hero) return;
 
-      if (localStorage.getItem(COMPLETED_KEY) === "1") {
-        applySettled(hero);
+      const key = `${COMPLETED_KEY}:${userId}`;
+      if (sessionStorage.getItem(key) === "1") {
+        hero.classList.add("ravine-home-welcome-settled");
         return;
       }
 
-      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (reduceMotion) {
-        applySettled(hero);
-        localStorage.setItem(COMPLETED_KEY, "1");
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        sessionStorage.setItem(key, "1");
+        hero.classList.add("ravine-home-welcome-settled");
         return;
       }
 
-      if (hero.dataset.ravineWelcomeMotionBound === "1") return;
+      reset();
       hero.dataset.ravineWelcomeMotionBound = "1";
 
-      const settleTimer = window.setTimeout(() => {
+      settleTimer = window.setTimeout(() => {
         if (cancelled) return;
         hero.classList.add("ravine-home-welcome-settling");
 
-        const finishTimer = window.setTimeout(() => {
+        finishTimer = window.setTimeout(() => {
           if (cancelled) return;
-          applySettled(hero);
-          localStorage.setItem(COMPLETED_KEY, "1");
-          delete hero.dataset.ravineWelcomeFinishTimer;
-        }, 1600);
+          hero.classList.remove("ravine-home-welcome-settling");
+          hero.classList.add("ravine-home-welcome-settled");
+          sessionStorage.setItem(key, "1");
+          finishTimer = null;
+          settleTimer = null;
+        }, EXIT_DURATION_MS);
+      }, SETTLE_DELAY_MS);
+    };
 
-        hero.dataset.ravineWelcomeFinishTimer = String(finishTimer);
-      }, 3000);
-
-      cleanupRun = () => {
-        window.clearTimeout(settleTimer);
-        const finishTimer = hero.dataset.ravineWelcomeFinishTimer;
-        if (finishTimer) window.clearTimeout(Number(finishTimer));
-        delete hero.dataset.ravineWelcomeFinishTimer;
-        delete hero.dataset.ravineWelcomeMotionBound;
-      };
+    const clearLoginCycle = () => {
+      reset();
+      Object.keys(sessionStorage)
+        .filter((key) => key.startsWith(`${COMPLETED_KEY}:`))
+        .forEach((key) => sessionStorage.removeItem(key));
     };
 
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_OUT") {
-        cleanupRun?.();
-        cleanupRun = undefined;
-        localStorage.removeItem(COMPLETED_KEY);
-        const hero = getHero();
-        if (hero) {
-          hero.classList.remove("ravine-home-welcome-settling", "ravine-home-welcome-settled");
-          delete hero.dataset.ravineWelcomeMotionBound;
-        }
+        clearLoginCycle();
         return;
       }
-
       if (event === "SIGNED_IN" && session?.user) {
-        window.setTimeout(runForHome, 0);
+        window.setTimeout(() => runAfterLogin(session.user.id), 0);
       }
-    });
-
-    let mounted = true;
-    void supabase.auth.getSession().then(({ data }) => {
-      if (!mounted || cancelled || !data.session?.user) return;
-      window.setTimeout(runForHome, 0);
     });
 
     return () => {
-      mounted = false;
       cancelled = true;
-      cleanupRun?.();
+      if (settleTimer !== null) window.clearTimeout(settleTimer);
+      if (finishTimer !== null) window.clearTimeout(finishTimer);
       authListener.subscription.unsubscribe();
     };
   }, [pathname]);
