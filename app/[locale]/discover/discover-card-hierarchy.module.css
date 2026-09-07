@@ -1,0 +1,4 @@
+:global(.discover-page .video-kicker){display:flex;align-items:center;gap:7px;flex-wrap:wrap;min-height:23px;margin-bottom:7px!important}
+:global(.discover-page .video-type),:global(.discover-page .video-quality){display:inline-flex;align-items:center;min-height:21px;padding:2px 7px;border:1px solid rgba(196,122,82,.24);border-radius:999px;background:rgba(196,122,82,.055);font-size:9px;font-weight:800;line-height:1;letter-spacing:.05em;color:var(--copper);white-space:nowrap}
+:global(html[data-theme="light"] .discover-page .video-type),:global(html[data-theme="light"] .discover-page .video-quality){color:#8f4e30;border-color:rgba(143,78,48,.2);background:rgba(196,122,82,.07)}
+:global(.discover-page .video-meta h2){margin-top:2px!important;line-height:1.28!important}
