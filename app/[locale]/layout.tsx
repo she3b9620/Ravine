@@ -53,6 +53,7 @@ import "./ravine-search-light-visual-fix.css";
 import "./ravine-search-results.css";
 import "./ravine-final-batch-polish.css";
 import "./ravine-light-spacing-finish.css";
+import "./ravine-final-micro-polish.css";
 
 const locales = ["ar", "en"] as const;
 type Locale = (typeof locales)[number];
