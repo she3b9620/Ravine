@@ -1,0 +1,48 @@
+/* RAVINE runtime UX corrections: scoped after all existing locale CSS. */
+
+@media (min-width:981px){
+  .ravine-sidebar{
+    inset-block-start:72px!important;
+    height:calc(100dvh - 72px)!important;
+  }
+  .ravine-sidebar-scroll-area{
+    overflow-y:auto!important;
+    scrollbar-width:thin!important;
+    scrollbar-color:rgba(196,122,82,.75) transparent!important;
+  }
+  .ravine-sidebar-scroll-area::-webkit-scrollbar{width:6px;height:6px;display:block}
+  .ravine-sidebar-scroll-area::-webkit-scrollbar-track{background:transparent}
+  .ravine-sidebar-scroll-area::-webkit-scrollbar-thumb{background:rgba(196,122,82,.72);border-radius:999px;border:1px solid transparent;background-clip:padding-box}
+  .ravine-sidebar-scroll-area::-webkit-scrollbar-thumb:hover{background:rgba(212,154,120,.95)}
+}
+
+.guest-shell .ravine-video-volume-popover label{position:relative;display:flex;align-items:center;justify-content:center;width:100%;height:100%}
+.guest-shell .ravine-video-volume-popover input[type="range"]{--ravine-volume-progress:60%;appearance:none;-webkit-appearance:none}
+.guest-shell .ravine-video-volume-popover input[type="range"]::-webkit-slider-runnable-track{
+  height:4px!important;
+  border-radius:999px!important;
+  background:linear-gradient(90deg,#C47A52 0%,#C47A52 var(--ravine-volume-progress),rgba(154,150,144,.28) var(--ravine-volume-progress),rgba(154,150,144,.28) 100%)!important;
+}
+.guest-shell .ravine-video-volume-popover input[type="range"]::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:14px!important;height:14px!important;margin-top:-5px!important;border:2px solid #F1E9DC!important;border-radius:50%!important;background:#C47A52!important;box-shadow:0 0 0 3px rgba(196,122,82,.16)!important}
+.guest-shell .ravine-video-volume-popover input[type="range"]::-moz-range-track{height:4px!important;border:0!important;border-radius:999px!important;background:rgba(154,150,144,.28)!important}
+.guest-shell .ravine-video-volume-popover input[type="range"]::-moz-range-progress{height:4px!important;border:0!important;border-radius:999px!important;background:#C47A52!important}
+.guest-shell .ravine-video-volume-popover input[type="range"]::-moz-range-thumb{width:14px!important;height:14px!important;border:2px solid #F1E9DC!important;border-radius:50%!important;background:#C47A52!important;box-shadow:0 0 0 3px rgba(196,122,82,.16)!important}
+.guest-shell .ravine-video-volume-popover label::after{content:attr(data-ravine-volume) '%';position:absolute;top:2px;inset-inline-end:2px;color:#C47A52;font-family:var(--font-latin,Satoshi,sans-serif);font-size:9px;font-weight:800;letter-spacing:.03em;line-height:1}
+html[data-theme="light"] .guest-shell .ravine-video-volume-popover label::after{color:#70402F}
+
+/* Search: independent in/out choreography for Light mode, with no filter dependency. */
+html[data-theme="light"] .ravine-search-overlay{animation:ravineSearchOverlayInFinal .34s cubic-bezier(.22,1,.36,1) both!important}
+html[data-theme="light"] .ravine-search-overlay.is-closing{animation:ravineSearchOverlayOutFinal .26s cubic-bezier(.4,0,.2,1) both!important;pointer-events:none!important}
+html[data-theme="light"] .ravine-search-dialog{animation:ravineSearchDialogInFinal .38s cubic-bezier(.22,1,.36,1) both!important;transform-origin:50% 42%!important;will-change:transform,opacity!important}
+html[data-theme="light"] .ravine-search-dialog.is-closing{animation:ravineSearchDialogOutFinal .26s cubic-bezier(.4,0,.2,1) both!important;pointer-events:none!important}
+@keyframes ravineSearchOverlayInFinal{from{opacity:0}to{opacity:1}}
+@keyframes ravineSearchOverlayOutFinal{from{opacity:1}to{opacity:0}}
+@keyframes ravineSearchDialogInFinal{from{opacity:0;transform:translate3d(0,14px,0) scale(.975)}to{opacity:1;transform:translate3d(0,0,0) scale(1)}}
+@keyframes ravineSearchDialogOutFinal{from{opacity:1;transform:translate3d(0,0,0) scale(1)}to{opacity:0;transform:translate3d(0,10px,0) scale(.975)}}
+
+@media(prefers-reduced-motion:reduce){
+  html[data-theme="light"] .ravine-search-overlay,
+  html[data-theme="light"] .ravine-search-overlay.is-closing,
+  html[data-theme="light"] .ravine-search-dialog,
+  html[data-theme="light"] .ravine-search-dialog.is-closing{animation:none!important}
+}
