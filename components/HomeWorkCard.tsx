@@ -1,7 +1,6 @@
 "use client";
-
 import Link from "next/link";
-import { formatRavineNumber } from "@/lib/ravine-number-formatter";
+import { ravineNumber } from "@/lib/ravine-format";
 import VideoHoverPreview from "./VideoHoverPreview";
 
 type Locale = "ar" | "en";
@@ -15,5 +14,10 @@ function isYouTubeUrl(value: string | null) { if (!value) return false; try { co
 function previewSource(work: HomeWork) { if (!work.video_url || isYouTubeUrl(work.video_url)) return null; try { const url = new URL(work.video_url, window.location.origin); if (url.pathname.includes("/storage/v1/object/public/videos/")) return `/api/media/video/${work.id}`; } catch { return null; } return work.video_url; }
 export default function HomeWorkCard({ work, locale, compact = false }: { work: HomeWork; locale: Locale; compact?: boolean }) {
   const creator=getCreator(work.creators); const type=contentTypeLabel(work.content_type,locale); const quality=qualityLabel(work.quality,locale); const title=work.title||(locale==="ar"?"عمل بدون عنوان":"Untitled work"); const creatorName=creator?.name||(creator?.username?`@${creator.username}`:locale==="ar"?"مبدع":"Creator"); const source=previewSource(work);
-  return <Link href={`/${locale}/watch/${work.id}`} className={`home-work-card${compact?" compact":""}`} prefetch={false}><div className="home-work-thumb"><img className="home-work-thumb-image" src={work.thumbnail_url||"/RAVINE.PNG"} alt="" loading="lazy" />{source?<VideoHoverPreview videoUrl={source} videoId={work.id}/>:null}<span className="home-work-preview-wash" aria-hidden="true"/><span className="home-work-duration">{formatDuration(work.duration)}</span><span className="home-work-quality">{quality||type}</span></div><div className="home-work-body"><h3>{title}</h3><p className="home-work-creator">{creatorName}</p><div className="home-work-meta"><span>{formatRavineNumber(Number(work.views||0),locale)} {locale==="ar"?"مشاهدة":"views"}</span><span>{formatRavineNumber(Number(work.likes||0),locale)} {locale==="ar"?"إعجاب":"likes"}</span></div></div></Link>;
+  const views = ravineNumber(Number(work.views || 0), locale, "western");
+  const likes = ravineNumber(Number(work.likes || 0), locale, "western");
+  return <Link href={`/${locale}/watch/${work.id}`} className={`home-work-card${compact?" compact":""}`} prefetch={false}>
+    <div className="home-work-thumb"><img className="home-work-thumb-image" src={work.thumbnail_url||"/RAVINE.PNG"} alt="" loading="lazy" />{source?<VideoHoverPreview videoUrl={source} videoId={work.id}/>:null}<span className="home-work-preview-wash" aria-hidden="true"/><span className="home-work-duration" dir="ltr" data-preserve-numerals>{formatDuration(work.duration)}</span><span className="home-work-quality">{quality||type}</span></div>
+    <div className="home-work-body"><h3>{title}</h3><p className="home-work-creator">{creatorName}</p><div className="home-work-meta"><span dir="ltr" data-preserve-numerals>{views} {locale==="ar"?"مشاهدة":"views"}</span><span dir="ltr" data-preserve-numerals>{likes} {locale==="ar"?"إعجاب":"likes"}</span></div></div>
+  </Link>;
 }
