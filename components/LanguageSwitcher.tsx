@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { persistRavineLocale, type RavineLocale } from "@/lib/locale-preference";
 
 type Locale = RavineLocale;
@@ -28,6 +28,8 @@ export default function LanguageSwitcher({ locale }: { locale: Locale }) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [, startTransition] = useTransition();
+  const menuRef = useRef<HTMLDetailsElement | null>(null);
+  const [open, setOpen] = useState(false);
   const [switching, setSwitching] = useState(false);
   const current = OPTIONS[locale];
   const alternateLocale: Locale = locale === "ar" ? "en" : "ar";
@@ -38,6 +40,17 @@ export default function LanguageSwitcher({ locale }: { locale: Locale }) {
     const path = replaceLocaleInPath(pathname, nextLocale);
     return `${path}${query ? `?${query}` : ""}`;
   };
+
+  useEffect(() => {
+    if (!open) return;
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target;
+      if (target instanceof Node && menuRef.current?.contains(target)) return;
+      setOpen(false);
+    };
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
+  }, [open]);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -52,6 +65,7 @@ export default function LanguageSwitcher({ locale }: { locale: Locale }) {
     if (nextLocale === locale || switching) return;
     const destination = buildHref(nextLocale);
     persistRavineLocale(nextLocale);
+    setOpen(false);
     setSwitching(true);
     window.setTimeout(() => {
       startTransition(() => router.replace(destination, { scroll: false }));
@@ -60,8 +74,8 @@ export default function LanguageSwitcher({ locale }: { locale: Locale }) {
   }
 
   return (
-    <details className="ravine-language-menu">
-      <summary className="ravine-language" aria-label={locale === "ar" ? "اختيار اللغة" : "Choose language"}>
+    <details ref={menuRef} open={open} className="ravine-language-menu" onToggle={(event) => setOpen(event.currentTarget.open)}>
+      <summary className="ravine-language" aria-label={locale === "ar" ? "اختيار اللغة" : "Choose language"} onClick={(event) => { event.preventDefault(); setOpen((value) => !value); }}>
         <span className="ravine-language-current-flags" aria-hidden="true">{current.flags.map((flag) => <FlagIcon code={flag} key={flag} />)}</span>
         <span className="ravine-language-copy"><span className="ravine-language-label">{current.label}</span><span className="ravine-language-chevron" aria-hidden="true">⌄</span></span>
       </summary>
