@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import RAVINEWorkContext from "@/components/RAVINEWorkContext";
 import RAVINEWorkPlayer from "@/components/RAVINEWorkPlayer";
 import { createClient } from "@/lib/supabase/server";
+import type { RAVINEPlaybackAsset } from "@/lib/ravine-playback-core";
 import { isPlayableRAVINEWork, toRAVINEWork, type RAVINEWorkSource } from "@/lib/ravine-work-universe";
 
 export const dynamic = "force-dynamic";
@@ -20,6 +21,13 @@ type WorkRow = {
   discovery_enabled: boolean | null;
   content_type: string | null;
 };
+type Chapter = {
+  id: number;
+  title: string;
+  start_seconds: number;
+  end_seconds: number | null;
+  thumbnail_url: string | null;
+};
 
 export default async function WorkPage({ params }: { params: Promise<{ locale: string; id: string }> }) {
   const { locale: rawLocale, id } = await params;
@@ -29,11 +37,23 @@ export default async function WorkPage({ params }: { params: Promise<{ locale: s
   if (!Number.isInteger(workId) || workId <= 0) notFound();
 
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("videos")
-    .select("id,title,description,thumbnail_url,video_url,duration,published,visibility,discovery_enabled,content_type")
-    .eq("id", workId)
-    .maybeSingle();
+  const [{ data, error }, { data: chapterData }, { data: assetData }] = await Promise.all([
+    supabase
+      .from("videos")
+      .select("id,title,description,thumbnail_url,video_url,duration,published,visibility,discovery_enabled,content_type")
+      .eq("id", workId)
+      .maybeSingle(),
+    supabase
+      .from("work_chapters")
+      .select("id,title,start_seconds,end_seconds,thumbnail_url,sort_order")
+      .eq("work_id", workId)
+      .order("sort_order", { ascending: true }),
+    supabase
+      .from("work_media_assets")
+      .select("id,kind,media_url,public_id,duration,language,label,mime_type,sort_order,metadata")
+      .eq("work_id", workId)
+      .order("sort_order", { ascending: true }),
+  ]);
 
   if (error) {
     return (
@@ -51,6 +71,8 @@ export default async function WorkPage({ params }: { params: Promise<{ locale: s
 
   const work = toRAVINEWork(data as WorkRow & RAVINEWorkSource);
   const playable = isPlayableRAVINEWork(work);
+  const chapters = (chapterData ?? []) as Chapter[];
+  const assets = (assetData ?? []) as unknown as RAVINEPlaybackAsset[];
 
   return (
     <section className="section ravine-work-page">
@@ -63,7 +85,7 @@ export default async function WorkPage({ params }: { params: Promise<{ locale: s
         </div>
       </div>
 
-      <RAVINEWorkPlayer work={work} locale={locale} />
+      <RAVINEWorkPlayer work={work} locale={locale} chapters={chapters} assets={assets} />
       <RAVINEWorkContext work={work} locale={locale} playable={playable} />
 
       {!playable && work.mediaUrl && work.mediaUrl.includes("youtube.com") ? (
