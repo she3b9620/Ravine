@@ -10,7 +10,6 @@ export const RAVINE_ACTIVE_IDENTITY_COOKIE = "ravine-active-creator-id";
 
 type Locale = "ar" | "en";
 type Creator = { id: number; name: string | null; username: string | null; avatar_url: string | null; user_id: string | null };
-
 type Props = { locale: Locale; onNavigate?: () => void };
 
 function persistIdentity(id: number | null) {
@@ -35,19 +34,31 @@ export default function CreatorIdentitySwitcher({ locale, onNavigate }: Props) {
 
   useEffect(() => {
     let mounted = true;
-    const saved = typeof window !== "undefined'" ? Number(window.localStorage.getItem(RAVINE_ACTIVE_IDENTITY_KEY)) : NaN;
-    setActiveId(Number.isInteger(saved) && saved > 0 ? saved : null);
+    const raw = typeof window !== "undefined" ? window.localStorage.getItem(RAVINE_ACTIVE_IDENTITY_KEY) : null;
+    const saved = raw ? Number(raw) : NaN;
+    const requestedId = Number.isInteger(saved) && saved > 0 ? saved : null;
+    setActiveId(requestedId);
+
     void supabase.auth.getUser().then(async ({ data }) => {
-      if (!mounted || !data.user) return;
-      const { data: rows } = await supabase.from("creators").select("id,name,username,avatar_url,user_id").eq("user_id", data.user.id).order("created_at", { ascending: true });
+      if (!mounted || !data.user) {
+        if (mounted) setLoading(false);
+        return;
+      }
+      const { data: rows } = await supabase
+        .from("creators")
+        .select("id,name,username,avatar_url,user_id")
+        .eq("user_id", data.user.id)
+        .order("created_at", { ascending: true });
       if (!mounted) return;
       const list = (rows ?? []) as Creator[];
       setCreators(list);
-      const validSaved = Number.isInteger(saved) && saved > 0 && list.some((item) => item.id === saved) ? saved : list[0]?.id ?? null;
-      if (validSaved !== null && validSaved !== saved) persistIdentity(validSaved);
-      setActiveId(validSaved);
+      const validRequested = requestedId !== null && list.some((item) => item.id === requestedId) ? requestedId : null;
+      if (validRequested === null && requestedId !== null) persistIdentity(null);
+      setActiveId(validRequested);
       setLoading(false);
-    }).catch(() => { if (mounted) setLoading(false); });
+    }).catch(() => {
+      if (mounted) setLoading(false);
+    });
     return () => { mounted = false; };
   }, [supabase]);
 
@@ -67,11 +78,12 @@ export default function CreatorIdentitySwitcher({ locale, onNavigate }: Props) {
     window.location.assign(`/${locale}/creators/${creator.id}`);
   }
 
-  if (loading && !creators.length) return null;
-  if (!creators.length) return null;
+  if (loading || !creators.length) return null;
 
   const activeCreator = creators.find((creator) => creator.id === activeId) ?? null;
-  const currentLabel = activeCreator ? activeCreator.name || activeCreator.username || (ar ? "هوية مبدع" : "Creator identity") : (ar ? "الحساب الشخصي" : "Personal account");
+  const currentLabel = activeCreator
+    ? activeCreator.name || activeCreator.username || (ar ? "هوية مبدع" : "Creator identity")
+    : (ar ? "الحساب الشخصي" : "Personal account");
 
   return (
     <div className={`ravine-identity-switcher${open ? " is-open" : ""}`} dir={ar ? "rtl" : "ltr"}>
