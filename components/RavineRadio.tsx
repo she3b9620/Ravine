@@ -121,7 +121,7 @@ export default function RavineRadio({ locale }: Props) {
     if (playing) {
       playerRef.current.playVideo?.();
     }
-  }, [active.id, open, playing]);
+  }, [active.id, open]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
