@@ -1,0 +1,70 @@
+/* RAVINE Logo Color Motion — visible color movement without changing logo geometry. */
+.ravine-brand-lockup .ravine-lockup-mark-wrap,
+.ravine-brand-lockup .ravine-lockup-wordmark-wrap{
+  position:relative;
+  display:inline-block;
+  flex:0 0 auto;
+  line-height:0;
+}
+
+.ravine-brand-lockup .ravine-lockup-mark-wrap::after,
+.ravine-brand-lockup .ravine-lockup-wordmark-wrap::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  opacity:0;
+  background:linear-gradient(135deg,#c47a52 0%,#d49a78 24%,#183f46 52%,#c47a52 76%,#70402f 100%);
+  background-size:240% 240%;
+  -webkit-mask-repeat:no-repeat;
+  mask-repeat:no-repeat;
+  -webkit-mask-position:center;
+  mask-position:center;
+  -webkit-mask-size:100% 100%;
+  mask-size:100% 100%;
+}
+
+.ravine-brand-lockup .ravine-lockup-mark-wrap::after{
+  -webkit-mask-image:url('/اللوجو.png');
+  mask-image:url('/اللوجو.png');
+}
+
+.ravine-brand-lockup .ravine-lockup-wordmark-wrap::after{
+  -webkit-mask-image:url('/التايبو.png');
+  mask-image:url('/التايبو.png');
+}
+
+html[data-ravine-logo-motion="on"] .ravine-brand-lockup .ravine-lockup-mark-wrap::after,
+html[data-ravine-logo-motion="on"] .ravine-brand-lockup .ravine-lockup-wordmark-wrap::after{
+  opacity:1;
+  animation:ravineLogoColorFlow 5.8s ease-in-out infinite;
+}
+
+html[data-ravine-logo-motion="on"] .ravine-brand-lockup .ravine-lockup-mark,
+html[data-ravine-logo-motion="on"] .ravine-brand-lockup .ravine-lockup-wordmark{
+  opacity:0!important;
+}
+
+html[data-ravine-logo-motion="off"] .ravine-brand-lockup .ravine-lockup-mark,
+html[data-ravine-logo-motion="off"] .ravine-brand-lockup .ravine-lockup-wordmark{
+  opacity:1!important;
+}
+
+@keyframes ravineLogoColorFlow{
+  0%,100%{background-position:0% 50%;filter:saturate(1.05) brightness(1)}
+  50%{background-position:100% 50%;filter:saturate(1.35) brightness(1.04)}
+}
+
+html[data-theme="light"] .ravine-brand-lockup .ravine-lockup-mark-wrap::after,
+html[data-theme="light"] .ravine-brand-lockup .ravine-lockup-wordmark-wrap::after{
+  background:linear-gradient(135deg,#70402f 0%,#c47a52 24%,#183f46 52%,#d49a78 76%,#70402f 100%);
+  background-size:240% 240%;
+}
+
+@media(prefers-reduced-motion:reduce){
+  html[data-ravine-logo-motion="on"] .ravine-brand-lockup .ravine-lockup-mark-wrap::after,
+  html[data-ravine-logo-motion="on"] .ravine-brand-lockup .ravine-lockup-wordmark-wrap::after{
+    animation:none!important;
+    background-position:50% 50%;
+  }
+}
