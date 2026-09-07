@@ -60,6 +60,7 @@ import "./ravine-creator-identity.css";
 import "./ravine-ui-runtime-fix.css";
 import "./ravine-final-polish.css";
 import "./ravine-interaction-finish-2026-09-07.css";
+import "./ravine-system-restore-2026-09-07.css";
 
 const locales = ["ar", "en"] as const;
 type Locale = (typeof locales)[number];
