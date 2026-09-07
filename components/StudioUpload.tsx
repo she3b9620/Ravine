@@ -27,6 +27,21 @@ type MediaAsset = {
 const videoAccept = "video/mp4,video/webm,video/quicktime,video/x-matroska";
 const audioAccept = "audio/mpeg,audio/mp4,audio/wav,audio/ogg,audio/aac,audio/x-m4a";
 
+function mapUploadError(error: unknown, ar: boolean) {
+  const message = error instanceof Error ? error.message : String(error);
+  const code = message.trim();
+  const copy: Record<string, [string, string]> = {
+    RAVINE_AUTH_REQUIRED: ["يجب تسجيل الدخول أولًا.", "You must be signed in first."],
+    RAVINE_UPLOAD_OWNER_MISMATCH: ["لا يمكنك رفع العمل بهذه الهوية.", "This creator identity is not owned by the current account."],
+    RAVINE_SHORT_QUOTA_EXCEEDED: ["وصلت إلى حد الشورتات الشهري لهذا الحساب.", "This account has reached its monthly Shorts limit."],
+    RAVINE_VIDEO_QUOTA_EXCEEDED: ["وصلت إلى حد الفيديوهات الشهري لهذا الحساب.", "This account has reached its monthly Video limit."],
+    RAVINE_PODCAST_QUOTA_EXCEEDED: ["وصلت إلى حد البودكاست الشهري لهذا الحساب.", "This account has reached its monthly Podcast limit."],
+    RAVINE_INVALID_CONTENT_TYPE: ["نوع المحتوى غير مدعوم.", "This content type is not supported."],
+  };
+  if (copy[code]) return ar ? copy[code][0] : copy[code][1];
+  return message;
+}
+
 export default function StudioUpload({ creatorId, locale }: Props) {
   const ar = locale === "ar";
   const router = useRouter();
@@ -46,11 +61,7 @@ export default function StudioUpload({ creatorId, locale }: Props) {
   const isShort = contentType === "short";
   const isVideoLike = contentType === "video" || contentType === "film" || contentType === "documentary";
 
-  async function uploadToCloudinary(
-    uploadFile: File,
-    cloudName: string,
-    uploadPreset: string,
-  ): Promise<CloudinaryUpload> {
+  async function uploadToCloudinary(uploadFile: File, cloudName: string, uploadPreset: string): Promise<CloudinaryUpload> {
     const formData = new FormData();
     formData.append("file", uploadFile);
     formData.append("upload_preset", uploadPreset);
@@ -97,7 +108,7 @@ export default function StudioUpload({ creatorId, locale }: Props) {
     try {
       const supabase = createClient();
       const { data: auth } = await supabase.auth.getUser();
-      if (!auth.user) throw new Error(ar ? "يجب تسجيل الدخول أولًا." : "You must be signed in first.");
+      if (!auth.user) throw new Error("RAVINE_AUTH_REQUIRED");
 
       const mainUpload = await uploadToCloudinary(file, cloudName, uploadPreset);
       const trailerUpload = trailerFile ? await uploadToCloudinary(trailerFile, cloudName, uploadPreset) : null;
@@ -105,6 +116,7 @@ export default function StudioUpload({ creatorId, locale }: Props) {
 
       if (previewUpload) validateAuxiliaryMedia("preview", previewUpload);
 
+      const aspectRatio = isShort ? "9:16" : "16:9";
       const { data: work, error: insertError } = await supabase
         .from("videos")
         .insert({
@@ -117,6 +129,7 @@ export default function StudioUpload({ creatorId, locale }: Props) {
           published: false,
           visibility,
           content_type: contentType,
+          aspect_ratio: aspectRatio,
           quality,
           is_creator_content: true,
           views: 0,
@@ -137,26 +150,10 @@ export default function StudioUpload({ creatorId, locale }: Props) {
           sort_order: 0,
         },
         ...(trailerUpload
-          ? [{
-              work_id: work.id,
-              kind: "trailer" as const,
-              media_url: trailerUpload.secure_url ?? null,
-              public_id: trailerUpload.public_id ?? null,
-              duration: trailerUpload.duration ?? null,
-              mime_type: trailerFile?.type || null,
-              sort_order: 1,
-            }]
+          ? [{ work_id: work.id, kind: "trailer" as const, media_url: trailerUpload.secure_url ?? null, public_id: trailerUpload.public_id ?? null, duration: trailerUpload.duration ?? null, mime_type: trailerFile?.type || null, sort_order: 1 }]
           : []),
         ...(previewUpload
-          ? [{
-              work_id: work.id,
-              kind: "preview" as const,
-              media_url: previewUpload.secure_url ?? null,
-              public_id: previewUpload.public_id ?? null,
-              duration: previewUpload.duration ?? null,
-              mime_type: previewFile?.type || null,
-              sort_order: 2,
-            }]
+          ? [{ work_id: work.id, kind: "preview" as const, media_url: previewUpload.secure_url ?? null, public_id: previewUpload.public_id ?? null, duration: previewUpload.duration ?? null, mime_type: previewFile?.type || null, sort_order: 2 }]
           : []),
       ];
 
@@ -174,7 +171,7 @@ export default function StudioUpload({ creatorId, locale }: Props) {
       setMessage(ar ? "تم رفع العمل وحفظه كمسودة مع إعدادات الظهور والـTrailer/Preview." : "The work was uploaded and saved as a draft with visibility and optional trailer/preview settings.");
       router.refresh();
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : String(submitError));
+      setError(mapUploadError(submitError, ar));
     } finally {
       setBusy(false);
     }
@@ -187,18 +184,13 @@ export default function StudioUpload({ creatorId, locale }: Props) {
           <div className="eyebrow">RAVINE / NEW WORK</div>
           <h2>{ar ? "أضف عملًا جديدًا" : "Add a new work"}</h2>
           <p className="section-note">
-            {ar
-              ? "الأصل المرئي يمر عبر طبقة Cloudinary، بينما تظل بيانات العمل وقواعد الظهور والنشر في RAVINE."
-              : "Media travels through Cloudinary while work metadata, visibility, and publication rules remain in RAVINE."}
+            {ar ? "الأصل المرئي يمر عبر طبقة Cloudinary، بينما تظل بيانات العمل وقواعد الظهور والنشر في RAVINE." : "Media travels through Cloudinary while work metadata, visibility, and publication rules remain in RAVINE."}
           </p>
         </div>
       </div>
 
       <div className="studio-form-grid">
-        <label>
-          <span>{ar ? "العنوان" : "Title"}</span>
-          <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder={ar ? "اسم العمل" : "Work title"} />
-        </label>
+        <label><span>{ar ? "العنوان" : "Title"}</span><input value={title} onChange={(event) => setTitle(event.target.value)} placeholder={ar ? "اسم العمل" : "Work title"} /></label>
 
         <label>
           <span>{ar ? "نوع المحتوى" : "Content type"}</span>
@@ -211,17 +203,14 @@ export default function StudioUpload({ creatorId, locale }: Props) {
           </select>
         </label>
 
-        <label className="studio-form-wide">
-          <span>{ar ? "الوصف" : "Description"}</span>
-          <textarea value={description} onChange={(event) => setDescription(event.target.value)} rows={4} placeholder={ar ? "السياق، الفكرة، وما الذي يجب أن يعرفه المشاهد." : "Context, intent, and what the viewer should know."} />
-        </label>
+        <label className="studio-form-wide"><span>{ar ? "الوصف" : "Description"}</span><textarea value={description} onChange={(event) => setDescription(event.target.value)} rows={4} placeholder={ar ? "السياق، الفكرة، وما الذي يجب أن يعرفه المشاهد." : "Context, intent, and what the viewer should know."} /></label>
 
         <label>
           <span>{ar ? "الجودة" : "Quality"}</span>
           <select value={quality} onChange={(event) => setQuality(event.target.value)}>
             <option value="1080p">1080p</option>
-            <option value="1440p">1440p</option>
-            <option value="2160p">4K</option>
+            <option value="2k">2K</option>
+            <option value="4k">4K</option>
           </select>
         </label>
 
@@ -242,27 +231,15 @@ export default function StudioUpload({ creatorId, locale }: Props) {
         </label>
 
         {!isShort ? (
-          <label>
-            <span>{ar ? "Trailer اختياري" : "Optional trailer"}</span>
-            <input type="file" accept={isPodcast ? `${videoAccept},${audioAccept}` : videoAccept} onChange={(event) => setTrailerFile(event.target.files?.[0] ?? null)} />
-          </label>
+          <label><span>{ar ? "Trailer اختياري" : "Optional trailer"}</span><input type="file" accept={isPodcast ? `${videoAccept},${audioAccept}` : videoAccept} onChange={(event) => setTrailerFile(event.target.files?.[0] ?? null)} /></label>
         ) : null}
 
         {isVideoLike ? (
-          <label>
-            <span>{ar ? "Preview اختياري · حتى 30 ثانية" : "Optional preview · up to 30s"}</span>
-            <input type="file" accept={videoAccept} onChange={(event) => setPreviewFile(event.target.files?.[0] ?? null)} />
-          </label>
+          <label><span>{ar ? "Preview اختياري · حتى 30 ثانية" : "Optional preview · up to 30s"}</span><input type="file" accept={videoAccept} onChange={(event) => setPreviewFile(event.target.files?.[0] ?? null)} /></label>
         ) : null}
       </div>
 
-      {visibility === "custom" ? (
-        <div className="empty-state">
-          <strong>{ar ? "الجمهور المخصص محفوظ كنوع وصول" : "Custom audience is prepared as an access mode"}</strong>
-          <span>{ar ? "اختيار الأشخاص/الأعضاء المسموح لهم سيُدار من واجهة الوصول المخصصة في الخطوة التالية." : "Selecting the allowed people or members will be handled by the dedicated access UI next."}</span>
-        </div>
-      ) : null}
-
+      {visibility === "custom" ? <div className="empty-state"><strong>{ar ? "الجمهور المخصص محفوظ كنوع وصول" : "Custom audience is prepared as an access mode"}</strong><span>{ar ? "اختيار الأشخاص/الأعضاء المسموح لهم سيُدار من واجهة الوصول المخصصة في الخطوة التالية." : "Selecting the allowed people or members will be handled by the dedicated access UI next."}</span></div> : null}
       {error ? <div className="empty-state"><strong>{ar ? "تعذر حفظ العمل." : "Work could not be saved."}</strong><span>{error}</span></div> : null}
       {message ? <div className="empty-state"><strong>{ar ? "تم الحفظ." : "Saved."}</strong><span>{message}</span></div> : null}
 
