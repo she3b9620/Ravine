@@ -57,8 +57,8 @@ function animateReorder(grid: HTMLElement, ordered: HTMLElement[]) {
     const dx = from.left - to.left;
     const dy = from.top - to.top;
     card.style.transition = "none";
-    card.style.transform = `translate3d(${dx}px, ${dy}px, 0)`;
-    card.style.opacity = "0.72";
+    card.style.transform = `translate3d(${dx}px, ${dy}px, 0) scale(.98)`;
+    card.style.opacity = "0.9";
   }
 
   void grid.offsetHeight;
@@ -66,8 +66,8 @@ function animateReorder(grid: HTMLElement, ordered: HTMLElement[]) {
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       for (const card of ordered) {
-        card.style.transition = "transform .62s cubic-bezier(.22,1,.36,1), opacity .42s ease";
-        card.style.transform = "translate3d(0, 0, 0)";
+        card.style.transition = "transform .78s cubic-bezier(.16,1,.3,1), opacity .52s cubic-bezier(.22,.61,.36,1)";
+        card.style.transform = "translate3d(0, 0, 0) scale(1)";
         card.style.opacity = "1";
       }
 
@@ -78,7 +78,7 @@ function animateReorder(grid: HTMLElement, ordered: HTMLElement[]) {
           card.style.opacity = "";
         }
         delete grid.dataset.ravineSelectionAnimating;
-      }, 700);
+      }, 860);
     });
   });
 }
