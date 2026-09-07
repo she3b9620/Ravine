@@ -22,5 +22,13 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL(`/${locale}/auth?error=${encodeURIComponent(error.message)}`, origin));
   }
 
-  return NextResponse.redirect(new URL(next, origin));
+  const response = NextResponse.redirect(new URL(next, origin));
+  response.cookies.set("ravine_login_cycle", "1", {
+    path: "/",
+    maxAge: 300,
+    httpOnly: false,
+    sameSite: "lax",
+    secure: request.nextUrl.protocol === "https:",
+  });
+  return response;
 }
