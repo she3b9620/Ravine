@@ -57,7 +57,7 @@ export default function GuestCinematicBackdrop({ locale }: GuestCinematicBackdro
     video.load();
     video.muted = muted;
     video.volume = volume / 100;
-    void video.play().catch(() => undefined);
+    void video.play().then(() => undefined, () => undefined);
   }, [current?.src]);
 
   useEffect(() => { const video = videoRef.current; if (!video) return; video.muted = muted; video.volume = volume / 100; }, [muted, volume]);
@@ -68,13 +68,13 @@ export default function GuestCinematicBackdrop({ locale }: GuestCinematicBackdro
       const video = videoRef.current;
       if (!detail || !video) return;
       switch (detail.action) {
-        case "play": void video.play().catch(() => undefined); break;
+        case "play": void video.play().then(() => undefined, () => undefined); break;
         case "pause": video.pause(); break;
         case "toggle-audio": { const nextMuted = detail.muted ?? !video.muted; setMuted(nextMuted); video.muted = nextMuted; break; }
         case "set-volume": { const next = Math.max(0, Math.min(100, detail.volume ?? volume)); setVolume(next); video.volume = next / 100; const nextMuted = detail.muted ?? next === 0; setMuted(nextMuted); video.muted = nextMuted; break; }
         case "toggle-repeat": setRepeat(detail.repeat ?? !repeat); break;
         case "seek": if (Number.isFinite(detail.time)) video.currentTime = Math.max(0, detail.time as number); break;
-        case "replay": video.currentTime = 0; void video.play().catch(() => undefined); break;
+        case "replay": video.currentTime = 0; void video.play().then(() => undefined, () => undefined); break;
         case "next": setCurrentIndex((index) => playableWorks.length ? (index + 1) % playableWorks.length : 0); break;
         case "previous": setCurrentIndex((index) => playableWorks.length ? (index - 1 + playableWorks.length) % playableWorks.length : 0); break;
       }
@@ -91,7 +91,7 @@ export default function GuestCinematicBackdrop({ locale }: GuestCinematicBackdro
     const onPlay = () => window.dispatchEvent(new CustomEvent("ravine-video-playback-state", { detail: { playing: true, currentTime: video.currentTime || 0, duration: video.duration || current?.duration || 0 } }));
     const onPause = () => window.dispatchEvent(new CustomEvent("ravine-video-playback-state", { detail: { playing: false, currentTime: video.currentTime || 0, duration: video.duration || current?.duration || 0 } }));
     const onVolume = () => { setVolume(Math.round(video.volume * 100)); window.dispatchEvent(new CustomEvent("ravine-video-audio-state", { detail: { muted: video.muted, volume: Math.round(video.volume * 100) } })); syncVolume(); };
-    const onEnded = () => { if (repeat) { video.currentTime = 0; void video.play().catch(() => undefined); } else if (playableWorks.length > 1) setCurrentIndex((index) => (index + 1) % playableWorks.length); };
+    const onEnded = () => { if (repeat) { video.currentTime = 0; void video.play().then(() => undefined, () => undefined); } else if (playableWorks.length > 1) setCurrentIndex((index) => (index + 1) % playableWorks.length); };
     video.addEventListener("timeupdate", onTime); video.addEventListener("play", onPlay); video.addEventListener("pause", onPause); video.addEventListener("volumechange", onVolume); video.addEventListener("ended", onEnded); syncVolume();
     return () => { video.removeEventListener("timeupdate", onTime); video.removeEventListener("play", onPlay); video.removeEventListener("pause", onPause); video.removeEventListener("volumechange", onVolume); video.removeEventListener("ended", onEnded); };
   }, [current?.duration, playableWorks.length, repeat]);
