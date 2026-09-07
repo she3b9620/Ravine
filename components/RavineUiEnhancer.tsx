@@ -51,12 +51,11 @@ function syncGuestAbout() {
   const hero = main?.querySelector(".home-guest-hero");
   if (!main || !hero) return;
 
-  const firstAfterHero = hero.nextElementSibling;
   const existingSection = existing[0];
 
   if (existingSection) {
     if (existing.length > 1) existing.slice(1).forEach((section) => section.remove());
-    if (firstAfterHero !== existingSection) hero.insertAdjacentElement("afterend", existingSection);
+    if (main.lastElementChild !== existingSection) main.appendChild(existingSection);
     return;
   }
 
@@ -66,7 +65,7 @@ function syncGuestAbout() {
   section.innerHTML = locale === "ar"
     ? `<div class="home-feed-label">رَافِين / عن المنصة</div><div class="about-grid"><div><h2>مساحة تمنح العمل حقه.</h2></div><div><p class="about-lead">رَافِين منصة إبداعية سينمائية تُبنى حول العمل نفسه: كيف صُنِع، من يقف خلفه، ما الذي ألهمه، وما الحوارات التي يفتحها. نريد اكتشافًا أكثر هدوءًا، وهوية أوضح للمبدع، وسياقًا يجعل كل عمل جزءًا من قصة أكبر.</p><div class="about-principles"><div><strong>العمل أولًا</strong><span>يمكن للضجيج والأرقام أن تساعد في الاكتشاف، لكنها ليست المعيار الوحيد للقيمة.</span></div><div><strong>المبدع كاملًا</strong><span>الهوية والاعتمادات وجميع الأعمال تعيش معًا بدلًا من أن تتوزع عبر قنوات منفصلة.</span></div><div><strong>رحلة مترابطة</strong><span>من العمل إلى المجتمع والجلسات المباشرة والبرامج الصوتية، ثم العودة إلى الحوار.</span></div></div></div></div>`
     : `<div class="home-feed-label">RAVINE / ABOUT</div><div class="about-grid"><div><h2>A space that gives the work its due.</h2></div><div><p class="about-lead">RAVINE is a cinematic creative platform built around the work itself: how it was made, who stands behind it, what shaped it, and what conversation it can open. We want calmer discovery, clearer creator identity, and enough context for every work to belong to a larger story.</p><div class="about-principles"><div><strong>Work first</strong><span>Noise and numbers can aid discovery without becoming the sole measure of value.</span></div><div><strong>Creators in full</strong><span>Identity, credits and the body of work live together instead of splitting across separate channels.</span></div><div><strong>A connected journey</strong><span>Move from work to community, Live and Podcast, then back into conversation.</span></div></div></div></div>`;
-  hero.insertAdjacentElement("afterend", section);
+  main.appendChild(section);
 }
 
 export default function RavineUiEnhancer() {
