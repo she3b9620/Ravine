@@ -134,7 +134,13 @@ export default function RavineAuthModal({ locale }: { locale: Locale }) {
     setLoading(true); setMessage("");
     try {
       const target = mode === "signup" ? `/${locale}/onboarding` : next;
-      const { error } = await createClient().auth.signInWithOAuth({ provider: "google", options: { redirectTo: `${window.location.origin}/${locale}/auth/callback?next=${encodeURIComponent(target)}` } });
+      const { error } = await createClient().auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/${locale}/auth/callback?next=${encodeURIComponent(target)}`,
+          queryParams: { prompt: "select_account" },
+        },
+      });
       if (error) throw error;
     } catch (error) { setMessage(error instanceof Error ? error.message : String(error)); setLoading(false); }
   }
