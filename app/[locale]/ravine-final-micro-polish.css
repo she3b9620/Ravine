@@ -1,0 +1,144 @@
+/* RAVINE final micro-polish: keep page-specific layouts intact while refining spacing, motion and light-mode contrast. */
+
+/* Sidebar: move only the menu content down a small amount; the panel itself stays anchored. */
+@media (min-width:981px){
+  .ravine-sidebar-scroll-content{transform:translateY(14px)!important}
+}
+
+/* Account: give the public-page callout a small breathing gap from the RAVINE path panel above it. */
+.account-page [class*="publicProfileCallout"]{margin-top:22px!important}
+
+/* Home welcome: elegant copy exit, restrained card shrink, centered finish and softer edge. */
+.home-viewer-welcome-copy{will-change:opacity,transform,filter,max-width,max-height}
+.home-viewer-welcome-copy h1,
+.home-viewer-welcome-copy .home-state-kicker,
+.home-viewer-welcome-copy p{will-change:opacity,transform,filter,max-height}
+
+.home-viewer-hero.ravine-home-welcome-settling .home-viewer-welcome-copy{
+  opacity:0!important;
+  transform:translate3d(0,-22px,0) scale(.985)!important;
+  filter:blur(4px)!important;
+}
+.home-viewer-hero.ravine-home-welcome-settling .home-viewer-welcome-copy h1,
+.home-viewer-hero.ravine-home-welcome-settling .home-viewer-welcome-copy .home-state-kicker,
+.home-viewer-hero.ravine-home-welcome-settling .home-viewer-welcome-copy p{
+  opacity:0!important;
+  transform:translate3d(0,-10px,0)!important;
+  filter:blur(3px)!important;
+}
+
+.home-viewer-hero.ravine-home-welcome-settling .home-viewer-profile{
+  width:270px!important;
+  min-height:174px!important;
+  padding:10px!important;
+  transform:translate3d(0,-14px,0) scale(.94)!important;
+  border-radius:25px 15px 28px 18px!important;
+  box-shadow:0 18px 48px rgba(0,0,0,.14),0 0 0 1px rgba(241,233,220,.022) inset!important;
+}
+.home-viewer-hero.ravine-home-welcome-settling .home-viewer-profile-halo{
+  width:132px!important;height:132px!important;min-width:132px!important;min-height:132px!important;
+  box-shadow:0 0 0 1px rgba(196,122,82,.12),0 12px 32px rgba(0,0,0,.16)!important;
+}
+
+.home-viewer-hero.ravine-home-welcome-settled .home-viewer-profile{
+  width:250px!important;
+  min-height:158px!important;
+  padding:9px!important;
+  transform:translate3d(0,-2px,0)!important;
+  border-radius:22px 14px 25px 16px!important;
+  box-shadow:0 16px 40px rgba(0,0,0,.12),0 0 0 1px rgba(241,233,220,.022) inset!important;
+}
+.home-viewer-hero.ravine-home-welcome-settled .home-viewer-profile-halo{
+  width:126px!important;height:126px!important;min-width:126px!important;min-height:126px!important;
+  box-shadow:0 0 0 1px rgba(196,122,82,.10),0 10px 28px rgba(0,0,0,.12)!important;
+}
+
+.home-viewer-hero.ravine-home-welcome-settled + .home-primary-feed{padding-top:8px!important}
+
+/* Light mode: dark/glass layers keep high-contrast text, with copper accents lifted slightly for readability. */
+html[data-theme="light"] .settingsShell,
+html[data-theme="light"] .editorRailCard,
+html[data-theme="light"] .identityPreview,
+html[data-theme="light"] .viewerFeatureCard,
+html[data-theme="light"] .creatorFeatureCard,
+html[data-theme="light"] .quickCard,
+html[data-theme="light"] .mapCard,
+html[data-theme="light"] .editorRailCard p,
+html[data-theme="light"] [class*="dark-layer"],
+html[data-theme="light"] [class*="darkLayer"],
+html[data-theme="light"] [class*="glass-dark"],
+html[data-theme="light"] [class*="dark-glass"]{
+  --ravine-light-layer-text:#ffffff;
+  --ravine-light-layer-muted:#ffffff;
+  --ravine-light-layer-copper:#e0aa89;
+}
+
+html[data-theme="light"] .settingsShell :is(h1,h2,h3,h4,p,span,small,label),
+html[data-theme="light"] .editorRailCard :is(h1,h2,h3,h4,p,span,small),
+html[data-theme="light"] .identityPreview :is(h1,h2,h3,h4,p,span,small),
+html[data-theme="light"] .viewerFeatureCard :is(h1,h2,h3,h4,p,span,small),
+html[data-theme="light"] .creatorFeatureCard :is(h1,h2,h3,h4,p,span,small),
+html[data-theme="light"] .quickCard :is(h1,h2,h3,h4,p,span,small),
+html[data-theme="light"] .mapCard :is(h1,h2,h3,h4,p,span,small),
+html[data-theme="light"] [class*="dark-layer"] :is(h1,h2,h3,h4,p,span,small),
+html[data-theme="light"] [class*="darkLayer"] :is(h1,h2,h3,h4,p,span,small),
+html[data-theme="light"] [class*="glass-dark"] :is(h1,h2,h3,h4,p,span,small),
+html[data-theme="light"] [class*="dark-glass"] :is(h1,h2,h3,h4,p,span,small){color:#fff!important;-webkit-text-fill-color:#fff!important}
+
+html[data-theme="light"] .settingsShell :is(svg),
+html[data-theme="light"] .editorRailCard :is(svg),
+html[data-theme="light"] .identityPreview :is(svg),
+html[data-theme="light"] .viewerFeatureCard :is(svg),
+html[data-theme="light"] .creatorFeatureCard :is(svg),
+html[data-theme="light"] .quickCard :is(svg),
+html[data-theme="light"] .mapCard :is(svg){color:#e0aa89!important;stroke:currentColor!important}
+
+html[data-theme="light"] .ravine-search-overlay .ravine-search-field-label,
+html[data-theme="light"] .ravine-search-overlay .ravine-advanced-search-toggle,
+html[data-theme="light"] .ravine-search-overlay .ravine-search-select-menu button,
+html[data-theme="light"] .ravine-search-overlay [class*="muted"],
+html[data-theme="light"] .ravine-search-dialog .ravine-search-field-label,
+html[data-theme="light"] .ravine-search-dialog .ravine-advanced-search-toggle,
+html[data-theme="light"] .ravine-search-dialog .ravine-search-select-menu button{color:#fff!important;-webkit-text-fill-color:#fff!important}
+
+/* Search in Light Mode: explicit premium in/out choreography, including dialog movement and opacity. */
+html[data-theme="light"] .ravine-search-overlay{
+  animation:ravineSearchOverlayInPremium .42s cubic-bezier(.22,1,.36,1) both!important;
+}
+html[data-theme="light"] .ravine-search-overlay.is-closing{
+  animation:ravineSearchOverlayOutPremium .26s cubic-bezier(.4,0,.8,.2) both!important;
+}
+html[data-theme="light"] .ravine-search-dialog{
+  animation:ravineSearchDialogInPremium .42s cubic-bezier(.22,1,.36,1) both!important;
+  transform-origin:50% 44%!important;
+  will-change:transform,opacity,filter!important;
+}
+html[data-theme="light"] .ravine-search-dialog.is-closing{
+  animation:ravineSearchDialogOutPremium .24s cubic-bezier(.4,0,.8,.2) both!important;
+}
+
+@keyframes ravineSearchOverlayInPremium{
+  from{opacity:0;background:rgba(9,9,9,0);-webkit-backdrop-filter:blur(0) saturate(100%);backdrop-filter:blur(0) saturate(100%)}
+  to{opacity:1;background:rgba(9,9,9,.30);-webkit-backdrop-filter:blur(20px) saturate(112%);backdrop-filter:blur(20px) saturate(112%)}
+}
+@keyframes ravineSearchOverlayOutPremium{
+  from{opacity:1;background:rgba(9,9,9,.30);-webkit-backdrop-filter:blur(20px) saturate(112%);backdrop-filter:blur(20px) saturate(112%)}
+  to{opacity:0;background:rgba(9,9,9,0);-webkit-backdrop-filter:blur(0) saturate(100%);backdrop-filter:blur(0) saturate(100%)}
+}
+@keyframes ravineSearchDialogInPremium{
+  from{opacity:0;transform:translate3d(0,16px,0) scale(.965);filter:blur(5px)}
+  to{opacity:1;transform:translate3d(0,0,0) scale(1);filter:blur(0)}
+}
+@keyframes ravineSearchDialogOutPremium{
+  from{opacity:1;transform:translate3d(0,0,0) scale(1);filter:blur(0)}
+  to{opacity:0;transform:translate3d(0,10px,0) scale(.975);filter:blur(3px)}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .home-viewer-hero.ravine-home-welcome-settling .home-viewer-welcome-copy,
+  .home-viewer-hero.ravine-home-welcome-settling .home-viewer-profile{filter:none!important}
+  html[data-theme="light"] .ravine-search-overlay,
+  html[data-theme="light"] .ravine-search-overlay.is-closing,
+  html[data-theme="light"] .ravine-search-dialog,
+  html[data-theme="light"] .ravine-search-dialog.is-closing{animation:none!important;transform:none!important;filter:none!important}
+}
