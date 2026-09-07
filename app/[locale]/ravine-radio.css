@@ -1,5 +1,5 @@
 /* RAVINE RADIO — structural layer. The player stays mounted independently from the drawer. */
-.ravine-radio-root{position:relative;z-index:220;isolation:isolate}
+.ravine-radio-root{position:fixed!important;inset:0!important;z-index:2147483000!important;isolation:isolate;pointer-events:none}
 
 .ravine-radio-backdrop{position:fixed;inset:0;z-index:180;background:rgba(4,7,8,.58);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .24s ease,visibility 0s linear .24s}
 .ravine-radio-backdrop.is-open{opacity:1;visibility:visible;pointer-events:auto;transition:opacity .24s ease,visibility 0s linear 0s}
@@ -7,6 +7,8 @@
 .ravine-radio-drawer{position:fixed;z-index:200;top:18px;right:18px;bottom:18px;width:min(500px,calc(100vw - 36px));box-sizing:border-box;overflow:auto;padding:24px;border:1px solid rgba(241,233,220,.12);border-radius:24px;background:linear-gradient(160deg,rgba(15,20,21,.98),rgba(9,9,9,.97));color:var(--ivory);box-shadow:0 30px 90px rgba(0,0,0,.42),0 0 0 1px rgba(196,122,82,.04) inset;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);transform:translate3d(108%,0,0);opacity:0;visibility:hidden;pointer-events:none;transition:transform .34s cubic-bezier(.22,1,.36,1),opacity .24s ease,visibility 0s linear .34s;overscroll-behavior:contain}
 .ravine-shell[dir="rtl"] .ravine-radio-drawer{right:auto;left:18px;transform:translate3d(-108%,0,0)}
 .ravine-radio-drawer.is-open{transform:translate3d(0,0,0);opacity:1;visibility:visible;pointer-events:auto;transition:transform .34s cubic-bezier(.22,1,.36,1),opacity .24s ease,visibility 0s linear 0s}
+.ravine-radio-root > .ravine-radio-drawer.is-open{z-index:2147483002!important;visibility:visible!important;opacity:1!important;transform:translate3d(0,0,0)!important;pointer-events:auto!important}
+.ravine-radio-root > .ravine-radio-backdrop.is-open{z-index:2147483001!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important}
 
 .ravine-radio-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding-bottom:16px;border-bottom:1px solid rgba(241,233,220,.08)}
 .ravine-radio-head h2{margin:5px 0 0;color:var(--ivory);font-size:clamp(26px,4vw,38px);line-height:1.05;letter-spacing:-.035em}
@@ -29,6 +31,7 @@
 /* Player mini-card can be hidden/revealed from its dedicated header control without stopping playback. */
 .ravine-radio-mini[data-user-hidden="true"]{opacity:0!important;visibility:hidden!important;pointer-events:none!important;transform:translateY(14px) scale(.985)!important;transition:opacity .2s ease,transform .2s ease,visibility 0s linear .2s!important}
 .ravine-radio-mini[data-user-hidden="false"]{opacity:1;visibility:visible;pointer-events:auto}
+.ravine-radio-root > .ravine-radio-mini[data-user-hidden="false"]{z-index:2147483003!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;transform:none!important}
 
 html[data-theme="light"] .ravine-radio-backdrop{background:rgba(15,18,19,.28);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 html[data-theme="light"] .ravine-radio-drawer{background:linear-gradient(160deg,rgba(34,39,40,.98),rgba(21,23,25,.98));border-color:rgba(241,233,220,.12);box-shadow:0 30px 90px rgba(0,0,0,.2),0 0 0 1px rgba(196,122,82,.05) inset}
