@@ -4,18 +4,23 @@ import { createClient } from "@/lib/supabase/server";
 
 const MAX_MESSAGE_LENGTH = 4000;
 
+type AuthState = Awaited<ReturnType<typeof createClient>>;
+
 export type RavineActionResult<T = void> =
   | { ok: true; data: T }
   | { ok: false; code: "AUTH_REQUIRED" | "INVALID_INPUT" | "DATABASE_ERROR"; message: string };
 
-async function requireUser() {
+async function requireUser(): Promise<
+  | { supabase: AuthState; user: null }
+  | { supabase: AuthState; user: NonNullable<Awaited<ReturnType<AuthState["auth"]["getUser"]>>["data"]["user"]> }
+> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { supabase, user: null as const };
+    return { supabase, user: null };
   }
 
   return { supabase, user };
