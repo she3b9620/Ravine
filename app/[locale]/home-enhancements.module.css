@@ -18,6 +18,7 @@
 :global(.pathway-card:hover:after){opacity:1;transform:translate3d(0,0,0)}
 :global(.pathway-card span),:global(.pathway-card strong),:global(.pathway-card p){position:relative;z-index:1}
 :global(.pathway-card span){color:#C47A52;font-size:10px;font-weight:700;letter-spacing:.16em}
+:global(.pathway-card span:first-child){font-size:15px;font-weight:900;line-height:1;letter-spacing:.12em;text-shadow:0 0 16px rgba(196,122,82,.12)}
 :global(.pathway-card strong){font-size:24px;line-height:1.05;letter-spacing:-.035em}
 :global(.pathway-card p){margin:14px 0 0;color:#9A9690;font-size:13px;line-height:1.6}
 :global(.creator-strip){display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
@@ -49,7 +50,6 @@
 @media(max-width:560px){:global(.pathway-grid){grid-template-columns:1fr}:global(.selection-tabs){width:100%}:global(.selection-tab){flex:1}:global(.about-grid h2){font-size:clamp(42px,15vw,68px)}}
 @media(prefers-reduced-motion:reduce){:global(.selection-tab),:global(.pathway-card),:global(.creator-feature),:global(.creator-feature-avatar img){transition:none}:global(.pathway-card:hover),:global(.creator-feature:hover),:global(.selection-tab:hover),:global(.creator-feature:hover .creator-feature-avatar img){transform:none}}
 
-/* Navigation icon treatment and Live status marker. */
 :global(.ravine-nav-link){display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 :global(.ravine-nav-icon){flex:0 0 auto;opacity:.72;transition:opacity .2s ease,transform .2s ease}
 :global(.ravine-nav-link:hover .ravine-nav-icon),:global(.ravine-nav-link.is-active .ravine-nav-icon){opacity:1;transform:translateY(-.5px)}
@@ -57,26 +57,10 @@
 @keyframes ravineLivePulse{0%,100%{transform:scale(.92);opacity:.8}50%{transform:scale(1.16);opacity:1}}
 @media(prefers-reduced-motion:reduce){:global(.ravine-live-dot){animation:none}}
 
-/* Guest mode: keep the public window intentionally small without changing authenticated Home. */
 :global(.guest-shell .home-work-card:nth-child(n+5)){display:none}
 :global(.guest-shell .creator-feature:nth-child(n+4)){display:none}
 :global(.guest-shell .mini-grid .video-card:nth-child(n+3)){display:none}
 :global(.guest-shell .pathway-card:nth-child(n+5)){display:none}
 
-
-/* Guest note visual treatment — dark + light + AR/EN */
-:global(.guest-shell .home-guest-note p){
-  color:#F1E9DC!important;
-  text-shadow:
-    0 0 10px rgba(241,233,220,.16),
-    0 0 22px rgba(241,233,220,.07),
-    0 2px 14px rgba(0,0,0,.24);
-}
-
-:global(html[data-theme="light"] .guest-shell .home-guest-note p){
-  color:#171717!important;
-  text-shadow:
-    0 0 10px rgba(23,23,23,.12),
-    0 0 22px rgba(23,23,23,.06),
-    0 2px 14px rgba(23,23,23,.14);
-}
+:global(.guest-shell .home-guest-note p){color:#F1E9DC!important;text-shadow:0 0 10px rgba(241,233,220,.16),0 0 22px rgba(241,233,220,.07),0 2px 14px rgba(0,0,0,.24)}
+:global(html[data-theme="light"] .guest-shell .home-guest-note p){color:#171717!important;text-shadow:0 0 10px rgba(23,23,23,.12),0 0 22px rgba(23,23,23,.06),0 2px 14px rgba(23,23,23,.14)}
