@@ -3,6 +3,7 @@ import path from "node:path";
 
 const root = process.cwd();
 const read = (relative) => fs.readFileSync(path.join(root, relative), "utf8");
+
 const required = [
   "app/[locale]/layout.tsx",
   "app/[locale]/ravine-sidebar.css",
@@ -12,7 +13,16 @@ const required = [
   "components/RAVINEPlayer.tsx",
   "components/RAVINEPlayerRuntime.tsx",
   "components/RAVINEPlayer.module.css",
+  "components/RAVINEWorkPlayer.tsx",
+  "components/RAVINEShortsPlayer.tsx",
+  "components/RAVINEVideoPlayer.tsx",
+  "components/RAVINEPodcastPlayer.tsx",
+  "components/RAVINEDocumentaryPlayer.tsx",
   "lib/ravine-playback-core.ts",
+  "lib/ravine-work-universe.ts",
+  "app/[locale]/work/[id]/page.tsx",
+  "components/RAVINEWorkContext.tsx",
+  "components/RAVINEWorkContext.module.css",
 ];
 
 for (const file of required) {
@@ -25,9 +35,12 @@ const layout = read("app/[locale]/layout.tsx");
 const sidebar = read("app/[locale]/ravine-sidebar-position-finish.css");
 const logo = read("app/[locale]/ravine-logo-motion-finish.css");
 const logoMotion = read("components/RavineLogoMotion.tsx");
-const watchPage = read("app/[locale]/watch/[id]/page.tsx");
 const playbackCore = read("lib/ravine-playback-core.ts");
 const playerRuntime = read("components/RAVINEPlayerRuntime.tsx");
+const workPlayer = read("components/RAVINEWorkPlayer.tsx");
+const workUniverse = read("lib/ravine-work-universe.ts");
+const workPage = read("app/[locale]/work/[id]/page.tsx");
+const workContext = read("components/RAVINEWorkContext.tsx");
 
 if (process.env.GITHUB_REF_NAME && process.env.GITHUB_REF_NAME !== "ravine/clean-rebuild") {
   throw new Error(`RAVINE build guard expected ravine/clean-rebuild, got ${process.env.GITHUB_REF_NAME}`);
@@ -63,15 +76,6 @@ if (!logoMotion.includes("ravine-logo-motion-change")) {
   throw new Error("Logo motion state-change event wiring is missing.");
 }
 
-if (!watchPage.includes('import RAVINEPlayerRuntime from "@/components/RAVINEPlayerRuntime";')) {
-  throw new Error("Watch pages must use the deterministic RAVINE player runtime.");
-}
-if (!watchPage.includes("resolveWorkPlaybackUrl(videoId, video.video_url")) {
-  throw new Error("Watch pages must resolve main media through the RAVINE playback contract.");
-}
-if (!watchPage.includes("resolveAssetPlaybackUrl(asset)")) {
-  throw new Error("Watch pages must resolve auxiliary assets through the RAVINE playback contract.");
-}
 if (!playbackCore.includes("export function resolveWorkPlaybackUrl")) {
   throw new Error("Shared RAVINE playback core is missing work source resolution.");
 }
@@ -92,6 +96,31 @@ if (playerRuntime.includes("[activeSrc, syncPlaying]")) {
 }
 if (!playerRuntime.includes("playingRef.current")) {
   throw new Error("Player control visibility must use a stable playing ref to avoid media lifecycle coupling.");
+}
+
+if (!workPlayer.includes("RAVINEShortsPlayer")) {
+  throw new Error("Work player dispatcher must route short works to the Shorts player.");
+}
+if (!workPlayer.includes("RAVINEPodcastPlayer")) {
+  throw new Error("Work player dispatcher must route podcast works to the Podcast player.");
+}
+if (!workPlayer.includes("RAVINEDocumentaryPlayer")) {
+  throw new Error("Work player dispatcher must route documentary works to the Documentary player.");
+}
+if (!workUniverse.includes("RAVINE_WORK_TYPES")) {
+  throw new Error("Work Universe type contract is missing.");
+}
+if (!workUniverse.includes("isPlayableRAVINEWork")) {
+  throw new Error("Work Universe playable-state guard is missing.");
+}
+if (!workPage.includes("toRAVINEWork")) {
+  throw new Error("Work detail page must normalize legacy video data into the Work contract.");
+}
+if (!workPage.includes("RAVINEWorkContext")) {
+  throw new Error("Work detail page must expose the Work context surface.");
+}
+if (!workContext.includes("Access")) {
+  throw new Error("Work context must expose access state to the user.");
 }
 
 const searchForbidden = [
