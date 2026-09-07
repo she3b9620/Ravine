@@ -16,5 +16,5 @@ html[data-theme="light"] .ravine-sidebar::before{background:linear-gradient(180d
 /* Keep the sidebar anchored at its original position. Move only the navigation options downward inside it. */
 @media(min-width:981px){
   .ravine-sidebar{inset-block-start:78px!important;height:calc(100dvh - 78px)!important;padding-top:24px!important}
-  .ravine-sidebar-scroll-content{transform:none!important;padding-top:38px!important}
+  .ravine-sidebar-scroll-content{transform:none!important;padding-top:64px!important}
 }
