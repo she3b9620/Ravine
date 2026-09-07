@@ -12,6 +12,7 @@ import GuestInteractionPolish from "../../components/GuestInteractionPolish";
 import LocalePersistence from "../../components/LocalePersistence";
 import EnglishAboutLocaleFix from "../../components/EnglishAboutLocaleFix";
 import RadioPlayerBridge from "../../components/RadioPlayerBridge";
+import CloudinaryPlaybackFix from "../../components/CloudinaryPlaybackFix";
 import "./ravine-overrides.css";
 import "./home-spacing.css";
 import "./ravine-home-experience-fixes.css";
@@ -75,5 +76,5 @@ export function generateStaticParams(){ return locales.map((locale)=>({locale}))
 export default async function LocaleLayout({children,params}:{children:ReactNode;params:Promise<{locale:string}>}){
   const {locale}=await params;
   if(!locales.includes(locale as Locale)) notFound();
-  return <RavineShell locale={locale as Locale}><RavineAuthStateSync /><LocalePersistence locale={locale as Locale}/><EnglishAboutLocaleFix /><VideoAudioToggle locale={locale as Locale}/><GuestInteractionPolish /><RavineUiEnhancer /><RavineLogoMotion /><RadioPlayerBridge /><SelectionTabsEnhancer /><HomeWelcomeMotion /><RavinePageTransition>{children}</RavinePageTransition></RavineShell>;
+  return <RavineShell locale={locale as Locale}><RavineAuthStateSync /><LocalePersistence locale={locale as Locale}/><EnglishAboutLocaleFix /><VideoAudioToggle locale={locale as Locale}/><GuestInteractionPolish /><RavineUiEnhancer /><RavineLogoMotion /><RadioPlayerBridge /><CloudinaryPlaybackFix /><SelectionTabsEnhancer /><HomeWelcomeMotion /><RavinePageTransition>{children}</RavinePageTransition></RavineShell>;
 }
