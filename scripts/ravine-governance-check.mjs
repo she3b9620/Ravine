@@ -18,17 +18,26 @@ const required = [
   "components/RAVINEVideoPlayer.tsx",
   "components/RAVINEPodcastPlayer.tsx",
   "components/RAVINEDocumentaryPlayer.tsx",
+  "components/RAVINEUniverseHub.tsx",
   "lib/ravine-playback-core.ts",
   "lib/ravine-work-universe.ts",
+  "lib/ravine-platform.ts",
+  "lib/ravine-ai-gateway.ts",
+  "lib/ravine-trust-engine.ts",
+  "lib/ravine-discovery.ts",
+  "lib/ravine-access.ts",
+  "lib/ravine-live-provider.ts",
+  "lib/ravine-economy.ts",
   "app/[locale]/work/[id]/page.tsx",
+  "app/[locale]/universe/page.tsx",
+  "app/[locale]/universe/module/page.tsx",
   "components/RAVINEWorkContext.tsx",
   "components/RAVINEWorkContext.module.css",
+  "supabase/migrations/20260907120000_ravine_platform_domain_foundation.sql",
 ];
 
 for (const file of required) {
-  if (!fs.existsSync(path.join(root, file))) {
-    throw new Error(`Missing required RAVINE file: ${file}`);
-  }
+  if (!fs.existsSync(path.join(root, file))) throw new Error(`Missing required RAVINE file: ${file}`);
 }
 
 const layout = read("app/[locale]/layout.tsx");
@@ -41,92 +50,36 @@ const workPlayer = read("components/RAVINEWorkPlayer.tsx");
 const workUniverse = read("lib/ravine-work-universe.ts");
 const workPage = read("app/[locale]/work/[id]/page.tsx");
 const workContext = read("components/RAVINEWorkContext.tsx");
+const platform = read("lib/ravine-platform.ts");
+const aiGateway = read("lib/ravine-ai-gateway.ts");
+const trust = read("lib/ravine-trust-engine.ts");
+const discovery = read("lib/ravine-discovery.ts");
+const access = read("lib/ravine-access.ts");
+const live = read("lib/ravine-live-provider.ts");
+const economy = read("lib/ravine-economy.ts");
+const domainMigration = read("supabase/migrations/20260907120000_ravine_platform_domain_foundation.sql");
 
-if (process.env.GITHUB_REF_NAME && process.env.GITHUB_REF_NAME !== "ravine/clean-rebuild") {
-  throw new Error(`RAVINE build guard expected ravine/clean-rebuild, got ${process.env.GITHUB_REF_NAME}`);
-}
-if (!layout.includes('import "./ravine-sidebar-position-finish.css";')) {
-  throw new Error("Sidebar position finish stylesheet is not loaded by the locale layout.");
-}
-if (!layout.includes('import "./ravine-logo-motion-finish.css";')) {
-  throw new Error("Logo motion finish stylesheet is not loaded by the locale layout.");
-}
-if (!sidebar.includes("inset-block-start: 78px !important")) {
-  throw new Error("Sidebar container anchor must remain below the header at 78px.");
-}
-if (!sidebar.includes("height: calc(100dvh - 78px) !important")) {
-  throw new Error("Sidebar height guard is missing.");
-}
-if (!sidebar.includes("padding-top: 36px !important")) {
-  throw new Error("Sidebar options must use the approved 36px internal lift.");
-}
-if (!logo.includes("ravineLogoQuietSweep")) {
-  throw new Error("Logo quiet motion animation is missing.");
-}
-if (!logo.includes("mask-image:url('/اللوجو.png')")) {
-  throw new Error("Logo mark color-motion mask is missing.");
-}
-if (!logo.includes("mask-image:url('/التايبو.png')")) {
-  throw new Error("Wordmark color-motion mask is missing.");
-}
-if (!logo.includes('data-ravine-auth="authenticated"')) {
-  throw new Error("Logo motion must be explicitly scoped to authenticated users.");
-}
-if (!logoMotion.includes("ravine-logo-motion-change")) {
-  throw new Error("Logo motion state-change event wiring is missing.");
-}
+if (process.env.GITHUB_REF_NAME && process.env.GITHUB_REF_NAME !== "ravine/clean-rebuild") throw new Error(`Expected ravine/clean-rebuild, got ${process.env.GITHUB_REF_NAME}`);
+if (!layout.includes('import "./ravine-sidebar-position-finish.css";')) throw new Error("Sidebar finish stylesheet not loaded.");
+if (!layout.includes('import "./ravine-logo-motion-finish.css";')) throw new Error("Logo motion stylesheet not loaded.");
+if (!sidebar.includes("inset-block-start: 78px !important") || !sidebar.includes("height: calc(100dvh - 78px) !important") || !sidebar.includes("padding-top: 36px !important")) throw new Error("Sidebar geometry guard failed.");
+if (!logo.includes("ravineLogoQuietSweep") || !logo.includes("mask-image:url('/اللوجو.png')") || !logo.includes("mask-image:url('/التايبو.png')") || !logo.includes('data-ravine-auth="authenticated"')) throw new Error("Logo motion guard failed.");
+if (!logoMotion.includes("ravine-logo-motion-change")) throw new Error("Logo motion event wiring missing.");
+if (!playbackCore.includes("export function resolveWorkPlaybackUrl") || !playbackCore.includes("export function resolveAssetPlaybackUrl") || !playbackCore.includes("toCloudinaryBrowserVideoUrl")) throw new Error("Playback contract guard failed.");
+if (!playerRuntime.includes('data-ravine-playback-runtime="deterministic"') || !playerRuntime.includes("}, [activeSrc, duration]);") || playerRuntime.includes("[activeSrc, syncPlaying]") || !playerRuntime.includes("playingRef.current")) throw new Error("Playback lifecycle guard failed.");
+if (!workPlayer.includes("RAVINEShortsPlayer") || !workPlayer.includes("RAVINEPodcastPlayer") || !workPlayer.includes("RAVINEDocumentaryPlayer")) throw new Error("Work player dispatch guard failed.");
+if (!workUniverse.includes("RAVINE_WORK_TYPES") || !workUniverse.includes("isPlayableRAVINEWork")) throw new Error("Work Universe guard failed.");
+if (!workPage.includes("toRAVINEWork") || !workPage.includes("RAVINEWorkContext")) throw new Error("Work surface guard failed.");
+if (!workContext.includes("Access")) throw new Error("Work context access guard failed.");
+if (!platform.includes("RAVINE_PLATFORM_MODULES") || !platform.includes("RAVINE_OPEN_DECISIONS") || !platform.includes("RAVINE_AI_RULES")) throw new Error("Platform contract guard failed.");
+if (!aiGateway.includes("shouldExecuteRAVINEAI") || !aiGateway.includes("confidenceBand")) throw new Error("AI gateway guard failed.");
+if (!trust.includes("resolveRAVINETrustDecision") || !trust.includes("requiresHumanReview")) throw new Error("Trust engine guard failed.");
+if (!discovery.includes("rankRAVINEWithExplicitWeights")) throw new Error("Discovery contract must require explicit ranking weights.");
+if (!access.includes("canAccessRAVINEWork") || !access.includes("canPublishAsCreator")) throw new Error("Access contract guard failed.");
+if (!live.includes("RAVINELiveProviderAdapter") || !live.includes("assertRAVINELiveProviderConfigured")) throw new Error("Live provider must remain adapter-based while open.");
+if (!economy.includes("RAVINEEconomyAdapter") || !economy.includes("assertRAVINEEconomyConfigured")) throw new Error("Economy provider must remain adapter-based while open.");
+if (!domainMigration.includes("alter table public.ravine_next_works enable row level security")) throw new Error("Staged domain migration RLS guard failed.");
 
-if (!playbackCore.includes("export function resolveWorkPlaybackUrl")) {
-  throw new Error("Shared RAVINE playback core is missing work source resolution.");
-}
-if (!playbackCore.includes("export function resolveAssetPlaybackUrl")) {
-  throw new Error("Shared RAVINE playback core is missing asset source resolution.");
-}
-if (!playbackCore.includes("toCloudinaryBrowserVideoUrl")) {
-  throw new Error("Shared RAVINE playback core is missing browser delivery normalization.");
-}
-if (!playerRuntime.includes('data-ravine-playback-runtime="deterministic"')) {
-  throw new Error("Deterministic RAVINE player runtime marker is missing.");
-}
-if (!playerRuntime.includes("}, [activeSrc, duration]);")) {
-  throw new Error("Player media lifecycle must be keyed to the media source, not playing state.");
-}
-if (playerRuntime.includes("[activeSrc, syncPlaying]")) {
-  throw new Error("Player must not reload media when the playing callback changes.");
-}
-if (!playerRuntime.includes("playingRef.current")) {
-  throw new Error("Player control visibility must use a stable playing ref to avoid media lifecycle coupling.");
-}
-
-if (!workPlayer.includes("RAVINEShortsPlayer")) {
-  throw new Error("Work player dispatcher must route short works to the Shorts player.");
-}
-if (!workPlayer.includes("RAVINEPodcastPlayer")) {
-  throw new Error("Work player dispatcher must route podcast works to the Podcast player.");
-}
-if (!workPlayer.includes("RAVINEDocumentaryPlayer")) {
-  throw new Error("Work player dispatcher must route documentary works to the Documentary player.");
-}
-if (!workUniverse.includes("RAVINE_WORK_TYPES")) {
-  throw new Error("Work Universe type contract is missing.");
-}
-if (!workUniverse.includes("isPlayableRAVINEWork")) {
-  throw new Error("Work Universe playable-state guard is missing.");
-}
-if (!workPage.includes("toRAVINEWork")) {
-  throw new Error("Work detail page must normalize legacy video data into the Work contract.");
-}
-if (!workPage.includes("RAVINEWorkContext")) {
-  throw new Error("Work detail page must expose the Work context surface.");
-}
-if (!workContext.includes("Access")) {
-  throw new Error("Work context must expose access state to the user.");
-}
-
-const searchForbidden = [
-  "مساحة للاكتشاف، مش مجرد بحث.",
-  "A discovery layer, not just a search box.",
-];
 const appDir = path.join(root, "app");
 const stack = [appDir];
 const textFiles = [];
@@ -138,13 +91,9 @@ while (stack.length) {
     else if (/\.(tsx|ts|css|md|json)$/.test(entry.name)) textFiles.push(full);
   }
 }
+const searchForbidden = ["مساحة للاكتشاف، مش مجرد بحث.", "A discovery layer, not just a search box."];
 for (const file of textFiles) {
   const source = fs.readFileSync(file, "utf8");
-  for (const phrase of searchForbidden) {
-    if (source.includes(phrase)) {
-      throw new Error(`Forbidden Search copy found in ${path.relative(root, file)}: ${phrase}`);
-    }
-  }
+  for (const phrase of searchForbidden) if (source.includes(phrase)) throw new Error(`Forbidden Search copy found in ${path.relative(root, file)}: ${phrase}`);
 }
-
 console.log("RAVINE governance checks passed.");
