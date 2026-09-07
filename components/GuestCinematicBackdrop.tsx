@@ -37,7 +37,7 @@ export default function GuestCinematicBackdrop({ locale }: GuestCinematicBackdro
     if (pathname !== `/${locale}`) { setIsGuestHome(false); return; }
     let mounted = true;
     const supabase = createClient();
-    void supabase.auth.getUser().then(({ data }) => { if (mounted) setIsGuestHome(!data.user); }).catch(() => { if (mounted) setIsGuestHome(false); });
+    void supabase.auth.getUser().then(({ data }) => { if (mounted) setIsGuestHome(!data.user); }, () => { if (mounted) setIsGuestHome(false); });
     return () => { mounted = false; };
   }, [locale, pathname]);
 
@@ -45,7 +45,7 @@ export default function GuestCinematicBackdrop({ locale }: GuestCinematicBackdro
     if (!isGuestHome) return;
     let mounted = true;
     const supabase = createClient();
-    void supabase.from("videos").select("id,video_url,thumbnail_url,duration,content_type").eq("published", true).not("video_url", "is", null).order("created_at", { ascending: false }).limit(60).then(({ data }) => { if (mounted) setWorks((data ?? []) as Work[]); }).catch(() => { if (mounted) setWorks([]); });
+    void supabase.from("videos").select("id,video_url,thumbnail_url,duration,content_type").eq("published", true).not("video_url", "is", null).order("created_at", { ascending: false }).limit(60).then(({ data }) => { if (mounted) setWorks((data ?? []) as Work[]); }, () => { if (mounted) setWorks([]); });
     return () => { mounted = false; };
   }, [isGuestHome]);
 
