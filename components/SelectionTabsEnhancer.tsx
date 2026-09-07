@@ -12,6 +12,7 @@ const PERIODS = [
 type PeriodKey = (typeof PERIODS)[number][0];
 
 const originalOrders = new WeakMap<HTMLElement, HTMLElement[]>();
+const animationTimers = new WeakMap<HTMLElement, number>();
 let scheduledEnhance = false;
 
 function periodKey(text: string): PeriodKey | null {
@@ -36,8 +37,25 @@ function getIndexes(length: number, period: PeriodKey) {
   return Array.from({ length }, (_, index) => (index % 2 === 0 ? Math.floor(index / 2) : Math.ceil(length / 2) + Math.floor(index / 2))).filter((index) => index < length);
 }
 
+function clearAnimation(grid: HTMLElement, cards: HTMLElement[]) {
+  const timer = animationTimers.get(grid);
+  if (timer) window.clearTimeout(timer);
+  animationTimers.delete(grid);
+  for (const card of cards) {
+    card.style.transition = "";
+    card.style.transform = "";
+    card.style.opacity = "";
+    card.style.filter = "";
+    card.style.transitionDelay = "";
+  }
+  delete grid.dataset.ravineSelectionAnimating;
+}
+
 function animateReorder(grid: HTMLElement, ordered: HTMLElement[]) {
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  const previousCards = Array.from(grid.children) as HTMLElement[];
+  clearAnimation(grid, previousCards);
 
   const before = new Map<HTMLElement, DOMRect>();
   for (const card of ordered) before.set(card, card.getBoundingClientRect());
@@ -50,35 +68,43 @@ function animateReorder(grid: HTMLElement, ordered: HTMLElement[]) {
   for (const card of ordered) after.set(card, card.getBoundingClientRect());
 
   grid.dataset.ravineSelectionAnimating = "1";
-  for (const card of ordered) {
+  ordered.forEach((card) => {
     const from = before.get(card);
     const to = after.get(card);
-    if (!from || !to) continue;
+    if (!from || !to) return;
     const dx = from.left - to.left;
     const dy = from.top - to.top;
     card.style.transition = "none";
-    card.style.transform = `translate3d(${dx}px, ${dy}px, 0) scale(.98)`;
-    card.style.opacity = "0.9";
-  }
+    card.style.transitionDelay = "0ms";
+    card.style.transform = `translate3d(${dx}px, ${dy}px, 0) scale(.985)`;
+    card.style.opacity = "0.94";
+    card.style.filter = "blur(.45px)";
+  });
 
   void grid.offsetHeight;
 
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
-      for (const card of ordered) {
-        card.style.transition = "transform .78s cubic-bezier(.16,1,.3,1), opacity .52s cubic-bezier(.22,.61,.36,1)";
+      ordered.forEach((card, index) => {
+        const delay = Math.min(index * 34, 136);
+        card.style.transition = `transform .86s cubic-bezier(.16,1,.3,1) ${delay}ms, opacity .58s cubic-bezier(.22,.61,.36,1) ${delay}ms, filter .66s cubic-bezier(.22,.61,.36,1) ${delay}ms`;
         card.style.transform = "translate3d(0, 0, 0) scale(1)";
         card.style.opacity = "1";
-      }
+        card.style.filter = "blur(0)";
+      });
 
-      window.setTimeout(() => {
+      const timer = window.setTimeout(() => {
         for (const card of ordered) {
           card.style.transition = "";
           card.style.transform = "";
           card.style.opacity = "";
+          card.style.filter = "";
+          card.style.transitionDelay = "";
         }
+        animationTimers.delete(grid);
         delete grid.dataset.ravineSelectionAnimating;
-      }, 860);
+      }, 1120);
+      animationTimers.set(grid, timer);
     });
   });
 }
