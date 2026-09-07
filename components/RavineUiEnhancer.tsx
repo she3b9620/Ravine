@@ -21,37 +21,11 @@ function walkTextNodes(root: Node, replace: (value: string, node: Text) => strin
   }
 }
 
-function toArabicIndicDigits(value: string) {
-  return value.replace(/[0-9]/g, (digit) => ARABIC_DIGITS[Number(digit)]);
-}
-
-function shouldPreserveNumerals(node: Text) {
-  const parent = node.parentElement;
-  if (!parent) return true;
-  if (parent.closest(USER_IDENTITY_SELECTOR)) return true;
-  if (parent.closest("input, textarea, code, pre, kbd, samp, script, style")) return true;
-  if (parent.closest("[data-numeric-literal]")) return true;
-  if (parent.closest("a[href]") && parent.textContent?.trim() === node.nodeValue?.trim() && /(?:https?:\/\/|\/\b(?:ar|en)\b\/|^@)/i.test(node.nodeValue || "")) return true;
-  return false;
-}
-
-function localizeArabicNumerals() {
-  const shell = document.querySelector('.ravine-shell[lang="ar"]');
-  if (!shell) return;
-  walkTextNodes(shell, (value, node) => shouldPreserveNumerals(node) ? value : toArabicIndicDigits(value));
-}
-
-function localizeFollowErrors() {
-  const shell = document.querySelector('.ravine-shell[lang="ar"]');
-  if (!shell) return;
-  walkTextNodes(shell, (value) => FOLLOW_PERMISSION.test(value) ? value.replace(FOLLOW_PERMISSION, "لا تملك صلاحية الوصول إلى المتابعات حاليًا.") : value);
-}
-
-function localizeVideosPolicyError() {
-  if (document.documentElement.lang !== "ar") return;
-  const root = document.querySelector('.ravine-shell[lang="ar"]') || document.body;
-  walkTextNodes(root, (value) => VIDEOS_RECURSION.test(value) ? "تعذر تحميل بعض الأعمال مؤقتًا بسبب خطأ في صلاحيات قاعدة البيانات. تم إصلاح المشكلة، حدّث الصفحة وحاول مرة أخرى." : value);
-}
+function toArabicIndicDigits(value: string) { return value.replace(/[0-9]/g, (digit) => ARABIC_DIGITS[Number(digit)]); }
+function shouldPreserveNumerals(node: Text) { const parent = node.parentElement; if (!parent) return true; if (parent.closest(USER_IDENTITY_SELECTOR)) return true; if (parent.closest("input, textarea, code, pre, kbd, samp, script, style")) return true; if (parent.closest("[data-numeric-literal]")) return true; if (parent.closest("a[href]") && parent.textContent?.trim() === node.nodeValue?.trim() && /(?:https?:\/\/|\/\b(?:ar|en)\b\/|^@)/i.test(node.nodeValue || "")) return true; return false; }
+function localizeArabicNumerals() { const shell = document.querySelector('.ravine-shell[lang="ar"]'); if (!shell) return; walkTextNodes(shell, (value, node) => shouldPreserveNumerals(node) ? value : toArabicIndicDigits(value)); }
+function localizeFollowErrors() { const shell = document.querySelector('.ravine-shell[lang="ar"]'); if (!shell) return; walkTextNodes(shell, (value) => FOLLOW_PERMISSION.test(value) ? value.replace(FOLLOW_PERMISSION, "لا تملك صلاحية الوصول إلى المتابعات حاليًا.") : value); }
+function localizeVideosPolicyError() { if (document.documentElement.lang !== "ar") return; const root = document.querySelector('.ravine-shell[lang="ar"]') || document.body; walkTextNodes(root, (value) => VIDEOS_RECURSION.test(value) ? "تعذر تحميل بعض الأعمال مؤقتًا بسبب خطأ في صلاحيات قاعدة البيانات. تم إصلاح المشكلة، حدّث الصفحة وحاول مرة أخرى." : value); }
 
 const PAGE_ICONS: Record<string, string> = {
   discover: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="2"/><path d="M17.8 6.2 15 9l-3 3-3 3-2.8 2.8"/></svg>',
@@ -64,60 +38,27 @@ const PAGE_ICONS: Record<string, string> = {
   community: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17H5a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3v2"/><path d="M10 21h8a3 3 0 0 0 3-3v-3a3 3 0 0 0-3-3h-5a3 3 0 0 0-3 3v6z"/></svg>',
 };
 
-function enhanceContentPageHeadingIcons() {
-  const path = window.location.pathname.split("/").filter(Boolean).pop() || "";
-  const iconMarkup = PAGE_ICONS[path];
-  if (!iconMarkup) return;
-  const candidates = document.querySelectorAll(".section > h1, .discover-page h1, .live-page h1, .creators-page h1, .cuts-page h1");
-  const heading = Array.from(candidates).find((item) => !item.classList.contains("ravine-page-heading"));
-  if (!(heading instanceof HTMLElement)) return;
-  heading.classList.add("ravine-page-heading");
-  const icon = document.createElement("span");
-  icon.className = "ravine-page-heading-icon";
-  icon.innerHTML = iconMarkup;
-  heading.prepend(icon);
-}
-
-function enhanceSelectionTabs() {
-  const labels = new Map([["يومية", "daily"], ["أسبوعية", "weekly"], ["شهرية", "monthly"], ["سنوية", "yearly"], ["Daily", "daily"], ["Weekly", "weekly"], ["Monthly", "monthly"], ["Yearly", "yearly"]]);
-  document.querySelectorAll(".selection-tabs button, .selection-tabs a").forEach((element) => {
-    const key = labels.get(element.textContent?.trim() || "");
-    if (!key || !(element instanceof HTMLElement)) return;
-    element.classList.add("ravine-period-tab");
-    element.setAttribute("data-ravine-period", key);
-    if (!element.hasAttribute("aria-pressed")) element.setAttribute("aria-pressed", element.classList.contains("active") ? "true" : "false");
-    if (element.dataset.ravineBound === "1") return;
-    element.dataset.ravineBound = "1";
-    element.addEventListener("click", () => {
-      const container = element.closest(".selection-tabs");
-      container?.querySelectorAll(".ravine-period-tab").forEach((tab) => {
-        const active = tab === element;
-        tab.classList.toggle("active", active);
-        tab.setAttribute("aria-pressed", active ? "true" : "false");
-      });
-    });
-  });
-}
-
-function isHomeRoute() {
-  const path = window.location.pathname.replace(/\/$/, "");
-  return path === "/ar" || path === "/en";
-}
-
-function getHomeLocale(): "ar" | "en" {
-  const firstSegment = window.location.pathname.split("/").filter(Boolean)[0];
-  return firstSegment === "en" ? "en" : "ar";
-}
+function enhanceContentPageHeadingIcons() { const path = window.location.pathname.split("/").filter(Boolean).pop() || ""; const iconMarkup = PAGE_ICONS[path]; if (!iconMarkup) return; const candidates = document.querySelectorAll(".section > h1, .discover-page h1, .live-page h1, .creators-page h1, .cuts-page h1"); const heading = Array.from(candidates).find((item) => !item.classList.contains("ravine-page-heading")); if (!(heading instanceof HTMLElement)) return; heading.classList.add("ravine-page-heading"); const icon = document.createElement("span"); icon.className = "ravine-page-heading-icon"; icon.innerHTML = iconMarkup; heading.prepend(icon); }
+function enhanceSelectionTabs() { const labels = new Map([["يومية", "daily"], ["أسبوعية", "weekly"], ["شهرية", "monthly"], ["سنوية", "yearly"], ["Daily", "daily"], ["Weekly", "weekly"], ["Monthly", "monthly"], ["Yearly", "yearly"]]); document.querySelectorAll(".selection-tabs button, .selection-tabs a").forEach((element) => { const key = labels.get(element.textContent?.trim() || ""); if (!key || !(element instanceof HTMLElement)) return; element.classList.add("ravine-period-tab"); element.setAttribute("data-ravine-period", key); if (!element.hasAttribute("aria-pressed")) element.setAttribute("aria-pressed", element.classList.contains("active") ? "true" : "false"); if (element.dataset.ravineBound === "1") return; element.dataset.ravineBound = "1"; element.addEventListener("click", () => { const container = element.closest(".selection-tabs"); container?.querySelectorAll(".ravine-period-tab").forEach((tab) => { const active = tab === element; tab.classList.toggle("active", active); tab.setAttribute("aria-pressed", active ? "true" : "false"); }); }); }); }
+function isHomeRoute() { const path = window.location.pathname.replace(/\/$/, ""); return path === "/ar" || path === "/en"; }
+function getHomeLocale(): "ar" | "en" { const firstSegment = window.location.pathname.split("/").filter(Boolean)[0]; return firstSegment === "en" ? "en" : "ar"; }
 
 function syncGuestAbout() {
-  const existing = document.querySelectorAll(".ravine-guest-about");
-  if (!isHomeRoute()) {
-    existing.forEach((section) => section.remove());
-    return;
-  }
+  const existing = Array.from(document.querySelectorAll(".ravine-guest-about"));
+  if (!isHomeRoute()) { existing.forEach((section) => section.remove()); return; }
 
   const main = document.querySelector(".guest-shell .ravine-main");
-  if (!main || main.querySelector(".ravine-guest-about")) return;
+  const hero = main?.querySelector(".home-guest-hero");
+  if (!main || !hero) return;
+
+  const firstAfterHero = hero.nextElementSibling;
+  const existingSection = existing[0];
+
+  if (existingSection) {
+    if (existing.length > 1) existing.slice(1).forEach((section) => section.remove());
+    if (firstAfterHero !== existingSection) hero.insertAdjacentElement("afterend", existingSection);
+    return;
+  }
 
   const locale = getHomeLocale();
   const section = document.createElement("section");
@@ -125,7 +66,7 @@ function syncGuestAbout() {
   section.innerHTML = locale === "ar"
     ? `<div class="home-feed-label">رَافِين / عن المنصة</div><div class="about-grid"><div><h2>مساحة تمنح العمل حقه.</h2></div><div><p class="about-lead">رَافِين منصة إبداعية سينمائية تُبنى حول العمل نفسه: كيف صُنِع، من يقف خلفه، ما الذي ألهمه، وما الحوارات التي يفتحها. نريد اكتشافًا أكثر هدوءًا، وهوية أوضح للمبدع، وسياقًا يجعل كل عمل جزءًا من قصة أكبر.</p><div class="about-principles"><div><strong>العمل أولًا</strong><span>يمكن للضجيج والأرقام أن تساعد في الاكتشاف، لكنها ليست المعيار الوحيد للقيمة.</span></div><div><strong>المبدع كاملًا</strong><span>الهوية والاعتمادات وجميع الأعمال تعيش معًا بدلًا من أن تتوزع عبر قنوات منفصلة.</span></div><div><strong>رحلة مترابطة</strong><span>من العمل إلى المجتمع والجلسات المباشرة والبرامج الصوتية، ثم العودة إلى الحوار.</span></div></div></div></div>`
     : `<div class="home-feed-label">RAVINE / ABOUT</div><div class="about-grid"><div><h2>A space that gives the work its due.</h2></div><div><p class="about-lead">RAVINE is a cinematic creative platform built around the work itself: how it was made, who stands behind it, what shaped it, and what conversation it can open. We want calmer discovery, clearer creator identity, and enough context for every work to belong to a larger story.</p><div class="about-principles"><div><strong>Work first</strong><span>Noise and numbers can aid discovery without becoming the sole measure of value.</span></div><div><strong>Creators in full</strong><span>Identity, credits and the body of work live together instead of splitting across separate channels.</span></div><div><strong>A connected journey</strong><span>Move from work to community, Live and Podcast, then back into conversation.</span></div></div></div></div>`;
-  main.appendChild(section);
+  hero.insertAdjacentElement("afterend", section);
 }
 
 export default function RavineUiEnhancer() {
