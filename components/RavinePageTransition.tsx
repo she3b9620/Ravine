@@ -9,14 +9,14 @@ type Props = {
 
 export default function RavinePageTransition({ children }: Props) {
   const pathname = usePathname();
-  const [transitionKey, setTransitionKey] = useState(pathname);
+  const [route, setRoute] = useState(pathname);
 
   useEffect(() => {
-    setTransitionKey(pathname);
+    setRoute(pathname);
   }, [pathname]);
 
   return (
-    <div key={transitionKey} className="ravine-page-transition" data-ravine-route={pathname}>
+    <div className="ravine-page-transition" data-ravine-route={route}>
       {children}
     </div>
   );
