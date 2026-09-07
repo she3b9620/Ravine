@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition, type MouseEvent } from "react";
 import { persistRavineLocale, type RavineLocale } from "@/lib/locale-preference";
 
 type Locale = RavineLocale;
@@ -60,7 +60,7 @@ export default function LanguageSwitcher({ locale }: { locale: Locale }) {
     };
   }, [switching]);
 
-  function handleLanguageChange(nextLocale: Locale, event: React.MouseEvent<HTMLAnchorElement>) {
+  function handleLanguageChange(nextLocale: Locale, event: MouseEvent<HTMLAnchorElement>) {
     event.preventDefault();
     if (nextLocale === locale || switching) return;
     const destination = buildHref(nextLocale);
