@@ -311,7 +311,7 @@ Promotion must use moderation and transparency. Paid promotion, eligibility, tar
 
 ## 18. External Identity Linking
 
-Creators may connect external profiles such as YouTube, TikTok, Instagram, X, Twitch, Behance, and personal portfolios.
+Creators may connect external profiles such as YouTube, TikTok, Instagram, X, Twitch, Behance, LinkedIn, and personal portfolios.
 
 RAVINE may import metadata or display external references where platform terms allow. It must not falsely imply ownership or native hosting of third-party content.
 
@@ -380,23 +380,24 @@ The following remain explicit design principles:
 - Protect Discover from unrelated global Home CSS changes.
 - Never treat a UI mock, local array, or frontend-only state as a completed backend capability.
 
-## 23. Implementation Status
+## 23. Current Implementation Status
 
-This document records agreed product direction only.
+The existing `creators.user_id` relation already permits more than one Creator Identity per authenticated Personal Account. A first real UI foundation is now present: the authenticated Account Menu exposes Personal Mode plus the user's owned Creator Identities, persists the selected creator identity locally/in a browser cookie, and provides a direct path to create another creator identity.
 
-It does NOT mean the following are already implemented:
-- Multi-Creator Identity architecture
-- Broadcast channels
-- Members Communities
-- Creator Circles
-- Tiered Memberships
-- Exclusive Drops
-- RAVINE Spotlight
-- RAVINE Live Universe
-- RAVINE Spaces
-- Gaming layer
-- Advanced Ratings / Reputation
+A database migration is staged in `supabase/migrations/20260907070000_ravine_creator_ecosystem.sql` to establish the next backend layer for memberships, Broadcast, Creator Circles, access policies, Live/Stage/Questions/Sessions, Spaces, Ratings, external links, Spotlight, Opportunities, Collections and Watch Parties. It has not been applied to the connected Supabase project in this execution.
+
+The following are still not claims of completed end-to-end implementation:
+- Full creator-acting identity propagation across every write path
+- Broadcast UI/backend workflows
+- Members Community gating and billing
+- Creator Circle UI/backend workflows
+- Exclusive Drop enforcement
+- RAVINE Spotlight workflow
+- Live Stage/Guest Queue runtime
+- RAVINE Spaces runtime
+- Gaming runtime surfaces
+- Advanced Ratings / Trust Score
 - Creator Teams / delegated permissions
 - Creator Marketplace
 
-These systems should be implemented incrementally after the current UI/security foundation and actual Supabase schema are audited.
+These systems should be implemented incrementally with real ownership checks, RLS, backend wiring and runtime verification.
