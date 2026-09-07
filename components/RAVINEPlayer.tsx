@@ -1,7 +1,7 @@
 "use client";
 
 import { type CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Bookmark, Check, ExternalLink, List, Maximize2, Pause, Play, RotateCcw, RotateCw, Settings2, Volume2 } from "lucide-react";
+import { Bookmark, Check, ExternalLink, List, Maximize2, Pause, PictureInPicture, Play, RotateCcw, RotateCw, Settings2, Volume2 } from "lucide-react";
 import styles from "./RAVINEPlayer.module.css";
 
 type Chapter = { id: number; title: string; start_seconds: number; end_seconds: number | null; thumbnail_url: string | null };
@@ -27,6 +27,14 @@ function formatTime(value: number) {
   return h > 0 ? `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}` : `${m}:${String(s).padStart(2, "0")}`;
 }
 
+function mediaErrorCopy(code: MediaError["code"] | undefined, ar: boolean) {
+  if (code === MediaError.MEDIA_ERR_ABORTED) return ar ? "تم إيقاف تشغيل الوسائط." : "Media playback was aborted.";
+  if (code === MediaError.MEDIA_ERR_NETWORK) return ar ? "تعذر الوصول إلى ملف الوسائط. تحقق من الاتصال ثم أعد المحاولة." : "The media could not be loaded from the network. Check the connection and try again.";
+  if (code === MediaError.MEDIA_ERR_DECODE) return ar ? "لا يستطيع المتصفح فك ترميز هذا الملف. قد يحتاج العمل إلى نسخة RAVINE متوافقة مع التشغيل." : "This file could not be decoded. The work may need a browser-compatible RAVINE playback version.";
+  if (code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED) return ar ? "صيغة هذا الملف غير مدعومة للتشغيل هنا." : "This media format is not supported for playback here.";
+  return ar ? "تعذر تشغيل هذا العمل حاليًا." : "This work could not be played right now.";
+}
+
 export default function RAVINEPlayer({ src, poster, title, contentType, duration, locale, chapters = [], assets = [] }: Props) {
   const ar = locale === "ar";
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -41,13 +49,16 @@ export default function RAVINEPlayer({ src, poster, title, contentType, duration
   const [showSettings, setShowSettings] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [timelineHover, setTimelineHover] = useState<number | null>(null);
-  const [introChoice, setIntroChoice] = useState<"main" | "trailer" | "preview">(assets.some((a) => a.kind === "trailer" || a.kind === "preview") ? "main" : "main");
+  const [mediaError, setMediaError] = useState<string | null>(null);
+  const [pipActive, setPipActive] = useState(false);
+  const [introChoice, setIntroChoice] = useState<"main" | "trailer" | "preview">("main");
 
   const trailer = useMemo(() => assets.find((asset) => asset.kind === "trailer"), [assets]);
   const preview = useMemo(() => assets.find((asset) => asset.kind === "preview"), [assets]);
   const activeAuxiliary = introChoice === "trailer" ? trailer : introChoice === "preview" ? preview : null;
   const activeSrc = activeAuxiliary?.media_url || src;
   const activeDuration = activeAuxiliary?.duration || readyDuration;
+  const playerKind = contentType === "short" ? "short" : contentType === "podcast" ? "podcast" : contentType === "documentary" ? "documentary" : "video";
 
   const clearControlsTimer = useCallback(() => {
     if (controlsTimerRef.current) window.clearTimeout(controlsTimerRef.current);
@@ -57,9 +68,7 @@ export default function RAVINEPlayer({ src, poster, title, contentType, duration
   const revealControls = useCallback(() => {
     clearControlsTimer();
     setShowControls(true);
-    if (playing) {
-      controlsTimerRef.current = window.setTimeout(() => setShowControls(false), 2800);
-    }
+    if (playing) controlsTimerRef.current = window.setTimeout(() => setShowControls(false), 2800);
   }, [clearControlsTimer, playing]);
 
   const syncPlaying = useCallback((nextPlaying: boolean) => {
@@ -73,17 +82,17 @@ export default function RAVINEPlayer({ src, poster, title, contentType, duration
     }
   }, [clearControlsTimer, revealControls]);
 
-  useEffect(() => {
-    return () => clearControlsTimer();
-  }, [clearControlsTimer]);
+  useEffect(() => () => clearControlsTimer(), [clearControlsTimer]);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
+    setMediaError(null);
     video.load();
     setCurrent(0);
     setEnded(false);
     setTimelineHover(null);
+    setPipActive(false);
     syncPlaying(false);
   }, [activeSrc, syncPlaying]);
 
@@ -98,11 +107,25 @@ export default function RAVINEPlayer({ src, poster, title, contentType, duration
     revealControls();
   }, [playing, revealControls]);
 
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const handleEnter = () => setPipActive(true);
+    const handleLeave = () => setPipActive(false);
+    video.addEventListener("enterpictureinpicture", handleEnter);
+    video.addEventListener("leavepictureinpicture", handleLeave);
+    return () => {
+      video.removeEventListener("enterpictureinpicture", handleEnter);
+      video.removeEventListener("leavepictureinpicture", handleLeave);
+    };
+  }, [activeSrc]);
+
   function togglePlay() {
     const video = videoRef.current;
     if (!video) return;
     if (video.paused) {
       setEnded(false);
+      setMediaError(null);
       void video.play().catch(() => undefined);
     } else video.pause();
   }
@@ -119,6 +142,7 @@ export default function RAVINEPlayer({ src, poster, title, contentType, duration
     const video = videoRef.current;
     if (!video) return;
     setEnded(false);
+    setMediaError(null);
     video.currentTime = seconds;
     revealControls();
     if (video.paused) void video.play().catch(() => undefined);
@@ -145,35 +169,54 @@ export default function RAVINEPlayer({ src, poster, title, contentType, duration
     }
   }
 
+  async function togglePictureInPicture() {
+    const video = videoRef.current as (HTMLVideoElement & { requestPictureInPicture?: () => Promise<PictureInPictureWindow> }) | null;
+    if (!video || typeof document === "undefined") return;
+    try {
+      if (document.pictureInPictureElement) {
+        await document.exitPictureInPicture();
+      } else if (video.requestPictureInPicture) {
+        await video.requestPictureInPicture();
+      }
+    } catch {
+      setShowSettings(true);
+      revealControls();
+    }
+  }
+
   return (
     <section
-      className={styles.player}
+      className={`${styles.player} ravine-player--${playerKind}`}
+      data-ravine-player-kind={playerKind}
       dir={ar ? "rtl" : "ltr"}
-      aria-label={ar ? "مشغل RAVINE" : "RAVINE player"}
+      aria-label={ar ? `مشغل RAVINE — ${contentType}` : `RAVINE ${contentType} player`}
       onMouseMove={revealControls}
       onPointerDown={revealControls}
       onTouchStart={revealControls}
     >
-      <div
-        className={`${styles.stage} ${ended ? styles.ended : ""}`}
-        style={ended && poster ? { backgroundImage: `url(${poster})` } : undefined}
-      >
+      <div className={`${styles.stage} ${ended ? styles.ended : ""}`} style={ended && poster ? { backgroundImage: `url(${poster})` } : undefined}>
         {activeSrc ? (
           <video
             ref={videoRef}
             className="watch-video"
             controls={false}
             controlsList="nodownload noremoteplayback"
-            disablePictureInPicture
+            disablePictureInPicture={false}
             disableRemotePlayback
             playsInline
             preload="metadata"
             poster={poster || undefined}
             src={activeSrc}
-            onPlay={() => syncPlaying(true)}
+            onPlay={() => { setMediaError(null); syncPlaying(true); }}
             onPause={() => syncPlaying(false)}
             onTimeUpdate={(event) => setCurrent(event.currentTarget.currentTime)}
-            onLoadedMetadata={(event) => setReadyDuration(event.currentTarget.duration || duration || 0)}
+            onLoadedMetadata={(event) => { setMediaError(null); setReadyDuration(event.currentTarget.duration || duration || 0); }}
+            onLoadedData={() => setMediaError(null)}
+            onError={(event) => {
+              const code = event.currentTarget.error?.code;
+              setMediaError(mediaErrorCopy(code, ar));
+              syncPlaying(false);
+            }}
             onVolumeChange={(event) => setVolume(event.currentTarget.volume)}
             onEnded={() => {
               setEnded(true);
@@ -187,10 +230,18 @@ export default function RAVINEPlayer({ src, poster, title, contentType, duration
           <div className={styles.empty}>{ar ? "العمل غير متاح للتشغيل حاليًا." : "This work is not available for playback yet."}</div>
         )}
 
+        {mediaError ? (
+          <div className={styles.errorOverlay} role="alert">
+            <strong>{ar ? "تعذر التشغيل" : "Playback unavailable"}</strong>
+            <span>{mediaError}</span>
+            <button type="button" onClick={() => { setMediaError(null); videoRef.current?.load(); revealControls(); }}>{ar ? "إعادة المحاولة" : "Try again"}</button>
+          </div>
+        ) : null}
+
         {activeAuxiliary ? (
           <div className={styles.auxiliaryLabel}>
             {introChoice === "trailer" ? (ar ? "التريلر" : "TRAILER") : (ar ? "المعاينة" : "PREVIEW")}
-            <button type="button" onClick={() => { setIntroChoice("main"); setEnded(false); revealControls(); }}>{ar ? "مشاهدة العمل" : "Watch full work"}</button>
+            <button type="button" onClick={() => { setIntroChoice("main"); setEnded(false); setMediaError(null); revealControls(); }}>{ar ? "مشاهدة العمل" : "Watch full work"}</button>
           </div>
         ) : null}
       </div>
@@ -198,20 +249,16 @@ export default function RAVINEPlayer({ src, poster, title, contentType, duration
       {(trailer || preview) && introChoice === "main" ? (
         <div className={styles.introBar}>
           <span>{ar ? "قبل المشاهدة" : "Before watching"}</span>
-          {trailer ? <button type="button" onClick={() => { setIntroChoice("trailer"); setEnded(false); revealControls(); }}>{ar ? "شاهد التريلر" : "Watch trailer"}</button> : null}
-          {preview ? <button type="button" onClick={() => { setIntroChoice("preview"); setEnded(false); revealControls(); }}>{ar ? "شاهد المعاينة" : "Watch preview"}</button> : null}
-          <button className={styles.primaryChoice} type="button" onClick={() => { setIntroChoice("main"); setEnded(false); revealControls(); }}>{ar ? "ابدأ العمل" : "Start work"}</button>
+          {trailer ? <button type="button" onClick={() => { setIntroChoice("trailer"); setEnded(false); setMediaError(null); revealControls(); }}>{ar ? "شاهد التريلر" : "Watch trailer"}</button> : null}
+          {preview ? <button type="button" onClick={() => { setIntroChoice("preview"); setEnded(false); setMediaError(null); revealControls(); }}>{ar ? "شاهد المعاينة" : "Watch preview"}</button> : null}
+          <button className={styles.primaryChoice} type="button" onClick={() => { setIntroChoice("main"); setEnded(false); setMediaError(null); revealControls(); }}>{ar ? "ابدأ العمل" : "Start work"}</button>
         </div>
       ) : null}
 
       <div className={`${styles.controls} ${!showControls && playing ? styles.quietControls : ""}`} aria-hidden={!showControls && playing}>
         <div className={styles.timelineRow}>
           <span>{formatTime(current)}</span>
-          <div
-            className={styles.timelineTrack}
-            onPointerMove={handleTimelineHover}
-            onPointerLeave={() => setTimelineHover(null)}
-          >
+          <div className={styles.timelineTrack} onPointerMove={handleTimelineHover} onPointerLeave={() => setTimelineHover(null)}>
             {timelineHover !== null ? <span className={styles.timelineHoverLine} style={{ left: `${timelineHover}%` }} aria-hidden="true" /> : null}
             <input aria-label={ar ? "موضع التشغيل" : "Playback position"} type="range" min="0" max={activeDuration || 0} step="0.1" value={Math.min(current, activeDuration || 0)} onChange={(event) => seekTo(Number(event.target.value))} />
           </div>
@@ -224,6 +271,7 @@ export default function RAVINEPlayer({ src, poster, title, contentType, duration
           <label className={styles.volume}><Volume2 size={16} /><input aria-label={ar ? "مستوى الصوت" : "Volume"} type="range" min="0" max="1" step="0.05" value={volume} style={{ "--volume-fill": `${volume * 100}%` } as CSSProperties} onChange={(event) => { const value = Number(event.target.value); setVolume(value); if (videoRef.current) videoRef.current.volume = value; }} /></label>
           <button type="button" onClick={() => { setShowChapters((value) => !value); revealControls(); }} aria-pressed={showChapters} title={ar ? "الفصول" : "Chapters"}><List size={17} /></button>
           <button type="button" onClick={() => { setShowSettings((value) => !value); revealControls(); }} aria-pressed={showSettings} title={ar ? "الإعدادات" : "Settings"}><Settings2 size={17} /></button>
+          <button type="button" onClick={() => void togglePictureInPicture()} title={ar ? "صورة داخل صورة" : "Picture in picture"} aria-pressed={pipActive}><PictureInPicture size={17} /></button>
           <button type="button" onClick={() => void toggleFullscreen()} title={ar ? "ملء الشاشة" : "Fullscreen"}><Maximize2 size={17} /></button>
         </div>
       </div>
