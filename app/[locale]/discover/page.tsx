@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import DiscoverFilters from "@/components/DiscoverFilters";
 import { formatRavineNumber } from "@/lib/ravine-number-formatter";
 import "./discover-enhancements.module.css";
+import "./discover-card-hierarchy.module.css";
 
 export const dynamic = "force-dynamic";
 
