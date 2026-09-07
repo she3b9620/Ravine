@@ -88,7 +88,7 @@ export default function SearchResultsPanel(props: SearchResultsPanelProps) {
       } finally {
         setLoading(false);
       }
-    }, props.query.trim() ? 180 : 80);
+    }, props.query.trim() ? 80 : 50);
 
     return () => window.clearTimeout(timer);
   }, [queryString, props.query]);
@@ -101,7 +101,7 @@ export default function SearchResultsPanel(props: SearchResultsPanelProps) {
       <div className="ravine-search-live-state is-error">
         {ar ? "تعذر تحديث النتائج الآن." : "Results could not be updated right now."}
         <Link href={discoverHref} className="ravine-search-discover-cta">
-          <span>{ar ? "اكتشف شيئًا أكبر" : "Discover something bigger"}</span>
+          <span>{ar ? "فتح النتائج في اكتشف" : "Open full results in Discover"}</span>
           <span aria-hidden="true">→</span>
         </Link>
       </div>
@@ -117,13 +117,18 @@ export default function SearchResultsPanel(props: SearchResultsPanelProps) {
       <div className="ravine-search-discovery">
         <div className="ravine-search-section-heading">
           <span>{ar ? "رَافِين / اكتشاف ذكي" : "RAVINE / SMART DISCOVERY"}</span>
-          <strong>{ar ? "مساحة للاكتشاف، مش مجرد بحث." : "A discovery layer, not just a search box."}</strong>
         </div>
         <div className="ravine-search-discovery-grid">
           {videos.slice(0, 4).map((video) => (
             <Link href={`/${locale}/watch/${video.id}`} className="ravine-search-discovery-card" key={video.id}>
               <div className="ravine-search-result-thumb"><img src={video.thumbnail_url || "/RAVINE.PNG"} alt="" /></div>
-              <div><small>{video.content_type || "WORK"}{video.quality ? ` · ${video.quality}` : ""}</small><strong>{video.title || (ar ? "عمل بدون عنوان" : "Untitled work")}</strong></div>
+              <div className="ravine-search-discovery-copy">
+                <div className="ravine-search-result-badges">
+                  <small>{video.content_type || "WORK"}</small>
+                  {video.quality ? <small>{video.quality}</small> : null}
+                </div>
+                <strong>{video.title || (ar ? "عمل بدون عنوان" : "Untitled work")}</strong>
+              </div>
             </Link>
           ))}
         </div>
@@ -160,7 +165,15 @@ export default function SearchResultsPanel(props: SearchResultsPanelProps) {
             {videos.map((video) => (
               <Link href={`/${locale}/watch/${video.id}`} className="ravine-search-video-result" key={video.id}>
                 <div className="ravine-search-result-thumb"><img src={video.thumbnail_url || "/RAVINE.PNG"} alt="" /><span>{durationLabel(video.duration)}</span></div>
-                <div className="ravine-search-video-copy"><small>{video.content_type || "WORK"}{video.quality ? ` · ${video.quality}` : ""}</small><strong>{video.title || (ar ? "عمل بدون عنوان" : "Untitled work")}</strong><p>{shorten(video.description, 88)}</p><em>{Number(video.views || 0).toLocaleString()} {ar ? "مشاهدة" : "views"}</em></div>
+                <div className="ravine-search-video-copy">
+                  <div className="ravine-search-result-badges">
+                    <small>{video.content_type || "WORK"}</small>
+                    {video.quality ? <small>{video.quality}</small> : null}
+                  </div>
+                  <strong>{video.title || (ar ? "عمل بدون عنوان" : "Untitled work")}</strong>
+                  <p>{shorten(video.description, 88)}</p>
+                  <em>{Number(video.views || 0).toLocaleString()} {ar ? "مشاهدة" : "views"}</em>
+                </div>
               </Link>
             ))}
           </div>
@@ -169,8 +182,8 @@ export default function SearchResultsPanel(props: SearchResultsPanelProps) {
         )}
       </section>
 
-      <Link href={discoverHref} className="ravine-search-discover-cta" aria-label={ar ? "اكتشف شيئًا أكبر" : "Discover something bigger"}>
-        <span>{ar ? "اكتشف شيئًا أكبر" : "Discover something bigger"}</span>
+      <Link href={discoverHref} className="ravine-search-discover-cta" aria-label={ar ? "فتح النتائج في اكتشف" : "Open full results in Discover"}>
+        <span>{ar ? "فتح النتائج في اكتشف" : "Open full results in Discover"}</span>
         <span aria-hidden="true">→</span>
       </Link>
     </div>
