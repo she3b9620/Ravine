@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 const COMPLETED_KEY = "ravine-home-welcome-login-cycle-v1";
+const LOGIN_SIGNAL_KEY = "ravine-login-cycle-started";
+const LOGIN_COOKIE = "ravine_login_cycle=1";
 const SETTLE_DELAY_MS = 3000;
 const EXIT_DURATION_MS = 3000;
 
@@ -22,6 +24,15 @@ function clearHero(hero?: HTMLElement | null) {
   hero.classList.remove("ravine-home-welcome-settling", "ravine-home-welcome-settled");
   delete hero.dataset.ravineWelcomeMotionBound;
   delete hero.dataset.ravineWelcomeFinishTimer;
+}
+
+function consumeLoginSignal() {
+  const sessionSignal = sessionStorage.getItem(LOGIN_SIGNAL_KEY) === "1";
+  const cookieSignal = document.cookie.split(";").some((part) => part.trim() === LOGIN_COOKIE);
+  if (!sessionSignal && !cookieSignal) return false;
+  sessionStorage.removeItem(LOGIN_SIGNAL_KEY);
+  if (cookieSignal) document.cookie = "ravine_login_cycle=; Max-Age=0; Path=/; SameSite=Lax";
+  return true;
 }
 
 export default function HomeWelcomeMotion() {
@@ -78,12 +89,22 @@ export default function HomeWelcomeMotion() {
       }, SETTLE_DELAY_MS);
     };
 
+    const maybeRunFromLoginSignal = async () => {
+      if (!consumeLoginSignal()) return;
+      const { data } = await supabase.auth.getUser();
+      if (data.user) window.setTimeout(() => runAfterLogin(data.user!.id), 0);
+    };
+
     const clearLoginCycle = () => {
       reset();
       Object.keys(sessionStorage)
         .filter((key) => key.startsWith(`${COMPLETED_KEY}:`))
         .forEach((key) => sessionStorage.removeItem(key));
+      sessionStorage.removeItem(LOGIN_SIGNAL_KEY);
+      document.cookie = "ravine_login_cycle=; Max-Age=0; Path=/; SameSite=Lax";
     };
+
+    void maybeRunFromLoginSignal();
 
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_OUT") {
@@ -91,7 +112,8 @@ export default function HomeWelcomeMotion() {
         return;
       }
       if (event === "SIGNED_IN" && session?.user) {
-        window.setTimeout(() => runAfterLogin(session.user.id), 0);
+        if (sessionStorage.getItem(LOGIN_SIGNAL_KEY) === "1") void maybeRunFromLoginSignal();
+        else window.setTimeout(() => runAfterLogin(session.user.id), 0);
       }
     });
 
