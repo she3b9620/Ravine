@@ -58,7 +58,9 @@ create table if not exists public.ravine_work_context (
   updated_at timestamptz not null default now()
 );
 
-create or replace view public.ravine_work_catalog as
+create or replace view public.ravine_work_catalog
+with (security_invoker = true)
+as
 select
   w.id,
   w.legacy_video_id,
@@ -94,6 +96,7 @@ drop policy if exists ravine_work_public_read on public.ravine_works;
 create policy ravine_work_public_read
 on public.ravine_works
 for select
+to anon, authenticated
 using (status = 'published' and visibility = 'public' and discovery_enabled = true);
 
 -- Creator-owned Work writes. Exact role verification/RLS helper functions remain a separate security phase.
@@ -101,6 +104,7 @@ drop policy if exists ravine_work_owner_insert on public.ravine_works;
 create policy ravine_work_owner_insert
 on public.ravine_works
 for insert
+to authenticated
 with check (
   exists (
     select 1
@@ -114,6 +118,7 @@ drop policy if exists ravine_work_owner_update on public.ravine_works;
 create policy ravine_work_owner_update
 on public.ravine_works
 for update
+to authenticated
 using (
   exists (
     select 1
@@ -131,4 +136,4 @@ with check (
   )
 );
 
--- Do not silently broaden write access on the contextual child tables before the full creator-role audit.
+-- Child-table write policies remain intentionally scoped to a later creator-role audit.
