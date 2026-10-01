@@ -104,3 +104,335 @@ html[data-theme="light"] .ravine-footer-brand{filter:drop-shadow(0 0 8px rgba(23
   .home-viewer-hero.ravine-home-welcome-settling .home-viewer-welcome-copy,
   .home-viewer-hero.ravine-home-welcome-settling .home-viewer-profile{animation:none!important}
 }
+
+/* RAVINE FINAL HERO CONTROL REBUILD — 2026-10-01 */
+
+/* Remove the obsolete halo/buffer around the open control launcher. */
+.guest-shell .ravine-home-video-control-shell.is-open::before{
+  display:none!important;
+  content:none!important;
+  background:none!important;
+  filter:none!important;
+  opacity:0!important;
+}
+
+/* Keep the sidebar below the horizontal header without moving its visible items. */
+@media (min-width:981px){
+  .guest-shell .ravine-sidebar,
+  .ravine-shell .ravine-sidebar{
+    inset-block-start:60px!important;
+    height:calc(100dvh - 60px)!important;
+    padding-top:42px!important;
+  }
+}
+
+/* Guest Hero controls: opposite the sidebar. */
+.guest-shell .ravine-home-video-control-shell{
+  position:fixed!important;
+  top:auto!important;
+  bottom:24px!important;
+  z-index:140!important;
+  display:flex!important;
+  align-items:flex-end!important;
+  gap:8px!important;
+  width:auto!important;
+  height:auto!important;
+  margin:0!important;
+  padding:0!important;
+  direction:ltr!important;
+}
+
+/* Arabic -> left, panel opens inward to the right. */
+.guest-shell .ravine-home-video-control-shell.is-rtl{
+  left:24px!important;
+  right:auto!important;
+  flex-direction:row!important;
+}
+
+/* English -> right, panel opens inward to the left. */
+.guest-shell .ravine-home-video-control-shell.is-ltr{
+  right:24px!important;
+  left:auto!important;
+  flex-direction:row-reverse!important;
+}
+
+/* Launcher button. */
+.guest-shell .ravine-home-video-control-toggle{
+  position:relative!important;
+  flex:0 0 44px!important;
+  width:44px!important;
+  height:44px!important;
+  display:grid!important;
+  place-items:center!important;
+  padding:0!important;
+  margin:0!important;
+  border:1px solid rgba(241,233,220,.16)!important;
+  border-radius:15px!important;
+  background:rgba(9,9,9,.52)!important;
+  color:#F1E9DC!important;
+  -webkit-backdrop-filter:blur(14px) saturate(115%)!important;
+  backdrop-filter:blur(14px) saturate(115%)!important;
+  box-shadow:0 14px 36px rgba(0,0,0,.26),0 0 0 1px rgba(196,122,82,.035)!important;
+  cursor:pointer!important;
+  transition:transform .20s ease,border-color .20s ease,background .20s ease,color .20s ease,box-shadow .20s ease!important;
+}
+.guest-shell .ravine-home-video-control-toggle:hover,
+.guest-shell .ravine-home-video-control-toggle:focus-visible{
+  transform:translateY(-2px)!important;
+  border-color:rgba(196,122,82,.58)!important;
+  background:rgba(196,122,82,.10)!important;
+  color:#F1E9DC!important;
+  box-shadow:0 16px 40px rgba(0,0,0,.30),0 0 18px rgba(196,122,82,.08)!important;
+  outline:none!important;
+}
+.guest-shell .ravine-home-video-control-toggle svg{
+  width:19px!important;
+  height:19px!important;
+}
+.guest-shell .ravine-home-video-control-toggle svg polygon{
+  fill:currentColor!important;
+  stroke:none!important;
+}
+html[data-theme="light"] .guest-shell .ravine-home-video-control-toggle{
+  background:rgba(241,233,220,.78)!important;
+  border-color:rgba(23,23,23,.14)!important;
+  color:#171717!important;
+  box-shadow:0 14px 34px rgba(23,23,23,.12)!important;
+}
+html[data-theme="light"] .guest-shell .ravine-home-video-control-toggle:hover,
+html[data-theme="light"] .guest-shell .ravine-home-video-control-toggle:focus-visible{
+  border-color:rgba(169,93,56,.48)!important;
+  background:rgba(255,250,246,.90)!important;
+  color:#70402F!important;
+}
+
+/* Collapsed / expanded panel. */
+.guest-shell .ravine-hero-video-controls-panel{
+  position:relative!important;
+  display:block!important;
+  width:0!important;
+  max-width:calc(100vw - 84px)!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:visible!important;
+  opacity:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+  transform:translateX(8px) scale(.97)!important;
+  transform-origin:center bottom!important;
+  transition:width .28s cubic-bezier(.22,1,.36,1),opacity .18s ease,transform .28s cubic-bezier(.22,1,.36,1),visibility 0s linear .28s!important;
+}
+.guest-shell .ravine-home-video-control-shell.is-rtl .ravine-hero-video-controls-panel{
+  transform:translateX(-8px) scale(.97)!important;
+}
+.guest-shell .ravine-home-video-control-shell.is-ltr .ravine-hero-video-controls-panel{
+  transform:translateX(8px) scale(.97)!important;
+}
+.guest-shell .ravine-home-video-control-shell.is-open .ravine-hero-video-controls-panel{
+  width:min(360px,calc(100vw - 84px))!important;
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+  transform:translateX(0) scale(1)!important;
+  transition-delay:0s!important;
+}
+
+/* Main control surface. */
+.guest-shell .ravine-hero-video-controls-panel > .ravine-hero-video-controls{
+  position:relative!important;
+  top:auto!important;
+  right:auto!important;
+  bottom:auto!important;
+  left:auto!important;
+  inset:auto!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:none!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:stretch!important;
+  justify-content:center!important;
+  gap:10px!important;
+  margin:0!important;
+  padding:12px!important;
+  overflow:visible!important;
+  border:1px solid rgba(241,233,220,.13)!important;
+  border-radius:18px!important;
+  background:linear-gradient(145deg,rgba(9,9,9,.84),rgba(21,23,25,.90))!important;
+  -webkit-backdrop-filter:blur(18px) saturate(115%)!important;
+  backdrop-filter:blur(18px) saturate(115%)!important;
+  box-shadow:0 18px 48px rgba(0,0,0,.28),0 0 0 1px rgba(196,122,82,.035) inset!important;
+  direction:ltr!important;
+}
+
+/* Timeline above the button row. */
+.guest-shell .ravine-home-video-timeline{
+  order:1!important;
+  width:100%!important;
+  min-width:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  margin:0!important;
+  padding:0 2px!important;
+}
+.guest-shell .ravine-home-video-timeline input[type="range"]{
+  width:100%!important;
+  max-width:none!important;
+  height:4px!important;
+  margin:0!important;
+  opacity:.82!important;
+}
+
+/* Buttons below the timeline. */
+.guest-shell .ravine-video-controls-row{
+  order:2!important;
+  width:100%!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:8px!important;
+  margin:0!important;
+  padding:0!important;
+}
+.guest-shell .ravine-hero-video-controls .ravine-video-control{
+  position:relative!important;
+  flex:0 0 40px!important;
+  width:40px!important;
+  height:40px!important;
+  display:grid!important;
+  place-items:center!important;
+  margin:0!important;
+}
+.guest-shell .ravine-hero-video-controls .ravine-video-control svg{
+  width:18px!important;
+  height:18px!important;
+}
+
+/* Horizontal volume rail beneath the volume icon. */
+.guest-shell .ravine-video-audio-wrap{
+  position:relative!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:40px!important;
+  height:40px!important;
+  overflow:visible!important;
+  z-index:20!important;
+}
+.guest-shell .ravine-video-volume-popover{
+  position:absolute!important;
+  top:calc(100% + 8px)!important;
+  bottom:auto!important;
+  left:50%!important;
+  right:auto!important;
+  width:116px!important;
+  height:32px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:0 8px!important;
+  border:1px solid rgba(241,233,220,.14)!important;
+  border-radius:12px!important;
+  background:rgba(9,9,9,.82)!important;
+  -webkit-backdrop-filter:blur(14px) saturate(115%)!important;
+  backdrop-filter:blur(14px) saturate(115%)!important;
+  box-shadow:0 14px 34px rgba(0,0,0,.24)!important;
+  opacity:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+  transform:translate(-50%,-5px) scale(.95)!important;
+  transform-origin:center top!important;
+  transition:opacity .20s ease,transform .20s cubic-bezier(.22,1,.36,1),visibility 0s linear .20s!important;
+  z-index:80!important;
+}
+.guest-shell .ravine-video-audio-wrap:hover .ravine-video-volume-popover,
+.guest-shell .ravine-video-audio-wrap:focus-within .ravine-video-volume-popover,
+.guest-shell .ravine-video-audio-wrap.volume-open .ravine-video-volume-popover,
+.guest-shell .ravine-video-volume-popover:hover{
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+  transform:translate(-50%,0) scale(1)!important;
+  transition-delay:0s!important;
+}
+.guest-shell .ravine-video-volume-popover label{
+  width:100%!important;
+  height:100%!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  margin:0!important;
+  padding:0!important;
+}
+.guest-shell .ravine-video-volume-popover input[type="range"]{
+  width:96px!important;
+  height:4px!important;
+  margin:0!important;
+  padding:0!important;
+  display:block!important;
+  writing-mode:horizontal-tb!important;
+  direction:ltr!important;
+  transform:none!important;
+  accent-color:#C47A52!important;
+  cursor:pointer!important;
+}
+.guest-shell .ravine-video-volume-popover input[type="range"]::-webkit-slider-runnable-track{
+  width:96px!important;
+  height:4px!important;
+  border-radius:999px!important;
+  background:rgba(241,233,220,.20)!important;
+}
+.guest-shell .ravine-video-volume-popover input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance:none!important;
+  appearance:none!important;
+  width:12px!important;
+  height:12px!important;
+  margin-top:-4px!important;
+  border:1px solid rgba(241,233,220,.8)!important;
+  border-radius:50%!important;
+  background:#C47A52!important;
+}
+html[data-theme="light"] .guest-shell .ravine-hero-video-controls-panel > .ravine-hero-video-controls{
+  border-color:rgba(23,23,23,.13)!important;
+  background:linear-gradient(145deg,rgba(241,233,220,.88),rgba(241,233,220,.94))!important;
+  box-shadow:0 18px 44px rgba(23,23,23,.14),0 0 0 1px rgba(196,122,82,.035) inset!important;
+}
+html[data-theme="light"] .guest-shell .ravine-video-volume-popover{
+  background:rgba(241,233,220,.94)!important;
+  border-color:rgba(23,23,23,.14)!important;
+  box-shadow:0 14px 32px rgba(23,23,23,.12)!important;
+}
+@media(max-width:820px){
+  .guest-shell .ravine-home-video-control-shell{bottom:14px!important}
+  .guest-shell .ravine-home-video-control-shell.is-rtl{left:12px!important}
+  .guest-shell .ravine-home-video-control-shell.is-ltr{right:12px!important}
+  .guest-shell .ravine-home-video-control-toggle{
+    flex-basis:40px!important;
+    width:40px!important;
+    height:40px!important;
+    border-radius:13px!important;
+  }
+  .guest-shell .ravine-home-video-control-shell.is-open .ravine-hero-video-controls-panel{
+    width:min(320px,calc(100vw - 68px))!important;
+  }
+  .guest-shell .ravine-hero-video-controls-panel > .ravine-hero-video-controls{
+    padding:10px!important;
+    border-radius:16px!important;
+  }
+  .guest-shell .ravine-hero-video-controls .ravine-video-control{
+    flex-basis:37px!important;
+    width:37px!important;
+    height:37px!important;
+  }
+  .guest-shell .ravine-video-controls-row{gap:6px!important}
+  .guest-shell .ravine-video-volume-popover{width:108px!important;height:30px!important}
+  .guest-shell .ravine-video-volume-popover input[type="range"]{width:88px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  .guest-shell .ravine-home-video-control-toggle,
+  .guest-shell .ravine-hero-video-controls-panel,
+  .guest-shell .ravine-video-volume-popover{transition:none!important}
+}
+
+/* END RAVINE FINAL HERO CONTROL REBUILD — 2026-10-01 */
