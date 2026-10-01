@@ -354,7 +354,7 @@ export default function VideoAudioToggle({
         aria-expanded={controlsOpen}
         onClick={() => setControlsOpen((open) => !open)}
       >
-        {controlsOpen ? <ControlMenuIcon /> : <PlayIcon />}
+        <ControlMenuIcon />
       </button>
 
       <div className="ravine-hero-video-controls-panel">
