@@ -39,3 +39,7 @@ html[data-theme="light"] .guest-shell .ravine-home-video-control-shell.is-open::
     filter:blur(6px);
   }
 }
+
+
+/* Remove the top-edge halo above the Guest Hero copy; keep the control surface itself unchanged. */
+.guest-shell .ravine-home-video-control-shell.is-open::before{display:none!important;content:none!important;background:none!important;filter:none!important}

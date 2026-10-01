@@ -11,6 +11,8 @@ import {
   Search,
   SkipBack,
   SkipForward,
+  Volume2,
+  VolumeX,
   X,
 } from "lucide-react";
 import {
@@ -52,6 +54,8 @@ export default function RavineRadio({ locale }: Props) {
   const [query, setQuery] = useState("");
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [volume, setVolume] = useState(1);
+  const [miniHidden, setMiniHidden] = useState(false);
 
   const playerRef = useRef<YouTubePlayer | null>(null);
   const playerHostRef = useRef<HTMLDivElement | null>(null);
@@ -83,6 +87,15 @@ export default function RavineRadio({ locale }: Props) {
   }, [open]);
 
   useEffect(() => {
+    const onPlayerState = (event: Event) => {
+      const visible = (event as CustomEvent<{ visible?: boolean }>).detail?.visible;
+      if (typeof visible === "boolean") setMiniHidden(!visible);
+    };
+    window.addEventListener("ravine:radio-player-state", onPlayerState);
+    return () => window.removeEventListener("ravine:radio-player-state", onPlayerState);
+  }, []);
+
+  useEffect(() => {
     let cancelled = false;
 
     const mountPlayer = async () => {
@@ -108,6 +121,7 @@ export default function RavineRadio({ locale }: Props) {
             onReady: () => {
               if (cancelled) return;
               setDuration(player.getDuration?.() ?? 0);
+              player.setVolume?.(volume * 100);
               if (playingRef.current) player.playVideo?.();
             },
             onStateChange: (event) => {
@@ -249,6 +263,22 @@ export default function RavineRadio({ locale }: Props) {
     window.open(target, "_blank", "noopener,noreferrer");
   };
 
+  const setRadioVolume = (next: number) => {
+    const clamped = Math.max(0, Math.min(1, Number.isFinite(next) ? next : 1));
+    setVolume(clamped);
+    playerRef.current?.setVolume?.(Math.round(clamped * 100));
+  };
+
+  const toggleRadioMute = () => {
+    setRadioVolume(volume > 0 ? 0 : 1);
+  };
+
+  const toggleMiniPlayer = () => {
+    const visible = miniHidden;
+    setMiniHidden(!visible);
+    window.dispatchEvent(new CustomEvent("ravine:radio-player-state", { detail: { visible } }));
+  };
+
   const togglePlayback = () => {
     const nextPlaying = !playing;
     setHasStarted(true);
@@ -343,24 +373,33 @@ export default function RavineRadio({ locale }: Props) {
         .ravine-radio-progress-time{font-size:9px;color:var(--stone);font-variant-numeric:tabular-nums;min-width:29px}
         .ravine-radio-progress-track{position:relative;height:4px;flex:1;border-radius:99px;background:rgba(241,233,220,.11);cursor:pointer;overflow:hidden}
         .ravine-radio-progress-fill{position:absolute;inset-block:0;inset-inline-start:0;width:${progress}%;border-radius:inherit;background:linear-gradient(90deg,#c47a52,#d49a78);transition:width .22s linear}
-        .ravine-radio-mini{position:fixed;z-index:190;inset-inline-end:22px;bottom:22px;width:min(420px,calc(100vw - 44px));display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;padding:11px 13px;border:1px solid rgba(241,233,220,.12);border-radius:17px;background:linear-gradient(140deg,rgba(9,9,9,.94),rgba(21,23,25,.92));box-shadow:0 18px 55px rgba(0,0,0,.32),0 0 0 1px rgba(196,122,82,.05) inset;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);animation:ravineRadioMiniIn .34s cubic-bezier(.22,1,.36,1) both}
+        .ravine-radio-dock{position:fixed;z-index:190;inset-inline-end:18px;bottom:18px;display:flex;flex-direction:row-reverse;align-items:flex-end;gap:8px;max-width:calc(100vw - 36px);direction:inherit}
+        .ravine-radio-tab{width:46px;height:46px;flex:0 0 46px;display:grid;place-items:center;padding:0;border:1px solid rgba(241,233,220,.12);border-radius:15px;background:linear-gradient(145deg,#183f46,#151719);color:#f1e9dc;box-shadow:0 16px 42px rgba(0,0,0,.26);cursor:pointer;transition:transform .24s ease,border-color .24s ease,background .24s ease,box-shadow .24s ease}
+        .ravine-radio-tab:hover{transform:translateY(-2px);border-color:rgba(196,122,82,.4);background:linear-gradient(145deg,#234c54,#1a1d1e)}
+        .ravine-radio-mini{position:relative;flex:0 1 auto;width:min(500px,calc(100vw - 92px));max-width:500px;max-height:120px;display:grid;gap:9px;overflow:hidden;padding:11px 13px;border:1px solid rgba(241,233,220,.12);border-radius:17px;background:linear-gradient(140deg,rgba(9,9,9,.94),rgba(21,23,25,.92));box-shadow:0 18px 55px rgba(0,0,0,.32),0 0 0 1px rgba(196,122,82,.05) inset;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);opacity:1;visibility:visible;transform:translateX(0);transition:opacity .22s ease,transform .28s cubic-bezier(.22,1,.36,1),max-width .28s cubic-bezier(.22,1,.36,1),padding .28s ease,border-color .28s ease}
+        .ravine-radio-mini[data-user-hidden="true"]{max-width:0;opacity:0;visibility:hidden;transform:translateX(-10px);padding-inline:0;border-color:transparent;pointer-events:none}
+        .ravine-radio-mini-head{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;min-width:0}
         .ravine-radio-mini-art{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;color:#f1e9dc;background:linear-gradient(145deg,#183f46,#70402f);box-shadow:inset 0 0 0 1px rgba(241,233,220,.1)}
         .ravine-radio-mini-copy{display:grid;gap:3px;min-width:0}
         .ravine-radio-mini-kicker{font-size:9px;color:#d49a78;letter-spacing:.12em;text-transform:uppercase}
         .ravine-radio-mini-title{font-size:13px;font-weight:800;color:#f1e9dc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
         .ravine-radio-mini-subtitle{font-size:10px;color:#9a9690;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-        .ravine-radio-mini-controls{display:flex;align-items:center;gap:5px}
+        .ravine-radio-mini-volume{display:grid;justify-items:center;gap:4px;min-width:92px}
+        .ravine-radio-mini-volume button{width:30px;height:28px;padding:0;display:grid;place-items:center;border:1px solid rgba(241,233,220,.09);border-radius:9px;background:rgba(241,233,220,.035);color:#f1e9dc;cursor:pointer}
+        .ravine-radio-mini-volume button:hover{border-color:rgba(196,122,82,.35);background:rgba(196,122,82,.07)}
+        .ravine-radio-mini-volume input{width:94px;height:4px;margin:0;accent-color:#c47a52;cursor:pointer}
+        .ravine-radio-mini-progress{display:flex;align-items:center;gap:8px;min-width:0}
+        .ravine-radio-mini-progress .ravine-radio-progress-track{height:4px}
+        .ravine-radio-mini-controls{display:flex;align-items:center;justify-content:center;gap:5px}
         .ravine-radio-mini-controls button{width:34px;height:34px;padding:0;border-radius:10px;border:1px solid rgba(241,233,220,.08);background:rgba(241,233,220,.035);color:#f1e9dc;display:grid;place-items:center;cursor:pointer}
         .ravine-radio-mini-controls button:hover{border-color:rgba(196,122,82,.35);background:rgba(196,122,82,.07)}
         .ravine-radio-mini-controls .is-main{width:38px;height:38px;border-color:rgba(196,122,82,.3);background:rgba(196,122,82,.12)}
-        .ravine-radio-mini-progress{grid-column:1/-1;display:flex;align-items:center;gap:8px}
-        .ravine-radio-mini-progress .ravine-radio-progress-track{height:3px}
         .ravine-radio-player{position:fixed;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden;pointer-events:none;opacity:0}
         @keyframes ravineRadioDrawerOut{from{opacity:1;transform:translate3d(0,0,0)}to{opacity:0;transform:translate3d(var(--ravine-radio-out-x),var(--ravine-radio-out-y),0)}}
         @keyframes ravineRadioMiniIn{from{opacity:0;transform:translateY(16px) scale(.98);filter:blur(3px)}to{opacity:1;transform:none;filter:none}}
         html[data-theme="light"] .ravine-radio-search-box input,html[data-theme="light"] .ravine-radio-search-result,html[data-theme="light"] .ravine-radio-actions button{color:#f1e9dc}
         html[data-theme="light"] .ravine-radio-search-result-subtitle,html[data-theme="light"] .ravine-radio-search-label,html[data-theme="light"] .ravine-radio-catalog-count{color:#d8d0c5}
-        @media(max-width:600px){.ravine-radio-drawer{gap:13px}.ravine-radio-search-box{min-height:46px}.ravine-radio-actions{grid-template-columns:repeat(5,minmax(0,1fr))}.ravine-radio-actions button{width:100%;padding:0}.ravine-radio-mini{inset-inline:14px;width:auto;bottom:14px;padding:10px}.ravine-radio-mini-controls button{width:31px;height:31px}.ravine-radio-mini-controls .is-main{width:35px;height:35px}}
+        @media(max-width:600px){.ravine-radio-drawer{gap:13px}.ravine-radio-search-box{min-height:46px}.ravine-radio-actions{grid-template-columns:repeat(5,minmax(0,1fr))}.ravine-radio-actions button{width:100%;padding:0}.ravine-radio-dock{inset-inline-end:12px;bottom:12px;max-width:calc(100vw - 24px)}.ravine-radio-tab{width:42px;height:42px;flex-basis:42px;border-radius:13px}.ravine-radio-mini{width:calc(100vw - 68px);max-width:calc(100vw - 68px);padding:10px}.ravine-radio-mini-head{grid-template-columns:auto minmax(0,1fr) auto;gap:8px}.ravine-radio-mini-volume{min-width:78px}.ravine-radio-mini-volume input{width:78px}.ravine-radio-mini-controls button{width:31px;height:31px}.ravine-radio-mini-controls .is-main{width:35px;height:35px}}
         @media(prefers-reduced-motion:reduce){.ravine-radio-search-box,.ravine-radio-search-result,.ravine-radio-actions button,.ravine-radio-drawer,.ravine-radio-drawer.is-closing,.ravine-radio-mini{transition:none;animation:none}}
       `}</style>
 
@@ -492,34 +531,75 @@ export default function RavineRadio({ locale }: Props) {
       </aside>
 
       {hasStarted ? (
-        <div className="ravine-radio-mini" role="region" aria-label={ar ? "مشغل راديو مصغر" : "Mini Radio Player"}>
-          <div className="ravine-radio-mini-art" aria-hidden="true"><Radio size={18} strokeWidth={1.8} /></div>
-          <div className="ravine-radio-mini-copy">
-            <span className="ravine-radio-mini-kicker">RAVINE RADIO</span>
-            <span className="ravine-radio-mini-title">{active.title}</span>
-            <span className="ravine-radio-mini-subtitle">{playing ? (ar ? "يعمل الآن" : "Playing now") : ar ? "متوقف مؤقتًا" : "Paused"}</span>
-          </div>
-          <div className="ravine-radio-mini-controls">
-            <button type="button" onClick={() => moveTrack(-1)} aria-label={ar ? "السابق" : "Previous"}><ChevronLeft size={14} /></button>
-            <button type="button" onClick={() => seekBy(-10)} aria-label={ar ? "رجوع 10 ثواني" : "Back 10 seconds"}><SkipBack size={13} /></button>
-            <button type="button" onClick={togglePlayback} className="is-main" aria-pressed={playing} aria-label={playing ? (ar ? "إيقاف مؤقت" : "Pause") : ar ? "تشغيل" : "Play"}>{playing ? <Pause size={15} /> : <Play size={15} fill="currentColor" />}</button>
-            <button type="button" onClick={() => seekBy(10)} aria-label={ar ? "تقديم 10 ثواني" : "Forward 10 seconds"}><SkipForward size={13} /></button>
-            <button type="button" onClick={() => moveTrack(1)} aria-label={ar ? "التالي" : "Next"}><ChevronRight size={14} /></button>
-          </div>
-          <div className="ravine-radio-mini-progress">
-            <span className="ravine-radio-progress-time">{formatTime(currentTime)}</span>
-            <button
-              type="button"
-              className="ravine-radio-progress-track"
-              onClick={(event) => {
-                const rect = event.currentTarget.getBoundingClientRect();
-                seekToRatio((event.clientX - rect.left) / rect.width);
-              }}
-              aria-label={ar ? "تغيير موضع التشغيل" : "Seek playback"}
-            >
-              <span className="ravine-radio-progress-fill" />
-            </button>
-            <span className="ravine-radio-progress-time">{formatTime(duration)}</span>
+        <div className="ravine-radio-dock">
+          <button
+            type="button"
+            className="ravine-radio-tab"
+            onClick={toggleMiniPlayer}
+            aria-expanded={!miniHidden}
+            aria-label={!miniHidden ? (ar ? "إخفاء مشغل رَافِين" : "Hide RAVINE player") : (ar ? "إظهار مشغل رَافِين" : "Show RAVINE player")}
+            title={!miniHidden ? (ar ? "إخفاء المشغل" : "Hide player") : (ar ? "إظهار المشغل" : "Show player")}
+          >
+            {!miniHidden ? <X size={17} /> : <Play size={17} fill="currentColor" />}
+          </button>
+
+          <div
+            className="ravine-radio-mini"
+            data-user-hidden={miniHidden ? "true" : "false"}
+            role="region"
+            aria-label={ar ? "مشغل راديو مصغر" : "Mini Radio Player"}
+          >
+            <div className="ravine-radio-mini-head">
+              <div className="ravine-radio-mini-art" aria-hidden="true"><Radio size={18} strokeWidth={1.8} /></div>
+              <div className="ravine-radio-mini-copy">
+                <span className="ravine-radio-mini-kicker">RAVINE RADIO</span>
+                <span className="ravine-radio-mini-title">{active.title}</span>
+                <span className="ravine-radio-mini-subtitle">{playing ? (ar ? "يعمل الآن" : "Playing now") : ar ? "متوقف مؤقتًا" : "Paused"}</span>
+              </div>
+              <div className="ravine-radio-mini-volume">
+                <button
+                  type="button"
+                  onClick={toggleRadioMute}
+                  aria-label={volume > 0 ? (ar ? "كتم الراديو" : "Mute radio") : (ar ? "إلغاء كتم الراديو" : "Unmute radio")}
+                  title={volume > 0 ? (ar ? "كتم" : "Mute") : (ar ? "إلغاء الكتم" : "Unmute")}
+                >
+                  {volume > 0 ? <Volume2 size={15} /> : <VolumeX size={15} />}
+                </button>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  value={volume}
+                  onChange={(event) => setRadioVolume(Number(event.target.value))}
+                  aria-label={ar ? "مستوى الصوت" : "Volume"}
+                />
+              </div>
+            </div>
+
+            <div className="ravine-radio-mini-progress">
+              <span className="ravine-radio-progress-time">{formatTime(currentTime)}</span>
+              <button
+                type="button"
+                className="ravine-radio-progress-track"
+                onClick={(event) => {
+                  const rect = event.currentTarget.getBoundingClientRect();
+                  seekToRatio((event.clientX - rect.left) / rect.width);
+                }}
+                aria-label={ar ? "تغيير موضع التشغيل" : "Seek playback"}
+              >
+                <span className="ravine-radio-progress-fill" />
+              </button>
+              <span className="ravine-radio-progress-time">{formatTime(duration)}</span>
+            </div>
+
+            <div className="ravine-radio-mini-controls">
+              <button type="button" onClick={() => moveTrack(-1)} aria-label={ar ? "السابق" : "Previous"}><ChevronLeft size={14} /></button>
+              <button type="button" onClick={() => seekBy(-10)} aria-label={ar ? "رجوع 10 ثواني" : "Back 10 seconds"}><SkipBack size={13} /></button>
+              <button type="button" onClick={togglePlayback} className="is-main" aria-pressed={playing} aria-label={playing ? (ar ? "إيقاف مؤقت" : "Pause") : ar ? "تشغيل" : "Play"}>{playing ? <Pause size={15} /> : <Play size={15} fill="currentColor" />}</button>
+              <button type="button" onClick={() => seekBy(10)} aria-label={ar ? "تقديم 10 ثواني" : "Forward 10 seconds"}><SkipForward size={13} /></button>
+              <button type="button" onClick={() => moveTrack(1)} aria-label={ar ? "التالي" : "Next"}><ChevronRight size={14} /></button>
+            </div>
           </div>
         </div>
       ) : null}
