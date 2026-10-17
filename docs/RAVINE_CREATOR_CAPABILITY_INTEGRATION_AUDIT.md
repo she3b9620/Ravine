@@ -93,3 +93,12 @@ This confirms the capability migrations must not be treated as already installed
 - CI passes the seven-migration rehearsal with fixture checks for legacy creator backfill, grandfathered tier, podcast quota-ledger preservation, and new-creator synchronization. This is not a clone of the production schema.
 - History alignment is still blocked: Supabase reports 38 applied migration entries, while this branch contains 8 migration SQL files. Thirty-six applied migration names have no matching SQL file in this branch. `ravine_founder_upload_policy` has a version mismatch: live `20260907102607`, repository `20260907082000`. The other seven files are staged migrations absent from live history.
 - Do not apply or replay migrations against the connected project until the missing historical SQL and version mismatch are reconciled, and the staged migrations are reviewed against the actual production schema and existing triggers.
+
+## Production design regression diagnosis — 2026-10-17
+
+- Read-only inspection of the Vercel project RAVINE identified its latest Production deployment as Git branch main, commit fb11e2494c4cfdbc8846530991c318317eb4df18. Its Production aliases include ravine-psi.vercel.app.
+- The homepage at main is the older, client-side homepage implementation. The homepage on ravine/clean-rebuild and the current feature branch is a distinct, newer server-rendered experience using GuestCinematicBackdrop and HomeWorkCard. No homepage/layout file was changed for the film-collection work.
+- PR #2 remains a draft based on ravine/clean-rebuild. Its new pages and creator-capability work do not become Production merely by being committed to that feature branch.
+- Corrective action is to reconcile the Vercel Production branch/source and confirm the intended release commit before deploying. Do not revert or replace the cinematic homepage with the older main homepage; do not change Vercel settings, deploy, or merge without explicit approval.
+- Added dedicated /[locale]/short-films and /[locale]/feature-films routes. Short films present a first-entry choice between poster cards and a vertical snap-scrolling feed. The pages fail safely when the staged videos.work_format column is not available, and they never guess a film subtype from runtime.
+
