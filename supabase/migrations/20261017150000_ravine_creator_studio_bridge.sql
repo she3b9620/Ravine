@@ -393,3 +393,59 @@ for each row execute function public.ravine_enforce_next_live_tier();
 
 comment on function public.ravine_enforce_next_live_tier() is
   'Blocks viewers from starting live sessions and verifies that the session belongs to the authenticated creator identity.';
+
+
+-- The new live-session table is RLS-enabled by the domain foundation but has no
+-- owner write policy there yet. Add the minimum owner-scoped surface needed for
+-- the tier trigger to protect real session creation and start transitions.
+drop policy if exists ravine_next_live_owner_select on public.ravine_next_live_sessions;
+create policy ravine_next_live_owner_select
+on public.ravine_next_live_sessions
+for select to authenticated
+using (
+  public.is_ravine_admin()
+  or exists (
+    select 1
+      from public.ravine_next_creator_identities i
+     where i.id = creator_identity_id
+       and i.owner_user_id = auth.uid()
+  )
+);
+
+drop policy if exists ravine_next_live_owner_insert on public.ravine_next_live_sessions;
+create policy ravine_next_live_owner_insert
+on public.ravine_next_live_sessions
+for insert to authenticated
+with check (
+  exists (
+    select 1
+      from public.ravine_next_creator_identities i
+     where i.id = creator_identity_id
+       and i.owner_user_id = auth.uid()
+  )
+);
+
+drop policy if exists ravine_next_live_owner_update on public.ravine_next_live_sessions;
+create policy ravine_next_live_owner_update
+on public.ravine_next_live_sessions
+for update to authenticated
+using (
+  public.is_ravine_admin()
+  or exists (
+    select 1
+      from public.ravine_next_creator_identities i
+     where i.id = creator_identity_id
+       and i.owner_user_id = auth.uid()
+  )
+)
+with check (
+  public.is_ravine_admin()
+  or exists (
+    select 1
+      from public.ravine_next_creator_identities i
+     where i.id = creator_identity_id
+       and i.owner_user_id = auth.uid()
+  )
+);
+
+grant select, insert, update on public.ravine_next_live_sessions to authenticated;
