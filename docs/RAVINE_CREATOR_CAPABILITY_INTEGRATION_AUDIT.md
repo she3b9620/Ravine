@@ -26,6 +26,12 @@ Status: implementation staged in the feature branch. No Supabase migration has b
 - The live migration history records `20260907102607 ravine_founder_upload_policy`, while the repository file is named `20260907082000_ravine_founder_upload_policy.sql`. That version-prefix mismatch must be reconciled on a non-production clone before any blanket `supabase db push`; do not blindly replay the repository migration chain against the live project.
 - Review the complete staged sequence and migration history, then test the bridge on a non-production database before runtime deployment.
 
+## Follow-up review — 2026-10-17
+
+- Fixed a quota-accounting edge case in `ravine_publish_creator_work`: an existing usage row now skips a new quota check only when the row is for the same work type. Reclassifying an already-published work into a limited type therefore checks the destination type's quota.
+- Added a regression test that verifies the SQL guard remains present.
+- These changes are committed to this feature branch only. The test suite/build status still needs confirmation, and the migration remains unapplied.
+
 ## Remaining validation gates
 
 1. GitHub Actions policy tests and focused lint must pass after the Studio integration changes.
