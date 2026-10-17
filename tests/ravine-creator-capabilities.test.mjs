@@ -211,8 +211,8 @@ test("Short-film and feature-film collections are separate, and short-film viewe
   assert.match(collection, /work_format/);
   assert.match(collection, /work_format === format/);
   assert.match(browser, /Choose your viewing mode/);
-  assert.match(browser, /setShortFilmMode\\("grid"\\)/);
-  assert.match(browser, /setShortFilmMode\\("feed"\\)/);
+  assert.ok(browser.includes('setShortFilmMode("grid")'));
+  assert.ok(browser.includes('setShortFilmMode("feed")'));
   assert.match(browser, /RAVINEWorkPlayer/);
   assert.match(sidebar, /short-films/);
   assert.match(sidebar, /feature-films/);
