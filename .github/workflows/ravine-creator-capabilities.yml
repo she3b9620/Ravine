@@ -8,8 +8,13 @@ on:
       - "lib/ravine-creator-capabilities.ts"
       - "lib/ravine-work-universe.ts"
       - "app/api/creator/publish-work/route.ts"
+      - "app/api/studio/publish-work/route.ts"
+      - "app/[locale]/studio/page.tsx"
+      - "components/StudioUpload.tsx"
+      - "components/StudioWorkManager.tsx"
       - "supabase/migrations/20261017110000_ravine_creator_capability_schema_foundation.sql"
       - "supabase/migrations/20261017130000_ravine_creator_publish_rpc.sql"
+      - "supabase/migrations/20261017150000_ravine_creator_studio_bridge.sql"
       - "tests/ravine-creator-capabilities.test.mjs"
       - "package.json"
       - "package-lock.json"
@@ -21,8 +26,13 @@ on:
       - "lib/ravine-creator-capabilities.ts"
       - "lib/ravine-work-universe.ts"
       - "app/api/creator/publish-work/route.ts"
+      - "app/api/studio/publish-work/route.ts"
+      - "app/[locale]/studio/page.tsx"
+      - "components/StudioUpload.tsx"
+      - "components/StudioWorkManager.tsx"
       - "supabase/migrations/20261017110000_ravine_creator_capability_schema_foundation.sql"
       - "supabase/migrations/20261017130000_ravine_creator_publish_rpc.sql"
+      - "supabase/migrations/20261017150000_ravine_creator_studio_bridge.sql"
       - "tests/ravine-creator-capabilities.test.mjs"
       - "package.json"
       - "package-lock.json"
@@ -70,7 +80,7 @@ jobs:
       - name: Install locked dependencies
         run: npm ci
       - name: Lint changed capability files
-        run: npx eslint app/api/creator/publish-work/route.ts lib/ravine-creator-capabilities.ts lib/ravine-work-universe.ts components/RAVINEWorkContext.tsx
+        run: npx eslint app/api/creator/publish-work/route.ts app/api/studio/publish-work/route.ts "app/[locale]/studio/page.tsx" components/StudioUpload.tsx components/StudioWorkManager.tsx lib/ravine-creator-capabilities.ts lib/ravine-work-universe.ts components/RAVINEWorkContext.tsx
       - name: Full repository lint
         run: npm run lint
       - name: Build
