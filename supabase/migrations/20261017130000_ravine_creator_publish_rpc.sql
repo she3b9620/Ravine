@@ -150,12 +150,17 @@ begin
     v_limit := 3;
   end if;
 
+  -- Re-publishing the same work only bypasses a new quota charge when
+  -- its existing ledger entry is for the same work type. Changing a published
+  -- work from an unlimited type (or another type) to a limited type must
+  -- consume/check the destination type's quota.
   if v_quota_enabled and v_limit is not null
      and not exists (
        select 1
          from public.ravine_creator_publish_quota_usage
         where work_id = v_work_id
           and quota_month = v_month
+          and work_type = p_work_type
      ) then
     select count(*)::integer into v_used
       from public.ravine_creator_publish_quota_usage
