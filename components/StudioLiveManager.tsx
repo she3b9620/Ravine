@@ -114,7 +114,7 @@ export default function StudioLiveManager({ creatorIdentityId, creatorTier, init
     try {
       const updated = await send({ action, sessionId: session.id });
       setSessions((current) => current.map((item) => item.id === updated.id ? updated : item));
-      setNotice(action === "cancel" ? (ar ? "تم إلغاء الجلسة." : "Session cancelled.") : action === "end" ? (ar ? "تم إنهاء الجلسة وتسجيلها كأرشيف." : "Session ended and marked as recorded.") : (ar ? "تم تحديث حالة الجلسة. هذا لا ينشئ بثًا فعليًا قبل ربط مزود البث." : "Session status updated. This does not start an actual stream until a provider is configured."));
+      setNotice(action === "cancel" ? (ar ? "تم إلغاء الجلسة." : "Session cancelled.") : action === "end" ? (ar ? "تم إنهاء الجلسة وتسجيلها كأرشيف." : "Session ended and marked as recorded.") : (ar ? "تم تحديث حالة الجلسة. بدء الجلسة معطل حتى ربط مزود بث فعلي." : "Session status updated. This starting a session is disabled until a provider is configured."));
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : String(reason));
     } finally {
@@ -167,7 +167,7 @@ export default function StudioLiveManager({ creatorIdentityId, creatorTier, init
                     <p>{session.starts_at ? new Date(session.starts_at).toLocaleString(ar ? "ar-EG" : "en-US", { dateStyle: "medium", timeStyle: "short" }) : (ar ? "لم يحدد الموعد" : "Time not set")}</p>
                   </div>
                   <div className="studio-work-actions">
-                    {session.status === "scheduled" ? <button className="button secondary" type="button" onClick={() => void transition(session, "start")} disabled={busy || creatorTier === "viewer"}>{ar ? "تفعيل الحالة" : "Mark live"}</button> : null}
+                    {session.status === "scheduled" ? <button className="button secondary" type="button" disabled title={ar ? "يلزم ربط مزود بث فعلي أولًا" : "A real streaming provider must be configured first"}>{ar ? "مزود البث غير مربوط" : "Provider not connected"}</button> : null}
                     {session.status === "live" ? <button className="button secondary" type="button" onClick={() => void transition(session, "end")} disabled={busy}>{ar ? "إنهاء" : "End"}</button> : null}
                     {session.status === "scheduled" ? <button className="button secondary" type="button" onClick={() => void transition(session, "cancel")} disabled={busy}>{ar ? "إلغاء" : "Cancel"}</button> : null}
                   </div>
