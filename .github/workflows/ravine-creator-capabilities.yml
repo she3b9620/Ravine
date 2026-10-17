@@ -5,6 +5,11 @@ on:
     branches:
       - ravine/clean-rebuild
     paths:
+      - "app/[locale]/feature-films/page.tsx"
+      - "app/[locale]/short-films/page.tsx"
+      - "components/FilmCollectionBrowser.module.css"
+      - "components/FilmCollectionBrowser.tsx"
+      - "lib/ravine-film-collections.ts"
       - "lib/ravine-creator-capabilities.ts"
       - "lib/ravine-work-universe.ts"
       - "app/api/creator/publish-work/route.ts"
@@ -41,6 +46,11 @@ on:
     branches:
       - "ravine/creator-capabilities-foundation-20261017"
     paths:
+      - "app/[locale]/feature-films/page.tsx"
+      - "app/[locale]/short-films/page.tsx"
+      - "components/FilmCollectionBrowser.module.css"
+      - "components/FilmCollectionBrowser.tsx"
+      - "lib/ravine-film-collections.ts"
       - "tests/sql/ravine-migration-smoke-bootstrap.sql"
       - "tests/ravine-migration-smoke.sh"
       - "supabase/migrations/20260907070000_ravine_creator_ecosystem.sql"
@@ -116,7 +126,7 @@ jobs:
       - name: Install locked dependencies
         run: npm ci
       - name: Lint changed capability files
-        run: npx eslint app/api/admin/creator-tier/route.ts app/api/live/sessions/route.ts app/api/creator/publish-work/route.ts app/api/studio/publish-work/route.ts "app/[locale]/studio/page.tsx" "app/[locale]/discover/page.tsx" "app/[locale]/work/[id]/page.tsx" "app/[locale]/creators/[id]/page.tsx" "app/[locale]/search/page.tsx" "app/[locale]/page.tsx" components/StudioUpload.tsx components/StudioWorkManager.tsx components/StudioLiveManager.tsx components/HomeWorkCard.tsx components/RAVINEWorkPlayer.tsx components/DiscoverFilters.tsx lib/ravine-creator-capabilities.ts lib/ravine-work-universe.ts components/RAVINEWorkContext.tsx
+        run: npx eslint app/api/admin/creator-tier/route.ts app/api/live/sessions/route.ts app/api/creator/publish-work/route.ts app/api/studio/publish-work/route.ts "app/[locale]/studio/page.tsx" "app/[locale]/discover/page.tsx" "app/[locale]/work/[id]/page.tsx" "app/[locale]/creators/[id]/page.tsx" "app/[locale]/search/page.tsx" "app/[locale]/page.tsx" components/StudioUpload.tsx components/StudioWorkManager.tsx components/StudioLiveManager.tsx components/HomeWorkCard.tsx components/RAVINEWorkPlayer.tsx components/FilmCollectionBrowser.tsx "app/[locale]/short-films/page.tsx" "app/[locale]/feature-films/page.tsx" lib/ravine-film-collections.ts components/DiscoverFilters.tsx lib/ravine-creator-capabilities.ts lib/ravine-work-universe.ts components/RAVINEWorkContext.tsx
       - name: Full repository lint (known baseline; non-blocking)
         run: npm run lint
         continue-on-error: true

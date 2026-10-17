@@ -206,8 +206,8 @@ test("Short-film and feature-film collections are separate, and short-film viewe
     "utf8",
   );
 
-  assert.match(shortPage, /getRAVINEFilmCollection\\("short_film"\\)/);
-  assert.match(featurePage, /getRAVINEFilmCollection\\("feature_film"\\)/);
+  assert.ok(shortPage.includes('getRAVINEFilmCollection("short_film")'));
+  assert.ok(featurePage.includes('getRAVINEFilmCollection("feature_film")'));
   assert.match(collection, /work_format/);
   assert.match(collection, /work_format === format/);
   assert.match(browser, /Choose your viewing mode/);
