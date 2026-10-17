@@ -79,6 +79,9 @@ This confirms the capability migrations must not be treated as already installed
 ## Migration preflight coverage — 2026-10-17
 
 - Added an automated regression test that checks the staged platform-domain prerequisites, capability-schema dependency, publishing RPC, legacy Studio bridge triggers, and the documented live migration-history mismatch.
-- This is an offline/static guard only. It does not execute SQL against PostgreSQL and does not replace a disposable-database rehearsal.
+- Added `tests/ravine-migration-smoke.sh` and an isolated PostgreSQL 16 GitHub Actions service. The ordered domain, capability-schema, publishing-RPC, and Studio-bridge migrations execute successfully against a disposable PostgreSQL database.
+- The smoke test seeds a legacy creator and a published podcast, then verifies the creator is grandfathered as `elevated_creator`, existing podcast usage is preserved in the legacy quota ledger, and a newly inserted legacy creator receives a synced `creator` identity.
+- The smoke harness uses minimal Supabase-compatible auth/admin/legacy-table stubs. It proves SQL syntax and this staged migration path against PostgreSQL, but it is not a byte-for-byte clone of the connected Supabase schema.
+- The latest CI run for commit `ea9e4215` passed all four jobs, including the PostgreSQL migration smoke test.
 - Read-only inspection of the connected Supabase project still shows the live history ending at `20260907102607 ravine_founder_upload_policy`. No migration was applied during this check.
-- Safe next gate: resolve the filename/history mismatch in a reviewed plan, then rehearse the ordered migration set against a local/disposable PostgreSQL database before considering any live change.
+- Before any live change, resolve the filename/history mismatch against the actual production schema and review a schema-diff plan. The ephemeral smoke test is not approval to apply migrations to production.
