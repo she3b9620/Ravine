@@ -50,6 +50,16 @@ export default async function WatchPage({ params }: { params: Promise<{ locale: 
 
   const creatorRecord = creator as Creator | null;
   const chapters = (chaptersData ?? []) as Chapter[];
+  const workTypeLabels: Record<typeof work.type, string> = {
+    short: ar ? "شورت" : "SHORT",
+    short_film: ar ? "فيلم قصير" : "SHORT FILM",
+    video: ar ? "فيديو" : "VIDEO",
+    podcast: ar ? "بودكاست" : "PODCAST",
+    documentary: ar ? "وثائقي" : "DOCUMENTARY",
+    film: ar ? "فيلم مطوّل" : "FEATURE FILM",
+    series: ar ? "مسلسل / حلقة" : "SERIES EPISODE",
+    live: ar ? "بث مباشر" : "LIVE",
+  };
 
   return (
     <main className="watch-page" dir={ar ? "rtl" : "ltr"}>
@@ -68,7 +78,7 @@ export default async function WatchPage({ params }: { params: Promise<{ locale: 
           </div>
         )}
         <div className="watch-copy">
-          <div className="watch-kicker">{work.type.toUpperCase()}{video.quality ? ` · ${video.quality}` : ""}</div>
+          <div className="watch-kicker">{workTypeLabels[work.type]}{video.quality ? ` · ${video.quality}` : ""}</div>
           <h1>{work.title}</h1>
           <p>{work.description || (ar ? "عمل إبداعي من مجتمع RAVINE." : "A creative work from the RAVINE community.")}</p>
           <div className="watch-meta">

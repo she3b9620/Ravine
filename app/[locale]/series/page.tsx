@@ -5,103 +5,72 @@ import { formatRavineNumber } from "@/lib/ravine-number-formatter";
 import styles from "./series.module.css";
 
 export const dynamic = "force-dynamic";
-
 type Locale = "ar" | "en";
-type SeriesWork = {
-  id: number;
-  title: string | null;
-  description: string | null;
-  thumbnail_url: string | null;
-  duration: number | null;
-  views: number | null;
-  likes: number | null;
-  quality: string | null;
-};
+type SeriesTitle = { id: number; title: string; description: string | null; poster_url: string | null; created_at: string | null; published: boolean; visibility: string };
+type SeriesEpisode = { id: number; title: string | null; description: string | null; thumbnail_url: string | null; duration: number | null; views: number | null; likes: number | null; quality: string | null; series_id: number | null; season_number: number | null; episode_number: number | null };
 
-function formatDuration(seconds: number | null, fallback: string) {
-  if (!seconds || seconds < 1) return fallback;
-  const total = Math.round(seconds);
-  const hours = Math.floor(total / 3600);
-  const minutes = Math.floor((total % 3600) / 60);
-  const remaining = total % 60;
-  return hours > 0
-    ? `${hours}:${String(minutes).padStart(2, "0")}:${String(remaining).padStart(2, "0")}`
-    : `${minutes}:${String(remaining).padStart(2, "0")}`;
+function durationLabel(seconds: number | null) {
+  if (!seconds || seconds < 1) return "—";
+  const total = Math.round(seconds), hours = Math.floor(total / 3600), minutes = Math.floor((total % 3600) / 60), remaining = total % 60;
+  return hours > 0 ? `${hours}:${String(minutes).padStart(2, "0")}:${String(remaining).padStart(2, "0")}` : `${minutes}:${String(remaining).padStart(2, "0")}`;
 }
 
 export default async function SeriesPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: rawLocale } = await params;
-  const locale: Locale = rawLocale === "en" ? "en" : "ar";
-  const ar = locale === "ar";
+  const locale: Locale = rawLocale === "en" ? "en" : "ar", ar = locale === "ar";
   const supabase = await createClient();
 
-  const { data, error } = await supabase
-    .from("videos")
-    .select("id,title,description,thumbnail_url,duration,views,likes,quality,created_at")
-    .eq("published", true)
-    .eq("content_type", "series")
-    .order("created_at", { ascending: false })
-    .limit(60);
+  const [seriesResult, episodesResult] = await Promise.all([
+    supabase.from("ravine_series_titles").select("id,title,description,poster_url,created_at,published,visibility").eq("published", true).eq("visibility", "public").order("created_at", { ascending: false }).limit(100),
+    supabase.from("videos").select("id,title,description,thumbnail_url,duration,views,likes,quality,series_id,season_number,episode_number,created_at").eq("published", true).eq("visibility", "public").eq("content_type", "series").order("created_at", { ascending: false }).limit(500),
+  ]);
 
-  const seriesWorks = (data ?? []) as SeriesWork[];
+  let pageError: string | null = null;
+  let seriesTitles = (seriesResult.data ?? []) as SeriesTitle[];
+  let episodes = (episodesResult.data ?? []) as SeriesEpisode[];
+  const structuredDataUnavailable = Boolean(seriesResult.error || episodesResult.error);
 
-  return (
-    <section className="section ravine-documentaries-page ravine-series-page" dir={ar ? "rtl" : "ltr"}>
-      <div className="ravine-documentaries-hero">
-        <div className="ravine-documentaries-mark" aria-hidden="true">
-          <Tv size={28} strokeWidth={1.6} />
-        </div>
-        <div>
-          <div className="eyebrow">{ar ? "رَافِين / الدراما" : "RAVINE / SERIES"}</div>
-          <h1>{ar ? "المسلسلات." : "Series."}</h1>
-          <p className="section-note">
-            {ar
-              ? "حكايات تمتد عبر الحلقات، وتبني عوالمها وشخصياتها مع الوقت."
-              : "Stories that unfold across episodes, building their worlds and characters over time."}
-          </p>
-          {!error && seriesWorks.length > 0 ? (
-            <div className="ravine-series-count">
-              {formatRavineNumber(seriesWorks.length, locale)} {ar ? "عملًا منشورًا" : "published series works"}
-            </div>
-          ) : null}
-        </div>
+  if (structuredDataUnavailable) {
+    const legacyResult = await supabase.from("videos").select("id,title,description,thumbnail_url,duration,views,likes,quality,created_at")
+      .eq("published", true).eq("visibility", "public").eq("content_type", "series").order("created_at", { ascending: false }).limit(100);
+    if (legacyResult.error) pageError = legacyResult.error.message;
+    else {
+      episodes = (legacyResult.data ?? []).map(row => ({ ...row, series_id: null, season_number: null, episode_number: null })) as SeriesEpisode[];
+      seriesTitles = [];
+    }
+  }
+
+  const titleCards = seriesTitles.map(series => {
+    const attachedEpisodes = episodes.filter(episode => episode.series_id === series.id);
+    const seasonCount = new Set(attachedEpisodes.map(episode => episode.season_number || 1)).size;
+    const image = series.poster_url || attachedEpisodes.find(episode => episode.thumbnail_url)?.thumbnail_url || "/RAVINE.PNG";
+    return { series, attachedEpisodes, seasonCount, image };
+  }).filter(item => item.attachedEpisodes.length > 0);
+  const legacyEpisodes = episodes.filter(episode => !episode.series_id);
+
+  return <section className="section ravine-documentaries-page ravine-series-page" dir={ar ? "rtl" : "ltr"}>
+    <div className="ravine-documentaries-hero"><div className="ravine-documentaries-mark" aria-hidden="true"><Tv size={28} strokeWidth={1.6} /></div>
+      <div><div className="eyebrow">{ar ? "رَافِين / الدراما" : "RAVINE / SERIES"}</div><h1>{ar ? "المسلسلات." : "Series."}</h1>
+        <p className="section-note">{ar ? "كل مسلسل عمل مستقل، بداخله مواسم وحلقات مرتبة؛ منفصل عن الفيديوهات والأفلام." : "Each series is a distinct work with seasons and ordered episodes—not a regular video or film."}</p>
+        {!pageError && titleCards.length > 0 ? <div className="ravine-series-count">{formatRavineNumber(titleCards.length, locale)} {ar ? "مسلسل منشور" : "published series"}</div> : null}
       </div>
-
-      {error ? (
-        <div className="empty-state">
-          <strong>{ar ? "تعذر تحميل المسلسلات." : "We could not load series."}</strong>
-          <span>{error.message}</span>
-        </div>
-      ) : seriesWorks.length === 0 ? (
-        <div className="empty-state">
-          <strong>{ar ? "لا توجد مسلسلات منشورة بعد." : "No series published yet."}</strong>
-          <span>{ar ? "ستظهر الأعمال الحلقية هنا بعد اعتماد نشرها من مساحة المبدع." : "Published episodic works will appear here after their creator publishes them from Studio."}</span>
-        </div>
-      ) : (
-        <div className="video-grid ravine-documentaries-grid ravine-series-grid">
-          {seriesWorks.map((work) => (
-            <Link href={`/${locale}/watch/${work.id}`} className="video-card ravine-series-card" key={work.id}>
-              <div className="video-thumb">
-                <img src={work.thumbnail_url || "/RAVINE.PNG"} alt="" loading="lazy" />
-                <span className="duration">{formatDuration(work.duration, "—")}</span>
-                <span className={`documentary-pill ${styles.seriesPill}`}>
-                  <Tv size={12} strokeWidth={1.8} aria-hidden="true" />
-                  {ar ? "مسلسل" : "Series"}
-                </span>
-              </div>
-              <div className="video-meta">
-                <div className="video-kicker">SERIES{work.quality ? ` · ${work.quality}` : ""}</div>
-                <h2>{work.title || (ar ? "مسلسل بدون عنوان" : "Untitled series")}</h2>
-                <p>{work.description || (ar ? "عمل درامي من مجتمع رَافِين." : "A serialized work from the RAVINE community.")}</p>
-                <div className="video-stats">
-                  <span>{formatRavineNumber(Number(work.views || 0), locale)} {ar ? "مشاهدة" : "views"}</span>
-                  <span>{formatRavineNumber(Number(work.likes || 0), locale)} {ar ? "إعجاب" : "likes"}</span>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      )}
-    </section>
-  );
+    </div>
+    {pageError ? <div className="empty-state"><strong>{ar ? "تعذر تحميل المسلسلات." : "We could not load series."}</strong><span>{pageError}</span></div>
+      : titleCards.length === 0 && legacyEpisodes.length === 0 ? <div className="empty-state"><strong>{ar ? "لا توجد مسلسلات منشورة بعد." : "No series published yet."}</strong><span>{structuredDataUnavailable ? (ar ? "المواسم والحلقات المنظمة تحتاج إلى تطبيق ترحيل قاعدة البيانات قبل إتاحتها." : "The database migration for structured seasons and episodes must be applied before series publishing is fully enabled.") : (ar ? "ستظهر المسلسلات هنا بعد نشر أول حلقة معتمدة." : "Series appear here after their first approved episode is published.")}</span></div>
+      : <>
+        {titleCards.length > 0 ? <div className="video-grid ravine-documentaries-grid ravine-series-grid">{titleCards.map(({series, attachedEpisodes, seasonCount, image}) => (
+          <Link href={`/${locale}/series/${series.id}`} className="video-card ravine-series-card" key={series.id}>
+            <div className="video-thumb"><img src={image} alt="" loading="lazy" /><span className={`documentary-pill ${styles.seriesPill}`}><Tv size={12} strokeWidth={1.8} aria-hidden="true" />{ar ? "مسلسل" : "Series"}</span></div>
+            <div className="video-meta"><div className="video-kicker">SERIES</div><h2>{series.title}</h2><p>{series.description || (ar ? "عمل متسلسل من مجتمع رَافِين." : "A serialized work from RAVINE creators.")}</p>
+              <div className="video-stats"><span>{formatRavineNumber(attachedEpisodes.length, locale)} {ar ? "حلقة" : "episodes"}</span><span>{formatRavineNumber(seasonCount, locale)} {ar ? "موسم" : "seasons"}</span></div></div>
+          </Link>
+        ))}</div> : null}
+        {legacyEpisodes.length > 0 ? <div className="ravine-series-legacy"><div className="eyebrow">{ar ? "أعمال حلقية تحتاج ترتيب المواسم" : "UNSTRUCTURED SERIES WORK"}</div><div className="video-grid ravine-documentaries-grid">{legacyEpisodes.map(work => (
+          <Link href={`/${locale}/watch/${work.id}`} className="video-card ravine-series-card" key={work.id}>
+            <div className="video-thumb"><img src={work.thumbnail_url || "/RAVINE.PNG"} alt="" loading="lazy" /><span className="duration">{durationLabel(work.duration)}</span><span className={`documentary-pill ${styles.seriesPill}`}>{ar ? "حلقة غير مرتبة" : "Unsorted episode"}</span></div>
+            <div className="video-meta"><div className="video-kicker">SERIES EPISODE{work.quality ? ` · ${work.quality}` : ""}</div><h2>{work.title || (ar ? "حلقة بدون عنوان" : "Untitled episode")}</h2><p>{work.description || (ar ? "هذه الحلقة لم تُربط بعد بمسلسل وموسم." : "This episode has not been linked to a series and season yet.")}</p></div>
+          </Link>
+        ))}</div></div> : null}
+      </>}
+  </section>;
 }

@@ -22,7 +22,7 @@ type Props = {
   locale: "ar" | "en";
 };
 
-const allowedContentTypes = new Set(["video", "short", "documentary", "podcast", "film", "series"]);
+const allowedContentTypes = new Set(["short", "video", "podcast", "documentary", "short_film", "film", "series"]);
 const allowedVisibility = new Set(["public", "followers", "unlisted", "private", "custom"]);
 
 function isPublishable(work: Work) {
@@ -39,6 +39,20 @@ function visibilityLabel(value: string | null, ar: boolean) {
   };
   const pair = labels[value || "public"] || labels.public;
   return ar ? pair[0] : pair[1];
+}
+
+function contentTypeLabel(value: string | null, ar: boolean) {
+  const labels: Record<string, [string, string]> = {
+    short: ["شورت", "SHORT"],
+    video: ["فيديو", "VIDEO"],
+    podcast: ["بودكاست", "PODCAST"],
+    documentary: ["وثائقي", "DOCUMENTARY"],
+    short_film: ["فيلم قصير", "SHORT FILM"],
+    film: ["فيلم مطوّل", "FEATURE FILM"],
+    series: ["حلقة مسلسل", "SERIES EPISODE"],
+  };
+  const label = labels[value || "video"] || labels.video;
+  return ar ? label[0] : label[1];
 }
 
 export default function StudioWorkManager({ works: initialWorks, locale }: Props) {
@@ -202,7 +216,7 @@ export default function StudioWorkManager({ works: initialWorks, locale }: Props
                 <div className="video-kicker">
                   {work.published ? (ar ? "منشور" : "PUBLISHED") : (ar ? "مسودة" : "DRAFT")}
                   {work.published && work.visibility ? ` · ${visibilityLabel(work.visibility, ar)}` : ""}
-                  {` · ${work.content_type || "video"} · ${work.quality || "1080p"}`}
+                  {` · ${contentTypeLabel(work.content_type || "video", ar)} · ${work.quality || "1080p"}`}
                 </div>
                 {editing ? (
                   <div className="studio-inline-form">
@@ -210,12 +224,13 @@ export default function StudioWorkManager({ works: initialWorks, locale }: Props
                     <textarea value={editDescription} onChange={(event) => setEditDescription(event.target.value)} rows={3} placeholder={ar ? "الوصف" : "Description"} />
                     <div className="studio-form-grid">
                       <select value={editType} onChange={(event) => setEditType(event.target.value)}>
-                        <option value="video">Video</option>
-                        <option value="short">Short</option>
-                        <option value="documentary">Documentary</option>
-                        <option value="podcast">Podcast</option>
-                        <option value="film">Film</option>
-                        <option value="series">{ar ? "مسلسل" : "Series"}</option>
+                        <option value="short">{ar ? "شورتات" : "Shorts"}</option>
+                        <option value="video">{ar ? "فيديو" : "Video"}</option>
+                        <option value="podcast">{ar ? "بودكاست" : "Podcast"}</option>
+                        <option value="documentary">{ar ? "وثائقي" : "Documentary"}</option>
+                        <option value="short_film">{ar ? "فيلم قصير" : "Short Film"}</option>
+                        <option value="film">{ar ? "فيلم مطوّل" : "Feature Film"}</option>
+                        <option value="series">{ar ? "مسلسل / حلقة" : "Series episode"}</option>
                       </select>
                       <select value={editQuality} onChange={(event) => setEditQuality(event.target.value)}>
                         <option value="1080p">1080p</option>

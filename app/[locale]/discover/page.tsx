@@ -13,7 +13,7 @@ type Video = { id: number; title: string | null; description: string | null; thu
 type Category = { id: number; name: string; slug: string | null };
 type SearchParams = { q?: string; category?: string; type?: string; duration?: string; format?: string; quality?: string; sort?: string };
 function durationLabel(seconds: number | null) { if (!seconds || seconds < 1) return "—"; const total = Math.round(seconds); const hours = Math.floor(total / 3600); const mins = Math.floor((total % 3600) / 60); const secs = total % 60; return hours > 0 ? `${hours}:${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}` : `${mins}:${String(secs).padStart(2, "0")}`; }
-const allowedTypes = ["short", "video", "film", "documentary", "podcast", "live"] as const;
+const allowedTypes = ["short", "video", "podcast", "documentary", "short_film", "film", "series", "live"] as const;
 type AllowedType = (typeof allowedTypes)[number];
 function isAllowedType(value: string | undefined): value is AllowedType { return Boolean(value && allowedTypes.includes(value as AllowedType)); }
 

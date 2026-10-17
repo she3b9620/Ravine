@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-const allowedContentTypes = new Set(["video", "short", "documentary", "podcast", "film", "series"]);
+const allowedContentTypes = new Set(["short", "video", "podcast", "documentary", "short_film", "film", "series"]);
 const allowedVisibility = new Set(["public", "followers", "unlisted", "private", "custom"]);
 
 type Body = {
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
 
     const { data: work, error: workError } = await supabase
       .from("videos")
-      .select("id,user_id,creator_id,title,description,video_url,content_type,quality,published,visibility")
+      .select("id,user_id,creator_id,title,description,video_url,content_type,quality,published,visibility,series_id,season_number,episode_number")
       .eq("id", videoId)
       .single();
 
@@ -55,6 +55,24 @@ export async function POST(request: NextRequest) {
         .single();
 
       if (error || !data) return NextResponse.json({ error: error?.message || "Could not unpublish work." }, { status: 500 });
+
+      if (work.content_type === "series" && work.series_id) {
+        const { data: remainingEpisodes, error: remainingError } = await supabase
+          .from("videos")
+          .select("id")
+          .eq("series_id", work.series_id)
+          .eq("content_type", "series")
+          .eq("published", true)
+          .eq("visibility", "public")
+          .limit(1);
+        if (remainingError) return NextResponse.json({ error: remainingError.message }, { status: 500 });
+        const { error: seriesUpdateError } = await supabase
+          .from("ravine_series_titles")
+          .update({ published: Boolean(remainingEpisodes?.length), updated_at: new Date().toISOString() })
+          .eq("id", work.series_id)
+          .eq("creator_id", creator.id);
+        if (seriesUpdateError) return NextResponse.json({ error: seriesUpdateError.message }, { status: 500 });
+      }
       return NextResponse.json({ ok: true, work: data });
     }
 
@@ -72,6 +90,24 @@ export async function POST(request: NextRequest) {
 
     if (!allowedContentTypes.has(contentType)) {
       return NextResponse.json({ error: "This content type is not supported." }, { status: 422 });
+    }
+
+    if (contentType === "series") {
+      if (!Number.isInteger(Number(work.series_id)) || Number(work.series_id) < 1 ||
+          !Number.isInteger(Number(work.season_number)) || Number(work.season_number) < 1 ||
+          !Number.isInteger(Number(work.episode_number)) || Number(work.episode_number) < 1) {
+        return NextResponse.json({ error: "A series episode must have a series, season number, and episode number." }, { status: 422 });
+      }
+      const { data: seriesRecord, error: seriesLookupError } = await supabase
+        .from("ravine_series_titles")
+        .select("id")
+        .eq("id", work.series_id)
+        .eq("creator_id", creator.id)
+        .eq("user_id", auth.user.id)
+        .maybeSingle();
+      if (seriesLookupError || !seriesRecord) {
+        return NextResponse.json({ error: seriesLookupError?.message || "Series ownership could not be verified." }, { status: 403 });
+      }
     }
 
     if (!allowedVisibility.has(visibility)) {
@@ -94,6 +130,15 @@ export async function POST(request: NextRequest) {
 
     if (error || !data) {
       return NextResponse.json({ error: error?.message || "Could not publish work." }, { status: 500 });
+    }
+
+    if (contentType === "series" && visibility === "public" && work.series_id) {
+      const { error: seriesUpdateError } = await supabase
+        .from("ravine_series_titles")
+        .update({ published: true, visibility: "public", updated_at: new Date().toISOString() })
+        .eq("id", work.series_id)
+        .eq("creator_id", creator.id);
+      if (seriesUpdateError) return NextResponse.json({ error: seriesUpdateError.message }, { status: 500 });
     }
 
     return NextResponse.json({ ok: true, work: data });
