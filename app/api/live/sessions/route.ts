@@ -77,7 +77,10 @@ export async function POST(request: NextRequest) {
         .eq("owner_user_id", auth.user.id)
         .maybeSingle();
 
-      if (identityError || !identity) {
+      if (identityError) {
+        return NextResponse.json({ error: "Live sessions are not available until the required RAVINE database migrations are installed." }, { status: 503 });
+      }
+      if (!identity) {
         return NextResponse.json({ error: "Creator identity not found or not owned by this account." }, { status: 403 });
       }
 
@@ -89,7 +92,10 @@ export async function POST(request: NextRequest) {
           .eq("creator_identity_id", creatorIdentityId)
           .maybeSingle();
 
-        if (relatedWorkError || !relatedWork) {
+        if (relatedWorkError) {
+          return NextResponse.json({ error: "Could not verify the related work against the RAVINE database." }, { status: 503 });
+        }
+        if (!relatedWork) {
           return NextResponse.json({ error: "Related work must belong to the selected creator identity." }, { status: 422 });
         }
       }
@@ -131,12 +137,15 @@ export async function POST(request: NextRequest) {
       .eq("id", sessionId)
       .maybeSingle();
 
-    if (lookupError || !existing) {
+    if (lookupError) {
+      return NextResponse.json({ error: "Live sessions are not available until the required RAVINE database migrations are installed." }, { status: 503 });
+    }
+    if (!existing) {
       return NextResponse.json({ error: "Live session not found." }, { status: 404 });
     }
 
     const transitions = {
-      start: { from: ["scheduled", "recorded"] as string[], to: "live" },
+      start: { from: ["scheduled"] as string[], to: "live" },
       end: { from: ["live"] as string[], to: "recorded" },
       cancel: { from: ["scheduled"] as string[], to: "cancelled" },
     } as const;
