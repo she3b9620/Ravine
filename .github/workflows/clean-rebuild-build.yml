@@ -26,5 +26,8 @@ jobs:
       - name: Governance checks
         run: npm run verify:ravine
 
+      - name: Guest hero background mode regression test
+        run: node --test tests/guest-hero-background-mode.test.mjs
+
       - name: Build
         run: npm run build

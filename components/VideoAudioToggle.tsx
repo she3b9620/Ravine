@@ -7,6 +7,8 @@ type VideoAudioToggleProps = {
   locale: "ar" | "en";
 };
 
+type BackgroundMode = "image" | "video";
+
 type VideoControlAction =
   | "play"
   | "pause"
@@ -16,7 +18,8 @@ type VideoControlAction =
   | "set-volume"
   | "toggle-repeat"
   | "seek"
-  | "replay";
+  | "replay"
+  | "set-background-mode";
 
 function sendControl(
   action: VideoControlAction,
@@ -25,6 +28,7 @@ function sendControl(
     volume?: number;
     repeat?: boolean;
     time?: number;
+    backgroundMode?: BackgroundMode;
   } = {}
 ) {
   window.dispatchEvent(
@@ -87,6 +91,21 @@ function ReplayIcon() {
   );
 }
 
+function BackgroundModeIcon({ mode }: { mode: BackgroundMode }) {
+  return mode === "video" ? (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="m10 9 5 3-5 3Z" />
+    </svg>
+  ) : (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <circle cx="8.5" cy="9" r="1.5" />
+      <path d="m21 15-5-5L5 20" />
+    </svg>
+  );
+}
+
 function ControlMenuIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -109,6 +128,7 @@ export default function VideoAudioToggle({
   const [muted, setMuted] = useState(true);
   const [playing, setPlaying] = useState(true);
   const [repeat, setRepeat] = useState(false);
+  const [backgroundMode, setBackgroundMode] = useState<BackgroundMode>("video");
   const [volume, setVolume] = useState(60);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -213,6 +233,11 @@ export default function VideoAudioToggle({
       }
     };
 
+    const syncBackgroundModeState = (event: Event) => {
+      const mode = (event as CustomEvent<{ backgroundMode?: BackgroundMode }>).detail?.backgroundMode;
+      if (mode === "image" || mode === "video") setBackgroundMode(mode);
+    };
+
     window.addEventListener(
       "ravine-video-audio-state",
       syncAudioState
@@ -231,6 +256,10 @@ export default function VideoAudioToggle({
     window.addEventListener(
       "ravine-video-repeat-state",
       syncRepeatState
+    );
+    window.addEventListener(
+      "ravine-video-background-mode-state",
+      syncBackgroundModeState
     );
 
     return () => {
@@ -252,6 +281,10 @@ export default function VideoAudioToggle({
       window.removeEventListener(
         "ravine-video-repeat-state",
         syncRepeatState
+      );
+      window.removeEventListener(
+        "ravine-video-background-mode-state",
+        syncBackgroundModeState
       );
     };
   }, []);
@@ -290,6 +323,10 @@ export default function VideoAudioToggle({
 
   const replayLabel =
     locale === "ar" ? "إعادة الفيديو من البداية" : "Replay video";
+
+  const backgroundModeLabel = backgroundMode === "video"
+    ? (locale === "ar" ? "تحويل الخلفية إلى صورة ثابتة" : "Switch background to image")
+    : (locale === "ar" ? "تحويل الخلفية إلى فيديو" : "Switch background to video");
 
   const toggleLabel = controlsOpen
     ? locale === "ar"
@@ -424,6 +461,23 @@ export default function VideoAudioToggle({
                 aria-hidden="true"
               >
                 <RepeatIcon />
+              </span>
+            </button>
+
+            <button
+              type="button"
+              className="ravine-video-control ravine-video-control-background-mode"
+              aria-label={backgroundModeLabel}
+              title={backgroundModeLabel}
+              aria-pressed={backgroundMode === "video"}
+              onClick={() => {
+                const nextMode: BackgroundMode = backgroundMode === "video" ? "image" : "video";
+                setBackgroundMode(nextMode);
+                sendControl("set-background-mode", { backgroundMode: nextMode, muted, volume });
+              }}
+            >
+              <span className="ravine-video-control-icon" aria-hidden="true">
+                <BackgroundModeIcon mode={backgroundMode} />
               </span>
             </button>
 

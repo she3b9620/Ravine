@@ -6,7 +6,8 @@ import { createClient } from "@/lib/supabase/client";
 
 type GuestCinematicBackdropProps = { locale: "ar" | "en" };
 type Work = { id: number; video_url: string | null; thumbnail_url: string | null; duration: number | null; content_type: string | null };
-type VideoControlEvent = CustomEvent<{ action: "play" | "pause" | "next" | "previous" | "toggle-audio" | "set-volume" | "toggle-repeat" | "seek" | "replay"; muted?: boolean; volume?: number; repeat?: boolean; time?: number }>;
+type BackgroundMode = "image" | "video";
+type VideoControlEvent = CustomEvent<{ action: "play" | "pause" | "next" | "previous" | "toggle-audio" | "set-volume" | "toggle-repeat" | "seek" | "replay" | "set-background-mode"; muted?: boolean; volume?: number; repeat?: boolean; time?: number; backgroundMode?: BackgroundMode }>;
 
 const DEFAULT_VOLUME = 60;
 const HERO_PAGE_SIZE = 500;
@@ -50,6 +51,7 @@ export default function GuestCinematicBackdrop({ locale }: GuestCinematicBackdro
   const [muted, setMuted] = useState(true);
   const [volume, setVolume] = useState(DEFAULT_VOLUME);
   const [repeat, setRepeat] = useState(false);
+  const [backgroundMode, setBackgroundMode] = useState<BackgroundMode>("video");
   const playableWorks = useMemo(() => shuffle(works.map((work) => ({ ...work, src: toPlaybackSource(work) })).filter((work) => work.src && work.content_type !== "podcast" && work.content_type !== "live")) as Array<Work & { src: string }>, [works]);
   const current = playableWorks[currentIndex] ?? null;
 
@@ -74,11 +76,15 @@ export default function GuestCinematicBackdrop({ locale }: GuestCinematicBackdro
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !current) return;
+    if (backgroundMode === "image") {
+      video.pause();
+      return;
+    }
     video.load();
     video.muted = muted;
     video.volume = volume / 100;
     void video.play().then(() => undefined, () => undefined);
-  }, [current?.src]);
+  }, [current?.src, backgroundMode]);
 
   useEffect(() => { const video = videoRef.current; if (!video) return; video.muted = muted; video.volume = volume / 100; }, [muted, volume]);
 
@@ -88,20 +94,24 @@ export default function GuestCinematicBackdrop({ locale }: GuestCinematicBackdro
       const video = videoRef.current;
       if (!detail || !video) return;
       switch (detail.action) {
-        case "play": void video.play().then(() => undefined, () => undefined); break;
+        case "play": if (backgroundMode === "image") { setBackgroundMode("video"); break; } void video.play().then(() => undefined, () => undefined); break;
         case "pause": video.pause(); break;
+        case "set-background-mode": {
+          if (detail.backgroundMode === "image" || detail.backgroundMode === "video") setBackgroundMode(detail.backgroundMode);
+          break;
+        }
         case "toggle-audio": { const nextMuted = detail.muted ?? !video.muted; setMuted(nextMuted); video.muted = nextMuted; break; }
         case "set-volume": { const next = Math.max(0, Math.min(100, detail.volume ?? volume)); setVolume(next); video.volume = next / 100; const nextMuted = detail.muted ?? next === 0; setMuted(nextMuted); video.muted = nextMuted; break; }
         case "toggle-repeat": setRepeat(detail.repeat ?? !repeat); break;
         case "seek": if (Number.isFinite(detail.time)) video.currentTime = Math.max(0, detail.time as number); break;
-        case "replay": video.currentTime = 0; void video.play().then(() => undefined, () => undefined); break;
+        case "replay": if (backgroundMode === "image") setBackgroundMode("video"); video.currentTime = 0; void video.play().then(() => undefined, () => undefined); break;
         case "next": setCurrentIndex((index) => playableWorks.length ? (index + 1) % playableWorks.length : 0); break;
         case "previous": setCurrentIndex((index) => playableWorks.length ? (index - 1 + playableWorks.length) % playableWorks.length : 0); break;
       }
     };
     window.addEventListener("ravine-video-control", handleControl as EventListener);
     return () => window.removeEventListener("ravine-video-control", handleControl as EventListener);
-  }, [playableWorks.length, repeat, volume]);
+  }, [backgroundMode, playableWorks.length, repeat, volume]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -116,6 +126,32 @@ export default function GuestCinematicBackdrop({ locale }: GuestCinematicBackdro
     return () => { video.removeEventListener("timeupdate", onTime); video.removeEventListener("play", onPlay); video.removeEventListener("pause", onPause); video.removeEventListener("volumechange", onVolume); video.removeEventListener("ended", onEnded); };
   }, [current?.duration, playableWorks.length, repeat]);
 
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent("ravine-video-background-mode-state", { detail: { backgroundMode } }));
+  }, [backgroundMode]);
+
   if (!isGuestHome || !current) return null;
-  return <div className="ravine-guest-cinematic-backdrop" aria-hidden="true"><video id="ravine-guest-cinematic-player" ref={videoRef} className="ravine-guest-cinematic-video" src={current.src} poster={current.thumbnail_url || undefined} muted={muted} playsInline autoPlay loop={false} controls={false} preload="metadata" disablePictureInPicture disableRemotePlayback /><span className="ravine-guest-cinematic-wash" /></div>;
+  return (
+    <div className="ravine-guest-cinematic-backdrop" data-background-mode={backgroundMode} aria-hidden="true">
+      {current.thumbnail_url ? (
+        <img className="ravine-guest-cinematic-image" src={current.thumbnail_url} alt="" decoding="async" />
+      ) : null}
+      <video
+        id="ravine-guest-cinematic-player"
+        ref={videoRef}
+        className="ravine-guest-cinematic-video"
+        src={current.src}
+        poster={current.thumbnail_url || undefined}
+        muted={muted}
+        playsInline
+        autoPlay={backgroundMode === "video"}
+        loop={false}
+        controls={false}
+        preload="metadata"
+        disablePictureInPicture
+        disableRemotePlayback
+      />
+      <span className="ravine-guest-cinematic-wash" />
+    </div>
+  );
 }

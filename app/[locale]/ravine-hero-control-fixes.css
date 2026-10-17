@@ -383,3 +383,30 @@ html[data-theme="light"] .guest-shell .ravine-home-video-control-shell .ravine-v
     transition:none!important;
   }
 }
+
+
+/* Guest Hero: explicit still-image / video background toggle. */
+.guest-shell .ravine-hero-video-controls .ravine-video-control-background-mode .ravine-video-control-icon,
+.guest-shell .ravine-hero-video-controls .ravine-video-control-background-mode .ravine-video-control-icon svg{
+  display:grid;
+  place-items:center;
+}
+.guest-shell .ravine-hero-video-controls .ravine-video-control-background-mode .ravine-video-control-icon svg{
+  width:18px;
+  height:18px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.7;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.guest-shell .ravine-hero-video-controls .ravine-video-control-background-mode[aria-pressed="true"]{
+  border-color:rgba(196,122,82,.58)!important;
+  color:#D49A78!important;
+  background:rgba(196,122,82,.09)!important;
+}
+html[data-theme="light"] .guest-shell .ravine-hero-video-controls .ravine-video-control-background-mode[aria-pressed="true"]{
+  border-color:rgba(169,93,56,.48)!important;
+  color:#70402F!important;
+  background:rgba(255,250,246,.78)!important;
+}
