@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
         visibility,
       })
       .eq("id", videoId)
-      .select("id,title,description,content_type,quality,published,visibility,video_url,views,likes,created_at")
+      .select("id,title,description,content_type,work_format,quality,published,visibility,video_url,views,likes,created_at")
       .single();
 
     if (error || !data) {
