@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { normalizeRAVINEWorkType, toRAVINEWork } from "../lib/ravine-work-universe.ts";
 import {
   canPublishRAVINEContent,
@@ -106,4 +107,16 @@ test("Legacy Studio film subtype is preserved by the Work Universe adapter", () 
   });
   assert.equal(shortFilm.type, "short_film");
   assert.equal(featureFilm.type, "feature_film");
+});
+
+
+test("re-publishing a work with a changed type checks destination quota", () => {
+  const migration = readFileSync(
+    new URL("../supabase/migrations/20261017130000_ravine_creator_publish_rpc.sql", import.meta.url),
+    "utf8",
+  );
+  assert.match(
+    migration,
+    /and not exists\s*\([\s\S]*?where work_id = v_work_id\s+and quota_month = v_month\s+and work_type = p_work_type\s*\)/,
+  );
 });
