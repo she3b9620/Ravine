@@ -1,9 +1,12 @@
 export const RAVINE_WORK_TYPES = [
   "short",
   "video",
-  "film",
-  "documentary",
   "podcast",
+  "documentary",
+  "short_film",
+  "feature_film",
+  // Legacy type retained so existing work records continue to render.
+  "film",
   "live",
 ] as const;
 
@@ -42,9 +45,12 @@ export type RAVINEWorkSource = {
 
 export function normalizeRAVINEWorkType(value: string | null | undefined): RAVINEWorkType {
   if (value === "short") return "short";
-  if (value === "film") return "film";
-  if (value === "documentary") return "documentary";
+  if (value === "video") return "video";
   if (value === "podcast") return "podcast";
+  if (value === "documentary") return "documentary";
+  if (value === "short_film") return "short_film";
+  if (value === "feature_film") return "feature_film";
+  if (value === "film") return "film";
   if (value === "live") return "live";
   return "video";
 }
