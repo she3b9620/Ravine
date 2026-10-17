@@ -206,6 +206,11 @@ begin
   end if;
 
   if new.content_type = 'live' then
+    -- Legacy live entries are subject to the same tier rule as new-domain
+    -- live sessions. Do not let a published videos row bypass Viewer blocking.
+    if v_tier = 'viewer' then
+      raise exception 'RAVINE_TIER_RESTRICTED' using errcode = '42501';
+    end if;
     return new;
   end if;
 
