@@ -58,6 +58,8 @@ export default function DiscoverFilters({ locale, query: initialQuery, category,
   const skipInitialRef = useRef(true);
 
   useEffect(() => {
+    // The input must follow URL query changes from browser navigation and submitted searches.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setQuery(initialQuery);
   }, [initialQuery]);
 
