@@ -120,3 +120,24 @@ test("re-publishing a work with a changed type checks destination quota", () => 
     /and not exists\s*\([\s\S]*?where work_id = v_work_id\s+and quota_month = v_month\s+and work_type = p_work_type\s*\)/,
   );
 });
+
+
+test("Live-session API only creates future scheduled sessions and cannot create a fake live state", () => {
+  const route = readFileSync(
+    new URL("../app/api/live/sessions/route.ts", import.meta.url),
+    "utf8",
+  );
+  assert.match(route, /A future scheduled start time is required/);
+  assert.match(route, /startsAt\.getTime\(\) <= Date\.now\(\)/);
+  assert.match(route, /const status = "scheduled"/);
+  assert.doesNotMatch(route, /const status = startsAt[\s\S]{0,120}\? "scheduled" : "live"/);
+});
+
+test("Studio live UI clearly distinguishes session state from actual streaming", () => {
+  const component = readFileSync(
+    new URL("../components/StudioLiveManager.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(component, /Actual audio\/video streaming requires an approved, configured Live provider/);
+  assert.match(component, /does not start an actual stream until a provider is configured/);
+});
