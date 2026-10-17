@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import StudioUpload from "@/components/StudioUpload";
@@ -32,10 +33,14 @@ export default async function StudioPage({ params }: { params: Promise<{ locale:
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) redirect(`/${locale}/auth?next=/${locale}/studio`);
 
-  const [{ data: creator }, { data: application }] = await Promise.all([
-    supabase.from("creators").select("id,name,username,specialty,followers").eq("user_id", auth.user.id).maybeSingle(),
+  const cookieStore = await cookies();
+  const rawActiveCreatorId = Number(cookieStore.get("ravine-active-creator-id")?.value);
+  const [{ data: creatorRows }, { data: application }] = await Promise.all([
+    supabase.from("creators").select("id,name,username,specialty,followers").eq("user_id", auth.user.id).order("created_at", { ascending: true }),
     supabase.from("creator_applications").select("status,created_at,reviewer_notes,reviewed_at").eq("user_id", auth.user.id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
   ]);
+  const ownedCreators = creatorRows ?? [];
+  const creator = ownedCreators.find((item) => Number.isInteger(rawActiveCreatorId) && item.id === rawActiveCreatorId) ?? ownedCreators[0] ?? null;
 
   if (!creator) {
     return (
@@ -54,13 +59,20 @@ export default async function StudioPage({ params }: { params: Promise<{ locale:
     );
   }
 
-  const { data: worksData } = await supabase
-    .from("videos")
-    .select("id,title,description,content_type,work_format,quality,published,visibility,video_url,views,likes,created_at")
-    .eq("creator_id", creator.id)
-    .order("created_at", { ascending: false })
-    .limit(50);
+  const [{ data: tierData }, { data: worksData }] = await Promise.all([
+    supabase.from("ravine_next_creator_identities").select("creator_tier").eq("legacy_creator_id", creator.id).maybeSingle(),
+    supabase.from("videos").select("id,title,description,content_type,work_format,quality,published,visibility,video_url,views,likes,created_at").eq("creator_id", creator.id).order("created_at", { ascending: false }).limit(50),
+  ]);
 
+  const creatorTier = typeof tierData?.creator_tier === "string" ? tierData.creator_tier : "creator";
+  const tierLabels: Record<string, [string, string]> = {
+    viewer: ["مشاهد", "Viewer"],
+    creator: ["مبدع", "Creator"],
+    elevated_creator: ["مبدع راقٍ", "Elevated Creator"],
+    artist: ["فنان", "Artist"],
+    elevated_artist: ["فنان راقٍ", "Elevated Artist"],
+  };
+  const tierLabel = tierLabels[creatorTier]?.[ar ? 0 : 1] ?? (ar ? "مبدع" : "Creator");
   const works = (worksData ?? []) as Work[];
   const publishedCount = works.filter((work) => work.published).length;
   const draftCount = works.length - publishedCount;
@@ -72,6 +84,7 @@ export default async function StudioPage({ params }: { params: Promise<{ locale:
         <div>
           <h1>{ar ? `مرحبًا، ${creator.name}.` : `Welcome, ${creator.name}.`}</h1>
           <p className="section-note">{ar ? "مساحة العمل والإدارة الخاصة بهويتك الإبداعية." : "Your workspace for managing your creative identity and published work."}</p>
+          <div className="work-kicker">{ar ? "فئة المبدع" : "CREATOR TIER"} · {tierLabel}</div>
         </div>
         <Link className="button secondary" href={`/${locale}/creators/${creator.id}`}>{ar ? "فتح الملف العام" : "Open public profile"}</Link>
       </div>
