@@ -417,7 +417,8 @@ create policy ravine_next_live_owner_insert
 on public.ravine_next_live_sessions
 for insert to authenticated
 with check (
-  exists (
+  public.is_ravine_admin()
+  or exists (
     select 1
       from public.ravine_next_creator_identities i
      where i.id = creator_identity_id
