@@ -130,6 +130,7 @@ test("Live-session API only creates future scheduled sessions and cannot create 
   assert.match(route, /A future scheduled start time is required/);
   assert.match(route, /startsAt\.getTime\(\) <= Date\.now\(\)/);
   assert.match(route, /const status = "scheduled"/);
+  assert.match(route, /if \(action === "start"\)[\s\S]*?Live streaming provider is not configured[\s\S]*?status: 503/);
   assert.doesNotMatch(route, /const status = startsAt[\s\S]{0,120}\? "scheduled" : "live"/);
 });
 
@@ -139,5 +140,6 @@ test("Studio live UI clearly distinguishes session state from actual streaming",
     "utf8",
   );
   assert.match(component, /Actual audio\/video streaming requires an approved, configured Live provider/);
-  assert.match(component, /does not start an actual stream until a provider is configured/);
+  assert.match(component, /Provider not connected/);
+  assert.match(component, /disabled title=\{ar \? "يلزم ربط مزود بث فعلي أولًا"/);
 });
