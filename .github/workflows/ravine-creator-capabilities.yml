@@ -24,6 +24,8 @@ on:
       - "app/[locale]/creators/[id]/page.tsx"
       - "app/[locale]/search/page.tsx"
       - "app/[locale]/page.tsx"
+      - "supabase/migrations/20260907070000_ravine_creator_ecosystem.sql"
+      - "supabase/migrations/20260907090000_ravine_work_universe.sql"
       - "supabase/migrations/20260907120000_ravine_platform_domain_foundation.sql"
       - "supabase/migrations/20260907130000_ravine_social_community_operations_foundation.sql"
       - "supabase/migrations/20261017110000_ravine_creator_capability_schema_foundation.sql"
@@ -41,6 +43,8 @@ on:
     paths:
       - "tests/sql/ravine-migration-smoke-bootstrap.sql"
       - "tests/ravine-migration-smoke.sh"
+      - "supabase/migrations/20260907070000_ravine_creator_ecosystem.sql"
+      - "supabase/migrations/20260907090000_ravine_work_universe.sql"
       - "supabase/migrations/20260907120000_ravine_platform_domain_foundation.sql"
       - "supabase/migrations/20260907130000_ravine_social_community_operations_foundation.sql"
       - "lib/ravine-creator-capabilities.ts"
