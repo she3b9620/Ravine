@@ -68,9 +68,16 @@ A content type is not merely a label. It must drive the publishing flow, validat
 
 ## Current implementation boundary
 
-- `lib/ravine-creator-capabilities.ts` defines a pure, typed policy registry and decision helpers.
-- `tests/ravine-creator-capabilities.test.mjs` covers tier and quota boundaries; run it with `npm run test:ravine-capabilities`.
-- `.github/workflows/ravine-creator-capabilities.yml` runs those tests on relevant pushes and pull requests.
-- `supabase/migrations/20261017110000_ravine_creator_capability_schema_foundation.sql` stages the creator-tier column and work-type vocabulary. It has not been applied to any Supabase project and deliberately does not enforce provisional quotas.
+- `lib/ravine-creator-capabilities.ts` defines the typed product policy.
+- `lib/ravine-work-universe.ts` and `components/RAVINEWorkContext.tsx` recognize the expanded work taxonomy while preserving legacy `film`.
+- `app/api/creator/publish-work/route.ts` is the new-domain publishing endpoint. It calls a database RPC; the browser cannot supply an owner or tier as authority.
+- `supabase/migrations/20261017110000_ravine_creator_capability_schema_foundation.sql` stages the tier column and work-type vocabulary.
+- `supabase/migrations/20261017130000_ravine_creator_publish_rpc.sql` stages the transactional publishing function, ownership checks, tier eligibility, quota ledger, and a `monthly_quotas_enabled=false` setting. Tier restrictions are enforced by this new endpoint when its migrations are applied; provisional numeric quotas remain disabled until approved.
+- `tests/ravine-creator-capabilities.test.mjs` covers the pure policy and work-type normalization; run it with `npm run test:ravine-capabilities`.
+- `.github/workflows/ravine-creator-capabilities.yml` runs the Node test suite on relevant pushes and pull requests.
 
-This is not yet a secure authorization boundary and must not be treated as complete enforcement until server-side ownership checks, database-side quota enforcement, active identity wiring, and integration tests are implemented and verified.
+## Explicit integration boundary
+
+The existing Creator Studio at `app/[locale]/studio/page.tsx` and `components/StudioUpload.tsx` still use legacy `public.creators` and `public.videos`. They are not automatically migrated to the new `ravine_next_creator_identities` / `ravine_next_works` domain, and this PR does not switch existing uploads to the new endpoint. The repository currently has no active-identity selector or runtime code creating/reading the new identity tables outside migrations. Do not claim the new endpoint is wired into the existing Studio UI until that identity lifecycle and media upload flow are deliberately integrated.
+
+The migrations are staged only and have not been applied to any Supabase project. This is not ready to merge or deploy until the migrations are reviewed and applied in a controlled non-production environment, the legacy/new-domain integration is implemented, and full build/integration checks pass.
