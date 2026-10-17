@@ -13,6 +13,7 @@ type Work = {
   title: string;
   description: string | null;
   content_type: string | null;
+  work_format: string | null;
   quality: string | null;
   published: boolean | null;
   visibility: string | null;
@@ -55,7 +56,7 @@ export default async function StudioPage({ params }: { params: Promise<{ locale:
 
   const { data: worksData } = await supabase
     .from("videos")
-    .select("id,title,description,content_type,quality,published,visibility,video_url,views,likes,created_at")
+    .select("id,title,description,content_type,work_format,quality,published,visibility,video_url,views,likes,created_at")
     .eq("creator_id", creator.id)
     .order("created_at", { ascending: false })
     .limit(50);
