@@ -23,7 +23,7 @@ const formats: Option[] = [
   { value: "16:9", ar: "أفقي · 16:9", en: "Landscape · 16:9" }, { value: "9:16", ar: "عمودي · 9:16", en: "Portrait · 9:16" },
   { value: "1:1", ar: "مربع · 1:1", en: "Square · 1:1" }, { value: "other", ar: "نسبة أخرى", en: "Other ratio" },
 ];
-const qualities = [{ value: "1080p", ar: "1080p", en: "1080p" }, { value: "1440p", ar: "1440p", en: "1440p" }, { value: "4K", ar: "4K", en: "4K" }];
+const qualities = [{ value: "1080p", ar: "1080p", en: "1080p" }, { value: "2k", ar: "2K", en: "2K" }, { value: "4k", ar: "4K", en: "4K" }];
 const sorts = [{ value: "newest", ar: "الأحدث", en: "Newest" }, { value: "oldest", ar: "الأقدم", en: "Oldest" }];
 
 function buildDiscoverHref(locale: Locale, query: string, category: string, type: string, duration: string, format: string, quality: string, sort: string) {
