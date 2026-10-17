@@ -183,3 +183,37 @@ test("Staged database migrations preserve dependency order and do not imply prod
   assert.match(audit, /20260907102607.*20260907082000/s);
   assert.match(audit, /Do not blindly replay the repository migration chain/i);
 });
+
+test("Short-film and feature-film collections are separate, and short-film viewers choose the display mode", () => {
+  const browser = readFileSync(
+    new URL("../components/FilmCollectionBrowser.tsx", import.meta.url),
+    "utf8",
+  );
+  const collection = readFileSync(
+    new URL("../lib/ravine-film-collections.ts", import.meta.url),
+    "utf8",
+  );
+  const shortPage = readFileSync(
+    new URL("../app/[locale]/short-films/page.tsx", import.meta.url),
+    "utf8",
+  );
+  const featurePage = readFileSync(
+    new URL("../app/[locale]/feature-films/page.tsx", import.meta.url),
+    "utf8",
+  );
+  const sidebar = readFileSync(
+    new URL("../components/SidebarNav.tsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(shortPage, /getRAVINEFilmCollection\\("short_film"\\)/);
+  assert.match(featurePage, /getRAVINEFilmCollection\\("feature_film"\\)/);
+  assert.match(collection, /work_format/);
+  assert.match(collection, /work_format === format/);
+  assert.match(browser, /Choose your viewing mode/);
+  assert.match(browser, /setShortFilmMode\\("grid"\\)/);
+  assert.match(browser, /setShortFilmMode\\("feed"\\)/);
+  assert.match(browser, /RAVINEWorkPlayer/);
+  assert.match(sidebar, /short-films/);
+  assert.match(sidebar, /feature-films/);
+});
