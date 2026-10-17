@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { normalizeRAVINEWorkType } from "../lib/ravine-work-universe.ts";
 import {
   canPublishRAVINEContent,
   canStartRAVINELive,
@@ -59,4 +60,16 @@ test("Elevated Artist has no tier-based monthly quota across all work types", ()
 test("A zero limit means tier-restricted; a reached positive limit means quota reached", () => {
   assert.equal(canPublishRAVINEContent("viewer", "short_film", 0).reason, "tier_restricted");
   assert.equal(canPublishRAVINEContent("viewer", "video", 10).reason, "monthly_quota_reached");
+});
+
+
+test("Work universe normalizes every dedicated format while preserving legacy film records", () => {
+  assert.equal(normalizeRAVINEWorkType("short"), "short");
+  assert.equal(normalizeRAVINEWorkType("video"), "video");
+  assert.equal(normalizeRAVINEWorkType("podcast"), "podcast");
+  assert.equal(normalizeRAVINEWorkType("documentary"), "documentary");
+  assert.equal(normalizeRAVINEWorkType("short_film"), "short_film");
+  assert.equal(normalizeRAVINEWorkType("feature_film"), "feature_film");
+  assert.equal(normalizeRAVINEWorkType("film"), "film");
+  assert.equal(normalizeRAVINEWorkType("unknown"), "video");
 });
