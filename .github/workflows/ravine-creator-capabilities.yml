@@ -8,6 +8,7 @@ on:
       - "lib/ravine-creator-capabilities.ts"
       - "lib/ravine-work-universe.ts"
       - "app/api/creator/publish-work/route.ts"
+      - "app/api/admin/creator-tier/route.ts"
       - "app/api/studio/publish-work/route.ts"
       - "app/[locale]/studio/page.tsx"
       - "components/StudioUpload.tsx"
@@ -34,6 +35,7 @@ on:
       - "lib/ravine-creator-capabilities.ts"
       - "lib/ravine-work-universe.ts"
       - "app/api/creator/publish-work/route.ts"
+      - "app/api/admin/creator-tier/route.ts"
       - "app/api/studio/publish-work/route.ts"
       - "app/[locale]/studio/page.tsx"
       - "components/StudioUpload.tsx"
@@ -96,7 +98,7 @@ jobs:
       - name: Install locked dependencies
         run: npm ci
       - name: Lint changed capability files
-        run: npx eslint app/api/creator/publish-work/route.ts app/api/studio/publish-work/route.ts "app/[locale]/studio/page.tsx" "app/[locale]/discover/page.tsx" "app/[locale]/work/[id]/page.tsx" "app/[locale]/creators/[id]/page.tsx" "app/[locale]/search/page.tsx" "app/[locale]/page.tsx" components/StudioUpload.tsx components/StudioWorkManager.tsx components/HomeWorkCard.tsx components/RAVINEWorkPlayer.tsx components/DiscoverFilters.tsx lib/ravine-creator-capabilities.ts lib/ravine-work-universe.ts components/RAVINEWorkContext.tsx
+        run: npx eslint app/api/admin/creator-tier/route.ts app/api/creator/publish-work/route.ts app/api/studio/publish-work/route.ts "app/[locale]/studio/page.tsx" "app/[locale]/discover/page.tsx" "app/[locale]/work/[id]/page.tsx" "app/[locale]/creators/[id]/page.tsx" "app/[locale]/search/page.tsx" "app/[locale]/page.tsx" components/StudioUpload.tsx components/StudioWorkManager.tsx components/HomeWorkCard.tsx components/RAVINEWorkPlayer.tsx components/DiscoverFilters.tsx lib/ravine-creator-capabilities.ts lib/ravine-work-universe.ts components/RAVINEWorkContext.tsx
       - name: Full repository lint
         run: npm run lint
       - name: Build
