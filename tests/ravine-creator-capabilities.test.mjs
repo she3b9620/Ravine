@@ -168,15 +168,15 @@ test("Staged database migrations preserve dependency order and do not imply prod
     "utf8",
   );
 
-  assert.match(domain, /create table if not exists public\\.ravine_next_creator_identities/i);
-  assert.match(domain, /create table if not exists public\\.ravine_next_works/i);
+  assert.match(domain, /create table if not exists public[.]ravine_next_creator_identities/i);
+  assert.match(domain, /create table if not exists public[.]ravine_next_works/i);
   assert.ok(
     capabilities.indexOf("ravine_next_creator_identities") >= 0 &&
       capabilities.indexOf("ravine_next_works") >= 0,
     "capability schema must target the domain foundation tables",
   );
-  assert.match(capabilities, /Depends on 20260907120000_ravine_platform_domain_foundation\\.sql/);
-  assert.match(publishRpc, /create or replace function public\\.ravine_publish_creator_work/i);
+  assert.match(capabilities, /Depends on 20260907120000_ravine_platform_domain_foundation[.]sql/);
+  assert.match(publishRpc, /create or replace function public[.]ravine_publish_creator_work/i);
   assert.match(studioBridge, /create trigger ravine_sync_legacy_creator_identity_trigger/i);
   assert.match(studioBridge, /create or replace function public\\.ravine_validate_legacy_creator_publish/i);
   assert.match(audit, /No migration has been applied to the live Supabase project/i);
