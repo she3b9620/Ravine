@@ -76,7 +76,7 @@ const domainMigration = read("supabase/migrations/20260907120000_ravine_platform
 if (process.env.GITHUB_REF_NAME && process.env.GITHUB_REF_NAME !== "ravine/clean-rebuild") throw new Error(`Expected ravine/clean-rebuild, got ${process.env.GITHUB_REF_NAME}`);
 if (!layout.includes('import "./ravine-sidebar-position-finish.css";')) throw new Error("Sidebar finish stylesheet not loaded.");
 if (!layout.includes('import "./ravine-logo-motion-finish.css";')) throw new Error("Logo motion stylesheet not loaded.");
-if (!sidebar.includes("inset-block-start: 78px !important") || !sidebar.includes("height: calc(100dvh - 78px) !important") || !sidebar.includes("padding-top: 36px !important")) throw new Error("Sidebar geometry guard failed.");
+if (!sidebar.includes("inset-block-start: 68px !important") || !sidebar.includes("height: calc(100dvh - 68px) !important") || !sidebar.includes("padding-top: 36px !important")) throw new Error("Sidebar geometry guard failed.");
 if (!logo.includes("ravineLogoQuietSweep") || !logo.includes("mask-image:url('/اللوجو.png')") || !logo.includes("mask-image:url('/التايبو.png')") || !logo.includes('data-ravine-auth="authenticated"')) throw new Error("Logo motion guard failed.");
 if (!logoMotion.includes("ravine-logo-motion-change")) throw new Error("Logo motion event wiring missing.");
 if (!playbackCore.includes("export function resolveWorkPlaybackUrl") || !playbackCore.includes("export function resolveAssetPlaybackUrl") || !playbackCore.includes("toCloudinaryBrowserVideoUrl")) throw new Error("Playback contract guard failed.");
