@@ -20,6 +20,7 @@ type WorkRow = {
   visibility: string | null;
   discovery_enabled: boolean | null;
   content_type: string | null;
+  work_format?: string | null;
   creator_id: number | null;
 };
 type Chapter = {
@@ -41,7 +42,7 @@ export default async function WorkPage({ params }: { params: Promise<{ locale: s
   const [{ data, error }, { data: chapterData }, { data: assetData }] = await Promise.all([
     supabase
       .from("videos")
-      .select("id,title,description,thumbnail_url,video_url,duration,published,visibility,discovery_enabled,content_type,creator_id")
+      .select("id,title,description,thumbnail_url,video_url,duration,published,visibility,discovery_enabled,content_type,work_format,creator_id")
       .eq("id", workId)
       .maybeSingle(),
     supabase
