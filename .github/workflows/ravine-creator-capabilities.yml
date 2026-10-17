@@ -1,0 +1,44 @@
+name: RAVINE Creator Capability Tests
+
+on:
+  pull_request:
+    branches:
+      - ravine/clean-rebuild
+    paths:
+      - "lib/ravine-creator-capabilities.ts"
+      - "tests/ravine-creator-capabilities.test.mjs"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/ravine-creator-capabilities.yml"
+  push:
+    branches:
+      - "ravine/creator-capabilities-foundation-20261017"
+    paths:
+      - "lib/ravine-creator-capabilities.ts"
+      - "tests/ravine-creator-capabilities.test.mjs"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/ravine-creator-capabilities.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  creator-capability-tests:
+    name: Creator tier policy tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Test creator capability boundaries
+        run: npm run test:ravine-capabilities
