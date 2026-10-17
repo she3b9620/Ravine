@@ -50,3 +50,26 @@ jobs:
 
       - name: Test creator capability boundaries
         run: npm run test:ravine-capabilities
+
+  app-quality:
+    name: RAVINE lint and production build
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: test-placeholder-anon-key
+      NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: test-cloud
+      NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET: test-preset
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Build
+        run: npm run build
