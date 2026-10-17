@@ -10,7 +10,7 @@ const controlStyles = read("../app/[locale]/ravine-hero-control-fixes.css");
 
 test("guest hero defaults to video and can switch to its still image", () => {
   assert.match(backdrop, /useState<BackgroundMode>\("video"\)/);
-  assert.match(backdrop, /case "set-background-mode"/);
+  assert.match(backdrop, /detail\.action === "set-background-mode"/);
   assert.match(backdrop, /data-background-mode=\{backgroundMode\}/);
   assert.match(backdrop, /className="ravine-guest-cinematic-image"/);
   assert.match(backdrop, /className="ravine-guest-cinematic-video"/);
