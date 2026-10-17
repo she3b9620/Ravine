@@ -44,7 +44,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   try {
     const [profileResult, worksResult, creatorsResult] = await Promise.all([
       user ? supabase.from("profiles").select("display_name,username,avatar_url").eq("id", user.id).maybeSingle() : Promise.resolve({ data: null }),
-      supabase.from("videos").select("id,title,description,thumbnail_url,video_url,duration,views,likes,content_type,quality,creator_id,creators(name,username)").eq("published", true).limit(60),
+      supabase.from("videos").select("id,title,description,thumbnail_url,video_url,duration,views,likes,content_type,work_format,quality,creator_id,creators(name,username)").eq("published", true).limit(60),
       supabase.from("creators").select("id,name,username,avatar_url,specialty,followers").order("followers", { ascending: false, nullsFirst: false }).limit(10)
     ]);
     viewer = (profileResult.data ?? null) as ViewerProfile | null;
