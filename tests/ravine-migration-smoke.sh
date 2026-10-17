@@ -6,6 +6,7 @@ root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$root/tests/sql/ravine-migration-smoke-bootstrap.sql"
 
 psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$root/supabase/migrations/20260907120000_ravine_platform_domain_foundation.sql"
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$root/supabase/migrations/20260907130000_ravine_social_community_operations_foundation.sql"
 psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$root/supabase/migrations/20261017110000_ravine_creator_capability_schema_foundation.sql"
 psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$root/supabase/migrations/20261017130000_ravine_creator_publish_rpc.sql"
 psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
