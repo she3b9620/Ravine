@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { normalizeRAVINEWorkType } from "../lib/ravine-work-universe.ts";
+import { normalizeRAVINEWorkType, toRAVINEWork } from "../lib/ravine-work-universe.ts";
 import {
   canPublishRAVINEContent,
   canStartRAVINELive,
@@ -72,4 +72,38 @@ test("Work universe normalizes every dedicated format while preserving legacy fi
   assert.equal(normalizeRAVINEWorkType("feature_film"), "feature_film");
   assert.equal(normalizeRAVINEWorkType("film"), "film");
   assert.equal(normalizeRAVINEWorkType("unknown"), "video");
+});
+
+
+test("Legacy Studio film subtype is preserved by the Work Universe adapter", () => {
+  const shortFilm = toRAVINEWork({
+    id: 101,
+    title: "Short film",
+    description: null,
+    thumbnail_url: null,
+    video_url: "https://media.example/short-film.mp4",
+    duration: 120,
+    content_type: "film",
+    work_format: "short_film",
+    published: true,
+    visibility: "public",
+    discovery_enabled: true,
+    creator_id: 1,
+  });
+  const featureFilm = toRAVINEWork({
+    id: 102,
+    title: "Feature film",
+    description: null,
+    thumbnail_url: null,
+    video_url: "https://media.example/feature-film.mp4",
+    duration: 5400,
+    content_type: "film",
+    work_format: "feature_film",
+    published: true,
+    visibility: "public",
+    discovery_enabled: true,
+    creator_id: 1,
+  });
+  assert.equal(shortFilm.type, "short_film");
+  assert.equal(featureFilm.type, "feature_film");
 });
