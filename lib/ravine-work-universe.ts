@@ -37,6 +37,7 @@ export type RAVINEWorkSource = {
   video_url: string | null;
   duration: number | null;
   content_type: string | null;
+  work_format?: string | null;
   published: boolean;
   visibility?: string | null;
   discovery_enabled?: boolean | null;
@@ -60,7 +61,7 @@ export function toRAVINEWork(source: RAVINEWorkSource, access: RAVINEWorkAccess 
     id: source.id,
     title: source.title || "Untitled",
     description: source.description || "",
-    type: normalizeRAVINEWorkType(source.content_type),
+    type: normalizeRAVINEWorkType(source.work_format || source.content_type),
     creatorId: source.creator_id ?? null,
     thumbnailUrl: source.thumbnail_url ?? null,
     mediaUrl: source.video_url ?? null,
