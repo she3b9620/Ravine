@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import StudioUpload from "@/components/StudioUpload";
 import StudioWorkManager from "@/components/StudioWorkManager";
+import StudioLiveManager from "@/components/StudioLiveManager";
 
 export const dynamic = "force-dynamic";
 
@@ -59,8 +60,8 @@ export default async function StudioPage({ params }: { params: Promise<{ locale:
     );
   }
 
-  const [{ data: tierData }, { data: worksData }] = await Promise.all([
-    supabase.from("ravine_next_creator_identities").select("creator_tier").eq("legacy_creator_id", creator.id).maybeSingle(),
+  const [{ data: tierData, error: tierError }, { data: worksData }] = await Promise.all([
+    supabase.from("ravine_next_creator_identities").select("id,creator_tier").eq("legacy_creator_id", creator.id).maybeSingle(),
     supabase.from("videos").select("id,title,description,content_type,work_format,quality,published,visibility,video_url,views,likes,created_at").eq("creator_id", creator.id).order("created_at", { ascending: false }).limit(50),
   ]);
 
@@ -73,6 +74,11 @@ export default async function StudioPage({ params }: { params: Promise<{ locale:
     elevated_artist: ["فنان راقٍ", "Elevated Artist"],
   };
   const tierLabel = tierLabels[creatorTier]?.[ar ? 0 : 1] ?? (ar ? "مبدع" : "Creator");
+  const creatorIdentityId = typeof tierData?.id === "number" ? tierData.id : null;
+  const liveQuery = creatorIdentityId
+    ? await supabase.from("ravine_next_live_sessions").select("id,creator_identity_id,title,mode,status,starts_at,ended_at,related_work_id,created_at").eq("creator_identity_id", creatorIdentityId).order("created_at", { ascending: false }).limit(20)
+    : { data: null, error: tierError || new Error("Creator identity schema is not available.") };
+  const liveSessions = (liveQuery.data ?? []) as Array<{ id: string; creator_identity_id: number; title: string; mode: string; status: "scheduled" | "live" | "recorded" | "edited" | "published" | "cancelled"; starts_at: string | null; ended_at: string | null; related_work_id: number | null; created_at: string }>;
   const works = (worksData ?? []) as Work[];
   const publishedCount = works.filter((work) => work.published).length;
   const draftCount = works.length - publishedCount;
@@ -95,6 +101,13 @@ export default async function StudioPage({ params }: { params: Promise<{ locale:
       </div>
       <StudioUpload creatorId={creator.id} locale={locale} />
       <StudioWorkManager works={works} locale={locale} />
+      <StudioLiveManager
+        creatorIdentityId={creatorIdentityId}
+        creatorTier={creatorTier}
+        initialSessions={liveSessions}
+        schemaReady={!liveQuery.error && creatorIdentityId !== null}
+        locale={locale}
+      />
     </section>
   );
 }
