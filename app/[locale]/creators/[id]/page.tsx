@@ -99,7 +99,7 @@ function WorkGrid({ works, locale, ar }: { works: Work[]; locale: Locale; ar: bo
           </div>
           <div className={styles.workBody}>
             <div className="video-kicker">
-              {work.work_format || work.content_type || "WORK"}
+              {(work.work_format || work.content_type || "WORK").replaceAll("_", " ")}
               {work.quality ? ` · ${work.quality}` : ""}
             </div>
             <h3>{work.title || (ar ? "بدون عنوان" : "Untitled")}</h3>
