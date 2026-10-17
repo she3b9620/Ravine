@@ -52,3 +52,11 @@ This confirms the capability migrations must not be treated as already installed
 - No Supabase migration applied.
 - No merge to `main` or Production.
 - No numeric quota enforcement enabled.
+
+## Follow-up — live-session API foundation
+
+- Added `app/api/live/sessions/route.ts` on the feature branch for authenticated live-session creation/scheduling, starting, ending, and cancelling.
+- Creation verifies that the selected creator identity belongs to the authenticated account. If a related work is supplied, it must belong to the same identity.
+- The route writes through the authenticated Supabase client and relies on the staged database RLS policies and live-tier trigger as the final authorization boundary. Starting a session transitions it to `live`, where the database trigger rejects Viewer-tier identities.
+- The route returns a service-unavailable response when the staged live-session schema is not installed, rather than reporting a missing identity/session as an authorization failure.
+- The route is included in focused ESLint and production-build CI. It is an API foundation only: no live-session UI/provider integration is claimed complete, and the database migration remains unapplied.
