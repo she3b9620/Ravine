@@ -32,6 +32,12 @@ Status: implementation staged in the feature branch. No Supabase migration has b
 - Added a regression test that verifies the SQL guard remains present.
 - These changes are committed to this feature branch only. The test suite/build status still needs confirmation, and the migration remains unapplied.
 
+## Live database readiness check — 2026-10-17
+
+A read-only check of the connected Supabase project confirmed that the staged Work Universe/capability tables are not present there yet: `ravine_next_creator_identities`, `ravine_next_works`, `ravine_creator_capability_settings`, `ravine_creator_publish_quota_usage`, `ravine_legacy_creator_publish_quota_usage`, and `ravine_next_live_sessions` were all absent. The live migration history currently ends at `20260907102607 ravine_founder_upload_policy`.
+
+This confirms the capability migrations must not be treated as already installed. The project also has a migration-history mismatch: the recorded founder policy version is `20260907102607`, while the repository filename uses `20260907082000`. The repository's `20260907120000_ravine_platform_domain_foundation.sql` is not recorded as applied. Do not apply the staged migration sequence to this project until the history mismatch and a safe, non-production rehearsal are resolved.
+
 ## Remaining validation gates
 
 1. GitHub Actions policy tests and focused lint must pass after the Studio integration changes.
