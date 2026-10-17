@@ -11,6 +11,7 @@ const publisher = read("../app/api/studio/publish-work/route.ts");
 const studioPage = read("../app/[locale]/studio/page.tsx");
 const workModel = read("../lib/ravine-work-universe.ts");
 const player = read("../components/RAVINEWorkPlayer.tsx");
+const workContext = read("../components/RAVINEWorkContext.tsx");
 const migration = read("../supabase/migrations/20261017100000_ravine_series_content_type.sql");
 
 test("series page lists published series work and links to its RAVINE watch page", () => {
@@ -40,6 +41,7 @@ test("series uses the canonical RAVINE work type and standard video player", () 
   assert.match(workModel, /"film",\s*"series",\s*"documentary"/);
   assert.match(workModel, /value === "series"\) return "series"/);
   assert.match(player, /case "series":/);
+  assert.match(workContext, /series: \{ ar: "مسلسل", en: "Series" \}/);
 });
 
 test("series content type shares existing video quota; no separate permission bypass", () => {

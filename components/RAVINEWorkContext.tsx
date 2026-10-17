@@ -12,6 +12,7 @@ const typeLabel: Record<RAVINEWork["type"], { ar: string; en: string }> = {
   short: { ar: "Short", en: "Short" },
   video: { ar: "فيديو", en: "Video" },
   film: { ar: "فيلم", en: "Film" },
+  series: { ar: "مسلسل", en: "Series" },
   documentary: { ar: "وثائقي", en: "Documentary" },
   podcast: { ar: "بودكاست", en: "Podcast" },
   live: { ar: "بث مباشر", en: "Live" },
