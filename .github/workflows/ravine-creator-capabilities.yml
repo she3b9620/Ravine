@@ -38,6 +38,9 @@ on:
     branches:
       - "ravine/creator-capabilities-foundation-20261017"
     paths:
+      - "tests/sql/ravine-migration-smoke-bootstrap.sql"
+      - "tests/ravine-migration-smoke.sh"
+      - "supabase/migrations/20260907120000_ravine_platform_domain_foundation.sql"
       - "lib/ravine-creator-capabilities.ts"
       - "lib/ravine-work-universe.ts"
       - "app/api/creator/publish-work/route.ts"
