@@ -74,3 +74,11 @@ This confirms the capability migrations must not be treated as already installed
 
 - Until the product's Live provider is selected and integrated, the API rejects `start` actions with HTTP 503 and the Studio control is disabled. A scheduled session can no longer be represented as live without a real provider.
 - Scheduling and cancellation remain available when the staged schema is installed. Ending remains available only for sessions already marked live by a trusted, provider-integrated path.
+
+
+## Migration preflight coverage — 2026-10-17
+
+- Added an automated regression test that checks the staged platform-domain prerequisites, capability-schema dependency, publishing RPC, legacy Studio bridge triggers, and the documented live migration-history mismatch.
+- This is an offline/static guard only. It does not execute SQL against PostgreSQL and does not replace a disposable-database rehearsal.
+- Read-only inspection of the connected Supabase project still shows the live history ending at `20260907102607 ravine_founder_upload_policy`. No migration was applied during this check.
+- Safe next gate: resolve the filename/history mismatch in a reviewed plan, then rehearse the ordered migration set against a local/disposable PostgreSQL database before considering any live change.
