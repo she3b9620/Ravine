@@ -37,6 +37,9 @@ function mapUploadError(error: unknown, ar: boolean) {
     RAVINE_VIDEO_QUOTA_EXCEEDED: ["وصلت إلى حد الفيديوهات الشهري لهذا الحساب.", "This account has reached its monthly Video limit."],
     RAVINE_PODCAST_QUOTA_EXCEEDED: ["وصلت إلى حد البودكاست الشهري لهذا الحساب.", "This account has reached its monthly Podcast limit."],
     RAVINE_INVALID_CONTENT_TYPE: ["نوع المحتوى غير مدعوم.", "This content type is not supported."],
+    RAVINE_TIER_RESTRICTED: ["نوع المحتوى غير متاح لفئة حسابك الحالية.", "Your current creator tier cannot publish this content type."],
+    RAVINE_MONTHLY_QUOTA_REACHED: ["وصلت إلى الحد الشهري لهذا النوع من المحتوى.", "The monthly publishing limit for this content type has been reached."],
+    RAVINE_CREATOR_IDENTITY_NOT_LINKED_OR_NOT_OWNED: ["تعذر التحقق من هوية المبدع المرتبطة بهذا العمل.", "The creator identity linked to this work could not be verified."],
   };
   if (copy[code]) return ar ? copy[code][0] : copy[code][1];
   return message;
@@ -59,7 +62,7 @@ export default function StudioUpload({ creatorId, locale }: Props) {
 
   const isPodcast = contentType === "podcast";
   const isShort = contentType === "short";
-  const isVideoLike = contentType === "video" || contentType === "film" || contentType === "documentary";
+  const isVideoLike = ["video", "film", "short_film", "feature_film", "documentary"].includes(contentType);
 
   async function uploadToCloudinary(uploadFile: File, cloudName: string, uploadPreset: string): Promise<CloudinaryUpload> {
     const formData = new FormData();
@@ -128,7 +131,8 @@ export default function StudioUpload({ creatorId, locale }: Props) {
           duration: mainUpload.duration || null,
           published: false,
           visibility,
-          content_type: contentType,
+          content_type: contentType === "short_film" || contentType === "feature_film" ? "film" : contentType,
+          work_format: contentType === "short_film" || contentType === "feature_film" ? contentType : null,
           aspect_ratio: aspectRatio,
           quality,
           is_creator_content: true,
@@ -199,7 +203,8 @@ export default function StudioUpload({ creatorId, locale }: Props) {
             <option value="short">Short</option>
             <option value="documentary">Documentary</option>
             <option value="podcast">Podcast</option>
-            <option value="film">Film</option>
+            <option value="short_film">Short Film</option>
+            <option value="feature_film">Feature Film</option>
           </select>
         </label>
 
