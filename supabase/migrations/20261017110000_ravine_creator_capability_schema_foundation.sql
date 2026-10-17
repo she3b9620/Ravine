@@ -22,46 +22,29 @@ begin
 end
 $$;
 
--- Expand the existing work vocabulary without renaming legacy types that may
--- already be referenced by data or UI. "film" remains supported for legacy
--- records; new publishing flows should use "short_film" / "feature_film".
-do $$
-declare
-  constraint_row record;
-begin
-  for constraint_row in
-    select conname
-    from pg_constraint
-    where conrelid = 'public.ravine_next_works'::regclass
-      and contype = 'c'
-      and pg_get_constraintdef(oid) ilike '%work_type%'
-  loop
-    execute format(
-      'alter table public.ravine_next_works drop constraint %I',
-      constraint_row.conname
-    );
-  end loop;
+-- Expand only the known work_type check constraint. Avoid dropping unrelated
+-- check constraints that may happen to reference this column.
+alter table public.ravine_next_works
+  drop constraint if exists ravine_next_works_work_type_check;
 
-  alter table public.ravine_next_works
-    add constraint ravine_next_works_work_type_check
-    check (work_type in (
-      'short',
-      'video',
-      'podcast',
-      'documentary',
-      'short_film',
-      'feature_film',
-      'film',
-      'photography',
-      'motion_vfx',
-      'audio',
-      'music',
-      'series_episode',
-      'gaming',
-      'other'
-    ));
-end
-$$;
+alter table public.ravine_next_works
+  add constraint ravine_next_works_work_type_check
+  check (work_type in (
+    'short',
+    'video',
+    'podcast',
+    'documentary',
+    'short_film',
+    'feature_film',
+    'film',
+    'photography',
+    'motion_vfx',
+    'audio',
+    'music',
+    'series_episode',
+    'gaming',
+    'other'
+  ));
 
 create index if not exists ravine_next_creator_tier_idx
   on public.ravine_next_creator_identities(creator_tier);
