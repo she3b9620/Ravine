@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
 
     const { data: work, error: workError } = await supabase
       .from("videos")
-      .select("id,user_id,creator_id,title,description,video_url,content_type,quality,published,visibility,series_id,season_number,episode_number")
+      .select("id,user_id,creator_id,title,description,video_url,content_type,quality,published,visibility")
       .eq("id", videoId)
       .single();
 
@@ -56,22 +56,30 @@ export async function POST(request: NextRequest) {
 
       if (error || !data) return NextResponse.json({ error: error?.message || "Could not unpublish work." }, { status: 500 });
 
-      if (work.content_type === "series" && work.series_id) {
-        const { data: remainingEpisodes, error: remainingError } = await supabase
+      if (work.content_type === "series") {
+        const { data: seriesMeta, error: seriesMetaError } = await supabase
           .from("videos")
-          .select("id")
-          .eq("series_id", work.series_id)
-          .eq("content_type", "series")
-          .eq("published", true)
-          .eq("visibility", "public")
-          .limit(1);
-        if (remainingError) return NextResponse.json({ error: remainingError.message }, { status: 500 });
-        const { error: seriesUpdateError } = await supabase
-          .from("ravine_series_titles")
-          .update({ published: Boolean(remainingEpisodes?.length), updated_at: new Date().toISOString() })
-          .eq("id", work.series_id)
-          .eq("creator_id", creator.id);
-        if (seriesUpdateError) return NextResponse.json({ error: seriesUpdateError.message }, { status: 500 });
+          .select("series_id")
+          .eq("id", videoId)
+          .maybeSingle();
+        // Old series records remain manageable before the structured-series migration is applied.
+        if (!seriesMetaError && seriesMeta?.series_id) {
+          const { data: remainingEpisodes, error: remainingError } = await supabase
+            .from("videos")
+            .select("id")
+            .eq("series_id", seriesMeta.series_id)
+            .eq("content_type", "series")
+            .eq("published", true)
+            .eq("visibility", "public")
+            .limit(1);
+          if (remainingError) return NextResponse.json({ error: remainingError.message }, { status: 500 });
+          const { error: seriesUpdateError } = await supabase
+            .from("ravine_series_titles")
+            .update({ published: Boolean(remainingEpisodes?.length), updated_at: new Date().toISOString() })
+            .eq("id", seriesMeta.series_id)
+            .eq("creator_id", creator.id);
+          if (seriesUpdateError) return NextResponse.json({ error: seriesUpdateError.message }, { status: 500 });
+        }
       }
       return NextResponse.json({ ok: true, work: data });
     }
@@ -92,16 +100,28 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "This content type is not supported." }, { status: 422 });
     }
 
+    let seriesIdForPublish: number | null = null;
     if (contentType === "series") {
-      if (!Number.isInteger(Number(work.series_id)) || Number(work.series_id) < 1 ||
-          !Number.isInteger(Number(work.season_number)) || Number(work.season_number) < 1 ||
-          !Number.isInteger(Number(work.episode_number)) || Number(work.episode_number) < 1) {
+      const { data: seriesMeta, error: seriesMetaError } = await supabase
+        .from("videos")
+        .select("series_id,season_number,episode_number")
+        .eq("id", videoId)
+        .maybeSingle();
+      if (seriesMetaError) {
+        return NextResponse.json({ error: "Structured series support requires the RAVINE series database migration." }, { status: 503 });
+      }
+      seriesIdForPublish = Number(seriesMeta?.series_id);
+      const seasonNumber = Number(seriesMeta?.season_number);
+      const episodeNumber = Number(seriesMeta?.episode_number);
+      if (!Number.isInteger(seriesIdForPublish) || seriesIdForPublish < 1 ||
+          !Number.isInteger(seasonNumber) || seasonNumber < 1 ||
+          !Number.isInteger(episodeNumber) || episodeNumber < 1) {
         return NextResponse.json({ error: "A series episode must have a series, season number, and episode number." }, { status: 422 });
       }
       const { data: seriesRecord, error: seriesLookupError } = await supabase
         .from("ravine_series_titles")
         .select("id")
-        .eq("id", work.series_id)
+        .eq("id", seriesIdForPublish)
         .eq("creator_id", creator.id)
         .eq("user_id", auth.user.id)
         .maybeSingle();
@@ -132,11 +152,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error?.message || "Could not publish work." }, { status: 500 });
     }
 
-    if (contentType === "series" && visibility === "public" && work.series_id) {
+    if (contentType === "series" && visibility === "public" && seriesIdForPublish) {
       const { error: seriesUpdateError } = await supabase
         .from("ravine_series_titles")
         .update({ published: true, visibility: "public", updated_at: new Date().toISOString() })
-        .eq("id", work.series_id)
+        .eq("id", seriesIdForPublish)
         .eq("creator_id", creator.id);
       if (seriesUpdateError) return NextResponse.json({ error: seriesUpdateError.message }, { status: 500 });
     }
