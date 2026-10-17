@@ -88,7 +88,7 @@ export default function SearchLauncher({ locale, categories }: Props) {
     </div>
   ) : null;
 
-  return <><button type="button" className="ravine-minor-link ravine-search-trigger" onPointerDown={(event) => event.stopPropagation()} onClick={() => { setClosing(false); setOpen(true); }} aria-label={ar ? "بحث" : "Search"}><Search size={15} aria-hidden="true" /><span>{ar ? "بحث" : "Search"}</span></button>{modal && typeof document !== "undefined" ? createPortal(modal, document.body) : null}</>;
+  return <><button type="button" className="ravine-minor-link ravine-search-trigger" onPointerDown={(event) => event.stopPropagation()} onClick={() => { setClosing(false); setOpen(true); }} aria-label={ar ? "ابحث عن عمل، مبدع، مسلسل أو فكرة" : "Search work, creators, series or ideas"} title={ar ? "ابحث عن عمل، مبدع، مسلسل أو فكرة" : "Search work, creators, series or ideas"}><Search size={17} aria-hidden="true" /><span>{ar ? "ابحث عن عمل، مبدع، مسلسل أو فكرة..." : "Search work, creators, series or ideas..."}</span></button>{modal && typeof document !== "undefined" ? createPortal(modal, document.body) : null}</>;
 }
 
 function SearchSelect({ label, value, locale, placeholder, options, onChange, disabled = false }: { label: string; value: string; locale: Locale; placeholder: string; options: Option[]; onChange: (value: string) => void; disabled?: boolean }) {
