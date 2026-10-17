@@ -150,13 +150,18 @@ begin
     v_limit := 3;
   end if;
 
-  if v_quota_enabled and v_limit is not null then
+  if v_quota_enabled and v_limit is not null
+     and not exists (
+       select 1
+         from public.ravine_creator_publish_quota_usage
+        where work_id = v_work_id
+          and quota_month = v_month
+     ) then
     select count(*)::integer into v_used
       from public.ravine_creator_publish_quota_usage
      where creator_identity_id = p_creator_identity_id
        and work_type = p_work_type
-       and quota_month = v_month
-       and work_id <> v_work_id;
+       and quota_month = v_month;
     if v_used >= v_limit then
       raise exception 'RAVINE_MONTHLY_QUOTA_REACHED' using errcode = 'check_violation';
     end if;
