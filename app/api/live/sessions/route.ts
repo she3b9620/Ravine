@@ -43,6 +43,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "A supported live-session action is required." }, { status: 422 });
     }
 
+    // Do not expose a session as live until an actual media provider is configured.
+    if (action === "start") {
+      return NextResponse.json(
+        { error: "Live streaming provider is not configured. Session status cannot be changed to live yet." },
+        { status: 503 },
+      );
+    }
+
     const supabase = await createClient();
     const { data: auth, error: authError } = await supabase.auth.getUser();
     if (authError || !auth.user) {
