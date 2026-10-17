@@ -1,0 +1,182 @@
+name: RAVINE Creator Capability Tests
+
+on:
+  pull_request:
+    branches:
+      - ravine/clean-rebuild
+    paths:
+      - "app/[locale]/feature-films/page.tsx"
+      - "app/[locale]/short-films/page.tsx"
+      - "components/FilmCollectionBrowser.module.css"
+      - "components/FilmCollectionBrowser.tsx"
+      - "lib/ravine-film-collections.ts"
+      - "lib/ravine-creator-capabilities.ts"
+      - "lib/ravine-work-universe.ts"
+      - "app/api/creator/publish-work/route.ts"
+      - "app/api/admin/creator-tier/route.ts"
+      - "app/api/live/sessions/route.ts"
+      - "app/api/studio/publish-work/route.ts"
+      - "app/[locale]/studio/page.tsx"
+      - "components/StudioUpload.tsx"
+      - "components/StudioWorkManager.tsx"
+      - "components/StudioLiveManager.tsx"
+      - "components/HomeWorkCard.tsx"
+      - "components/RAVINEWorkPlayer.tsx"
+      - "components/DiscoverFilters.tsx"
+      - "components/RAVINEWorkContext.tsx"
+      - "app/[locale]/discover/page.tsx"
+      - "app/[locale]/work/[id]/page.tsx"
+      - "app/[locale]/creators/[id]/page.tsx"
+      - "app/[locale]/search/page.tsx"
+      - "app/[locale]/page.tsx"
+      - "supabase/migrations/20260907070000_ravine_creator_ecosystem.sql"
+      - "supabase/migrations/20260907090000_ravine_work_universe.sql"
+      - "supabase/migrations/20260907120000_ravine_platform_domain_foundation.sql"
+      - "supabase/migrations/20260907130000_ravine_social_community_operations_foundation.sql"
+      - "supabase/migrations/20261017110000_ravine_creator_capability_schema_foundation.sql"
+      - "supabase/migrations/20261017130000_ravine_creator_publish_rpc.sql"
+      - "supabase/migrations/20261017150000_ravine_creator_studio_bridge.sql"
+      - "tests/ravine-creator-capabilities.test.mjs"
+      - "tests/ravine-migration-smoke.sh"
+      - "tests/sql/ravine-migration-smoke-bootstrap.sql"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/ravine-creator-capabilities.yml"
+  push:
+    branches:
+      - "ravine/creator-capabilities-foundation-20261017"
+    paths:
+      - "app/[locale]/feature-films/page.tsx"
+      - "app/[locale]/short-films/page.tsx"
+      - "components/FilmCollectionBrowser.module.css"
+      - "components/FilmCollectionBrowser.tsx"
+      - "lib/ravine-film-collections.ts"
+      - "tests/sql/ravine-migration-smoke-bootstrap.sql"
+      - "tests/ravine-migration-smoke.sh"
+      - "supabase/migrations/20260907070000_ravine_creator_ecosystem.sql"
+      - "supabase/migrations/20260907090000_ravine_work_universe.sql"
+      - "supabase/migrations/20260907120000_ravine_platform_domain_foundation.sql"
+      - "supabase/migrations/20260907130000_ravine_social_community_operations_foundation.sql"
+      - "lib/ravine-creator-capabilities.ts"
+      - "lib/ravine-work-universe.ts"
+      - "app/api/creator/publish-work/route.ts"
+      - "app/api/live/sessions/route.ts"
+      - "app/api/admin/creator-tier/route.ts"
+      - "app/api/studio/publish-work/route.ts"
+      - "app/[locale]/studio/page.tsx"
+      - "components/StudioUpload.tsx"
+      - "components/StudioWorkManager.tsx"
+      - "components/StudioLiveManager.tsx"
+      - "components/HomeWorkCard.tsx"
+      - "components/RAVINEWorkPlayer.tsx"
+      - "components/DiscoverFilters.tsx"
+      - "components/RAVINEWorkContext.tsx"
+      - "app/[locale]/discover/page.tsx"
+      - "app/[locale]/work/[id]/page.tsx"
+      - "app/[locale]/creators/[id]/page.tsx"
+      - "app/[locale]/search/page.tsx"
+      - "app/[locale]/page.tsx"
+      - "supabase/migrations/20261017110000_ravine_creator_capability_schema_foundation.sql"
+      - "supabase/migrations/20261017130000_ravine_creator_publish_rpc.sql"
+      - "supabase/migrations/20261017150000_ravine_creator_studio_bridge.sql"
+      - "tests/ravine-creator-capabilities.test.mjs"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/ravine-creator-capabilities.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  creator-capability-tests:
+    name: Creator tier policy tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Test creator capability boundaries
+        run: npm run test:ravine-capabilities
+
+  app-quality:
+    name: RAVINE lint and production build
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: test-placeholder-anon-key
+      NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: test-cloud
+      NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET: test-preset
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Lint changed capability files
+        run: npx eslint app/api/admin/creator-tier/route.ts app/api/live/sessions/route.ts app/api/creator/publish-work/route.ts app/api/studio/publish-work/route.ts "app/[locale]/studio/page.tsx" "app/[locale]/discover/page.tsx" "app/[locale]/work/[id]/page.tsx" "app/[locale]/creators/[id]/page.tsx" "app/[locale]/search/page.tsx" "app/[locale]/page.tsx" components/StudioUpload.tsx components/StudioWorkManager.tsx components/StudioLiveManager.tsx components/HomeWorkCard.tsx components/RAVINEWorkPlayer.tsx components/FilmCollectionBrowser.tsx "app/[locale]/short-films/page.tsx" "app/[locale]/feature-films/page.tsx" lib/ravine-film-collections.ts components/DiscoverFilters.tsx lib/ravine-creator-capabilities.ts lib/ravine-work-universe.ts components/RAVINEWorkContext.tsx
+      - name: Full repository lint (known baseline; non-blocking)
+        run: npm run lint
+        continue-on-error: true
+      - name: Build
+        run: npm run build
+
+  app-build:
+    name: RAVINE production build
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: test-placeholder-anon-key
+      NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: test-cloud
+      NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET: test-preset
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Build
+        run: npm run build
+
+  migration-smoke:
+    name: RAVINE PostgreSQL migration smoke test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ravine_test
+          POSTGRES_PASSWORD: ravine_test
+          POSTGRES_DB: ravine_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ravine_test -d ravine_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Run staged migrations against disposable PostgreSQL
+        env:
+          DATABASE_URL: postgres://ravine_test:ravine_test@localhost:5432/ravine_test
+        run: bash tests/ravine-migration-smoke.sh

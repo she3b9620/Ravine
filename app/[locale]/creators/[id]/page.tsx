@@ -28,6 +28,7 @@ type Work = {
   views: number | null;
   likes: number | null;
   content_type: string | null;
+  work_format: string | null;
   quality: string | null;
 };
 
@@ -41,7 +42,7 @@ function formatDuration(seconds: number | null, fallback: string) {
 
 function normalizeWorkType(contentType: string | null) {
   const value = (contentType || "work").trim().toLowerCase();
-  if (["film", "films", "video", "videos", "work", "works"].includes(value)) return "video";
+  if (["film", "films", "short_film", "feature_film", "video", "videos", "work", "works"].includes(value)) return "video";
   if (["cut", "cuts", "short", "shorts"].includes(value)) return "cut";
   if (["documentary", "documentaries", "doc", "docs"].includes(value)) return "documentary";
   if (["podcast", "podcasts", "audio", "audio podcast"].includes(value)) return "podcast";
@@ -70,7 +71,7 @@ function buildWorkSections(works: Work[], ar: boolean): WorkSection[] {
   const order = ["video", "cut", "documentary", "podcast", "live", "series", "bts", "other"];
   const buckets = new Map<string, Work[]>();
   for (const work of works) {
-    const key = normalizeWorkType(work.content_type);
+    const key = normalizeWorkType(work.work_format || work.content_type);
     const list = buckets.get(key) || [];
     list.push(work);
     buckets.set(key, list);
@@ -98,7 +99,7 @@ function WorkGrid({ works, locale, ar }: { works: Work[]; locale: Locale; ar: bo
           </div>
           <div className={styles.workBody}>
             <div className="video-kicker">
-              {work.content_type || "WORK"}
+              {(work.work_format || work.content_type || "WORK").replaceAll("_", " ")}
               {work.quality ? ` · ${work.quality}` : ""}
             </div>
             <h3>{work.title || (ar ? "بدون عنوان" : "Untitled")}</h3>
@@ -133,7 +134,7 @@ export default async function CreatorProfilePage({ params }: { params: Promise<{
   const [{ data: worksData }, { data: profileData }] = await Promise.all([
     supabase
       .from("videos")
-      .select("id,title,description,thumbnail_url,video_url,duration,views,likes,content_type,quality")
+      .select("id,title,description,thumbnail_url,video_url,duration,views,likes,content_type,work_format,quality")
       .eq("creator_id", creatorId)
       .eq("published", true)
       .order("created_at", { ascending: false })

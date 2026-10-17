@@ -8,6 +8,7 @@ type Work = {
   title: string;
   description: string | null;
   content_type: string | null;
+  work_format: string | null;
   quality: string | null;
   published: boolean | null;
   visibility: string | null;
@@ -22,11 +23,11 @@ type Props = {
   locale: "ar" | "en";
 };
 
-const allowedContentTypes = new Set(["video", "short", "documentary", "podcast", "film"]);
+const allowedContentTypes = new Set(["video", "short", "documentary", "podcast", "film", "short_film", "feature_film"]);
 const allowedVisibility = new Set(["public", "followers", "unlisted", "private", "custom"]);
 
 function isPublishable(work: Work) {
-  return Boolean(work.title.trim() && work.video_url?.trim() && allowedContentTypes.has(work.content_type || "video"));
+  return Boolean(work.title.trim() && work.video_url?.trim() && allowedContentTypes.has(work.work_format || work.content_type || "video"));
 }
 
 function visibilityLabel(value: string | null, ar: boolean) {
@@ -57,7 +58,7 @@ export default function StudioWorkManager({ works: initialWorks, locale }: Props
     setEditingId(work.id);
     setEditTitle(work.title);
     setEditDescription(work.description || "");
-    setEditType(work.content_type || "video");
+    setEditType(work.work_format || work.content_type || "video");
     setEditQuality(work.quality || "1080p");
     setEditVisibility(work.visibility || "public");
     setError("");
@@ -86,12 +87,13 @@ export default function StudioWorkManager({ works: initialWorks, locale }: Props
         .update({
           title: editTitle.trim(),
           description: editDescription.trim() || null,
-          content_type: editType,
+          content_type: editType === "short_film" || editType === "feature_film" ? "film" : editType,
+          work_format: editType === "short_film" || editType === "feature_film" ? editType : null,
           quality: editQuality,
           visibility: editVisibility,
         })
         .eq("id", id)
-        .select("id,title,description,content_type,quality,published,visibility,video_url,views,likes,created_at")
+        .select("id,title,description,content_type,work_format,quality,published,visibility,video_url,views,likes,created_at")
         .single();
 
       if (updateError || !data) {
@@ -202,7 +204,7 @@ export default function StudioWorkManager({ works: initialWorks, locale }: Props
                 <div className="video-kicker">
                   {work.published ? (ar ? "منشور" : "PUBLISHED") : (ar ? "مسودة" : "DRAFT")}
                   {work.published && work.visibility ? ` · ${visibilityLabel(work.visibility, ar)}` : ""}
-                  {` · ${work.content_type || "video"} · ${work.quality || "1080p"}`}
+                  {` · ${work.work_format || work.content_type || "video"} · ${work.quality || "1080p"}`}
                 </div>
                 {editing ? (
                   <div className="studio-inline-form">
@@ -214,11 +216,13 @@ export default function StudioWorkManager({ works: initialWorks, locale }: Props
                         <option value="short">Short</option>
                         <option value="documentary">Documentary</option>
                         <option value="podcast">Podcast</option>
-                        <option value="film">Film</option>
+                        {editType === "film" ? <option value="film" disabled>Film (legacy)</option> : null}
+                        <option value="short_film">Short Film</option>
+                        <option value="feature_film">Feature Film</option>
                       </select>
                       <select value={editQuality} onChange={(event) => setEditQuality(event.target.value)}>
                         <option value="1080p">1080p</option>
-                        <option value="1440p">1440p</option>
+                        <option value="2k">2K</option>
                         <option value="2160p">4K</option>
                       </select>
                       <select value={editVisibility} onChange={(event) => setEditVisibility(event.target.value)}>

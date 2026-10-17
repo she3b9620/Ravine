@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
 const allowedContentTypes = new Set(["video", "short", "documentary", "podcast", "film"]);
+const allowedWorkFormats = new Set(["short_film", "feature_film"]);
 const allowedVisibility = new Set(["public", "followers", "unlisted", "private", "custom"]);
 
 type Body = {
@@ -28,7 +29,7 @@ export async function POST(request: NextRequest) {
 
     const { data: work, error: workError } = await supabase
       .from("videos")
-      .select("id,user_id,creator_id,title,description,video_url,content_type,quality,published,visibility")
+      .select("id,user_id,creator_id,title,description,video_url,content_type,work_format,quality,published,visibility")
       .eq("id", videoId)
       .single();
 
@@ -51,7 +52,7 @@ export async function POST(request: NextRequest) {
         .from("videos")
         .update({ published: false })
         .eq("id", videoId)
-        .select("id,title,description,content_type,quality,published,visibility,video_url,views,likes,created_at")
+        .select("id,title,description,content_type,work_format,quality,published,visibility,video_url,views,likes,created_at")
         .single();
 
       if (error || !data) return NextResponse.json({ error: error?.message || "Could not unpublish work." }, { status: 500 });
@@ -70,7 +71,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "A title and media source are required before publishing." }, { status: 422 });
     }
 
-    if (!allowedContentTypes.has(contentType)) {
+    const workFormat = typeof work.work_format === "string" ? work.work_format : null;
+    if (!allowedContentTypes.has(contentType) || (workFormat !== null && (!allowedWorkFormats.has(workFormat) || contentType !== "film"))) {
       return NextResponse.json({ error: "This content type is not supported." }, { status: 422 });
     }
 
@@ -89,11 +91,17 @@ export async function POST(request: NextRequest) {
         visibility,
       })
       .eq("id", videoId)
-      .select("id,title,description,content_type,quality,published,visibility,video_url,views,likes,created_at")
+      .select("id,title,description,content_type,work_format,quality,published,visibility,video_url,views,likes,created_at")
       .single();
 
     if (error || !data) {
-      return NextResponse.json({ error: error?.message || "Could not publish work." }, { status: 500 });
+      const message = error?.message || "Could not publish work.";
+      const status = message.includes("RAVINE_AUTH_REQUIRED") ? 401
+        : message.includes("RAVINE_TIER_RESTRICTED") || message.includes("RAVINE_CREATOR_IDENTITY_NOT_LINKED_OR_NOT_OWNED") || message.includes("RAVINE_UPLOAD_OWNER_MISMATCH") ? 403
+        : message.includes("RAVINE_MONTHLY_QUOTA_REACHED") ? 429
+        : message.includes("RAVINE_INVALID_CONTENT_TYPE") ? 422
+        : 500;
+      return NextResponse.json({ error: status === 500 ? "Could not publish work." : message }, { status });
     }
 
     return NextResponse.json({ ok: true, work: data });
