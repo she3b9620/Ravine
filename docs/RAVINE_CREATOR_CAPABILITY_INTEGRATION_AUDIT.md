@@ -60,3 +60,11 @@ This confirms the capability migrations must not be treated as already installed
 - The route writes through the authenticated Supabase client and relies on the staged database RLS policies and live-tier trigger as the final authorization boundary. Starting a session transitions it to `live`, where the database trigger rejects Viewer-tier identities.
 - The route returns a service-unavailable response when the staged live-session schema is not installed, rather than reporting a missing identity/session as an authorization failure.
 - The route is included in focused ESLint and production-build CI. It is an API foundation only: no live-session UI/provider integration is claimed complete, and the database migration remains unapplied.
+
+
+## Follow-up — live-session scheduling guard and regression coverage
+
+- Tightened `POST /api/live/sessions`: session creation now requires a valid future `startsAt` and always creates the session in `scheduled` state. The API cannot create a new session directly in a fake `live` state by omitting the date or sending a past date.
+- Added regression tests for this server-side guard and for the UI's explicit distinction between session-state management and actual streaming.
+- Added `StudioLiveManager.tsx` to the focused lint/build workflow path coverage.
+- This does not add a media provider, alter the unresolved provider decision, apply migrations, deploy, or merge.
