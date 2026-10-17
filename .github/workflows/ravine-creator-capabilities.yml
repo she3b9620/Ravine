@@ -69,7 +69,9 @@ jobs:
           cache: npm
       - name: Install locked dependencies
         run: npm ci
-      - name: Lint
+      - name: Lint changed capability files
+        run: npx eslint app/api/creator/publish-work/route.ts lib/ravine-creator-capabilities.ts lib/ravine-work-universe.ts components/RAVINEWorkContext.tsx
+      - name: Full repository lint
         run: npm run lint
       - name: Build
         run: npm run build
