@@ -483,3 +483,61 @@ comment on table public.ravine_creator_publish_quota_usage is
   'Historical monthly publication ledger. Intentionally has no foreign keys so work or identity deletion cannot erase quota history.';
 comment on table public.ravine_legacy_creator_publish_quota_usage is
   'Historical monthly publication ledger for legacy Studio videos. Intentionally has no foreign keys so deletion cannot erase quota history.';
+
+
+-- Trusted tier assignment entry point. The browser may request a tier change,
+-- but only the existing platform-admin authorization helper can authorize it.
+create or replace function public.ravine_admin_set_creator_tier(
+  p_creator_identity_id bigint,
+  p_creator_tier text
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_actor uuid := auth.uid();
+  v_previous_tier text;
+begin
+  if v_actor is null then
+    raise exception 'RAVINE_AUTH_REQUIRED' using errcode = '42501';
+  end if;
+
+  if not public.is_ravine_admin() then
+    raise exception 'RAVINE_ADMIN_REQUIRED' using errcode = '42501';
+  end if;
+
+  if p_creator_tier not in ('viewer','creator','elevated_creator','artist','elevated_artist') then
+    raise exception 'RAVINE_INVALID_CREATOR_TIER' using errcode = '22023';
+  end if;
+
+  select creator_tier into v_previous_tier
+    from public.ravine_next_creator_identities
+   where id = p_creator_identity_id
+   for update;
+
+  if not found then
+    raise exception 'RAVINE_CREATOR_IDENTITY_NOT_FOUND' using errcode = 'P0002';
+  end if;
+
+  update public.ravine_next_creator_identities
+     set creator_tier = p_creator_tier,
+         updated_at = now()
+   where id = p_creator_identity_id;
+
+  return jsonb_build_object(
+    'ok', true,
+    'creator_identity_id', p_creator_identity_id,
+    'previous_tier', v_previous_tier,
+    'creator_tier', p_creator_tier,
+    'changed_by', v_actor
+  );
+end;
+$$;
+
+revoke all on function public.ravine_admin_set_creator_tier(bigint,text) from public, anon, authenticated;
+grant execute on function public.ravine_admin_set_creator_tier(bigint,text) to authenticated;
+
+comment on function public.ravine_admin_set_creator_tier(bigint,text) is
+  'Admin-only creator tier assignment. Caller-provided tier is validated and never trusted without is_ravine_admin().';
