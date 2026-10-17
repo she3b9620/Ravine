@@ -12,7 +12,7 @@ type Props = { locale: Locale; query: string; category: string; type: string; du
 type Option = { value: string; ar: string; en: string };
 
 const types: Option[] = [
-  { value: "video", ar: "فيديو", en: "Video" }, { value: "short", ar: "قصير", en: "Short" }, { value: "film", ar: "فيلم", en: "Film" },
+  { value: "video", ar: "فيديو", en: "Video" }, { value: "short", ar: "قصير", en: "Short" }, { value: "film", ar: "فيلم", en: "Film" }, { value: "short_film", ar: "فيلم قصير", en: "Short Film" }, { value: "feature_film", ar: "فيلم روائي طويل", en: "Feature Film" },
   { value: "documentary", ar: "وثائقي", en: "Documentary" }, { value: "podcast", ar: "بودكاست", en: "Podcast" }, { value: "live", ar: "مباشر", en: "Live" },
 ];
 const durations: Option[] = [
