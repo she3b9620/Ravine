@@ -68,3 +68,9 @@ This confirms the capability migrations must not be treated as already installed
 - Added regression tests for this server-side guard and for the UI's explicit distinction between session-state management and actual streaming.
 - Added `StudioLiveManager.tsx` to the focused lint/build workflow path coverage.
 - This does not add a media provider, alter the unresolved provider decision, apply migrations, deploy, or merge.
+
+
+## Live-provider safety gate
+
+- Until the product's Live provider is selected and integrated, the API rejects `start` actions with HTTP 503 and the Studio control is disabled. A scheduled session can no longer be represented as live without a real provider.
+- Scheduling and cancellation remain available when the staged schema is installed. Ending remains available only for sessions already marked live by a trusted, provider-integrated path.
