@@ -68,4 +68,9 @@ A content type is not merely a label. It must drive the publishing flow, validat
 
 ## Current implementation boundary
 
-`lib/ravine-creator-capabilities.ts` defines a pure, typed policy registry and decision helpers. It is not yet a secure authorization boundary and must not be treated as complete enforcement until server-side and database checks are implemented and tested.
+- `lib/ravine-creator-capabilities.ts` defines a pure, typed policy registry and decision helpers.
+- `tests/ravine-creator-capabilities.test.mjs` covers tier and quota boundaries; run it with `npm run test:ravine-capabilities`.
+- `.github/workflows/ravine-creator-capabilities.yml` runs those tests on relevant pushes and pull requests.
+- `supabase/migrations/20261017110000_ravine_creator_capability_schema_foundation.sql` stages the creator-tier column and work-type vocabulary. It has not been applied to any Supabase project and deliberately does not enforce provisional quotas.
+
+This is not yet a secure authorization boundary and must not be treated as complete enforcement until server-side ownership checks, database-side quota enforcement, active identity wiring, and integration tests are implemented and verified.
