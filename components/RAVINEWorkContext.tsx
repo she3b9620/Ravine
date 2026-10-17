@@ -9,9 +9,10 @@ type Props = {
 };
 
 const typeLabel: Record<RAVINEWork["type"], { ar: string; en: string }> = {
-  short: { ar: "Short", en: "Short" },
+  short: { ar: "شورت", en: "Short" },
+  short_film: { ar: "فيلم قصير", en: "Short film" },
   video: { ar: "فيديو", en: "Video" },
-  film: { ar: "فيلم", en: "Film" },
+  film: { ar: "فيلم مطوّل", en: "Feature film" },
   series: { ar: "مسلسل", en: "Series" },
   documentary: { ar: "وثائقي", en: "Documentary" },
   podcast: { ar: "بودكاست", en: "Podcast" },
