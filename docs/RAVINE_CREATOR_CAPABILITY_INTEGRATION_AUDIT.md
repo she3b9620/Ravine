@@ -85,3 +85,11 @@ This confirms the capability migrations must not be treated as already installed
 - The latest CI run for commit `ea9e4215` passed all four jobs, including the PostgreSQL migration smoke test.
 - Read-only inspection of the connected Supabase project still shows the live history ending at `20260907102607 ravine_founder_upload_policy`. No migration was applied during this check.
 - Before any live change, resolve the filename/history mismatch against the actual production schema and review a schema-diff plan. The ephemeral smoke test is not approval to apply migrations to production.
+
+## Full staged migration rehearsal and history reconciliation — 2026-10-17
+
+- The disposable PostgreSQL smoke test now runs all seven staged schema migrations in order: Creator Ecosystem, Work Universe, Platform Domain, Social/Community Operations, Creator Capability Schema, Creator Publish RPC, and Creator Studio Bridge.
+- The rehearsal exposed a SQL defect: Social/Community Operations referenced `ravine_next_discovery_events` for an index and RLS policies without defining the table. Added its table definition before those statements.
+- CI passes the seven-migration rehearsal with fixture checks for legacy creator backfill, grandfathered tier, podcast quota-ledger preservation, and new-creator synchronization. This is not a clone of the production schema.
+- History alignment is still blocked: Supabase reports 38 applied migration entries, while this branch contains 8 migration SQL files. Thirty-six applied migration names have no matching SQL file in this branch. `ravine_founder_upload_policy` has a version mismatch: live `20260907102607`, repository `20260907082000`. The other seven files are staged migrations absent from live history.
+- Do not apply or replay migrations against the connected project until the missing historical SQL and version mismatch are reconciled, and the staged migrations are reviewed against the actual production schema and existing triggers.
