@@ -1,34 +1,38 @@
 # RAVINE Creator Capability Integration Audit
 
-Status: investigation only. No runtime authorization or quota behavior is changed by this document.
+Status: implementation staged in the feature branch. No Supabase migration has been applied and no deployment has been performed.
 
-## Current write-path findings
+## Implemented in this branch
 
-The existing Studio publish endpoint is `app/api/studio/publish-work/route.ts` and writes to legacy `public.videos`. It currently accepts only `video`, `short`, `documentary`, `podcast`, and legacy `film`.
+- `lib/ravine-creator-capabilities.ts` is the canonical typed tier policy.
+- `app/api/creator/publish-work/route.ts` publishes to the new Work Universe through a security-definer RPC that validates authentication, creator-identity ownership, tier eligibility, and optional quota enforcement.
+- `components/StudioUpload.tsx` now offers Short Film and Feature Film separately. For compatibility with existing playback/query code, both are stored as `content_type='film'` plus `work_format='short_film'|'feature_film'`.
+- `components/StudioWorkManager.tsx`, `app/[locale]/studio/page.tsx`, and `app/api/studio/publish-work/route.ts` preserve and return the new subtype field.
+- `supabase/migrations/20261017150000_ravine_creator_studio_bridge.sql` maps legacy `public.creators` records to `public.ravine_next_creator_identities`, maintains the mapping when creator profiles change, adds the legacy `videos.work_format` field, and installs database-side publication-tier checks and an atomic quota ledger.
+- The bridge also blocks Viewer-tier identities from transitioning new-domain live sessions to `status='live'`.
+- Monthly quota checks read `ravine_creator_capability_settings.monthly_quotas_enabled`, which is provisioned as `false`. Publishing eligibility by tier is enforced regardless of that flag; numeric quota limits remain inactive until product approval.
+- Existing legacy creator profiles are migrated as `elevated_creator` to avoid unexpectedly removing their existing Podcast/Documentary publishing during the bridge. New creator records linked by the synchronization trigger start at `creator`. Reclassification should be performed through a trusted administrative workflow, never a client-supplied tier.
 
-The existing staged upload-policy migration `20260907082000_ravine_founder_upload_policy.sql` installs a BEFORE INSERT trigger on `public.videos`. That trigger independently validates the legacy content-type set and applies the old account/creator upload-limit model. The same migration constrains `videos.content_type` to the old set.
+## Database safety and compatibility
 
-The new capability-schema migration adds `creator_tier` to `public.ravine_next_creator_identities` and expands `public.ravine_next_works.work_type`; these are not the same records as legacy `public.creators` and `public.videos`.
+- The new identity/work domain remains distinct from legacy tables, with an explicit `legacy_creator_id` mapping rather than assuming equal IDs.
+- Legacy film playback remains compatible: `videos.content_type` stays `film`, and the subtype is stored separately. Old `film` records are treated as Feature Films for tier checks.
+- Tier checks execute in database triggers, so direct Supabase table writes cannot bypass them by skipping the Next.js route.
+- The creator identity row is locked during publish eligibility/quota checks; usage is written by an AFTER trigger in the same transaction.
+- Numeric quota enforcement stays disabled by default. The migration seeds current-month already-published work into the ledger based on `created_at` because the legacy table does not have a reliable `published_at` field.
+- No migration has been applied to the live Supabase project. The domain foundation migration (`20260907120000...`) is not in the project's applied migration history, so all staged migrations must be reviewed and applied in order in a non-production environment before runtime deployment.
 
-## Why the new tiers are not enforced yet
+## Remaining validation gates
 
-There are currently two different identity/work domains:
-- Legacy runtime: `auth.users` -> `public.creators` -> `public.videos`.
-- New platform foundation: `auth.users` -> `public.ravine_next_creator_identities` -> `public.ravine_next_works`.
+1. GitHub Actions policy tests and focused lint must pass after the Studio integration changes.
+2. Full repository lint currently has unrelated pre-existing errors; these remain out of scope.
+3. The production build must pass independently of the full-lint job.
+4. Run the staged SQL migrations against a disposable/non-production Supabase project, then test creator mapping, draft creation, publish/unpublish, all tier restrictions, quota concurrency, live eligibility, and legacy film playback.
+5. Confirm the active-identity UX and trusted admin tier assignment workflow before enabling numeric quotas.
 
-The current publish route uses the legacy domain. The new tier field is in the new domain. Simply checking `creator_tier` in the legacy publish route would not establish ownership or prove that the selected identity owns the legacy work.
+## Explicit non-actions
 
-Likewise, allowing `short_film` or `feature_film` in the route alone is insufficient: the legacy database constraint and trigger currently reject those values. Expanding those constraints without a deliberate migration of the existing quota trigger could accidentally bypass legacy quota accounting or apply the wrong quota model.
-
-## Safe implementation sequence
-
-1. Decide whether new uploads should write to the new Work Universe or remain in legacy `videos` for this phase.
-2. Establish an explicit, server-validated mapping from the authenticated account and active creator identity to the work being created or published.
-3. Implement atomic quota reservation in the same write transaction as publish, keyed by creator identity and calendar month; do not rely on client-side counts.
-4. Define migration/compatibility behavior for existing legacy videos and their existing upload limits before expanding the legacy trigger.
-5. Gate live session creation on the same verified identity-tier capability source.
-6. Add route/database integration tests and run the full Next.js build and checks before merging.
-
-## Provisional product policy
-
-The quota numbers remain provisional. This audit does not treat them as approved production rules and does not enforce them in SQL. A null tier limit means no tier-specific quota; platform-wide abuse limits and safety controls still apply.
+- No Vercel deployment.
+- No Supabase migration applied.
+- No merge to `main` or Production.
+- No numeric quota enforcement enabled.
