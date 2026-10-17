@@ -8,6 +8,7 @@ const nav = read("../components/SidebarNav.tsx");
 const upload = read("../components/StudioUpload.tsx");
 const manager = read("../components/StudioWorkManager.tsx");
 const publisher = read("../app/api/studio/publish-work/route.ts");
+const studioPage = read("../app/[locale]/studio/page.tsx");
 const workModel = read("../lib/ravine-work-universe.ts");
 const player = read("../components/RAVINEWorkPlayer.tsx");
 const migration = read("../supabase/migrations/20261017100000_ravine_series_content_type.sql");
@@ -21,7 +22,8 @@ test("series page lists published series work and links to its RAVINE watch page
 
 test("series is discoverable in the sidebar and follows guest gating", () => {
   assert.match(nav, /\["series", "Series", "المسلسلات", Tv\]/);
-  assert.match(nav, /"videos", "series", "live"/);
+  assert.match(nav, /\["series", "Series", "المسلسلات", Tv\]/);
+  assert.match(nav, /new Set\(\["community", "cuts", "videos", "series", "live"/);
 });
 
 test("only the existing creator-owner publishing path is used for series", () => {
@@ -30,6 +32,8 @@ test("only the existing creator-owner publishing path is used for series", () =>
   assert.match(manager, /"film", "series"/);
   assert.match(publisher, /"film", "series"/);
   assert.match(publisher, /creator\.user_id !== auth\.user\.id/);
+  assert.match(studioPage, /if \(!creator\)/);
+  assert.match(studioPage, /<StudioUpload creatorId=\{creator\.id\}/);
 });
 
 test("series uses the canonical RAVINE work type and standard video player", () => {

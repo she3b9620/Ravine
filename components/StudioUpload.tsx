@@ -34,7 +34,7 @@ function mapUploadError(error: unknown, ar: boolean) {
     RAVINE_AUTH_REQUIRED: ["يجب تسجيل الدخول أولًا.", "You must be signed in first."],
     RAVINE_UPLOAD_OWNER_MISMATCH: ["لا يمكنك رفع العمل بهذه الهوية.", "This creator identity is not owned by the current account."],
     RAVINE_SHORT_QUOTA_EXCEEDED: ["وصلت إلى حد الشورتات الشهري لهذا الحساب.", "This account has reached its monthly Shorts limit."],
-    RAVINE_VIDEO_QUOTA_EXCEEDED: ["وصلت إلى حد الفيديوهات الشهري لهذا الحساب.", "This account has reached its monthly Video limit."],
+    RAVINE_VIDEO_QUOTA_EXCEEDED: ["وصلت إلى الحد الشهري للفيديوهات والأفلام والمسلسلات لهذا الحساب.", "This account has reached its monthly Video, Film, and Series limit."],
     RAVINE_PODCAST_QUOTA_EXCEEDED: ["وصلت إلى حد البودكاست الشهري لهذا الحساب.", "This account has reached its monthly Podcast limit."],
     RAVINE_INVALID_CONTENT_TYPE: ["نوع المحتوى غير مدعوم.", "This content type is not supported."],
   };
