@@ -449,3 +449,36 @@ with check (
 );
 
 grant select, insert, update on public.ravine_next_live_sessions to authenticated;
+
+
+-- Quota ledgers are historical accounting records. They must survive deleting a
+-- published work or identity; otherwise deleting/recreating content could reset
+-- monthly usage and bypass the quota once the feature flag is enabled.
+do $$
+declare
+  v_constraint record;
+begin
+  for v_constraint in
+    select conname
+      from pg_constraint
+     where conrelid = 'public.ravine_creator_publish_quota_usage'::regclass
+       and contype = 'f'
+  loop
+    execute format('alter table public.ravine_creator_publish_quota_usage drop constraint %I', v_constraint.conname);
+  end loop;
+
+  for v_constraint in
+    select conname
+      from pg_constraint
+     where conrelid = 'public.ravine_legacy_creator_publish_quota_usage'::regclass
+       and contype = 'f'
+  loop
+    execute format('alter table public.ravine_legacy_creator_publish_quota_usage drop constraint %I', v_constraint.conname);
+  end loop;
+end
+$$;
+
+comment on table public.ravine_creator_publish_quota_usage is
+  'Historical monthly publication ledger. Intentionally has no foreign keys so work or identity deletion cannot erase quota history.';
+comment on table public.ravine_legacy_creator_publish_quota_usage is
+  'Historical monthly publication ledger for legacy Studio videos. Intentionally has no foreign keys so deletion cannot erase quota history.';
