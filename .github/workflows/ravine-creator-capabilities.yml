@@ -6,6 +6,10 @@ on:
       - ravine/clean-rebuild
     paths:
       - "lib/ravine-creator-capabilities.ts"
+      - "lib/ravine-work-universe.ts"
+      - "app/api/creator/publish-work/route.ts"
+      - "supabase/migrations/20261017110000_ravine_creator_capability_schema_foundation.sql"
+      - "supabase/migrations/20261017130000_ravine_creator_publish_rpc.sql"
       - "tests/ravine-creator-capabilities.test.mjs"
       - "package.json"
       - "package-lock.json"
