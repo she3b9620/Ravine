@@ -20,7 +20,9 @@ Status: implementation staged in the feature branch. No Supabase migration has b
 - Tier checks execute in database triggers, so direct Supabase table writes cannot bypass them by skipping the Next.js route.
 - The creator identity row is locked during publish eligibility/quota checks; usage is written by an AFTER trigger in the same transaction.
 - Numeric quota enforcement stays disabled by default. The migration seeds current-month already-published work into the ledger based on `created_at` because the legacy table does not have a reliable `published_at` field.
-- No migration has been applied to the live Supabase project. The domain foundation migration (`20260907120000...`) is not in the project's applied migration history, so all staged migrations must be reviewed and applied in order in a non-production environment before runtime deployment.
+- No migration has been applied to the live Supabase project. The domain foundation migration (`20260907120000...`) is not in the project's applied migration history.
+- The live migration history records `20260907102607 ravine_founder_upload_policy`, while the repository file is named `20260907082000_ravine_founder_upload_policy.sql`. That version-prefix mismatch must be reconciled on a non-production clone before any blanket `supabase db push`; do not blindly replay the repository migration chain against the live project.
+- Review the complete staged sequence and migration history, then test the bridge on a non-production database before runtime deployment.
 
 ## Remaining validation gates
 
