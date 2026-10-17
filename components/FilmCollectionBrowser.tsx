@@ -138,7 +138,6 @@ export default function FilmCollectionBrowser({
   const ar = locale === "ar";
   const isShortFilmPage = format === "short_film";
   const [shortFilmMode, setShortFilmMode] = useState<ViewMode | null>(null);
-  const [showAllInfo, setShowAllInfo] = useState(false);
   const mode = isShortFilmPage ? shortFilmMode : "grid";
   const title = isShortFilmPage ? (ar ? "الأفلام القصيرة." : "Short films.") : (ar ? "الأفلام الروائية الطويلة." : "Feature films.");
   const subtitle = isShortFilmPage
@@ -209,7 +208,7 @@ export default function FilmCollectionBrowser({
         </div>
       ) : null}
 
-      {schemaReady && items.length === 0 && !loadError ? (
+      {schemaReady && items.length === 0 && !loadError && (!isShortFilmPage || mode !== null) ? (
         <div className={"empty-state " + styles.emptyState}>
           <strong>{format === "short_film" ? (ar ? "لا توجد أفلام قصيرة مصنفة بعد." : "No classified short films yet.") : (ar ? "لا توجد أفلام روائية طويلة مصنفة بعد." : "No classified feature films yet.")}</strong>
           <span>{ar ? "ستظهر هنا الأعمال المنشورة التي اختير نوعها السينمائي صراحةً داخل الاستوديو." : "Published works explicitly classified in Studio will appear here."}</span>
@@ -228,7 +227,6 @@ export default function FilmCollectionBrowser({
         </div>
       ) : null}
 
-      {isShortFilmPage && mode === null && showAllInfo ? <p className={styles.extraInfo}>{ar ? "تُعرض هنا الأفلام القصيرة المنشورة والمصنّفة صراحةً داخل الاستوديو." : "This page lists published works explicitly classified as Short Film in Studio."}</p> : null}
     </section>
   );
 }
