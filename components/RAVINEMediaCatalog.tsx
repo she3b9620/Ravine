@@ -1,5 +1,3 @@
-"use server";
-
 import Link from "next/link";
 import { Scissors, Clapperboard, Film, type LucideIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
