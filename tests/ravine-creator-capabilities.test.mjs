@@ -143,3 +143,43 @@ test("Studio live UI clearly distinguishes session state from actual streaming",
   assert.match(component, /Provider not connected/);
   assert.match(component, /disabled title=\{ar \? "يلزم ربط مزود بث فعلي أولًا"/);
 });
+
+
+test("Staged database migrations preserve dependency order and do not imply production readiness", () => {
+  const migrationsDir = new URL("../supabase/migrations/", import.meta.url);
+  const domain = readFileSync(
+    new URL("20260907120000_ravine_platform_domain_foundation.sql", migrationsDir),
+    "utf8",
+  );
+  const capabilities = readFileSync(
+    new URL("20261017110000_ravine_creator_capability_schema_foundation.sql", migrationsDir),
+    "utf8",
+  );
+  const publishRpc = readFileSync(
+    new URL("20261017130000_ravine_creator_publish_rpc.sql", migrationsDir),
+    "utf8",
+  );
+  const studioBridge = readFileSync(
+    new URL("20261017150000_ravine_creator_studio_bridge.sql", migrationsDir),
+    "utf8",
+  );
+  const audit = readFileSync(
+    new URL("../docs/RAVINE_CREATOR_CAPABILITY_INTEGRATION_AUDIT.md", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(domain, /create table if not exists public\\.ravine_next_creator_identities/i);
+  assert.match(domain, /create table if not exists public\\.ravine_next_works/i);
+  assert.ok(
+    capabilities.indexOf("ravine_next_creator_identities") >= 0 &&
+      capabilities.indexOf("ravine_next_works") >= 0,
+    "capability schema must target the domain foundation tables",
+  );
+  assert.match(capabilities, /Depends on 20260907120000_ravine_platform_domain_foundation\\.sql/);
+  assert.match(publishRpc, /create or replace function public\\.ravine_publish_creator_work/i);
+  assert.match(studioBridge, /create trigger ravine_sync_legacy_creator_identity_trigger/i);
+  assert.match(studioBridge, /create or replace function public\\.ravine_validate_legacy_creator_publish/i);
+  assert.match(audit, /No migration has been applied to the live Supabase project/i);
+  assert.match(audit, /20260907102607.*20260907082000/s);
+  assert.match(audit, /Do not blindly replay the repository migration chain/i);
+});
