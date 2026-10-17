@@ -65,9 +65,9 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Invalid related work id." }, { status: 400 });
       }
 
-      const startsAt = body.startsAt == null || body.startsAt === "" ? null : new Date(body.startsAt);
-      if (startsAt && Number.isNaN(startsAt.getTime())) {
-        return NextResponse.json({ error: "Invalid scheduled start time." }, { status: 422 });
+      const startsAt = typeof body.startsAt === "string" && body.startsAt.trim() ? new Date(body.startsAt) : null;
+      if (!startsAt || Number.isNaN(startsAt.getTime()) || startsAt.getTime() <= Date.now()) {
+        return NextResponse.json({ error: "A future scheduled start time is required." }, { status: 422 });
       }
 
       const { data: identity, error: identityError } = await supabase
@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      const status = startsAt && startsAt.getTime() > Date.now() ? "scheduled" : "live";
+      const status = "scheduled";
       const { data: session, error } = await supabase
         .from("ravine_next_live_sessions")
         .insert({
@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
           title,
           mode,
           status,
-          starts_at: startsAt?.toISOString() ?? (status === "live" ? new Date().toISOString() : null),
+          starts_at: startsAt.toISOString(),
           related_work_id: relatedWorkId,
         })
         .select("id,creator_identity_id,title,mode,status,starts_at,ended_at,related_work_id,created_at")
