@@ -22,7 +22,7 @@ type Props = {
   locale: "ar" | "en";
 };
 
-const allowedContentTypes = new Set(["video", "short", "documentary", "podcast", "film"]);
+const allowedContentTypes = new Set(["video", "short", "documentary", "podcast", "film", "series"]);
 const allowedVisibility = new Set(["public", "followers", "unlisted", "private", "custom"]);
 
 function isPublishable(work: Work) {
@@ -215,6 +215,7 @@ export default function StudioWorkManager({ works: initialWorks, locale }: Props
                         <option value="documentary">Documentary</option>
                         <option value="podcast">Podcast</option>
                         <option value="film">Film</option>
+                        <option value="series">{ar ? "مسلسل" : "Series"}</option>
                       </select>
                       <select value={editQuality} onChange={(event) => setEditQuality(event.target.value)}>
                         <option value="1080p">1080p</option>

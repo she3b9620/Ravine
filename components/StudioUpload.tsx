@@ -59,7 +59,7 @@ export default function StudioUpload({ creatorId, locale }: Props) {
 
   const isPodcast = contentType === "podcast";
   const isShort = contentType === "short";
-  const isVideoLike = contentType === "video" || contentType === "film" || contentType === "documentary";
+  const isVideoLike = contentType === "video" || contentType === "film" || contentType === "documentary" || contentType === "series";
 
   async function uploadToCloudinary(uploadFile: File, cloudName: string, uploadPreset: string): Promise<CloudinaryUpload> {
     const formData = new FormData();
@@ -200,6 +200,7 @@ export default function StudioUpload({ creatorId, locale }: Props) {
             <option value="documentary">Documentary</option>
             <option value="podcast">Podcast</option>
             <option value="film">Film</option>
+            <option value="series">{ar ? "مسلسل" : "Series"}</option>
           </select>
         </label>
 

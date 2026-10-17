@@ -29,5 +29,8 @@ jobs:
       - name: Guest hero background mode regression test
         run: node --test tests/guest-hero-background-mode.test.mjs
 
+      - name: Series content type and publisher policy regression test
+        run: node --test tests/series-content-type.test.mjs
+
       - name: Build
         run: npm run build

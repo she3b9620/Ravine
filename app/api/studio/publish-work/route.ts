@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-const allowedContentTypes = new Set(["video", "short", "documentary", "podcast", "film"]);
+const allowedContentTypes = new Set(["video", "short", "documentary", "podcast", "film", "series"]);
 const allowedVisibility = new Set(["public", "followers", "unlisted", "private", "custom"]);
 
 type Body = {

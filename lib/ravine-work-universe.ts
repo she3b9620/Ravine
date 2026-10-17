@@ -2,6 +2,7 @@ export const RAVINE_WORK_TYPES = [
   "short",
   "video",
   "film",
+  "series",
   "documentary",
   "podcast",
   "live",
@@ -43,6 +44,7 @@ export type RAVINEWorkSource = {
 export function normalizeRAVINEWorkType(value: string | null | undefined): RAVINEWorkType {
   if (value === "short") return "short";
   if (value === "film") return "film";
+  if (value === "series") return "series";
   if (value === "documentary") return "documentary";
   if (value === "podcast") return "podcast";
   if (value === "live") return "live";

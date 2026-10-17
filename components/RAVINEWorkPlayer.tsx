@@ -29,6 +29,7 @@ export default function RAVINEWorkPlayer(props: RAVINEWorkPlayerProps) {
     case "documentary":
       return <RAVINEDocumentaryPlayer {...props} />;
     case "film":
+    case "series":
     case "live":
     case "video":
     default:

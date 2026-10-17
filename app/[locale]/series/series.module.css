@@ -1,0 +1,16 @@
+.seriesPill {
+  color: #F1E9DC !important;
+  border-color: rgba(241,233,220,.22) !important;
+  background: rgba(24,63,70,.88) !important;
+}
+.seriesPill svg {
+  flex: 0 0 auto;
+}
+html[data-theme="light"] .seriesPill {
+  color: #183F46 !important;
+  border-color: rgba(24,63,70,.22) !important;
+  background: rgba(238,246,242,.94) !important;
+}
+html[data-theme="light"] .ravine-series-card .video-meta h2 {
+  color: #171717;
+}
