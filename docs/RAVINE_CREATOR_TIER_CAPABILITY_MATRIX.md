@@ -76,8 +76,12 @@ A content type is not merely a label. It must drive the publishing flow, validat
 - `tests/ravine-creator-capabilities.test.mjs` covers the pure policy and work-type normalization; run it with `npm run test:ravine-capabilities`.
 - `.github/workflows/ravine-creator-capabilities.yml` runs the Node test suite on relevant pushes and pull requests.
 
-## Explicit integration boundary
+## Studio integration boundary
 
-The existing Creator Studio at `app/[locale]/studio/page.tsx` and `components/StudioUpload.tsx` still use legacy `public.creators` and `public.videos`. They are not automatically migrated to the new `ravine_next_creator_identities` / `ravine_next_works` domain, and this PR does not switch existing uploads to the new endpoint. The repository currently has no active-identity selector or runtime code creating/reading the new identity tables outside migrations. Do not claim the new endpoint is wired into the existing Studio UI until that identity lifecycle and media upload flow are deliberately integrated.
+The existing Creator Studio continues to upload media and preserve work IDs in legacy `public.videos` so existing players, chapters, media assets, likes, saves, and watch history remain compatible. The staged bridge migration `20261017150000_ravine_creator_studio_bridge.sql` explicitly maps each legacy `public.creators` row to a `ravine_next_creator_identities` row using `legacy_creator_id`; it does not assume matching numeric IDs.
 
-The migrations are staged only and have not been applied to any Supabase project. This is not ready to merge or deploy until the migrations are reviewed and applied in a controlled non-production environment, the legacy/new-domain integration is implemented, and full build/integration checks pass.
+The Studio form and work manager now expose Short Film and Feature Film as distinct formats while storing `content_type='film'` plus `work_format` to preserve legacy compatibility. Database triggers validate tier eligibility on publication and record monthly usage transactionally; numeric quota checks remain disabled by the feature flag. A separate trigger blocks Viewer-tier identities from transitioning new-domain live sessions to `status='live'`.
+
+Existing approved creator profiles are migrated as `elevated_creator` to preserve current Podcast/Documentary publishing during rollout; newly synchronized creator profiles start at `creator`. Tier changes must be performed through a trusted administrative workflow. The broader active-identity switcher is still not wired through every platform write path.
+
+The migrations are staged only and have not been applied to any Supabase project. Do not deploy this branch before the staged migrations are reviewed and applied in order to a non-production project, integration scenarios pass, and a production build is verified.
