@@ -92,14 +92,15 @@ export default function GuestCinematicBackdrop({ locale }: GuestCinematicBackdro
     const handleControl = (event: Event) => {
       const detail = (event as VideoControlEvent).detail;
       const video = videoRef.current;
-      if (!detail || !video) return;
+      if (!detail) return;
+      if (detail.action === "set-background-mode") {
+        if (detail.backgroundMode === "image" || detail.backgroundMode === "video") setBackgroundMode(detail.backgroundMode);
+        return;
+      }
+      if (!video) return;
       switch (detail.action) {
         case "play": if (backgroundMode === "image") { setBackgroundMode("video"); break; } void video.play().then(() => undefined, () => undefined); break;
         case "pause": video.pause(); break;
-        case "set-background-mode": {
-          if (detail.backgroundMode === "image" || detail.backgroundMode === "video") setBackgroundMode(detail.backgroundMode);
-          break;
-        }
         case "toggle-audio": { const nextMuted = detail.muted ?? !video.muted; setMuted(nextMuted); video.muted = nextMuted; break; }
         case "set-volume": { const next = Math.max(0, Math.min(100, detail.volume ?? volume)); setVolume(next); video.volume = next / 100; const nextMuted = detail.muted ?? next === 0; setMuted(nextMuted); video.muted = nextMuted; break; }
         case "toggle-repeat": setRepeat(detail.repeat ?? !repeat); break;
