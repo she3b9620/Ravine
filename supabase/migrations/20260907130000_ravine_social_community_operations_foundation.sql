@@ -143,6 +143,17 @@ create table if not exists public.ravine_next_spaces (
   check (creator_identity_id is not null or community_id is not null)
 );
 create index if not exists ravine_next_spaces_idx on public.ravine_next_spaces(status, starts_at);
+-- Anonymous discovery telemetry may have a null user_id; authenticated events remain owner-readable.
+create table if not exists public.ravine_next_discovery_events (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete set null,
+  event_type text not null,
+  entity_type text,
+  entity_id text,
+  context jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+
 create index if not exists ravine_next_discovery_events_feed_idx on public.ravine_next_discovery_events(user_id, created_at desc);
 
 alter table public.ravine_next_connections enable row level security;
