@@ -178,7 +178,7 @@ test("Staged database migrations preserve dependency order and do not imply prod
   assert.match(capabilities, /Depends on 20260907120000_ravine_platform_domain_foundation[.]sql/);
   assert.match(publishRpc, /create or replace function public[.]ravine_publish_creator_work/i);
   assert.match(studioBridge, /create trigger ravine_sync_legacy_creator_identity_trigger/i);
-  assert.match(studioBridge, /create or replace function public\\.ravine_validate_legacy_creator_publish/i);
+  assert.match(studioBridge, /create or replace function public[.]ravine_validate_legacy_creator_publish/i);
   assert.match(audit, /No migration has been applied to the live Supabase project/i);
   assert.match(audit, /20260907102607.*20260907082000/s);
   assert.match(audit, /Do not blindly replay the repository migration chain/i);
