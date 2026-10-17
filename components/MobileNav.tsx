@@ -8,14 +8,19 @@ import styles from "./MobileNav.module.css";
 
 const navigation = [
   ["discover", "Discover", "اكتشف"],
-  ["cuts", "Cuts", "كِتس"],
-  ["videos", "Videos", "الفيديو"],
-  ["podcasts", "Podcasts & Documentaries", "البودكاست والوثائقي"],
+  ["shorts", "Shorts", "الشورتات"],
+  ["videos", "Videos", "الفيديوهات"],
+  ["podcasts", "Podcasts", "البودكاست"],
+  ["documentaries", "Documentaries", "الأفلام الوثائقية"],
+  ["short-films", "Short Films", "الأفلام القصيرة"],
+  ["films", "Feature Films", "الأفلام المطوّلة"],
+  ["series", "Series", "المسلسلات"],
   ["live", "Live", "مباشر"],
   ["creators", "Creators", "المبدعون"],
+  ["community", "Community", "المجتمع"],
 ] as const;
 
-const GUEST_GATED = new Set(["cuts", "videos", "podcasts", "live"]);
+const GUEST_GATED = new Set(["shorts", "videos", "podcasts", "documentaries", "short-films", "films", "series", "live", "community"]);
 type Locale = "ar" | "en";
 const CLOSE_MS = 220;
 
@@ -23,8 +28,20 @@ export default function MobileNav({ locale, authenticated }: { locale: Locale; a
   const ar = locale === "ar";
   const [open, setOpen] = useState(false);
   const [closing, setClosing] = useState(false);
-  useEffect(() => { if (!open) return; const key = (event: KeyboardEvent) => { if (event.key === "Escape") close(); }; document.addEventListener("keydown", key); return () => document.removeEventListener("keydown", key); }, [open]);
-  function close() { if (!open || closing) return; setClosing(true); window.setTimeout(() => { setOpen(false); setClosing(false); }, CLOSE_MS); }
+
+  useEffect(() => {
+    if (!open) return;
+    const key = (event: KeyboardEvent) => { if (event.key === "Escape") close(); };
+    document.addEventListener("keydown", key);
+    return () => document.removeEventListener("keydown", key);
+  }, [open]);
+
+  function close() {
+    if (!open || closing) return;
+    setClosing(true);
+    window.setTimeout(() => { setOpen(false); setClosing(false); }, CLOSE_MS);
+  }
+
   function show() { setClosing(false); setOpen(true); }
 
   return (
@@ -34,12 +51,13 @@ export default function MobileNav({ locale, authenticated }: { locale: Locale; a
         <div className={`${styles.panel} ${closing ? styles.closing : ""}`} role="dialog" aria-modal="true" aria-label={ar ? "قائمة RAVINE" : "RAVINE menu"} onPointerDown={(event) => { if (event.target === event.currentTarget) close(); }}>
           <div className={styles.head}><span className="ravine-brand">RAVINE<span>.</span></span><button type="button" className={styles.close} onClick={close} aria-label={ar ? "إغلاق القائمة" : "Close menu"}><X size={20} /></button></div>
           <nav className={styles.links}>
-            <Link href={`/${locale}/discover`} onClick={close}>{ar ? "اكتشف" : "Discover"}</Link>
-            {!authenticated && GUEST_GATED.has("cuts") ? <button type="button" onClick={() => { close(); window.setTimeout(() => requestRavineAuth(`/${locale}`), CLOSE_MS); }}>{ar ? "كِتس — سجّل للدخول" : "Cuts — Sign in"}</button> : <Link href={`/${locale}/cuts`} onClick={close}>{ar ? "كِتس" : "Cuts"}</Link>}
-            {!authenticated && GUEST_GATED.has("videos") ? <button type="button" onClick={() => { close(); window.setTimeout(() => requestRavineAuth(`/${locale}`), CLOSE_MS); }}>{ar ? "الفيديو — سجّل للدخول" : "Videos — Sign in"}</button> : <Link href={`/${locale}/videos`} onClick={close}>{ar ? "الفيديو" : "Videos"}</Link>}
-            {!authenticated && GUEST_GATED.has("podcasts") ? <button type="button" onClick={() => { close(); window.setTimeout(() => requestRavineAuth(`/${locale}`), CLOSE_MS); }}>{ar ? "البودكاست والوثائقي — سجّل للدخول" : "Podcasts & Documentaries — Sign in"}</button> : <Link href={`/${locale}/podcasts`} onClick={close}>{ar ? "البودكاست والوثائقي" : "Podcasts & Documentaries"}</Link>}
-            {!authenticated && GUEST_GATED.has("live") ? <button type="button" onClick={() => { close(); window.setTimeout(() => requestRavineAuth(`/${locale}`), CLOSE_MS); }}>{ar ? "مباشر — سجّل للدخول" : "Live — Sign in"}</button> : <Link href={`/${locale}/live`} onClick={close}>{ar ? "مباشر" : "Live"}</Link>}
-            <Link href={`/${locale}/creators`} onClick={close}>{ar ? "المبدعون" : "Creators"}</Link>
+            {navigation.map(([slug, en, arLabel]) => {
+              const label = locale === "ar" ? arLabel : en;
+              const gated = !authenticated && GUEST_GATED.has(slug);
+              return gated
+                ? <button key={slug} type="button" onClick={() => { close(); window.setTimeout(() => requestRavineAuth(`/${locale}/${slug}`), CLOSE_MS); }}>{label} — {ar ? "سجّل للدخول" : "Sign in"}</button>
+                : <Link key={slug} href={`/${locale}/${slug}`} onClick={close}>{label}</Link>;
+            })}
             {!authenticated ? <button type="button" onClick={() => { close(); window.setTimeout(() => requestRavineAuth(`/${locale}`), CLOSE_MS); }}>{ar ? "دخول" : "Sign in"}</button> : <><Link href={`/${locale}/library`} onClick={close}>{ar ? "المكتبة" : "Library"}</Link><Link href={`/${locale}/account`} onClick={close}>{ar ? "الحساب" : "Account"}</Link></>}
           </nav>
         </div>

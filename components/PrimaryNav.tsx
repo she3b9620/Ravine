@@ -8,8 +8,8 @@ import { requestRavineAuth } from "./AuthModal";
 type Locale = "ar" | "en";
 type Item = readonly [slug: string, en: string, ar: string, icon: typeof Home];
 
-const navigation: Item[] = [["", "Home", "الرئيسية", Home], ["discover", "Discover", "اكتشف", Compass], ["shorts", "Shorts", "الشورتات", Scissors], ["videos", "Videos", "الفيديوهات", Clapperboard], ["podcasts", "Podcasts", "البودكاست", Mic2], ["documentaries", "Documentaries", "الأفلام الوثائقية", Film], ["short-films", "Short Films", "الأفلام القصيرة", Clapperboard], ["films", "Feature Films", "الأفلام المطوّلة", Film], ["series", "Series", "المسلسلات", Clapperboard], ["live", "Live", "مباشر", Radio], ["creators", "Creators", "المبدعون", Users], ["community", "Community", "المجتمع", MessagesSquare]];
-const GUEST_GATED = new Set(["community", "shorts", "cuts", "videos", "live", "podcasts", "documentaries", "short-films", "films", "series"]);
+const navigation: Item[] = [["", "Home", "الرئيسية", Home], ["discover", "Discover", "اكتشف", Compass], ["shorts", "Shorts", "الشورتات", Scissors], ["videos", "Videos", "الفيديوهات", Clapperboard], ["live", "Live", "مباشر", Radio], ["podcasts", "Podcasts", "البودكاست", Mic2], ["documentaries", "Documentaries", "الأفلام الوثائقية", Film], ["creators", "Creators", "المبدعون", Users], ["community", "Community", "المجتمع", MessagesSquare]];
+const GUEST_GATED = new Set(["community", "shorts", "videos", "live", "podcasts", "documentaries"]);
 
 export default function PrimaryNav({ locale, authenticated = false }: { locale: Locale; authenticated?: boolean }) {
   const pathname = usePathname() || `/${locale}`;
