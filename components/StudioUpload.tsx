@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { isAllowedRavineMediaFile } from "@/lib/ravine-media-validation.mjs";
@@ -103,6 +103,9 @@ export default function StudioUpload({ creatorId, locale }: Props) {
   const [file, setFile] = useState<File | null>(null);
   const [trailerFile, setTrailerFile] = useState<File | null>(null);
   const [previewFile, setPreviewFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const trailerInputRef = useRef<HTMLInputElement>(null);
+  const previewInputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<StudioUploadProgress | null>(null);
   const [message, setMessage] = useState("");
@@ -390,6 +393,9 @@ export default function StudioUpload({ creatorId, locale }: Props) {
       setFile(null);
       setTrailerFile(null);
       setPreviewFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      if (trailerInputRef.current) trailerInputRef.current.value = "";
+      if (previewInputRef.current) previewInputRef.current.value = "";
       setMessage(ar ? "تم رفع العمل وحفظه كمسودة مع إعدادات الظهور والـTrailer/Preview." : "The work was uploaded and saved as a draft with visibility and optional trailer/preview settings.");
       setUploadProgress(null);
       router.refresh();
@@ -536,15 +542,15 @@ export default function StudioUpload({ creatorId, locale }: Props) {
 
         <label className="studio-form-wide">
           <span>{ar ? (isPodcast ? "ملف الحلقة الصوتي/المرئي" : "ملف العمل") : (isPodcast ? "Episode audio/video" : "Work media")}</span>
-          <input type="file" accept={isPodcast ? `${videoAccept},${audioAccept}` : videoAccept} onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
+          <input ref={fileInputRef} type="file" accept={isPodcast ? `${videoAccept},${audioAccept}` : videoAccept} onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
         </label>
 
         {!isShort ? (
-          <label><span>{ar ? "Trailer اختياري" : "Optional trailer"}</span><input type="file" accept={isPodcast ? `${videoAccept},${audioAccept}` : videoAccept} onChange={(event) => setTrailerFile(event.target.files?.[0] ?? null)} /></label>
+          <label><span>{ar ? "Trailer اختياري" : "Optional trailer"}</span><input ref={trailerInputRef} type="file" accept={isPodcast ? `${videoAccept},${audioAccept}` : videoAccept} onChange={(event) => setTrailerFile(event.target.files?.[0] ?? null)} /></label>
         ) : null}
 
         {isVideoLike ? (
-          <label><span>{ar ? "Preview اختياري · حتى 30 ثانية" : "Optional preview · up to 30s"}</span><input type="file" accept={videoAccept} onChange={(event) => setPreviewFile(event.target.files?.[0] ?? null)} /></label>
+          <label><span>{ar ? "Preview اختياري · حتى 30 ثانية" : "Optional preview · up to 30s"}</span><input ref={previewInputRef} type="file" accept={videoAccept} onChange={(event) => setPreviewFile(event.target.files?.[0] ?? null)} /></label>
         ) : null}
       </div>
 

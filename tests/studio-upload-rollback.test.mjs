@@ -67,6 +67,25 @@ test("upload rollback attempts work cleanup even if no public ID was returned an
   assert.ok(upload.includes("if (!mayCleanUploads && uploadedPublicIds.length)"));
 });
 
+test("the cleanup endpoint rejects oversized raw rollback arrays before deduplicating them", () => {
+  const rawGuard = cleanup.indexOf("body.publicIds.length > 3");
+  const dedupe = cleanup.indexOf("Array.from(new Set(body.publicIds))");
+  assert.ok(rawGuard >= 0 && dedupe > rawGuard);
+  assert.match(cleanup, /body\.publicIds\.length < 1 \|\| body\.publicIds\.length > 3/);
+});
+
+test("successful uploads clear native main, trailer, and preview file inputs", () => {
+  for (const refName of ["fileInputRef", "trailerInputRef", "previewInputRef"]) {
+    assert.ok(upload.includes(`const ${refName} = useRef<HTMLInputElement>(null)`));
+    assert.ok(upload.includes(`ref={${refName}}`));
+    assert.ok(upload.includes(`if (${refName}.current) ${refName}.current.value = ""`));
+  }
+  const successReset = upload.indexOf('if (fileInputRef.current) fileInputRef.current.value = ""');
+  const failureHandler = upload.indexOf("} catch (submitError)");
+  assert.ok(successReset > upload.indexOf("setFile(null)"));
+  assert.ok(successReset < failureHandler);
+});
+
 test("rollback requests do not permit deletion of arbitrary public IDs or another creator's work", () => {
   assert.match(cleanup, /publicIds\.every\(\(id\) => isCreatorUploadPublicId\(id, creatorId\)\)/);
   assert.match(cleanup, /The requested media identifiers are not valid for this creator/);

@@ -57,7 +57,8 @@ export async function POST(request: NextRequest) {
     } | null;
 
     const creatorId = Number(body?.creatorId);
-    if (!Number.isSafeInteger(creatorId) || creatorId < 1 || !Array.isArray(body?.publicIds)) {
+    if (!Number.isSafeInteger(creatorId) || creatorId < 1 || !Array.isArray(body?.publicIds)
+        || body.publicIds.length < 1 || body.publicIds.length > 3) {
       return jsonError("Invalid cleanup request.", 400);
     }
 

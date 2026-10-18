@@ -48,6 +48,7 @@ test("Studio work actions use localized recovery messages instead of raw provide
 
 test("Studio metadata editor only offers quality values accepted by the database schema", () => {
   const qualityOptions = manager.match(/<select value=\{editQuality\}[^>]*>([\s\S]*?)<\/select>/)?.[1] ?? "";
+  assert.match(qualityOptions, /value="720p"/);
   assert.match(qualityOptions, /value="1080p"/);
   assert.match(qualityOptions, /value="2k"/);
   assert.match(qualityOptions, /value="4k"/);

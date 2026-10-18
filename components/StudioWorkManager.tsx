@@ -430,6 +430,7 @@ export default function StudioWorkManager({ works: initialWorks, locale, creator
                         <option value="series" disabled={work.content_type !== "series"}>{ar ? "مسلسل / حلقة" : "Series episode"}</option>
                       </select>
                       <select value={editQuality} onChange={(event) => setEditQuality(event.target.value)}>
+                        <option value="720p">720p</option>
                         <option value="1080p">1080p</option>
                         <option value="2k">2K</option>
                         <option value="4k">4K</option>
