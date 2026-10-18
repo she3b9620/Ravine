@@ -64,3 +64,12 @@ test("username-based public profile excludes unpublished and non-public creator 
   assert.match(source, /\.eq\("published",true\)/);
   assert.match(source, /\.eq\("visibility","public"\)/);
 });
+
+
+test("public username profiles direct every visitor to Discover rather than another user's account", () => {
+  const source = read("../app/[locale]/u/[username]/page.tsx");
+  assert.ok(source.includes('href={`/${locale}/discover`}'));
+  assert.ok(source.includes("استكشف رَافِين"));
+  assert.ok(source.includes("Explore RAVINE"));
+  assert.doesNotMatch(source, /href={`\/${locale}\/account`}[^\n]*Back to my account/);
+});
