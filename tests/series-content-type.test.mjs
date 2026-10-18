@@ -158,3 +158,13 @@ test("series detail provides bilingual season headings, episode playback links, 
   assert.match(seriesDetailStyles, /@media \(max-width: 720px\)/);
   assert.match(seriesDetailStyles, /@media \(max-width: 480px\)/);
 });
+
+
+test("public catalog failures show localized recovery guidance instead of raw provider errors", () => {
+  assert.doesNotMatch(catalog, /\{error\.message\}/);
+  assert.match(catalog, /The catalogue could not retrieve works right now/);
+  assert.match(catalog, /تعذّر جلب الأعمال الآن/);
+  assert.doesNotMatch(page, /legacyResult\.error\.message/);
+  assert.match(page, /The series catalogue could not be retrieved right now/);
+  assert.match(page, /تعذّر استرجاع قائمة المسلسلات الآن/);
+});
