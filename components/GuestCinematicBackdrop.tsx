@@ -73,14 +73,17 @@ async function loadCuratedHeroMedia(supabase: ReturnType<typeof createClient>): 
 
   const items = itemsResult.data ?? [];
   const videos: Work[] = items.flatMap((item) => {
-    if (item.media_type !== "video" || !item.video_id || !item.media_url) return [];
-    return [{
-      id: Number(item.video_id),
+    if (item.media_type !== "video" || !item.media_url) return [];
+    // Existing published works use their video_id; directly uploaded hero-only
+    // videos use the hero media row ID and never create a public work record.
+    const id = Number(item.video_id ?? item.id);
+    return Number.isSafeInteger(id) && id > 0 ? [{
+      id,
       video_url: item.media_url,
       thumbnail_url: item.thumbnail_url ?? null,
       duration: null,
       content_type: "video",
-    }];
+    }] : [];
   });
   const images: StillImage[] = items.flatMap((item) => {
     if (item.media_type !== "image" || !item.media_url) return [];
