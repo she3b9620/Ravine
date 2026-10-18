@@ -31,3 +31,16 @@ test("creators can preview a draft or published work from the Studio manager", (
   assert.match(manager, /"معاينة"/);
   assert.match(manager, /"Preview"/);
 });
+
+
+test("Studio work actions use localized recovery messages instead of raw provider failures", () => {
+  assert.match(manager, /function studioActionError\(ar: boolean, action: StudioAction\)/);
+  assert.match(manager, /تعذّر حفظ تعديلات العمل/);
+  assert.match(manager, /Could not save these changes/);
+  assert.match(manager, /تعذّر نشر العمل/);
+  assert.match(manager, /تعذّر إخفاء العمل/);
+  assert.match(manager, /تعذّر حذف العمل/);
+  assert.doesNotMatch(manager, /setError\(saveError instanceof Error \? saveError\.message/);
+  assert.doesNotMatch(manager, /setError\(publishError instanceof Error \? publishError\.message/);
+  assert.doesNotMatch(manager, /setError\(deleteError instanceof Error \? deleteError\.message/);
+});
