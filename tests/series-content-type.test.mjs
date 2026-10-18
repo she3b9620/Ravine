@@ -78,11 +78,11 @@ test("Shorts viewers can switch between a standard grid and a vertical reels fee
   assert.match(shortsBrowse, /IntersectionObserver/);
   assert.match(shortsBrowse, /visibilityRatiosRef/);
   assert.match(shortsBrowse, /manuallyPausedRef/);
-  assert.match(shortsBrowse, /ratio >= 0\\.25/);
+  assert.match(shortsBrowse, /ratio >= 0\.25/);
   assert.match(shortsBrowse, /if \(id !== workId\) other\.pause\(\)/);
-  assert.match(shortsBrowse, /video\\.play\\(\\)/);
-  assert.match(shortsBrowse, /video\\.pause\\(\\)/);
-  assert.match(shortsBrowse, /resolveWorkPlaybackUrl\\(work\\.id, work\\.video_url\\)/);
+  assert.match(shortsBrowse, /video\.play\(\)/);
+  assert.match(shortsBrowse, /video\.pause\(\)/);
+  assert.match(shortsBrowse, /resolveWorkPlaybackUrl\(work\.id, work\.video_url\)/);
   assert.match(shortsStyles, /scroll-snap-type: y proximity/);
   assert.match(shortsStyles, /@media \(max-width: 620px\)/);
 });
