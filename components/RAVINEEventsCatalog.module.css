@@ -57,3 +57,8 @@
 @media(max-width:1080px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:660px){.grid{grid-template-columns:minmax(0,1fr)}.card{padding:17px}.filterRow{gap:6px}.filterButton{min-height:36px;padding:0 11px}}
 @media(prefers-reduced-motion:reduce){.search,.filterButton{scroll-behavior:auto;transition:none}}
+
+.eventDetailLink{color:inherit;text-decoration:none;text-decoration-color:rgba(196,122,82,.5);text-underline-offset:5px}
+.eventDetailLink:hover{color:var(--copper,#c47a52);text-decoration:underline}
+.eventDetailLink:focus-visible{outline:2px solid var(--copper,#c47a52);outline-offset:4px;border-radius:3px}
+:global(html[data-theme="light"]) .eventDetailLink:hover{color:#70402f}

@@ -19,6 +19,7 @@ export type RAVINEEventItem = {
   creatorName: string;
   creatorAvatar: string | null;
   recordingHref: string | null;
+  detailHref?: string | null;
 };
 
 type Locale = "ar" | "en";
@@ -141,7 +142,7 @@ export default function RAVINEEventsCatalog({ locale, items }: { locale: Locale;
                   </span>
                   <span className={styles.type}>{formatEventType(event.type, locale)}</span>
                 </div>
-                <h2>{event.title}</h2>
+                <h2>{event.detailHref ? <Link className={styles.eventDetailLink} href={event.detailHref}>{event.title}</Link> : event.title}</h2>
                 <p className={styles.description}>{event.description || (ar ? "جلسة من مجتمع رَافِين." : "An event from the RAVINE community.")}</p>
                 <div className={styles.details}>
                   <span><CalendarClock size={15} aria-hidden="true" />{formatDate(event.scheduledAt, locale)}</span>
