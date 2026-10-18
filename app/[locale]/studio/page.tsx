@@ -153,8 +153,8 @@ export default async function StudioPage({ params, searchParams }: { params: Pro
   const draftCount = draftCountResult.count;
   const statisticsError = Boolean(totalWorksError || publishedCountResult.error || draftCountResult.error);
 
-  function studioPageHref(pageNumber: number) {
-    const params = new URLSearchParams({ creatorId: String(creator.id), workPage: String(pageNumber) });
+  function studioPageHref(pageNumber: number, creatorId: number) {
+    const params = new URLSearchParams({ creatorId: String(creatorId), workPage: String(pageNumber) });
     if (workSearch) params.set("workSearch", workSearch);
     if (workStatus !== "all") params.set("workStatus", workStatus);
     if (workType !== "all") params.set("workType", workType);
@@ -211,13 +211,13 @@ export default async function StudioPage({ params, searchParams }: { params: Pro
         />
         {pageCount > 1 ? <nav className={styles.pagination} dir={ar ? "rtl" : "ltr"} aria-label={ar ? "صفحات الأعمال" : "Work pages"}>
           {currentPage > 1
-            ? <Link className={styles.pageLink} href={studioPageHref(currentPage - 1)}>{ar ? "السابق" : "Previous"}</Link>
+            ? <Link className={styles.pageLink} href={studioPageHref(currentPage - 1, creator.id)}>{ar ? "السابق" : "Previous"}</Link>
             : <span className={styles.pageDisabled}>{ar ? "السابق" : "Previous"}</span>}
           <span className={styles.pageIndicator} aria-current="page">{ar
             ? `صفحة ${currentPage.toLocaleString(locale)} من ${pageCount.toLocaleString(locale)}`
             : `Page ${currentPage.toLocaleString(locale)} of ${pageCount.toLocaleString(locale)}`}</span>
           {currentPage < pageCount
-            ? <Link className={styles.pageLink} href={studioPageHref(currentPage + 1)}>{ar ? "التالي" : "Next"}</Link>
+            ? <Link className={styles.pageLink} href={studioPageHref(currentPage + 1, creator.id)}>{ar ? "التالي" : "Next"}</Link>
             : <span className={styles.pageDisabled}>{ar ? "التالي" : "Next"}</span>}
         </nav> : null}
       </>}

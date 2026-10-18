@@ -26,9 +26,9 @@ test("identity switch links keep the current creator selected across Studio pagi
   assert.match(page, /Choose creator identity/);
   assert.match(page, /اختيار هوية المبدع/);
   assert.match(page, /creatorId=.*identity\.id/);
-  assert.match(page, /studioPageHref\(currentPage - 1\)/);
-  assert.match(page, /studioPageHref\(currentPage \+ 1\)/);
-  assert.match(page, /new URLSearchParams\(\{ creatorId: String\(creator\.id\), workPage: String\(pageNumber\) \}\)/);
+  assert.match(page, /studioPageHref\(currentPage - 1, creator\.id\)/);
+  assert.match(page, /studioPageHref\(currentPage \+ 1, creator\.id\)/);
+  assert.match(page, /new URLSearchParams\(\{ creatorId: String\(creatorId\), workPage: String\(pageNumber\) \}\)/);
   assert.match(page, /params\.set\("workSearch", workSearch\)/);
   assert.match(page, /params\.set\("workStatus", workStatus\)/);
   assert.match(page, /params\.set\("workType", workType\)/);
