@@ -31,6 +31,7 @@ export default function HeroMediaManager({ locale }: { locale: Locale }) {
   const [videos, setVideos] = useState<CandidateVideo[]>([]);
   const [curatedMode, setCuratedMode] = useState(false);
   const [imageTitle, setImageTitle] = useState("");
+  const [videoTitle, setVideoTitle] = useState("");
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [busyId, setBusyId] = useState<number | null>(null);
@@ -92,6 +93,60 @@ export default function HeroMediaManager({ locale }: { locale: Locale }) {
     }
     setItems((current) => [...current, data as HeroItem]);
     setNotice(ar ? "أُضيف الفيديو إلى قائمة الهيرو. فعّل وضع الاختيارات اليدوية ليظهر بدل القائمة التلقائية." : "Video added. Enable curated mode to show your selected list instead of the automatic feed.");
+  }
+
+  async function uploadHeroVideo(file: File) {
+    setError("");
+    setNotice("");
+    if (!file.type.startsWith("video/")) {
+      setError(ar ? "اختَر ملف فيديو صالحًا." : "Choose a valid video file.");
+      return;
+    }
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+    if (!cloudName || !uploadPreset) {
+      setError(ar ? "إعدادات Cloudinary غير مكتملة في المشروع." : "Cloudinary is not configured for this project.");
+      return;
+    }
+    setUploading(true);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      form.append("upload_preset", uploadPreset);
+      const response = await fetch("https://api.cloudinary.com/v1_1/" + encodeURIComponent(cloudName) + "/video/upload", {
+        method: "POST",
+        body: form,
+      });
+      const payload = await response.json() as { secure_url?: string; duration?: number; error?: { message?: string } };
+      if (!response.ok || !payload.secure_url) {
+        throw new Error(payload.error?.message || (ar ? "تعذر رفع فيديو الهيرو." : "Hero video upload failed."));
+      }
+      let thumbnailUrl: string | null = null;
+      try {
+        const poster = new URL(payload.secure_url);
+        poster.pathname = poster.pathname
+          .replace("/video/upload/", "/video/upload/so_0/")
+          .replace(/\\.(mp4|mov|webm|mkv|m4v)$/i, ".jpg");
+        thumbnailUrl = poster.toString();
+      } catch {}
+      const { data, error: insertError } = await supabase.from("ravine_hero_media_items").insert({
+        media_type: "video",
+        title: videoTitle.trim() || file.name.replace(/\\.[^.]+$/, ""),
+        media_url: payload.secure_url,
+        thumbnail_url: thumbnailUrl,
+        video_id: null,
+        sort_order: (sortedItems.reduce((highest, item) => Math.max(highest, item.sort_order), -10)) + 10,
+        is_active: true,
+      }).select("id,media_type,title,media_url,thumbnail_url,video_id,sort_order,is_active").single();
+      if (insertError || !data) throw new Error(insertError?.message || "Could not save hero video.");
+      setItems((current) => [...current, data as HeroItem]);
+      setVideoTitle("");
+      setNotice(ar ? "تم رفع الفيديو وإضافته للهيرو مباشرةً، دون الحاجة لنشره كعمل في المنصة." : "Hero video uploaded directly; it does not need to be published as a platform work.");
+    } catch (uploadError) {
+      setError((ar ? "تعذر رفع فيديو الهيرو: " : "Hero video upload failed: ") + (uploadError instanceof Error ? uploadError.message : String(uploadError)));
+    } finally {
+      setUploading(false);
+    }
   }
 
   async function uploadImage(file: File) {
@@ -228,6 +283,14 @@ export default function HeroMediaManager({ locale }: { locale: Locale }) {
       <div className={styles.columns}>
         <section className={styles.panel}>
           <div className={styles.panelHead}><div><div className={styles.kicker}>01 / VIDEO</div><h2>{ar ? "اختَر فيديوهات الهيرو" : "Select hero videos"}</h2><p>{ar ? "فقط الفيديوهات المنشورة للعامة تظهر هنا." : "Only published public videos appear here."}</p></div><span className={styles.count}>{selectedVideoIds.size}</span></div>
+          <label className={styles.field}><span>{ar ? "اسم فيديو الهيرو (اختياري)" : "Hero video title (optional)"}</span><input value={videoTitle} onChange={(event) => setVideoTitle(event.target.value)} maxLength={120} placeholder={ar ? "مثال: مشهد افتتاحي 01" : "e.g. Opening cinematic 01"} /></label>
+          <label className={styles.uploadBox}>
+            <input type="file" accept="video/mp4,video/webm,video/quicktime,video/x-matroska,video/x-m4v" disabled={uploading} onChange={(event) => { const input = event.currentTarget; const file = input.files?.[0]; if (file) void uploadHeroVideo(file).finally(() => { input.value = ""; }); }} />
+            <span className={styles.uploadIcon}>{uploading ? "…" : "▶"}</span>
+            <strong>{uploading ? (ar ? "جارٍ رفع فيديو الهيرو…" : "Uploading hero video…") : (ar ? "ارفع فيديو مخصصًا للهيرو من جهازك" : "Upload a dedicated hero video")}</strong>
+            <small>{ar ? "MP4 أو WebM أو MOV. لا يلزم نشره كعمل في رَافِين." : "MP4, WebM, or MOV. It does not need to be published as a RAVINE work."}</small>
+          </label>
+          <div className={styles.subsectionLabel}>{ar ? "أو اختَر فيديو منشورًا للعامة" : "Or select a published public video"}</div>
           <div className={styles.candidateList}>
             {loading ? <div className={styles.empty}>{ar ? "جارٍ تحميل الفيديوهات…" : "Loading videos…"}</div> : videos.length === 0 ? <div className={styles.empty}>{ar ? "لا توجد فيديوهات عامة مؤهلة حتى الآن." : "No eligible public videos yet."}</div> : videos.map((video) => {
               const selected = selectedVideoIds.has(video.id);
