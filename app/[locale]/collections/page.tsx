@@ -5,6 +5,7 @@ import { ArrowDown, ArrowUp, BookmarkPlus, Eye, LockKeyhole, Plus, Trash2 } from
 import { createClient } from "@/lib/supabase/server";
 import styles from "./collections.module.css";
 import RAVINECollectionsDirectory, { type RAVINECollectionDirectoryItem } from "@/components/RAVINECollectionsDirectory";
+import RAVINECopyLinkButton from "@/components/RAVINECopyLinkButton";
 
 export const dynamic = "force-dynamic";
 
@@ -406,7 +407,10 @@ export default async function CollectionsPage({
     return (
       <section className={"section " + styles.page} dir={ar ? "rtl" : "ltr"}>
         <div className={styles.topRow}>
-          <Link href={"/" + locale + "/collections"} className={styles.backLink}>{ar ? "كل المجموعات" : "All collections"}</Link>
+          <div className={styles.topRowStart}>
+            <Link href={"/" + locale + "/collections"} className={styles.backLink}>{ar ? "كل المجموعات" : "All collections"}</Link>
+            {collectionRow.visibility === "public" ? <RAVINECopyLinkButton locale={locale} /> : null}
+          </div>
           <span className={styles.visibilityPill}>{collectionRow.visibility === "public" ? <Eye size={13} aria-hidden="true" /> : <LockKeyhole size={13} aria-hidden="true" />}{collectionRow.visibility === "public" ? (ar ? "عامة" : "Public") : collectionRow.visibility === "members" ? (ar ? "الأعضاء فقط" : "Members only") : (ar ? "خاصة" : "Private")}</span>
         </div>
         <div className={styles.collectionHero}>

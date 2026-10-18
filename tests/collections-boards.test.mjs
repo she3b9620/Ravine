@@ -68,3 +68,15 @@ test("collection owners can reorder items without violating the collection-order
   assert.match(page, /disabled=\{index === 0\}/);
   assert.match(page, /disabled=\{index === orderedItems\.length - 1\}/);
 });
+
+test("public collections expose a localized share action while private collections do not", () => {
+  const page = read("../app/[locale]/collections/page.tsx");
+  const button = read("../components/RAVINECopyLinkButton.tsx");
+  const css = read("../components/RAVINECopyLinkButton.module.css");
+  assert.match(page, /collectionRow\.visibility === "public" \? <RAVINECopyLinkButton locale=\{locale\} \/> : null/);
+  assert.match(button, /navigator\.share/);
+  assert.match(button, /navigator\.clipboard\?\.writeText/);
+  assert.match(button, /role="status" aria-live="polite"/);
+  assert.match(button, /مشاركة المجموعة العامة/);
+  assert.match(css, /focus-visible/);
+});

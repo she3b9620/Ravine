@@ -1,5 +1,6 @@
 .page{display:grid;gap:22px;width:100%;max-width:1420px;box-sizing:border-box;margin-inline:auto;padding-inline:clamp(20px,4.5vw,72px)}
 .topRow{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+.topRowStart{display:flex;align-items:center;flex-wrap:wrap;gap:16px}
 .backLink{color:var(--stone,#9a9690);font-size:12px;text-decoration:none}
 .backLink:hover{color:var(--copper,#c47a52)}
 .visibilityPill{display:inline-flex;align-items:center;gap:7px;min-height:29px;padding:0 11px;border:1px solid rgba(241,233,220,.13);border-radius:999px;color:var(--stone,#9a9690);font-size:10px;white-space:nowrap}

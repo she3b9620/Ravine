@@ -1,0 +1,8 @@
+.root{display:inline-flex;min-width:0}
+.button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:34px;padding:0 11px;border:1px solid rgba(196,122,82,.32);border-radius:10px;background:rgba(196,122,82,.06);color:var(--copper,#c47a52);font:inherit;font-size:11px;cursor:pointer;transition:border-color 150ms ease,background-color 150ms ease}
+.button:hover{border-color:rgba(196,122,82,.65);background:rgba(196,122,82,.12)}
+.button:focus-visible{outline:2px solid var(--copper,#c47a52);outline-offset:3px}
+.button svg{flex:0 0 auto}
+.visuallyHidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+:global(html[data-theme="light"]) .button{border-color:rgba(112,64,47,.25);background:rgba(196,122,82,.08);color:#70402f}
+@media(prefers-reduced-motion:reduce){.button{transition:none}}
