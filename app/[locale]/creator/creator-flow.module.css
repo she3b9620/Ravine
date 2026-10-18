@@ -447,3 +447,25 @@
     white-space: normal;
   }
 }
+
+/* Creator application: a centered frame with deliberate, balanced side gutters. */
+.applyPage {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1640px;
+  margin-inline: auto;
+  padding-inline: clamp(24px, 4.2vw, 72px);
+}
+
+@media (max-width: 860px) {
+  .applyPage {
+    padding-inline: clamp(18px, 4vw, 32px);
+  }
+}
+
+@media (max-width: 560px) {
+  .applyPage {
+    padding-inline: 16px;
+    padding-bottom: 38px;
+  }
+}
