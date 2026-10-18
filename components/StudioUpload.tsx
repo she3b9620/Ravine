@@ -262,8 +262,9 @@ export default function StudioUpload({ creatorId, locale }: Props) {
     let createdWorkId: number | null = null;
     let createdSeriesId: number | null = null;
     let signedInUserId: string | null = null;
+    let supabase: ReturnType<typeof createClient> | null = null;
     try {
-      const supabase = createClient();
+      supabase = createClient();
       const { data: auth } = await supabase.auth.getUser();
       if (!auth.user) throw new Error("RAVINE_AUTH_REQUIRED");
       signedInUserId = auth.user.id;
@@ -416,7 +417,7 @@ export default function StudioUpload({ creatorId, locale }: Props) {
 
         // Remove only the new, still-empty series record created by this
         // submission. If its episode cannot be ruled out, preserve the series.
-        if (mayCleanUploads && createdSeriesId !== null && signedInUserId) {
+        if (mayCleanUploads && createdSeriesId !== null && signedInUserId && supabase) {
           try {
             const { data: remainingEpisodes, error: episodeCheckError } = await supabase
               .from("videos")
@@ -437,7 +438,7 @@ export default function StudioUpload({ creatorId, locale }: Props) {
           } catch {
             seriesRollbackVerified = false;
           }
-        } else if (createdSeriesId !== null && !mayCleanUploads) {
+        } else if (createdSeriesId !== null && (!mayCleanUploads || !signedInUserId || !supabase)) {
           seriesRollbackVerified = false;
         }
 
