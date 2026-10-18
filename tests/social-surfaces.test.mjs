@@ -23,7 +23,7 @@ test("selected inbox thread determines the recipient instead of stale compose st
 });
 
 test("saved collection loads only published public works from the current user's saved IDs", () => {
-  const route = read("../app/[locale]/collections/page.tsx");
+  const route = read("../app/[locale]/library/page.tsx");
   assert.match(route, /from\("video_saves"\)/);
   assert.match(route, /\.eq\("user_id", auth\.user\.id\)/);
   assert.match(route, /\.eq\("published", true\)/);
@@ -31,8 +31,10 @@ test("saved collection loads only published public works from the current user's
   assert.match(route, /<SavedWorksCollection/);
 });
 
-test("saved collection offers live search, sorting, and removal with localized UI", () => {
+test("saved library uses the removable searchable saved-work UI", () => {
+  const route = read("../app/[locale]/library/page.tsx");
   const component = read("../components/SavedWorksCollection.tsx");
+  assert.match(route, /<SavedWorksCollection locale=\{locale\} initialItems=\{works\} loadError=\{loadError\}/);
   assert.match(component, /type="search"/);
   assert.match(component, /Most viewed/);
   assert.match(component, /Most liked/);

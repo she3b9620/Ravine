@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import RAVINEWorkCatalog, { type RAVINECatalogItem } from "@/components/RAVINEWorkCatalog";
+import SavedWorksCollection from "@/components/SavedWorksCollection";
 
 export const dynamic = "force-dynamic";
 
@@ -121,8 +122,10 @@ export default async function LibraryPage({
       </div>
       {loadError ? (
         <div className="empty-state"><strong>{ar ? "تعذر تحميل المكتبة." : "We could not load your library."}</strong><span>{ar ? "تحقق من اتصالك ثم أعد تحميل الصفحة." : "Check your connection and reload the page."}</span></div>
-      ) : items.length ? (
-        <RAVINEWorkCatalog locale={locale} items={items} />
+      ) : works.length ? (
+        isLiked
+          ? <RAVINEWorkCatalog locale={locale} items={items} />
+          : <SavedWorksCollection locale={locale} initialItems={works} loadError={loadError} />
       ) : (
         <div className="empty-state">
           <strong>{isLiked ? (ar ? "لم تُبدِ إعجابك بأي عمل بعد." : "You have not liked any work yet.") : (ar ? "مكتبتك فارغة." : "Your saved library is empty.")}</strong>
