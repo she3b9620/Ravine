@@ -9,6 +9,7 @@ const mediaCatalog = read("../components/RAVINEMediaCatalog.tsx");
 const shortsBrowse = read("../components/RAVINEShortsBrowse.tsx");
 const shortsStyles = read("../components/RAVINEShortsBrowse.module.css");
 const catalog = read("../components/RAVINEMediaCatalog.tsx");
+const workCatalog = read("../components/RAVINEWorkCatalog.tsx");
 const podcastStyles = read("../app/[locale]/podcasts/podcasts.module.css");
 const nav = read("../components/SidebarNav.tsx");
 const upload = read("../components/StudioUpload.tsx");
@@ -64,12 +65,13 @@ test("podcasts share the same public media-catalog layout used by film pages", (
   assert.match(catalog, /RAVINEMediaCatalogType = "short" \| "short_film" \| "film" \| "podcast"/);
   assert.match(catalog, /enTitle: "Podcasts\."/);
   assert.match(catalog, /\.eq\("published", true\)\.eq\("visibility", "public"\)\.eq\("content_type", contentType\)/);
-  assert.match(catalog, /href=\{\`\/\$\{locale\}\/watch\/\$\{work\.id\}\`\}/);
+  assert.match(catalog, /href:.*watch.*work\.id/);
+  assert.match(workCatalog, /<Link href=\{work\.href\}/);
   assert.match(podcastStyles, /ravine-podcast-pill/);
 });
 
 test("Shorts viewers can switch between a standard grid and a vertical reels feed", () => {
-  assert.match(mediaCatalog, /\.select\("id,title,description,thumbnail_url,video_url,duration,views,likes,quality"\)/);
+  assert.match(mediaCatalog, /\.select\("id,title,description,thumbnail_url,video_url,duration,views,likes,quality,created_at"\)/);
   assert.match(mediaCatalog, /contentType === "short" \? <RAVINEShortsBrowse locale=\{locale\} works=\{works\} \/>/);
   assert.match(shortsBrowse, /type ViewMode = "grid" \| "reels"/);
   assert.match(shortsBrowse, /ravine\.shorts\.view-mode\.v1/);
@@ -87,4 +89,14 @@ test("Shorts viewers can switch between a standard grid and a vertical reels fee
   assert.match(shortsBrowse, /resolveWorkPlaybackUrl\(work\.id, work\.video_url\)/);
   assert.match(shortsStyles, /scroll-snap-type: y proximity/);
   assert.match(shortsStyles, /@media \(max-width: 620px\)/);
+});
+
+test("film, podcast, and series catalogues share searchable and sortable results", () => {
+  assert.match(workCatalog, /const \[query, setQuery\] = useState/);
+  assert.match(workCatalog, /Most viewed/);
+  assert.match(workCatalog, /Most liked/);
+  assert.match(workCatalog, /visibleItems\.length === 0/);
+  assert.match(workCatalog, /items\.filter/);
+  assert.match(page, /RAVINEWorkCatalog locale=\{locale\} items=\{seriesItems\}/);
+  assert.match(catalog, /RAVINEWorkCatalog locale=\{locale\} items=\{items\}/);
 });

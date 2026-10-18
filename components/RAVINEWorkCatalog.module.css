@@ -1,0 +1,34 @@
+.catalog{display:grid;gap:20px;min-width:0;width:100%}
+.controls{display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,285px) auto;align-items:center;gap:12px;margin:8px 0 2px}
+.searchControl,.sortControl{display:flex;align-items:center;gap:10px;min-width:0;min-height:48px;padding:0 14px;border:1px solid rgba(241,233,220,.13);border-radius:14px;background:rgba(21,23,25,.56);color:var(--stone,#9a9690)}
+.searchControl:focus-within,.sortControl:focus-within{border-color:rgba(196,122,82,.58);box-shadow:0 0 0 3px rgba(196,122,82,.07)}
+.searchControl>svg,.sortControl>svg{flex:0 0 auto;color:var(--copper,#c47a52)}
+.searchControl input{flex:1;min-width:0;width:100%;border:0;outline:0;background:transparent;color:var(--ivory,#f1e9dc);font:inherit;font-size:12px}
+.searchControl input::placeholder{color:var(--stone,#9a9690);opacity:.78}
+.searchControl button{display:grid;place-items:center;width:28px;height:28px;flex:0 0 auto;border:0;border-radius:8px;background:rgba(241,233,220,.07);color:var(--ivory,#f1e9dc);cursor:pointer}
+.sortControl{gap:8px}.sortControl>span{flex:0 0 auto;font-size:10px;white-space:nowrap}
+.sortControl select{min-width:0;flex:1;border:0;outline:0;background:transparent;color:var(--ivory,#f1e9dc);font:inherit;font-size:11px;cursor:pointer}
+.sortControl option{background:#151719;color:#f1e9dc}
+.resultCount{display:grid;justify-items:end;gap:2px;min-width:88px;color:var(--stone,#9a9690);font-size:10px;line-height:1.5;white-space:nowrap}
+.resultCount strong{color:var(--copper,#c47a52);font-size:15px}
+.noResults{display:grid;justify-items:center;gap:9px;max-width:620px;margin:18px auto 6px;padding:clamp(26px,4vw,42px);border:1px solid rgba(241,233,220,.11);border-radius:22px;background:rgba(21,23,25,.48);text-align:center}
+.noResultsIcon{display:grid;place-items:center;width:42px;height:42px;margin-bottom:3px;border:1px solid rgba(196,122,82,.25);border-radius:14px;color:var(--copper,#c47a52);background:rgba(196,122,82,.07)}
+.noResults strong{color:var(--ivory,#f1e9dc);font-size:14px}.noResults>span{color:var(--stone,#9a9690);font-size:12px;line-height:1.8}
+.noResults>button{min-height:38px;margin-top:7px;padding:0 13px;border:1px solid rgba(196,122,82,.32);border-radius:11px;background:rgba(196,122,82,.1);color:var(--ivory,#f1e9dc);font:inherit;font-size:11px;cursor:pointer}
+.visuallyHidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.badge{display:inline-flex;align-items:center;gap:5px}
+.podcastBadge{color:#f1e9dc!important;border-color:rgba(241,233,220,.18)!important;background:rgba(9,9,9,.76)!important}
+.seriesBadge{color:#f1e9dc!important;border-color:rgba(241,233,220,.22)!important;background:rgba(24,63,70,.88)!important}
+:global(html[data-theme="light"]) .searchControl,:global(html[data-theme="light"]) .sortControl{border-color:rgba(112,64,47,.19);background:rgba(255,250,246,.82)}
+:global(html[data-theme="light"]) .searchControl input,:global(html[data-theme="light"]) .sortControl select{color:#24211f}
+:global(html[data-theme="light"]) .searchControl input::placeholder{color:#82776f}
+:global(html[data-theme="light"]) .searchControl button{color:#70402f;background:rgba(112,64,47,.07)}
+:global(html[data-theme="light"]) .sortControl option{background:#fffaf6;color:#24211f}
+:global(html[data-theme="light"]) .resultCount{color:#6f6962}
+:global(html[data-theme="light"]) .noResults{border-color:rgba(23,23,23,.12);background:rgba(255,250,246,.9)}
+:global(html[data-theme="light"]) .noResults strong{color:#171717}
+:global(html[data-theme="light"]) .seriesBadge{color:#183f46!important;border-color:rgba(24,63,70,.22)!important;background:rgba(238,246,242,.94)!important}
+:global(html[data-theme="light"]) .podcastBadge{color:#70402f!important;border-color:rgba(112,64,47,.22)!important;background:rgba(255,250,246,.9)!important}
+@media(max-width:980px){.controls{grid-template-columns:minmax(0,1fr) minmax(200px,250px)}.resultCount{grid-column:1/-1;justify-items:start;display:flex;align-items:baseline;gap:7px}}
+@media(max-width:620px){.controls{grid-template-columns:minmax(0,1fr);gap:9px}.searchControl,.sortControl{min-height:46px}.resultCount{grid-column:auto}}
+@media(prefers-reduced-motion:reduce){.searchControl,.sortControl{scroll-behavior:auto}}
