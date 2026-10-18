@@ -1,10 +1,12 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import RAVINECreatorDirectory, { type RAVINECreatorDirectoryItem } from "@/components/RAVINECreatorDirectory";
 
 export const dynamic = "force-dynamic";
 
 type Locale = "ar" | "en";
-type Creator = {
+type CreatorRow = {
   id: number;
   name: string;
   username: string | null;
@@ -13,66 +15,110 @@ type Creator = {
   specialty: string | null;
   followers: number | null;
 };
+type FollowRow = { creator_id: number };
 
-export default async function CreatorsPage({ params }: { params: Promise<{ locale: string }> }) {
-  const { locale: rawLocale } = await params;
+export default async function CreatorsPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ tab?: string }>;
+}) {
+  const [{ locale: rawLocale }, query] = await Promise.all([params, searchParams]);
   const locale: Locale = rawLocale === "en" ? "en" : "ar";
   const ar = locale === "ar";
+  const followingOnly = query.tab === "following";
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("creators")
-    .select("id,name,username,avatar_url,bio,specialty,followers")
-    .order("followers", { ascending: false, nullsFirst: false })
-    .limit(48);
+  const { data: auth } = await supabase.auth.getUser();
 
-  const creators = (data ?? []) as Creator[];
+  if (followingOnly && !auth.user) {
+    redirect("/" + locale + "/auth?next=" + encodeURIComponent("/" + locale + "/creators?tab=following"));
+  }
+
+  let rows: CreatorRow[] = [];
+  let errorMessage = "";
+
+  if (followingOnly && auth.user) {
+    const { data: follows, error: followsError } = await supabase
+      .from("follows")
+      .select("creator_id")
+      .eq("follower_id", auth.user.id)
+      .limit(200);
+
+    if (followsError) {
+      errorMessage = followsError.message;
+    } else {
+      const ids = Array.from(new Set(
+        ((follows ?? []) as FollowRow[])
+          .map((row) => Number(row.creator_id))
+          .filter((id) => Number.isSafeInteger(id) && id > 0),
+      ));
+      if (ids.length) {
+        const { data, error } = await supabase
+          .from("creators")
+          .select("id,name,username,avatar_url,bio,specialty,followers")
+          .in("id", ids)
+          .limit(200);
+        if (error) errorMessage = error.message;
+        else {
+          const byId = new Map<number, CreatorRow>((data ?? []).map((creator) => [Number(creator.id), creator as CreatorRow]));
+          rows = ids.map((id) => byId.get(id)).filter((creator): creator is CreatorRow => Boolean(creator));
+        }
+      }
+    }
+  } else {
+    const { data, error } = await supabase
+      .from("creators")
+      .select("id,name,username,avatar_url,bio,specialty,followers")
+      .order("followers", { ascending: false, nullsFirst: false })
+      .limit(100);
+    if (error) errorMessage = error.message;
+    else rows = (data ?? []) as CreatorRow[];
+  }
+
+  const items: RAVINECreatorDirectoryItem[] = rows.map((creator) => ({
+    id: Number(creator.id),
+    name: creator.name || (ar ? "مبدع رَافِين" : "RAVINE creator"),
+    username: creator.username,
+    avatarUrl: creator.avatar_url,
+    bio: creator.bio,
+    specialty: creator.specialty,
+    followers: Number(creator.followers || 0),
+  }));
 
   return (
-    <section className="section creators-page">
+    <section className="section creators-page" dir={ar ? "rtl" : "ltr"}>
       <div className="section-head">
         <div>
           <div className="eyebrow">RAVINE / CREATORS</div>
-          <h1>{ar ? "الأشخاص خلف الأعمال." : "The people behind the work."}</h1>
+          <h1>{followingOnly ? (ar ? "المبدعون الذين تتابعهم." : "Creators you follow.") : (ar ? "الأشخاص خلف الأعمال." : "The people behind the work.")}</h1>
           <p className="section-note">
-            {ar
-              ? "ملفات إبداعية احترافية، اعتمادات واضحة، وسمعة مبنية على المساهمة الفعلية."
-              : "Professional creative identities, visible credits, and reputation built on real contribution."}
+            {followingOnly
+              ? (ar ? "مسارك الإبداعي، بعيدًا عن ضجيج الترتيب العام." : "Your personal creative path, separate from the noise of the public directory.")
+              : (ar ? "ملفات إبداعية احترافية، اعتمادات واضحة، وسمعة مبنية على المساهمة الفعلية." : "Professional creative identities, visible credits, and reputation built on real contribution.")}
           </p>
         </div>
-        <Link className="button primary" href={`/${locale}/creator/apply`}>
+        <Link className="button primary" href={"/" + locale + "/creator/apply"}>
           {ar ? "قدّم كمبدع" : "Apply as a creator"}
         </Link>
       </div>
 
-      {error ? (
+      <nav className="creator-directory-tabs" aria-label={ar ? "عرض المبدعين" : "Creator views"}>
+        <Link className={"button " + (!followingOnly ? "primary" : "secondary")} href={"/" + locale + "/creators"} aria-current={!followingOnly ? "page" : undefined}>
+          {ar ? "كل المبدعين" : "All creators"}
+        </Link>
+        <Link className={"button " + (followingOnly ? "primary" : "secondary")} href={"/" + locale + "/creators?tab=following"} aria-current={followingOnly ? "page" : undefined}>
+          {ar ? "تتابعهم" : "Following"}
+        </Link>
+      </nav>
+
+      {errorMessage ? (
         <div className="empty-state">
           <strong>{ar ? "تعذر تحميل المبدعين." : "We could not load creators."}</strong>
-          <span>{error.message}</span>
-        </div>
-      ) : creators.length === 0 ? (
-        <div className="empty-state">
-          <strong>{ar ? "لا يوجد مبدعون منشورون بعد." : "No published creators yet."}</strong>
-          <span>{ar ? "سيظهر المبدعون المقبولون هنا." : "Approved creators will appear here."}</span>
+          <span>{ar ? "تحقق من اتصالك ثم حاول مجددًا." : "Check your connection and try again."}</span>
         </div>
       ) : (
-        <div className="video-grid creators-grid">
-          {creators.map((creator) => (
-            <Link href={`/${locale}/creators/${creator.id}`} className="video-card creator-card" key={creator.id}>
-              <div className="video-thumb creator-avatar-wrap">
-                <img src={creator.avatar_url || "/RAVINE.PNG"} alt="" className="creator-avatar" />
-              </div>
-              <div className="video-meta">
-                <div className="video-kicker">{creator.specialty || "CREATOR"}</div>
-                <h2>{creator.name}</h2>
-                <p>{creator.bio || (ar ? "ملف إبداعي من مجتمع RAVINE." : "A creative identity from the RAVINE community.")}</p>
-                <div className="video-stats">
-                  <span>@{creator.username || `creator-${creator.id}`}</span>
-                  <span>{Number(creator.followers || 0).toLocaleString()} {ar ? "متابع" : "followers"}</span>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
+        <RAVINECreatorDirectory locale={locale} view={followingOnly ? "following" : "all"} creators={items} />
       )}
     </section>
   );

@@ -28,7 +28,7 @@ jobs:
         run: npm audit --omit=dev --audit-level=moderate
 
       - name: Media catalog lint
-        run: npx eslint components/RAVINEShortsBrowse.tsx components/RAVINEMediaCatalog.tsx components/RAVINEWorkCatalog.tsx 'app/[locale]/podcasts/page.tsx' 'app/[locale]/series/page.tsx' 'app/[locale]/videos/page.tsx' 'app/[locale]/documentaries/page.tsx' components/StudioUpload.tsx components/StudioWorkManager.tsx components/DirectMessages.tsx components/SavedWorksCollection.tsx 'app/[locale]/messages/page.tsx' 'app/[locale]/collections/page.tsx' app/actions/ravine-social.ts 'app/[locale]/discover/page.tsx' 'app/[locale]/search/page.tsx' 'app/[locale]/live/page.tsx' 'app/[locale]/creators/[id]/page.tsx' 'app/[locale]/work/[id]/page.tsx' 'app/[locale]/watch/[id]/page.tsx' 'app/[locale]/u/[username]/page.tsx' 'app/api/search/route.ts' 'app/[locale]/history/page.tsx' 'app/[locale]/library/page.tsx' 'app/[locale]/community/page.tsx' 'app/[locale]/community/[slug]/page.tsx' components/RAVINEEventsCatalog.tsx 'app/[locale]/events/page.tsx' 'app/[locale]/spaces/page.tsx' components/PrimaryNav.tsx components/SidebarNav.tsx components/MobileNav.tsx 'app/[locale]/notifications/page.tsx'
+        run: npx eslint components/RAVINEShortsBrowse.tsx components/RAVINEMediaCatalog.tsx components/RAVINEWorkCatalog.tsx 'app/[locale]/podcasts/page.tsx' 'app/[locale]/series/page.tsx' 'app/[locale]/videos/page.tsx' 'app/[locale]/documentaries/page.tsx' components/StudioUpload.tsx components/StudioWorkManager.tsx components/DirectMessages.tsx components/SavedWorksCollection.tsx 'app/[locale]/messages/page.tsx' 'app/[locale]/collections/page.tsx' app/actions/ravine-social.ts 'app/[locale]/discover/page.tsx' 'app/[locale]/search/page.tsx' 'app/[locale]/live/page.tsx' 'app/[locale]/creators/[id]/page.tsx' 'app/[locale]/work/[id]/page.tsx' 'app/[locale]/watch/[id]/page.tsx' 'app/[locale]/u/[username]/page.tsx' 'app/api/search/route.ts' 'app/[locale]/history/page.tsx' 'app/[locale]/library/page.tsx' 'app/[locale]/community/page.tsx' 'app/[locale]/community/[slug]/page.tsx' components/RAVINEEventsCatalog.tsx 'app/[locale]/events/page.tsx' 'app/[locale]/spaces/page.tsx' components/PrimaryNav.tsx components/SidebarNav.tsx components/MobileNav.tsx components/RAVINECreatorDirectory.tsx 'app/[locale]/creators/page.tsx' 'app/[locale]/notifications/page.tsx'
 
       - name: Governance checks
         run: npm run verify:ravine
@@ -56,6 +56,9 @@ jobs:
 
       - name: Events schedule tests
         run: node --test tests/events-schedule.test.mjs
+
+      - name: Creator directory regression tests
+        run: node --test tests/creator-directory.test.mjs
 
       - name: Social surfaces regression tests
         run: node --test tests/social-surfaces.test.mjs
