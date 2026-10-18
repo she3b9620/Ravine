@@ -28,9 +28,10 @@ test("series page lists published series work and links to its RAVINE watch page
   assert.match(page, /No series published yet/);
 });
 
-test("series is discoverable in the sidebar and follows guest gating", () => {
+test("series is discoverable in the sidebar and public browsing remains available to guests", () => {
   assert.match(nav, /\["series", "Series", "المسلسلات", Tv\]/);
-  assert.match(nav, /const GUEST_GATED = new Set\(\["shorts", "cuts", "videos", "series", "live"/);
+  assert.doesNotMatch(nav, /GUEST_GATED|requestRavineAuth/);
+  assert.match(nav, /return \([\s\S]*?<Link key=\{slug\} href=\{href\}/);
 });
 
 test("only the existing creator-owner publishing path is used for series", () => {
