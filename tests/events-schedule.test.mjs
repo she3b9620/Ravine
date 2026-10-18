@@ -24,3 +24,16 @@ test("Events catalog provides search, status filters, responsive layout, and onl
   assert.match(css, /@media\(max-width:1080px\)/);
   assert.match(css, /@media\(max-width:660px\)/);
 });
+
+
+test("Spaces page exposes the staged schedule without inventing a live provider", () => {
+  const page = read("../app/[locale]/spaces/page.tsx");
+  const component = read("../components/RAVINEEventsCatalog.tsx");
+  assert.match(page, /\.from\("ravine_spaces"\)/);
+  assert.match(page, /\.in\("status", \["scheduled", "live", "ended"\]\)/);
+  assert.match(page, /recordingHref: null/);
+  assert.match(page, /live participation remains dependent on the selected provider/i);
+  assert.match(page, /<RAVINEEventsCatalog locale=\{locale\} items=\{items\}/);
+  assert.match(component, /creatorId: number \| null/);
+  assert.match(component, /town_hall/);
+});

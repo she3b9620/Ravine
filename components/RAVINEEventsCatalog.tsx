@@ -15,7 +15,7 @@ export type RAVINEEventItem = {
   scheduledAt: string | null;
   startedAt: string | null;
   endedAt: string | null;
-  creatorId: number;
+  creatorId: number | null;
   creatorName: string;
   creatorAvatar: string | null;
   recordingHref: string | null;
@@ -44,6 +44,7 @@ const copy = {
 function formatEventType(type: string, locale: Locale) {
   const labels: Record<string, [string, string]> = {
     solo: ["جلسة فردية", "Solo session"], co_live: ["بث مشترك", "Co-live"],
+    open: ["جلسة مفتوحة", "Open session"], debate: ["مناظرة", "Debate"], interview: ["مقابلة", "Interview"], town_hall: ["لقاء عام", "Town hall"],
     guest: ["ضيف", "Guest"], panel: ["حلقة نقاش", "Panel"], podcast: ["بودكاست", "Podcast"],
     gaming: ["ألعاب", "Gaming"], watch_party: ["مشاهدة جماعية", "Watch party"],
     workshop: ["ورشة عمل", "Workshop"], premiere: ["عرض أول", "Premiere"],
@@ -149,7 +150,7 @@ export default function RAVINEEventsCatalog({ locale, items }: { locale: Locale;
                 <div className={styles.host}>
                   {event.creatorAvatar ? <img src={event.creatorAvatar} alt="" loading="lazy" /> : <span className={styles.avatarFallback} aria-hidden="true">{event.creatorName.slice(0, 1)}</span>}
                   <span><small>{t.host}</small><strong>{event.creatorName}</strong></span>
-                  <Link href={"/" + locale + "/creators/" + event.creatorId} className={styles.creatorLink}>{ar ? "الملف" : "Profile"}</Link>
+                  {event.creatorId ? <Link href={"/" + locale + "/creators/" + event.creatorId} className={styles.creatorLink}>{ar ? "الملف" : "Profile"}</Link> : null}
                 </div>
                 <div className={styles.cardFooter}>
                   {event.recordingHref
