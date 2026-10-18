@@ -158,14 +158,14 @@ export default function RAVINEShortsBrowse({ locale, works }: Props) {
           </button>
           <button type="button" className={mode === "reels" ? styles.modeActive : ""} onClick={() => chooseMode("reels")} aria-pressed={mode === "reels"}>
             <AudioLines size={16} aria-hidden="true" />
-            <span>{ar ? "عرض الريلز" : "Reels view"}</span>
+            <span>{ar ? "عرض عمودي" : "Swipe feed"}</span>
             {mode === "reels" ? <Check size={14} aria-hidden="true" /> : null}
           </button>
         </div>
       </div>
 
       {works.length === 0 ? null : mode === "grid" ? (
-        <div className={`video-grid ravine-documentaries-grid ${styles.grid}`}>
+        <div className={`video-grid ravine-documentaries-grid ravine-shorts-grid ${styles.grid}`}>
           {works.map((work) => (
             <Link href={`/${locale}/watch/${work.id}`} className="video-card" key={work.id}>
               <div className="video-thumb">
