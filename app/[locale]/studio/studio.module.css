@@ -84,3 +84,10 @@
     transition: none;
   }
 }
+
+.paginationHint {
+  margin: 0 0 0.75rem;
+  color: var(--ravine-muted, #777);
+  font-size: 0.8rem;
+  line-height: 1.65;
+}
