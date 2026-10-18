@@ -2,6 +2,7 @@
 
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { supabasePublishableKey, supabaseUrl } from "@/lib/supabase/config";
 import styles from "./HeroMediaManager.module.css";
 
 type Locale = "ar" | "en";
@@ -15,6 +16,18 @@ type HeroItem = {
   sort_order: number;
   is_active: boolean;
 };
+type UploadKind = "image" | "video";
+type UploadPhase = "uploading" | "saving";
+type UploadProgress = {
+  kind: UploadKind;
+  fileName: string;
+  totalBytes: number;
+  loadedBytes: number;
+  percent: number;
+  startedAt: number;
+  phase: UploadPhase;
+};
+
 type CandidateVideo = {
   id: number;
   title: string;
@@ -34,6 +47,8 @@ export default function HeroMediaManager({ locale }: { locale: Locale }) {
   const [videoTitle, setVideoTitle] = useState("");
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<UploadProgress | null>(null);
+  const [progressNow, setProgressNow] = useState(Date.now());
   const [busyId, setBusyId] = useState<number | null>(null);
   const [savingMode, setSavingMode] = useState(false);
   const [error, setError] = useState("");
@@ -70,6 +85,12 @@ export default function HeroMediaManager({ locale }: { locale: Locale }) {
 
   useEffect(() => { void reload(); }, []);
 
+  useEffect(() => {
+    if (!uploadProgress) return;
+    const timer = window.setInterval(() => setProgressNow(Date.now()), 500);
+    return () => window.clearInterval(timer);
+  }, [uploadProgress?.startedAt]);
+
   async function addVideo(video: CandidateVideo) {
     setError("");
     setNotice("");
@@ -95,6 +116,148 @@ export default function HeroMediaManager({ locale }: { locale: Locale }) {
     setNotice(ar ? "أُضيف الفيديو إلى قائمة الهيرو. فعّل وضع الاختيارات اليدوية ليظهر بدل القائمة التلقائية." : "Video added. Enable curated mode to show your selected list instead of the automatic feed.");
   }
 
+  function beginUploadProgress(kind: UploadKind, file: File) {
+    const startedAt = Date.now();
+    setProgressNow(startedAt);
+    setUploadProgress({
+      kind,
+      fileName: file.name,
+      totalBytes: file.size,
+      loadedBytes: 0,
+      percent: 0,
+      startedAt,
+      phase: "uploading",
+    });
+  }
+
+  async function uploadFileWithProgress(
+    file: File,
+    objectPath: string,
+    contentType: string,
+    kind: UploadKind,
+  ): Promise<void> {
+    const { data: authData, error: authError } = await supabase.auth.getSession();
+    const accessToken = authData.session?.access_token;
+    if (authError || !accessToken) {
+      throw new Error(ar
+        ? "انتهت جلسة تسجيل الدخول أو تعذر التحقق منها. سجّل الدخول مجددًا."
+        : "Your sign-in session is missing or expired. Please sign in again.");
+    }
+
+    const encodedPath = objectPath.split("/").map((segment) => encodeURIComponent(segment)).join("/");
+    const endpoint = supabaseUrl.replace(/\/+$/, "") + "/storage/v1/object/ravine-hero-media/" + encodedPath;
+
+    await new Promise<void>((resolve, reject) => {
+      const request = new XMLHttpRequest();
+      request.open("POST", endpoint);
+      request.setRequestHeader("apikey", supabasePublishableKey);
+      request.setRequestHeader("Authorization", "Bearer " + accessToken);
+      request.setRequestHeader("cache-control", "max-age=3600");
+      request.setRequestHeader("content-type", contentType);
+      request.setRequestHeader("x-upsert", "false");
+
+      request.upload.onprogress = (event) => {
+        const totalBytes = event.lengthComputable && event.total > 0 ? event.total : file.size;
+        const loadedBytes = Math.min(event.loaded, totalBytes);
+        setProgressNow(Date.now());
+        setUploadProgress((current) => {
+          if (!current || current.kind !== kind) return current;
+          return {
+            ...current,
+            loadedBytes,
+            totalBytes,
+            percent: totalBytes > 0 ? Math.min(100, Math.round((loadedBytes / totalBytes) * 100)) : 0,
+          };
+        });
+      };
+
+      request.onload = () => {
+        if (request.status >= 200 && request.status < 300) {
+          setProgressNow(Date.now());
+          setUploadProgress((current) => current && current.kind === kind
+            ? { ...current, loadedBytes: file.size, totalBytes: file.size, percent: 100, phase: "saving" }
+            : current);
+          resolve();
+          return;
+        }
+
+        let message = "Storage upload failed (" + request.status + ").";
+        try {
+          const payload = JSON.parse(request.responseText) as { message?: string; error?: string };
+          message = payload.message || payload.error || message;
+        } catch {
+          // Keep the status-based message when the server does not return JSON.
+        }
+        reject(new Error(message));
+      };
+
+      request.onerror = () => reject(new Error(ar
+        ? "انقطع الاتصال أثناء رفع الملف. تحقّق من الإنترنت وأعد المحاولة."
+        : "The connection was interrupted during upload. Check your internet connection and try again."));
+      request.onabort = () => reject(new Error(ar ? "تم إيقاف الرفع قبل اكتماله." : "The upload was cancelled before completion."));
+      request.send(file);
+    });
+  }
+
+  function formatBytes(bytes: number): string {
+    if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";
+    const units = ["B", "KB", "MB", "GB", "TB"];
+    const unitIndex = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+    const value = bytes / Math.pow(1024, unitIndex);
+    return value.toFixed(unitIndex === 0 || value >= 100 ? 0 : value >= 10 ? 1 : 2) + " " + units[unitIndex];
+  }
+
+  function formatDuration(seconds: number | null): string {
+    if (seconds === null || !Number.isFinite(seconds)) return ar ? "جارٍ الحساب…" : "Calculating…";
+    const wholeSeconds = Math.max(0, Math.ceil(seconds));
+    const hours = Math.floor(wholeSeconds / 3600);
+    const minutes = Math.floor((wholeSeconds % 3600) / 60);
+    const remainder = wholeSeconds % 60;
+    if (hours > 0) return ar ? hours + " س " + minutes + " د" : hours + "h " + minutes + "m";
+    if (minutes > 0) return ar ? minutes + " د " + remainder + " ث" : minutes + "m " + remainder + "s";
+    return ar ? remainder + " ثانية" : remainder + "s";
+  }
+
+  function renderUploadProgress(kind: UploadKind) {
+    const current = uploadProgress?.kind === kind ? uploadProgress : null;
+    if (!current) return null;
+
+    const elapsedSeconds = Math.max(0, (progressNow - current.startedAt) / 1000);
+    const averageBytesPerSecond = elapsedSeconds > 0.5 ? current.loadedBytes / elapsedSeconds : 0;
+    const remainingSeconds = current.phase === "uploading" && averageBytesPerSecond > 0
+      ? Math.max(0, (current.totalBytes - current.loadedBytes) / averageBytesPerSecond)
+      : null;
+    const progressLabel = kind === "video"
+      ? (ar ? "تقدّم رفع الفيديو" : "Video upload progress")
+      : (ar ? "تقدّم رفع الصورة" : "Image upload progress");
+
+    return (
+      <div className={styles.uploadProgress} role="status" aria-live="polite">
+        <div className={styles.progressHeading}>
+          <strong>{current.phase === "saving"
+            ? (ar ? "اكتمل نقل الملف — جارٍ حفظه في قائمة الهيرو" : "File uploaded — saving it to the hero list")
+            : progressLabel}</strong>
+          <span>{current.phase === "saving" ? "100%" : current.percent + "%"}</span>
+        </div>
+        <progress
+          className={styles.progressBar}
+          max={100}
+          value={current.phase === "saving" ? 100 : current.percent}
+          aria-label={progressLabel}
+        />
+        <div className={styles.progressStats}>
+          <span>{ar ? "المُرفَع" : "Uploaded"}: <b>{formatBytes(current.loadedBytes)} / {formatBytes(current.totalBytes)}</b></span>
+          <span>{ar ? "الوقت المنقضي" : "Elapsed"}: <b>{formatDuration(elapsedSeconds)}</b></span>
+          <span>{ar ? "السرعة التقريبية" : "Avg. speed"}: <b>{averageBytesPerSecond > 0 ? formatBytes(averageBytesPerSecond) + "/s" : (ar ? "جارٍ البدء…" : "Starting…")}</b></span>
+          <span>{ar ? "الوقت المتبقي" : "Time left"}: <b>{current.phase === "saving"
+            ? (ar ? "جارٍ الحفظ…" : "Saving…")
+            : formatDuration(remainingSeconds)}</b></span>
+        </div>
+        <div className={styles.progressFileName} title={current.fileName}>{current.fileName}</div>
+      </div>
+    );
+  }
+
   async function uploadHeroVideo(file: File) {
     setError("");
     setNotice("");
@@ -118,19 +281,13 @@ export default function HeroMediaManager({ locale }: { locale: Locale }) {
     }
 
     setUploading(true);
+    beginUploadProgress("video", file);
     try {
       const safeName = file.name.normalize("NFKD").replace(/[^\w.-]+/g, "-").replace(/^-+|-+$/g, "").slice(-120) || "hero-video";
       const objectPath = "videos/" + Date.now() + "-" + crypto.randomUUID() + "-" + safeName;
-      const { data: uploaded, error: uploadError } = await supabase.storage
-        .from("ravine-hero-media")
-        .upload(objectPath, file, {
-          cacheControl: "3600",
-          upsert: false,
-          contentType,
-        });
-      if (uploadError || !uploaded) throw new Error(uploadError?.message || "Storage upload returned no file path.");
+      await uploadFileWithProgress(file, objectPath, contentType, "video");
 
-      const { data: publicFile } = supabase.storage.from("ravine-hero-media").getPublicUrl(uploaded.path);
+      const { data: publicFile } = supabase.storage.from("ravine-hero-media").getPublicUrl(objectPath);
       if (!publicFile.publicUrl) throw new Error("Could not create a public URL for the uploaded video.");
 
       const { data, error: insertError } = await supabase.from("ravine_hero_media_items").insert({
@@ -150,6 +307,8 @@ export default function HeroMediaManager({ locale }: { locale: Locale }) {
       setError((ar ? "تعذر رفع فيديو الهيرو: " : "Hero video upload failed: ") + (uploadError instanceof Error ? uploadError.message : String(uploadError)));
     } finally {
       setUploading(false);
+      setUploadProgress(null);
+      setProgressNow(Date.now());
     }
   }
 
@@ -175,19 +334,13 @@ export default function HeroMediaManager({ locale }: { locale: Locale }) {
     }
 
     setUploading(true);
+    beginUploadProgress("image", file);
     try {
       const safeName = file.name.normalize("NFKD").replace(/[^\w.-]+/g, "-").replace(/^-+|-+$/g, "").slice(-120) || "hero-image";
       const objectPath = "images/" + Date.now() + "-" + crypto.randomUUID() + "-" + safeName;
-      const { data: uploaded, error: uploadError } = await supabase.storage
-        .from("ravine-hero-media")
-        .upload(objectPath, file, {
-          cacheControl: "3600",
-          upsert: false,
-          contentType,
-        });
-      if (uploadError || !uploaded) throw new Error(uploadError?.message || "Storage upload returned no file path.");
+      await uploadFileWithProgress(file, objectPath, contentType, "image");
 
-      const { data: publicFile } = supabase.storage.from("ravine-hero-media").getPublicUrl(uploaded.path);
+      const { data: publicFile } = supabase.storage.from("ravine-hero-media").getPublicUrl(objectPath);
       if (!publicFile.publicUrl) throw new Error("Could not create a public URL for the uploaded image.");
 
       const { data, error: insertError } = await supabase.from("ravine_hero_media_items").insert({
@@ -207,6 +360,8 @@ export default function HeroMediaManager({ locale }: { locale: Locale }) {
       setError((ar ? "تعذر رفع الصورة: " : "Image upload failed: ") + (uploadError instanceof Error ? uploadError.message : String(uploadError)));
     } finally {
       setUploading(false);
+      setUploadProgress(null);
+      setProgressNow(Date.now());
     }
   }
 
@@ -244,7 +399,7 @@ export default function HeroMediaManager({ locale }: { locale: Locale }) {
   }
 
   async function removeItem(item: HeroItem) {
-    const confirmed = window.confirm(ar ? "إزالة «" + item.title + "» من قائمة الهيرو؟ لن يتم حذف ملفه الأصلي من Cloudinary." : "Remove “" + item.title + "” from the hero list? The original Cloudinary file will not be deleted.");
+    const confirmed = window.confirm(ar ? "إزالة «" + item.title + "» من قائمة الهيرو؟ لن يتم حذف الملف الأصلي من مساحة التخزين." : "Remove “" + item.title + "” from the hero list? The original Storage file will not be deleted.");
     if (!confirmed) return;
     setBusyId(item.id);
     setError("");
@@ -302,10 +457,11 @@ export default function HeroMediaManager({ locale }: { locale: Locale }) {
           <label className={styles.field}><span>{ar ? "اسم فيديو الهيرو (اختياري)" : "Hero video title (optional)"}</span><input value={videoTitle} onChange={(event) => setVideoTitle(event.target.value)} maxLength={120} placeholder={ar ? "مثال: مشهد افتتاحي 01" : "e.g. Opening cinematic 01"} /></label>
           <label className={styles.uploadBox}>
             <input type="file" accept="video/mp4,video/webm,video/quicktime,video/x-matroska,video/x-m4v" disabled={uploading} onChange={(event) => { const input = event.currentTarget; const file = input.files?.[0]; if (file) void uploadHeroVideo(file).finally(() => { input.value = ""; }); }} />
-            <span className={styles.uploadIcon}>{uploading ? "…" : "▶"}</span>
-            <strong>{uploading ? (ar ? "جارٍ رفع فيديو الهيرو…" : "Uploading hero video…") : (ar ? "ارفع فيديو مخصصًا للهيرو من جهازك" : "Upload a dedicated hero video")}</strong>
+            <span className={styles.uploadIcon}>{uploading && uploadProgress?.kind === "video" ? "…" : "▶"}</span>
+            <strong>{uploading && uploadProgress?.kind === "video" ? (ar ? "جارٍ رفع فيديو الهيرو…" : "Uploading hero video…") : (ar ? "ارفع فيديو مخصصًا للهيرو من جهازك" : "Upload a dedicated hero video")}</strong>
             <small>{ar ? "MP4 أو WebM أو MOV. لا يلزم نشره كعمل في رَافِين." : "MP4, WebM, or MOV. It does not need to be published as a RAVINE work."}</small>
           </label>
+          {renderUploadProgress("video")}
           <div className={styles.subsectionLabel}>{ar ? "أو اختَر فيديو منشورًا للعامة" : "Or select a published public video"}</div>
           <div className={styles.candidateList}>
             {loading ? <div className={styles.empty}>{ar ? "جارٍ تحميل الفيديوهات…" : "Loading videos…"}</div> : videos.length === 0 ? <div className={styles.empty}>{ar ? "لا توجد فيديوهات عامة مؤهلة حتى الآن." : "No eligible public videos yet."}</div> : videos.map((video) => {
@@ -324,10 +480,11 @@ export default function HeroMediaManager({ locale }: { locale: Locale }) {
           <label className={styles.field}><span>{ar ? "اسم الصورة (اختياري)" : "Image title (optional)"}</span><input value={imageTitle} onChange={(event) => setImageTitle(event.target.value)} maxLength={120} placeholder={ar ? "مثال: لقطة سينمائية 01" : "e.g. Cinematic still 01"} /></label>
           <label className={styles.uploadBox}>
             <input type="file" accept="image/*" disabled={uploading} onChange={(event) => { const input = event.currentTarget; const file = input.files?.[0]; if (file) void uploadImage(file).finally(() => { input.value = ""; }); }} />
-            <span className={styles.uploadIcon}>{uploading ? "…" : "+"}</span>
-            <strong>{uploading ? (ar ? "جارٍ رفع الصورة…" : "Uploading image…") : (ar ? "اختر صورة من جهازك" : "Choose an image from your device")}</strong>
+            <span className={styles.uploadIcon}>{uploading && uploadProgress?.kind === "image" ? "…" : "+"}</span>
+            <strong>{uploading && uploadProgress?.kind === "image" ? (ar ? "جارٍ رفع الصورة…" : "Uploading image…") : (ar ? "اختر صورة من جهازك" : "Choose an image from your device")}</strong>
             <small>{ar ? "JPG أو PNG أو WebP · حتى 25 ميجابايت" : "JPG, PNG, or WebP · up to 25 MB"}</small>
           </label>
+          {renderUploadProgress("image")}
         </section>
       </div>
 
