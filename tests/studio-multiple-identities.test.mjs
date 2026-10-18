@@ -14,7 +14,7 @@ test("Studio loads every creator identity owned by the signed-in account", () =>
 });
 
 test("a selected creator identity must belong to the current user's returned creator list", () => {
-  assert.match(page, /searchParams: Promise<\{ workPage\?: string \| string\[\]; creatorId\?: string \| string\[\] \}>/);
+  assert.match(page, /searchParams: Promise<\{ workPage\?: string \| string\[\]; creatorId\?: string \| string\[\]; workSearch\?: string \| string\[\]; workStatus\?: string \| string\[\]; workType\?: string \| string\[\]; workSort\?: string \| string\[\] \}>/);
   assert.match(page, /const selectedCreatorId = rawCreatorId \? Number\(rawCreatorId\) : null/);
   assert.match(page, /!creators\.some\(\(item\) => item\.id === selectedCreatorId\)/);
   assert.match(page, /redirect\(/);
@@ -26,8 +26,13 @@ test("identity switch links keep the current creator selected across Studio pagi
   assert.match(page, /Choose creator identity/);
   assert.match(page, /اختيار هوية المبدع/);
   assert.match(page, /creatorId=.*identity\.id/);
-  assert.match(page, /creatorId=\$\{creator\.id\}&workPage=\$\{currentPage - 1\}/);
-  assert.match(page, /creatorId=\$\{creator\.id\}&workPage=\$\{currentPage \+ 1\}/);
+  assert.match(page, /studioPageHref\(currentPage - 1\)/);
+  assert.match(page, /studioPageHref\(currentPage \+ 1\)/);
+  assert.match(page, /params\.set\("creatorId", String\(creator\.id\)\)/);
+  assert.match(page, /params\.set\("workSearch", workSearch\)/);
+  assert.match(page, /params\.set\("workStatus", workStatus\)/);
+  assert.match(page, /params\.set\("workType", workType\)/);
+  assert.match(page, /params\.set\("workSort", workSort\)/);
   assert.match(page, /aria-current=\{identity\.id === creator\.id/);
   assert.match(page, /Open public profile/);
 });
