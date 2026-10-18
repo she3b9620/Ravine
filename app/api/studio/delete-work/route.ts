@@ -159,11 +159,10 @@ export async function POST(request: NextRequest) {
     }
 
     const mainPublicId = extractCloudinaryPublicId(work.video_url, cloudName);
-    const auxiliaryPublicIds = assets
-      .filter((asset) => asset.kind !== "main")
+    const assetPublicIds = assets
       .map((asset) => extractCloudinaryPublicId(asset.media_url, cloudName))
       .filter((id): id is string => Boolean(id));
-
+    const auxiliaryPublicIds = assetPublicIds.filter((id) => id !== mainPublicId);
     const publicIds = Array.from(new Set([...auxiliaryPublicIds, mainPublicId].filter((id): id is string => Boolean(id))));
 
     // Remove trailers/previews first so the primary source remains available if
