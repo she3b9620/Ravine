@@ -17,7 +17,7 @@ export default async function HistoryPage({ params }: { params: Promise<{ locale
   const { data: auth } = await s.auth.getUser();
   if (!auth.user) redirect(`/${locale}/auth?next=/${locale}/history`);
 
-  const { data, error } = await s.from("watch_history").select("id,video_id,videos(id,title,thumbnail_url,duration,views)").eq("user_id", auth.user.id).order("created_at", { ascending: false }).limit(50);
+  const { data, error } = await s.from("watch_history").select("id,video_id,videos(id,title,thumbnail_url,duration,views)").eq("user_id", auth.user.id).eq("videos.published", true).eq("videos.visibility", "public").order("created_at", { ascending: false }).limit(50);
   const items = (data ?? []) as unknown as HistoryRow[];
 
   return (

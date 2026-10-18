@@ -30,6 +30,8 @@ export default async function LibraryPage({ params }: { params: Promise<{ locale
     .from("video_saves")
     .select("video_id,videos(id,title,description,thumbnail_url,duration,views)")
     .eq("user_id", auth.user.id)
+    .eq("videos.published", true)
+    .eq("videos.visibility", "public")
     .order("created_at", { ascending: false });
 
   const saved = (data ?? []) as unknown as SavedWork[];

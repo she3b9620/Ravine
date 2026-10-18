@@ -33,3 +33,12 @@ test("live search API filters public visibility as well as explicit search visib
   const source = read("../app/api/search/route.ts");
   assert.match(source, /query\.eq\("published", true\)\.eq\("visibility", "public"\)\.eq\("search_visible", true\)/);
 });
+
+
+test("watch history and legacy library hide unpublished and restricted work", () => {
+  for (const path of ["../app/[locale]/history/page.tsx", "../app/[locale]/library/page.tsx"]) {
+    const source = read(path);
+    assert.match(source, /\.eq\("videos\.published", true\)/, path);
+    assert.match(source, /\.eq\("videos\.visibility", "public"\)/, path);
+  }
+});
