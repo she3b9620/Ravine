@@ -100,3 +100,11 @@ test("film, podcast, and series catalogues share searchable and sortable results
   assert.match(page, /RAVINEWorkCatalog locale=\{locale\} items=\{seriesItems\}/);
   assert.match(catalog, /RAVINEWorkCatalog locale=\{locale\} items=\{items\}/);
 });
+
+test("Shorts keep both view modes and add local search plus sort options", () => {
+  assert.match(shortsBrowse, /const \[searchQuery, setSearchQuery\] = useState/);
+  assert.match(shortsBrowse, /const \[sortMode, setSortMode\] = useState/);
+  assert.match(shortsBrowse, /filteredWorks/);
+  assert.match(shortsBrowse, /Search Shorts/);
+  assert.match(shortsBrowse, /Most viewed/);
+});

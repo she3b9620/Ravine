@@ -416,3 +416,26 @@
   scroll-snap-type: y proximity;
   scroll-padding-top: 0;
 }
+
+/* Discovery controls shared by the standard grid and vertical feed. */
+.browseTools{display:grid;grid-template-columns:minmax(0,1fr) minmax(190px,245px) auto;align-items:center;gap:11px;margin:0 0 18px}
+.searchBox,.sortBox{display:flex;align-items:center;gap:9px;min-width:0;min-height:45px;padding:0 12px;border:1px solid rgba(241,233,220,.12);border-radius:13px;background:rgba(21,23,25,.54);color:var(--stone,#9a9690)}
+.searchBox:focus-within,.sortBox:focus-within{border-color:rgba(196,122,82,.58);box-shadow:0 0 0 3px rgba(196,122,82,.07)}
+.searchBox>svg,.sortBox>svg{flex:0 0 auto;color:var(--copper,#c47a52)}
+.searchBox input{min-width:0;width:100%;flex:1;border:0;outline:0;background:transparent;color:var(--ivory,#f1e9dc);font:inherit;font-size:12px}
+.searchBox input::placeholder{color:var(--stone,#9a9690);opacity:.78}
+.searchBox button{display:grid;place-items:center;width:27px;height:27px;flex:0 0 auto;border:0;border-radius:8px;background:rgba(241,233,220,.07);color:var(--ivory,#f1e9dc);cursor:pointer}
+.sortBox{gap:7px}.sortBox>span{flex:0 0 auto;font-size:10px}
+.sortBox select{min-width:0;flex:1;border:0;outline:0;background:transparent;color:var(--ivory,#f1e9dc);font:inherit;font-size:11px;cursor:pointer}
+.sortBox option{background:#151719;color:#f1e9dc}.searchCount{color:var(--stone,#9a9690);font-size:10px;white-space:nowrap}
+.noResults{display:grid;justify-items:center;gap:9px;max-width:560px;margin:16px auto;padding:32px 24px;border:1px solid rgba(241,233,220,.1);border-radius:20px;background:rgba(21,23,25,.45);text-align:center}
+.noResults strong{color:var(--ivory,#f1e9dc);font-size:13px}.noResults span{color:var(--stone,#9a9690);font-size:11px;line-height:1.8}
+.noResults button{min-height:36px;margin-top:4px;padding:0 12px;border:1px solid rgba(196,122,82,.3);border-radius:10px;background:rgba(196,122,82,.1);color:var(--ivory,#f1e9dc);font:inherit;font-size:11px;cursor:pointer}
+:global(html[data-theme="light"]) .searchBox,:global(html[data-theme="light"]) .sortBox{border-color:rgba(112,64,47,.18);background:rgba(255,250,246,.86)}
+:global(html[data-theme="light"]) .searchBox input,:global(html[data-theme="light"]) .sortBox select{color:#24211f}
+:global(html[data-theme="light"]) .sortBox option{background:#fffaf6;color:#24211f}
+:global(html[data-theme="light"]) .searchBox button{color:#70402f;background:rgba(112,64,47,.07)}
+:global(html[data-theme="light"]) .noResults{border-color:rgba(23,23,23,.12);background:rgba(255,250,246,.9)}
+:global(html[data-theme="light"]) .noResults strong{color:#171717}
+@media(max-width:980px){.browseTools{grid-template-columns:minmax(0,1fr) minmax(190px,245px)}.searchCount{grid-column:1/-1}}
+@media(max-width:620px){.browseTools{grid-template-columns:minmax(0,1fr);gap:8px}.searchCount{grid-column:auto}}

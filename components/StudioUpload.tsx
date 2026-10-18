@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { isAllowedRavineMediaFile } from "@/lib/ravine-media-validation.mjs";
 
 type Props = { creatorId: number; locale: "ar" | "en" };
 
@@ -66,8 +67,8 @@ type MediaAsset = {
   sort_order: number;
 };
 
-const videoAccept = "video/mp4,video/webm,video/quicktime,video/x-matroska";
-const audioAccept = "audio/mpeg,audio/mp4,audio/wav,audio/ogg,audio/aac,audio/x-m4a";
+const videoAccept = "video/mp4,video/webm,video/quicktime,video/x-matroska,.mp4,.webm,.mov,.mkv";
+const audioAccept = "audio/mpeg,audio/mp4,audio/wav,audio/ogg,audio/aac,audio/x-m4a,.mp3,.m4a,.wav,.ogg,.aac";
 
 function mapUploadError(error: unknown, ar: boolean) {
   const message = error instanceof Error ? error.message : String(error);
@@ -238,6 +239,20 @@ export default function StudioUpload({ creatorId, locale }: Props) {
 
     if (isShort && trailerFile) {
       setError(ar ? "الشورت نفسه لا يحتاج Trailer؛ يمكن أن يكون مستقلًا أو مرتبطًا بعمل لاحقًا." : "Shorts do not need a trailer; they can remain independent or link to a work later.");
+      return;
+    }
+    if (!isAllowedRavineMediaFile(file, isPodcast)) {
+      setError(ar
+        ? (isPodcast ? "ملف البودكاست يجب أن يكون صوتًا مدعومًا أو فيديو بصيغة MP4 أو WebM أو MOV أو MKV." : "ملف العمل يجب أن يكون فيديو بصيغة MP4 أو WebM أو MOV أو MKV.")
+        : (isPodcast ? "Podcast media must be a supported audio file or MP4, WebM, MOV, or MKV video." : "Work media must be an MP4, WebM, MOV, or MKV video."));
+      return;
+    }
+    if (trailerFile && !isAllowedRavineMediaFile(trailerFile, isPodcast)) {
+      setError(ar ? "صيغة ملف الـTrailer غير مدعومة لهذا النوع من المحتوى." : "The selected trailer format is not supported for this content type.");
+      return;
+    }
+    if (previewFile && !isAllowedRavineMediaFile(previewFile, false)) {
+      setError(ar ? "صيغة ملف الـPreview غير مدعومة؛ اختر ملف فيديو مدعومًا." : "The preview format is unsupported; choose a supported video file.");
       return;
     }
 

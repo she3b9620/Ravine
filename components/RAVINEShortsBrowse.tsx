@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { startTransition, useCallback, useEffect, useRef, useState } from "react";
-import { AudioLines, Check, Grid2X2, Pause, Play, Volume2, VolumeX } from "lucide-react";
+import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ArrowDownUp, AudioLines, Check, Grid2X2, Pause, Play, Search, Volume2, VolumeX, X } from "lucide-react";
 import { resolveWorkPlaybackUrl } from "@/lib/ravine-playback-core";
 import styles from "./RAVINEShortsBrowse.module.css";
 import { formatRavineNumber } from "@/lib/ravine-number-formatter";
@@ -18,10 +18,12 @@ type ShortWork = {
   views: number | null;
   likes: number | null;
   quality: string | null;
+  created_at: string | null;
 };
 
 type Props = { locale: Locale; works: ShortWork[] };
 type ViewMode = "grid" | "reels";
+type SortMode = "newest" | "views" | "likes";
 const PREFERENCE_KEY = "ravine.shorts.view-mode.v1";
 
 function formatDuration(seconds: number | null, fallback: string) {
@@ -35,6 +37,8 @@ function formatDuration(seconds: number | null, fallback: string) {
 export default function RAVINEShortsBrowse({ locale, works }: Props) {
   const ar = locale === "ar";
   const [mode, setMode] = useState<ViewMode>("grid");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortMode, setSortMode] = useState<SortMode>("newest");
   const [muted, setMuted] = useState(true);
   const [playingId, setPlayingId] = useState<number | null>(null);
   const videosRef = useRef(new Map<number, HTMLVideoElement>());
@@ -51,6 +55,17 @@ export default function RAVINEShortsBrowse({ locale, works }: Props) {
       // Storage can be unavailable in privacy-restricted browser contexts.
     }
   }, []);
+
+  const filteredWorks = useMemo(() => {
+    const query = searchQuery.trim().toLocaleLowerCase(locale);
+    const matches = works.filter((work) => !query || [work.title || "", work.description || "", work.quality || ""]
+      .join(" ").toLocaleLowerCase(locale).includes(query));
+    return matches.sort((left, right) => {
+      if (sortMode === "views") return Number(right.views || 0) - Number(left.views || 0);
+      if (sortMode === "likes") return Number(right.likes || 0) - Number(left.likes || 0);
+      return (Date.parse(right.created_at || "") || 0) - (Date.parse(left.created_at || "") || 0);
+    });
+  }, [works, locale, searchQuery, sortMode]);
 
   useEffect(() => {
     if (mode !== "reels") {
@@ -158,7 +173,7 @@ export default function RAVINEShortsBrowse({ locale, works }: Props) {
       visibilityRatios.clear();
       activeRef.current = null;
     };
-  }, [mode, works]);
+  }, [mode, filteredWorks]);
 
   useEffect(() => {
     videosRef.current.forEach((video) => {
@@ -210,9 +225,32 @@ export default function RAVINEShortsBrowse({ locale, works }: Props) {
         </div>
       </div>
 
-      {works.length === 0 ? null : mode === "grid" ? (
+      <div className={styles.browseTools}>
+        <label className={styles.searchBox}>
+          <Search size={16} aria-hidden="true" />
+          <input type="search" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder={ar ? "ابحث في الشورتات..." : "Search Shorts..."} aria-label={ar ? "البحث في الشورتات" : "Search Shorts"} />
+          {searchQuery ? <button type="button" onClick={() => setSearchQuery("")} aria-label={ar ? "مسح البحث" : "Clear search"}><X size={14} /></button> : null}
+        </label>
+        <label className={styles.sortBox}>
+          <ArrowDownUp size={15} aria-hidden="true" /><span>{ar ? "الترتيب" : "Sort"}</span>
+          <select value={sortMode} onChange={(event) => setSortMode(event.target.value as SortMode)} aria-label={ar ? "ترتيب الشورتات" : "Sort Shorts"}>
+            <option value="newest">{ar ? "الأحدث" : "Newest"}</option>
+            <option value="views">{ar ? "الأكثر مشاهدة" : "Most viewed"}</option>
+            <option value="likes">{ar ? "الأكثر إعجابًا" : "Most liked"}</option>
+          </select>
+        </label>
+        <span className={styles.searchCount} role="status" aria-live="polite">{formatRavineNumber(filteredWorks.length, locale)} {ar ? "شورت" : "Shorts"}</span>
+      </div>
+
+      {filteredWorks.length === 0 ? (
+        <div className={styles.noResults} role="status">
+          <strong>{ar ? "لا توجد شورتات مطابقة." : "No matching Shorts."}</strong>
+          <span>{ar ? "جرّب البحث بكلمة مختلفة أو امسح البحث لعرض كل الشورتات." : "Try another search or clear it to see every Short."}</span>
+          {searchQuery ? <button type="button" onClick={() => setSearchQuery("")}>{ar ? "عرض الكل" : "Show all"}</button> : null}
+        </div>
+      ) : mode === "grid" ? (
         <div className={`video-grid ravine-documentaries-grid ravine-shorts-grid ${styles.grid}`}>
-          {works.map((work) => (
+          {filteredWorks.map((work) => (
             <Link href={`/${locale}/watch/${work.id}`} className="video-card" key={work.id}>
               <div className="video-thumb">
                 <img src={work.thumbnail_url || "/RAVINE.PNG"} alt="" loading="lazy" />
@@ -235,7 +273,7 @@ export default function RAVINEShortsBrowse({ locale, works }: Props) {
         <div className={styles.reelsLayout} aria-label={ar ? "عرض الشورتات العمودي" : "Vertical Shorts feed"}>
           <div className={styles.reelsHint}><span />{ar ? "اسحب لأعلى أو لأسفل للتنقل بين الشورتات" : "Scroll vertically to move between Shorts"}</div>
           <div className={styles.reelsFeed}>
-            {works.map((work, index) => {
+            {filteredWorks.map((work, index) => {
               const source = resolveWorkPlaybackUrl(work.id, work.video_url);
               return (
                 <article className={styles.reel} key={work.id} data-ravine-short-reel data-short-id={work.id}>
