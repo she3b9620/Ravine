@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowDownUp, Search, X } from "lucide-react";
+import { ArrowDownUp, Search } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import styles from "./StudioWorkManager.module.css";
 
@@ -25,6 +26,9 @@ type Props = {
   works: Work[];
   locale: "ar" | "en";
   creatorId: number;
+  resultCount: number;
+  totalWorksCount: number;
+  filters: { search: string; status: StatusFilter; type: TypeFilter; sort: SortMode };
 };
 type StatusFilter = "all" | "published" | "draft";
 type TypeFilter = "all" | "short" | "video" | "podcast" | "documentary" | "short_film" | "film" | "series";
@@ -87,13 +91,11 @@ function contentTypeLabel(value: string | null, ar: boolean) {
   return ar ? label[0] : label[1];
 }
 
-export default function StudioWorkManager({ works: initialWorks, locale, creatorId }: Props) {
+export default function StudioWorkManager({ works: initialWorks, locale, creatorId, resultCount, totalWorksCount, filters }: Props) {
   const ar = locale === "ar";
+  const router = useRouter();
   const [works, setWorks] = useState(initialWorks);
-  const [query, setQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
-  const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
-  const [sortMode, setSortMode] = useState<SortMode>("newest");
+  useEffect(() => setWorks(initialWorks), [initialWorks]);
   const [busyId, setBusyId] = useState<number | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editTitle, setEditTitle] = useState("");
@@ -102,31 +104,6 @@ export default function StudioWorkManager({ works: initialWorks, locale, creator
   const [editQuality, setEditQuality] = useState("1080p");
   const [editVisibility, setEditVisibility] = useState("public");
   const [error, setError] = useState("");
-
-  const visibleWorks = useMemo(() => {
-    const normalizedQuery = query.trim().toLocaleLowerCase(locale);
-    const filtered = works.filter((work) => {
-      const matchesQuery = !normalizedQuery || [work.title || "", work.description || ""]
-        .join(" ").toLocaleLowerCase(locale).includes(normalizedQuery);
-      const matchesStatus = statusFilter === "all"
-        || (statusFilter === "published" ? work.published === true : work.published !== true);
-      const matchesType = typeFilter === "all" || (work.content_type || "video") === typeFilter;
-      return matchesQuery && matchesStatus && matchesType;
-    });
-    return filtered.sort((left, right) => {
-      if (sortMode === "views") return Number(right.views || 0) - Number(left.views || 0);
-      if (sortMode === "likes") return Number(right.likes || 0) - Number(left.likes || 0);
-      if (sortMode === "title") return (left.title || "").localeCompare(right.title || "", locale, { sensitivity: "base" });
-      return (Date.parse(right.created_at || "") || 0) - (Date.parse(left.created_at || "") || 0);
-    });
-  }, [works, query, statusFilter, typeFilter, sortMode, locale]);
-
-  function clearFilters() {
-    setQuery("");
-    setStatusFilter("all");
-    setTypeFilter("all");
-    setSortMode("newest");
-  }
 
   function beginEdit(work: Work) {
     setEditingId(work.id);
@@ -243,6 +220,7 @@ export default function StudioWorkManager({ works: initialWorks, locale, creator
 
         setWorks((current) => current.map((work) => (work.id === id ? (data as Work) : work)));
         setEditingId(null);
+        router.refresh();
       }
     } catch {
       setError(studioActionError(ar, "save"));
@@ -285,6 +263,7 @@ export default function StudioWorkManager({ works: initialWorks, locale, creator
       }
 
       setWorks((current) => current.map((item) => (item.id === work.id ? payload.work as Work : item)));
+      router.refresh();
     } catch {
       setError(studioActionError(ar, nextPublished ? "publish" : "unpublish"));
     } finally {
@@ -314,6 +293,7 @@ export default function StudioWorkManager({ works: initialWorks, locale, creator
           : "RAVINE_STUDIO_DELETE_FAILED");
       }
       setWorks((current) => current.filter((item) => item.id !== work.id));
+      router.refresh();
     } catch (deleteError) {
       if (deleteError instanceof Error && deleteError.message === "RAVINE_WORK_HAS_FINANCIAL_RECORDS") {
         setError(ar
@@ -325,10 +305,6 @@ export default function StudioWorkManager({ works: initialWorks, locale, creator
     } finally {
       setBusyId(null);
     }
-  }
-
-  if (!works.length) {
-    return <div className="empty-state"><strong>{ar ? "لا توجد أعمال بعد." : "No works yet."}</strong><span>{ar ? "استخدم النموذج أعلاه لإضافة أول عمل." : "Use the form above to add your first work."}</span></div>;
   }
 
   return (
@@ -343,21 +319,23 @@ export default function StudioWorkManager({ works: initialWorks, locale, creator
 
       {error ? <div className="empty-state"><strong>{ar ? "حدث خطأ." : "Something went wrong."}</strong><span>{error}</span></div> : null}
 
-      <div className={styles.discovery}>
+      <form
+        key={`${filters.search}|${filters.status}|${filters.type}|${filters.sort}`}
+        className={styles.discovery}
+        action={`/${locale}/studio`}
+        method="get"
+      >
+        <input type="hidden" name="creatorId" value={creatorId} />
+        <input type="hidden" name="workPage" value="1" />
         <label className={styles.search}>
           <Search size={16} aria-hidden="true" />
-          <input
-            type="search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
+          <input type="search" name="workSearch" defaultValue={filters.search} maxLength={100}
             placeholder={ar ? "ابحث في أعمالك..." : "Search your work..."}
-            aria-label={ar ? "البحث في أعمالك" : "Search your work"}
-          />
-          {query ? <button type="button" onClick={() => setQuery("")} aria-label={ar ? "مسح البحث" : "Clear search"}><X size={14} /></button> : null}
+            aria-label={ar ? "البحث في أعمالك" : "Search your work"} />
         </label>
         <label className={styles.filter}>
           <span>{ar ? "الحالة" : "Status"}</span>
-          <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as StatusFilter)} aria-label={ar ? "تصفية حسب حالة النشر" : "Filter by publishing status"}>
+          <select name="workStatus" defaultValue={filters.status} aria-label={ar ? "تصفية حسب حالة النشر" : "Filter by publishing status"}>
             <option value="all">{ar ? "كل الحالات" : "All statuses"}</option>
             <option value="published">{ar ? "منشور" : "Published"}</option>
             <option value="draft">{ar ? "مسودات" : "Drafts"}</option>
@@ -365,7 +343,7 @@ export default function StudioWorkManager({ works: initialWorks, locale, creator
         </label>
         <label className={styles.filter}>
           <span>{ar ? "النوع" : "Format"}</span>
-          <select value={typeFilter} onChange={(event) => setTypeFilter(event.target.value as TypeFilter)} aria-label={ar ? "تصفية حسب نوع المحتوى" : "Filter by format"}>
+          <select name="workType" defaultValue={filters.type} aria-label={ar ? "تصفية حسب نوع المحتوى" : "Filter by format"}>
             <option value="all">{ar ? "كل الأنواع" : "All formats"}</option>
             <option value="short">{ar ? "شورتات" : "Shorts"}</option>
             <option value="video">{ar ? "فيديو" : "Video"}</option>
@@ -379,7 +357,7 @@ export default function StudioWorkManager({ works: initialWorks, locale, creator
         <label className={styles.filter}>
           <ArrowDownUp size={14} aria-hidden="true" />
           <span>{ar ? "الترتيب" : "Sort"}</span>
-          <select value={sortMode} onChange={(event) => setSortMode(event.target.value as SortMode)} aria-label={ar ? "ترتيب الأعمال" : "Sort work"}>
+          <select name="workSort" defaultValue={filters.sort} aria-label={ar ? "ترتيب الأعمال" : "Sort work"}>
             <option value="newest">{ar ? "الأحدث" : "Newest"}</option>
             <option value="views">{ar ? "الأكثر مشاهدة" : "Most viewed"}</option>
             <option value="likes">{ar ? "الأكثر إعجابًا" : "Most liked"}</option>
@@ -387,23 +365,31 @@ export default function StudioWorkManager({ works: initialWorks, locale, creator
           </select>
         </label>
         <div className={styles.count} role="status" aria-live="polite">
-          <strong>{visibleWorks.length.toLocaleString(ar ? "ar-EG" : "en-US")}</strong>
-          <span>{ar ? "من " + works.length.toLocaleString("ar-EG") + " عمل" : "of " + works.length.toLocaleString("en-US") + " works"}</span>
-          {(query || statusFilter !== "all" || typeFilter !== "all" || sortMode !== "newest") ?
-            <button type="button" onClick={clearFilters}>{ar ? "إعادة الضبط" : "Reset"}</button> : null}
+          <strong>{resultCount.toLocaleString(ar ? "ar-EG" : "en-US")}</strong>
+          <span>{ar ? "عمل مطابق" : "matching works"}</span>
+          <button className={styles.applyFilters} type="submit">{ar ? "تطبيق" : "Apply"}</button>
+          {(filters.search || filters.status !== "all" || filters.type !== "all" || filters.sort !== "newest") ? (
+            <Link className={styles.resetFilters} href={`/${locale}/studio?creatorId=${creatorId}`}>{ar ? "إلغاء التصفية" : "Reset filters"}</Link>
+          ) : null}
         </div>
-      </div>
+      </form>
 
-      {visibleWorks.length === 0 ? (
+      {works.length === 0 ? (
         <div className={styles.noResults} role="status">
-          <strong>{ar ? "لا توجد أعمال مطابقة." : "No matching work."}</strong>
-          <span>{ar ? "جرّب تغيير البحث أو المرشحات." : "Try changing your search or filters."}</span>
-          <button type="button" onClick={clearFilters}>{ar ? "عرض كل الأعمال" : "Show all work"}</button>
+          <strong>{totalWorksCount === 0 && !filters.search && filters.status === "all" && filters.type === "all"
+            ? (ar ? "لا توجد أعمال بعد." : "No works yet.")
+            : (ar ? "لا توجد أعمال مطابقة." : "No matching work.")}</strong>
+          <span>{totalWorksCount === 0 && !filters.search && filters.status === "all" && filters.type === "all"
+            ? (ar ? "استخدم النموذج أعلاه لإضافة أول عمل." : "Use the upload form above to add your first work.")
+            : (ar ? "جرّب تغيير البحث أو المرشحات." : "Try changing your search or filters.")}</span>
+          {(filters.search || filters.status !== "all" || filters.type !== "all" || filters.sort !== "newest") ? (
+            <Link className={styles.resetFilters} href={`/${locale}/studio?creatorId=${creatorId}`}>{ar ? "عرض كل الأعمال" : "Show all work"}</Link>
+          ) : null}
         </div>
       ) : null}
 
       <div className="studio-work-list">
-        {visibleWorks.map((work) => {
+        {works.map((work) => {
           const editing = editingId === work.id;
           const busy = busyId === work.id;
           const publishBlocked = !work.published && !isPublishable(work);

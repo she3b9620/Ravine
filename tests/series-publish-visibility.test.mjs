@@ -40,7 +40,8 @@ test("public series catalogue and detail page both require public, published rec
 test("editing a series episode's visibility synchronizes the parent card from all remaining public episodes", () => {
   assert.ok(studioPage.includes('select("id,series_id,title,description,content_type,quality,published,visibility,video_url,views,likes,created_at")'));
   assert.ok(studioPage.includes('select("id", { count: "exact", head: true }).eq("creator_id", creator.id)'));
-  assert.ok(studioPage.includes('<StudioWorkManager works={works} locale={locale} creatorId={creator.id} />'));
+  assert.ok(studioPage.includes("<StudioWorkManager"));
+  assert.ok(studioPage.includes("creatorId={creator.id}"));
   assert.ok(studioManager.includes('if (originalType === "series" && originalWork?.series_id)'));
   assert.ok(studioManager.includes('.eq("series_id", originalWork.series_id)'));
   assert.ok(studioManager.includes('.eq("published", true)'));

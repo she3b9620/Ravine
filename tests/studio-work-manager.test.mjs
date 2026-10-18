@@ -3,18 +3,19 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 const manager = readFileSync(new URL("../components/StudioWorkManager.tsx", import.meta.url), "utf8");
+const page = readFileSync(new URL("../app/[locale]/studio/page.tsx", import.meta.url), "utf8");
 const styles = readFileSync(new URL("../components/StudioWorkManager.module.css", import.meta.url), "utf8");
 
-test("Studio work manager provides local search, status and format filters, and sorting", () => {
-  assert.match(manager, /const \[query, setQuery\] = useState/);
-  assert.match(manager, /const \[statusFilter, setStatusFilter\] = useState/);
-  assert.match(manager, /const \[typeFilter, setTypeFilter\] = useState/);
-  assert.match(manager, /const \[sortMode, setSortMode\] = useState/);
-  assert.match(manager, /const visibleWorks = useMemo/);
-  assert.match(manager, /visibleWorks\.map\(\(work\)/);
-  assert.match(manager, /if \(sortMode === "views"\)/);
-  assert.match(manager, /if \(sortMode === "likes"\)/);
-  assert.match(manager, /if \(sortMode === "title"\)/);
+test("Studio filter form submits server-side search, status, type, and sort parameters", () => {
+  assert.match(manager, /method="get"/);
+  for (const name of ["workSearch", "workStatus", "workType", "workSort", "creatorId"]) {
+    assert.ok(manager.includes(`name="${name}"`));
+  }
+  assert.ok(manager.includes('name="workPage" value="1"'));
+  assert.ok(manager.includes("resultCount.toLocaleString"));
+  assert.ok(manager.includes("works.map((work)"));
+  assert.doesNotMatch(manager, /const visibleWorks = useMemo/);
+  assert.ok(page.includes("full catalogue before pagination"));
 });
 
 test("Studio work manager has responsive bilingual discovery and no-result states", () => {
@@ -24,6 +25,7 @@ test("Studio work manager has responsive bilingual discovery and no-result state
   assert.match(manager, /No matching work/);
   assert.match(styles, /@media \(max-width: 760px\)/);
   assert.match(styles, /data-theme="light"/);
+  assert.match(styles, /\.applyFilters/);
 });
 
 test("creators can preview a draft or published work from the Studio manager", () => {
@@ -31,7 +33,6 @@ test("creators can preview a draft or published work from the Studio manager", (
   assert.match(manager, /"معاينة"/);
   assert.match(manager, /"Preview"/);
 });
-
 
 test("Studio work actions use localized recovery messages instead of raw provider failures", () => {
   assert.match(manager, /function studioActionError\(ar: boolean, action: StudioAction\)/);
@@ -45,7 +46,6 @@ test("Studio work actions use localized recovery messages instead of raw provide
   assert.doesNotMatch(manager, /setError\(deleteError instanceof Error \? deleteError\.message/);
 });
 
-
 test("Studio metadata editor only offers quality values accepted by the database schema", () => {
   const qualityOptions = manager.match(/<select value=\{editQuality\}[^>]*>([\s\S]*?)<\/select>/)?.[1] ?? "";
   assert.match(qualityOptions, /value="720p"/);
@@ -53,6 +53,12 @@ test("Studio metadata editor only offers quality values accepted by the database
   assert.match(qualityOptions, /value="2k"/);
   assert.match(qualityOptions, /value="4k"/);
   assert.doesNotMatch(qualityOptions, /1440p|2160p/);
+});
+
+test("Studio refreshes server props after upload, edits, publish/hide, and deletion", () => {
+  assert.ok(manager.includes("useEffect(() => setWorks(initialWorks), [initialWorks])"));
+  assert.ok(manager.includes("const router = useRouter()"));
+  assert.ok(manager.includes("router.refresh()"));
 });
 
 test("Studio explains why a work with retained financial records can only be hidden, not deleted", () => {

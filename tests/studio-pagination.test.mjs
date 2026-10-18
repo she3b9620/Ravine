@@ -26,11 +26,11 @@ test("the Studio summary counts all published works and drafts, independent of t
 });
 
 test("pagination navigation is accessible, localized, and keeps page numbers bounded", () => {
-  assert.match(page, /Math\.max\(1, Math\.ceil\(safeTotalWorks \/ pageSize\)\)/);
+  assert.match(page, /Math\.max\(1, Math\.ceil\(safeFilteredTotalWorks \/ pageSize\)\)/);
   assert.match(page, /const currentPage = Math\.min\(validRequestedPage, pageCount\)/);
   assert.match(page, /const validRequestedPage = Number\.isSafeInteger\(requestedPage\) && requestedPage > 0 \? requestedPage : 1/);
-  assert.match(page, /workPage=\$\{currentPage - 1\}/);
-  assert.match(page, /workPage=\$\{currentPage \+ 1\}/);
+  assert.match(page, /studioPageHref\(currentPage - 1\)/);
+  assert.match(page, /studioPageHref\(currentPage \+ 1\)/);
   assert.match(page, /aria-label=\{ar \? "صفحات الأعمال" : "Work pages"\}/);
   assert.match(page, /aria-current="page"/);
   assert.match(page, /"السابق"/);
@@ -50,4 +50,26 @@ test("pagination styling responds to small screens and reduced-motion preference
   assert.match(styles, /:focus-visible/);
   assert.match(styles, /@media \(max-width: 520px\)/);
   assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/);
+});
+
+
+test("Studio search, status, type, and sort filters are applied before pagination across the full catalogue", () => {
+  assert.ok(page.includes("const filteredCountQuery = supabase"));
+  assert.ok(page.includes("filteredCountQuery.or("));
+  assert.ok(page.includes("pageRequest.or("));
+  assert.ok(page.includes('pageRequest.eq("published", true)'));
+  assert.ok(page.includes('pageRequest.eq("published", false)'));
+  assert.ok(page.includes('pageRequest.eq("content_type", workType)'));
+  assert.ok(page.includes('pageRequest.order("views"'));
+  assert.ok(page.includes('pageRequest.order("likes"'));
+  assert.ok(page.includes('pageRequest.order("title"'));
+  assert.ok(page.includes("safeFilteredTotalWorks / pageSize"));
+});
+
+test("pagination links preserve search and filters while form submissions start from page one", () => {
+  for (const name of ["workSearch", "workStatus", "workType", "workSort"]) {
+    assert.ok(page.includes(`params.set("${name}"`));
+  }
+  assert.ok(page.includes('name="workPage" value="1"'));
+  assert.ok(page.includes('params.set("creatorId", String(creator.id)'));
 });

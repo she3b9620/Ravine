@@ -138,3 +138,26 @@
   .discovery { grid-template-columns: minmax(0,1fr); }
   .search,.count { grid-column:auto; }
 }
+
+
+.applyFilters {
+  min-height: 30px;
+  margin-top: 6px;
+  padding: 0 12px;
+  border: 1px solid rgba(196, 122, 82, .38);
+  border-radius: 9px;
+  background: rgba(196, 122, 82, .12);
+  color: var(--ivory, #f1e9dc);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.applyFilters:hover { background: rgba(196, 122, 82, .2); }
+.resetFilters {
+  color: var(--copper, #c47a52);
+  font-size: 10px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+:global(html[data-theme="light"]) .applyFilters { color: #241a16; }
