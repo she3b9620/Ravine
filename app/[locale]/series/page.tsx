@@ -17,14 +17,14 @@ export default async function SeriesPage({ params }: { params: Promise<{ locale:
     supabase.from("ravine_series_titles").select("id,title,description,poster_url,created_at,published,visibility").eq("published", true).eq("visibility", "public").order("created_at", { ascending: false }).limit(100),
     supabase.from("videos").select("id,title,description,thumbnail_url,duration,views,likes,quality,series_id,season_number,episode_number,created_at").eq("published", true).eq("visibility", "public").eq("content_type", "series").order("created_at", { ascending: false }).limit(500),
   ]);
-  let pageError: string | null = null;
+  let pageError = false;
   let seriesTitles = (seriesResult.data ?? []) as SeriesTitle[];
   let episodes = (episodesResult.data ?? []) as SeriesEpisode[];
   const structuredDataUnavailable = Boolean(seriesResult.error || episodesResult.error);
   if (structuredDataUnavailable) {
     const legacyResult = await supabase.from("videos").select("id,title,description,thumbnail_url,duration,views,likes,quality,created_at")
       .eq("published", true).eq("visibility", "public").eq("content_type", "series").order("created_at", { ascending: false }).limit(100);
-    if (legacyResult.error) pageError = legacyResult.error.message;
+    if (legacyResult.error) pageError = true;
     else {
       episodes = (legacyResult.data ?? []).map(row => ({ ...row, series_id: null, season_number: null, episode_number: null })) as SeriesEpisode[];
       seriesTitles = [];
@@ -60,7 +60,7 @@ export default async function SeriesPage({ params }: { params: Promise<{ locale:
         {!pageError && titleCards.length > 0 ? <div className="ravine-series-count">{formatRavineNumber(titleCards.length, locale)} {ar ? "مسلسل منشور" : "published series"}</div> : null}
       </div>
     </div>
-    {pageError ? <div className="empty-state"><strong>{ar ? "تعذر تحميل المسلسلات." : "We could not load series."}</strong><span>{pageError}</span></div>
+    {pageError ? <div className="empty-state"><strong>{ar ? "تعذر تحميل المسلسلات." : "We could not load series."}</strong><span>{ar ? "تعذّر استرجاع قائمة المسلسلات الآن. جرّب تحديث الصفحة بعد قليل." : "The series catalogue could not be retrieved right now. Please refresh the page shortly."}</span></div>
       : titleCards.length === 0 && legacyEpisodes.length === 0 ? <div className="empty-state"><strong>{ar ? "لا توجد مسلسلات منشورة بعد." : "No series published yet."}</strong><span>{structuredDataUnavailable ? (ar ? "المواسم والحلقات المنظمة تحتاج إلى تطبيق ترحيل قاعدة البيانات قبل إتاحتها." : "The database migration for structured seasons and episodes must be applied before series publishing is fully enabled.") : (ar ? "ستظهر المسلسلات هنا بعد نشر أول حلقة معتمدة." : "Series appear here after their first approved episode is published.")}</span></div>
       : <>
         {titleCards.length > 0 ? <RAVINEWorkCatalog locale={locale} items={seriesItems} /> : null}
