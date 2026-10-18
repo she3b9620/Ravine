@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Mic2 } from "lucide-react";
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import styles from "./podcasts.module.css";
 import { formatRavineNumber } from "@/lib/ravine-number-formatter";
@@ -61,13 +60,14 @@ export default async function PodcastsPage({ params }: { params: Promise<{ local
   const locale: Locale = rawLocale === "en" ? "en" : "ar";
   const ar = locale === "ar";
   const supabase = await createClient();
-  const { data: userData } = await supabase.auth.getUser();
-  if (!userData.user) redirect(`/${locale}`);
 
+  // Public discovery stays open to guests. Private/follower-only work must never
+  // leak into the public podcast catalogue.
   const { data, error } = await supabase
     .from("videos")
     .select("id,title,description,thumbnail_url,duration,views,likes,quality,content_type,created_at")
     .eq("published", true)
+    .eq("visibility", "public")
     .eq("content_type", "podcast")
     .order("created_at", { ascending: false })
     .limit(60);
