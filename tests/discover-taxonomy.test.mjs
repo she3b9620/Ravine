@@ -36,7 +36,7 @@ test("Discover searches published work and creator identities together", () => {
   assert.ok(page.includes("creatorRequest"));
   assert.ok(page.includes('from("creators")'));
   assert.ok(page.includes("name.ilike.%"));
-  assert.ok(page.includes('className="discover-creator-results"'));
+  assert.ok(page.includes('discover-result-section discover-creator-results'));
   assert.ok(page.includes("Matching creators"));
   assert.ok(page.includes("المبدعون المطابقون"));
   assert.ok(page.includes('.eq("visibility", "public")'));

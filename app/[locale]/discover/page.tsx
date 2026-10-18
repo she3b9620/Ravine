@@ -228,6 +228,8 @@ export default async function DiscoverPage({
       creatorHeading: "المبدعون المطابقون",
       workCount: "عمل",
       creatorCount: "مبدع",
+      eventsCount: "حدث",
+      communitiesCount: "مجتمع",
       noWork: query ? "لم نعثر على أعمال مطابقة." : "لا توجد أعمال منشورة في هذا القسم بعد.",
       noWorkHelp: query ? "جرّب عبارة مختلفة؛ وقد تجد المبدع الذي تبحث عنه في النتائج التالية." : "ستظهر الأعمال هنا عندما تصبح متاحة للاكتشاف.",
       creatorError: "تعذر تحميل نتائج المبدعين الآن.",
@@ -257,6 +259,8 @@ export default async function DiscoverPage({
       creatorHeading: "Matching creators",
       workCount: "works",
       creatorCount: "creators",
+      eventsCount: "events",
+      communitiesCount: "communities",
       noWork: query ? "No matching works found." : "No published work is available in this section yet.",
       noWorkHelp: query ? "Try another phrase; the creator you are looking for may appear in the results below." : "Work will appear here when it is available for discovery.",
       creatorError: "Creator results could not be loaded right now.",
@@ -377,7 +381,7 @@ export default async function DiscoverPage({
               <div className="eyebrow">{isArabic ? "04 / الأحداث" : "04 / EVENTS"}</div>
               <h2 id="discover-event-heading">{copy.eventHeading}</h2>
             </div>
-            <span className="discover-result-count">{formatRavineNumber(eventItems.length, locale)} {copy.creatorCount}</span>
+            <span className="discover-result-count">{formatRavineNumber(eventItems.length, locale)} {copy.eventsCount}</span>
           </div>
           {hasEventError ? (
             <div className="empty-state" role="alert">
@@ -397,7 +401,7 @@ export default async function DiscoverPage({
               <div className="eyebrow">{isArabic ? "05 / المجتمعات" : "05 / COMMUNITIES"}</div>
               <h2 id="discover-community-heading">{copy.communityHeading}</h2>
             </div>
-            <span className="discover-result-count">{formatRavineNumber(communities.length, locale)} {copy.creatorCount}</span>
+            <span className="discover-result-count">{formatRavineNumber(communities.length, locale)} {copy.communitiesCount}</span>
           </div>
           {hasCommunityError ? (
             <div className="empty-state" role="alert">
