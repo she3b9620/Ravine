@@ -41,11 +41,16 @@ export default async function proxy(request: NextRequest) {
   const supabase = createServerClient(supabaseUrl, supabasePublishableKey, {
     cookies: {
       getAll: () => request.cookies.getAll(),
-      setAll(cookiesToSet, headers) {
+      setAll(cookiesToSet) {
         cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
         // Preserve next-intl rewrite/redirect headers while refreshing auth cookies.
         cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
-        headers?.forEach((value, name) => response.headers.set(name, value));
+        // Avoid caching refreshed auth cookies in intermediaries or browser caches.
+        if (cookiesToSet.length > 0) {
+          response.headers.set("Cache-Control", "private, no-store");
+          response.headers.set("Expires", "0");
+          response.headers.set("Pragma", "no-cache");
+        }
       },
     },
   });

@@ -24,7 +24,7 @@ export default function AccountMenu({locale,displayName,username,avatarUrl,isCre
  async function signOut(){
   setSigningOut(true);
   const s=createClient();
-  const { error } = await s.auth.signOut();
+  const { error } = await s.auth.signOut({ scope: "local" });
   if (error) { setSigningOut(false); return; }
   setOpen(false);
   setClosing(false);

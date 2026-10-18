@@ -54,8 +54,18 @@ const STEP_DEFINITIONS = [
 ] as const;
 
 const EMPTY_DRAFT: CreatorDraft = {
-  specialties: [], bio: "", experience: "", tools: "", portfolio: "", samples: "",
-  originality: false, copyright: false, standards: false, noSpam: false, credits: false,
+  specialties: [],
+  additionalSpecialty: "",
+  bio: "",
+  experience: "",
+  tools: "",
+  portfolio: "",
+  samples: "",
+  originality: false,
+  copyright: false,
+  standards: false,
+  noSpam: false,
+  credits: false,
 };
 
 function isHttpUrl(value: string) {
