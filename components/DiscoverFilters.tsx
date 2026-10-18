@@ -12,8 +12,14 @@ type Props = { locale: Locale; query: string; category: string; type: string; du
 type Option = { value: string; ar: string; en: string };
 
 const types: Option[] = [
-  { value: "video", ar: "فيديو", en: "Video" }, { value: "short", ar: "قصير", en: "Short" }, { value: "film", ar: "فيلم", en: "Film" },
-  { value: "documentary", ar: "وثائقي", en: "Documentary" }, { value: "podcast", ar: "بودكاست", en: "Podcast" }, { value: "live", ar: "مباشر", en: "Live" },
+  { value: "video", ar: "فيديو", en: "Video" },
+  { value: "short", ar: "شورت", en: "Short" },
+  { value: "short_film", ar: "فيلم قصير", en: "Short film" },
+  { value: "film", ar: "فيلم مطوّل", en: "Feature film" },
+  { value: "series", ar: "مسلسل", en: "Series" },
+  { value: "documentary", ar: "وثائقي", en: "Documentary" },
+  { value: "podcast", ar: "بودكاست", en: "Podcast" },
+  { value: "live", ar: "مباشر", en: "Live" },
 ];
 const durations: Option[] = [
   { value: "under-5", ar: "أقل من 5 دقائق", en: "Under 5 min" }, { value: "5-20", ar: "5–20 دقيقة", en: "5–20 min" },

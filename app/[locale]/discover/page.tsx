@@ -20,7 +20,7 @@ function isAllowedType(value: string | undefined): value is AllowedType { return
 export default async function DiscoverPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<SearchParams> }) {
   const { locale: rawLocale } = await params; const filters = await searchParams; const locale: Locale = rawLocale === "en" ? "en" : "ar"; const isArabic = locale === "ar"; const supabase = await createClient();
   let request = supabase.from("videos").select("id,title,description,thumbnail_url,video_url,duration,views,likes,content_type,quality,aspect_ratio").eq("published", true).eq("visibility", "public").limit(48);
-  const query = filters.q?.trim();
+  const query = (filters.q ?? "").trim().slice(0, 120).replace(/[,()%*]/g, " ").replace(/\s+/g, " ").trim();
   if (query) request = request.or(`title.ilike.%${query}%,description.ilike.%${query}%`);
   if (isAllowedType(filters.type)) request = request.eq("content_type", filters.type);
   const categoryId = Number(filters.category); if (Number.isFinite(categoryId) && categoryId > 0) request = request.eq("category_id", categoryId);

@@ -5,12 +5,17 @@ import test from "node:test";
 const read = (path) => readFileSync(new URL(path, import.meta.url), "utf8");
 const publicVisibility = /\.eq\("visibility", "public"\)/;
 
-test("discover and search only return published public works", () => {
-  for (const path of ["../app/[locale]/discover/page.tsx", "../app/[locale]/search/page.tsx"]) {
-    const source = read(path);
-    assert.match(source, /\.eq\("published", true\)/, path + " must exclude drafts");
-    assert.match(source, publicVisibility, path + " must exclude restricted visibility");
-  }
+test("discover only returns published public works", () => {
+  const source = read("../app/[locale]/discover/page.tsx");
+  assert.match(source, /\.eq\("published", true\)/);
+  assert.match(source, publicVisibility);
+});
+
+test("legacy search URLs redirect to the unified Discover experience", () => {
+  const source = read("../app/[locale]/search/page.tsx");
+  assert.ok(source.includes('redirect("/" + locale + "/discover" + suffix)'));
+  assert.ok(source.includes('paramsOut.set("q", query)'));
+  assert.ok(source.includes("paramsOut.toString()"));
 });
 
 test("live catalog and creator profile only include public published work", () => {

@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-const ALLOWED_TYPES = new Set(["video", "short", "film", "documentary", "podcast", "live"]);
+const ALLOWED_TYPES = new Set(["video", "short", "short_film", "film", "series", "documentary", "podcast", "live"]);
 const ALLOWED_FORMATS = new Set(["16:9", "9:16", "1:1", "other"]);
 const ALLOWED_QUALITIES = new Set(["720p", "1080p", "1440p", "2k", "4k", "4K"]);
 
 function clean(value: string | null) {
   return (value ?? "").trim().slice(0, 120);
+}
+
+function normalizeSearchPattern(value: string) {
+  return value.replace(/[,()%*]/g, " ").replace(/\s+/g, " ").trim();
 }
 
 type VideoSearchQuery = ReturnType<ReturnType<Awaited<ReturnType<typeof createClient>>["from"]>["select"]>;
@@ -42,7 +46,8 @@ function applyVideoFilters(query: VideoSearchQuery, params: URLSearchParams) {
 export async function GET(request: NextRequest) {
   const supabase = await createClient();
   const params = request.nextUrl.searchParams;
-  const q = clean(params.get("q"));
+  const q = normalizeSearchPattern(clean(params.get("q")));
+  const hasQuery = Boolean(q);
   const hasFilters = ["category", "type", "duration", "format", "quality"].some((key) => clean(params.get(key)));
 
   let videosQuery = applyVideoFilters(
@@ -53,14 +58,13 @@ export async function GET(request: NextRequest) {
   ).order("created_at", { ascending: false });
 
   if (q) {
-    const escaped = q.replace(/[,()]/g, " ").replace(/[%*]/g, "");
     videosQuery = applyVideoFilters(
       supabase
         .from("videos")
         .select("id,title,description,thumbnail_url,duration,views,likes,content_type,quality,aspect_ratio,creator_id,category_id,created_at"),
       params,
     )
-      .or(`title.ilike.%${escaped}%,description.ilike.%${escaped}%`)
+      .or(`title.ilike.%${q}%,description.ilike.%${q}%`)
       .order("created_at", { ascending: false });
   }
 
@@ -83,7 +87,7 @@ export async function GET(request: NextRequest) {
 
   const videos = videosResult.data ?? [];
   const creators = creatorsResult.data ?? [];
-  const mode = q || hasFilters ? "results" : "discovery";
+  const mode = hasQuery || hasFilters ? "results" : "discovery";
 
   return NextResponse.json({ videos, creators, mode });
 }

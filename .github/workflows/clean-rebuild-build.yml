@@ -48,6 +48,9 @@ jobs:
       - name: Public visibility regression tests
         run: node --test tests/public-visibility.test.mjs
 
+      - name: Discover taxonomy and query tests
+        run: node --test tests/discover-taxonomy.test.mjs
+
       - name: Social surfaces regression tests
         run: node --test tests/social-surfaces.test.mjs
 
