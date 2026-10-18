@@ -40,8 +40,16 @@ export async function canAccessRAVINEVideo(
     creatorIdentityOwner = creator?.user_id === user.id;
   }
 
-  // Drafts are accessible only to their owner for preview.
-  if (video.published !== true && !creatorIdentityOwner) return false;
+  // Use the same server-side admin RPC as the protected platform tooling.
+  // A failed/missing RPC is intentionally treated as non-admin.
+  let admin = false;
+  if (user && !creatorIdentityOwner) {
+    const { data: adminResult, error: adminError } = await supabase.rpc("is_ravine_admin");
+    admin = !adminError && adminResult === true;
+  }
+
+  // Drafts are accessible only to the owner or a verified RAVINE administrator.
+  if (video.published !== true && !creatorIdentityOwner && !admin) return false;
 
   const rawVisibility = (video.visibility || "public").trim().toLowerCase();
   const policy = visibilityPolicies[rawVisibility] || "private";
@@ -65,6 +73,6 @@ export async function canAccessRAVINEVideo(
     // until the connected database policies and UI are verified.
     member: false,
     invited: false,
-    admin: false,
+    admin,
   });
 }
