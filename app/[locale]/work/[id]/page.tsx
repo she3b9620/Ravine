@@ -57,7 +57,7 @@ export default async function WorkPage({ params }: { params: Promise<{ locale: s
       <section className="section">
         <div className="empty-state">
           <strong>{ar ? "تعذر تحميل العمل." : "We could not load this work."}</strong>
-          <span>{error.message}</span>
+          <span>{ar ? "تعذّر جلب تفاصيل العمل الآن. حاول تحديث الصفحة بعد قليل." : "Work details could not be retrieved right now. Please refresh the page shortly."}</span>
           <Link className="button" href={`/${locale}/discover`}>{ar ? "العودة إلى اكتشف" : "Back to Discover"}</Link>
         </div>
       </section>
