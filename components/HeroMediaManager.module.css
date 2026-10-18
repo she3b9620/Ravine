@@ -11,3 +11,5 @@
 .feedbackError,.feedbackSuccess{padding:13px 16px;border-radius:12px;font-size:12px;line-height:1.7}.feedbackError{border:1px solid rgba(190,70,70,.35);color:#cc7777;background:rgba(190,70,70,.07)}.feedbackSuccess{border:1px solid rgba(65,150,115,.3);color:#71c8a0;background:rgba(65,150,115,.07)}
 @media(max-width:900px){.columns{grid-template-columns:1fr}.candidate,.selectedRow{flex-wrap:wrap}.rowActions{width:100%}.rowActions button{flex:1}.thumb{width:78px;height:50px}}
 @media(max-width:520px){.modePanel,.panel{padding:15px}.candidate,.selectedRow{gap:9px}.thumb{width:68px;height:46px}.candidateCopy strong,.selectedCopy strong{font-size:12px}.smallAction{padding:7px 8px}}
+
+.subsectionLabel{margin:18px 0 10px;font-size:11px;font-weight:800;letter-spacing:.02em;color:var(--muted-foreground,#a6a19b)}
