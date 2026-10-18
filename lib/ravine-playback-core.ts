@@ -37,6 +37,19 @@ export function isSupabaseVideoStorageUrl(value: string | null | undefined) {
   }
 }
 
+export function isAudioMediaUrl(value: string | null | undefined) {
+  if (!value) return false;
+  try {
+    return /\.(mp3|m4a|wav|ogg|oga|aac|flac|opus)$/i.test(new URL(value).pathname);
+  } catch {
+    return false;
+  }
+}
+
+function isAudioMimeType(value: string | null | undefined) {
+  return typeof value === "string" && value.trim().toLowerCase().startsWith("audio/");
+}
+
 export function isCloudinaryVideoUrl(value: string | null | undefined) {
   if (!value) return false;
   try {
@@ -63,6 +76,8 @@ export function toCloudinaryBrowserVideoUrl(value: string | null | undefined) {
     const after = url.pathname.slice(index + marker.length);
     if (!after) return url.toString();
 
+    // Audio should remain audio; forcing an MP4/H.264 transform corrupts podcast sources.
+    if (/\.(mp3|m4a|wav|ogg|oga|aac|flac|opus)$/i.test(after)) return url.toString();
     const hasExtension = /\.[a-z0-9]+$/i.test(after);
     const transformed = hasExtension ? after.replace(/\.[a-z0-9]+$/i, ".mp4") : `${after}.mp4`;
     url.pathname = `${before}f_mp4,vc_h264/${transformed}`;
@@ -72,15 +87,17 @@ export function toCloudinaryBrowserVideoUrl(value: string | null | undefined) {
   }
 }
 
-export function resolveWorkPlaybackUrl(workId: number, value: string | null | undefined) {
+export function resolveWorkPlaybackUrl(workId: number, value: string | null | undefined, mimeType?: string | null) {
   if (!value || isYouTubeUrl(value)) return null;
   if (isSupabaseVideoStorageUrl(value)) return `/api/media/video/${workId}`;
+  if (isAudioMimeType(mimeType) || isAudioMediaUrl(value)) return value;
   return toCloudinaryBrowserVideoUrl(value);
 }
 
 export function resolveAssetPlaybackUrl(asset: RAVINEPlaybackAsset) {
   if (!asset.media_url || isYouTubeUrl(asset.media_url)) return null;
   if (isSupabaseVideoStorageUrl(asset.media_url)) return `/api/media/asset/${asset.id}`;
+  if (isAudioMimeType(asset.mime_type) || isAudioMediaUrl(asset.media_url)) return asset.media_url;
   return toCloudinaryBrowserVideoUrl(asset.media_url);
 }
 

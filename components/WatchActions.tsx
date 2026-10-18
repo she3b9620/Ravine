@@ -149,7 +149,7 @@ function WatchVideoBridge({ onTimeUpdate, resumeSeconds, duration }: { onTimeUpd
   const lastSavedAt = useRef(0);
 
   useEffect(() => {
-    const video = document.querySelector<HTMLVideoElement>(".watch-video");
+    const video = document.querySelector<HTMLMediaElement>(".watch-video");
     if (!video) return;
 
     if (resumeSeconds > 5 && (!Number.isFinite(video.duration) || resumeSeconds < video.duration - 2)) {
@@ -164,7 +164,7 @@ function WatchVideoBridge({ onTimeUpdate, resumeSeconds, duration }: { onTimeUpd
   }, [resumeSeconds]);
 
   useEffect(() => {
-    const video = document.querySelector<HTMLVideoElement>(".watch-video");
+    const video = document.querySelector<HTMLMediaElement>(".watch-video");
     if (!video) return;
 
     const onTime = () => {

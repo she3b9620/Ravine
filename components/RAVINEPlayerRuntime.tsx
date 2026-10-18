@@ -6,6 +6,7 @@ import styles from "./RAVINEPlayer.module.css";
 import {
   formatRAVINETime,
   getRAVINEPlayerKind,
+  isAudioMediaUrl,
   resolveAssetPlaybackUrl,
   type RAVINEPlaybackAsset,
 } from "@/lib/ravine-playback-core";
@@ -27,6 +28,7 @@ type Props = {
   locale: "ar" | "en";
   chapters?: Chapter[];
   assets?: RAVINEPlaybackAsset[];
+  audioOnly?: boolean;
 };
 
 function mediaErrorCopy(code: MediaError["code"] | undefined, ar: boolean) {
@@ -37,10 +39,10 @@ function mediaErrorCopy(code: MediaError["code"] | undefined, ar: boolean) {
   return ar ? "تعذر تشغيل هذا العمل حاليًا." : "This work could not be played right now.";
 }
 
-export default function RAVINEPlayerRuntime({ src, poster, title, contentType, duration, locale, chapters = [], assets = [] }: Props) {
+export default function RAVINEPlayerRuntime({ src, poster, title, contentType, duration, locale, chapters = [], assets = [], audioOnly = false }: Props) {
   const ar = locale === "ar";
   const kind = getRAVINEPlayerKind(contentType);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const mediaRef = useRef<HTMLMediaElement | null>(null);
   const controlsTimerRef = useRef<number | null>(null);
   const playingRef = useRef(false);
   const [playing, setPlaying] = useState(false);
@@ -68,6 +70,9 @@ export default function RAVINEPlayerRuntime({ src, poster, title, contentType, d
   const activeAuxiliary = introChoice === "trailer" ? trailer : introChoice === "preview" ? preview : null;
   const activeSrc = activeAuxiliary?.media_url || src;
   const activeDuration = activeAuxiliary?.duration || readyDuration;
+  const activeIsAudio = activeAuxiliary
+    ? Boolean(activeAuxiliary.mime_type?.toLowerCase().startsWith("audio/")) || isAudioMediaUrl(activeAuxiliary.media_url)
+    : audioOnly || isAudioMediaUrl(src);
 
   const clearControlsTimer = useCallback(() => {
     if (controlsTimerRef.current !== null) window.clearTimeout(controlsTimerRef.current);
@@ -95,7 +100,7 @@ export default function RAVINEPlayerRuntime({ src, poster, title, contentType, d
   useEffect(() => () => clearControlsTimer(), [clearControlsTimer]);
 
   useEffect(() => {
-    const video = videoRef.current;
+    const video = mediaRef.current;
     if (!video) return;
 
     setMediaError(null);
@@ -110,14 +115,14 @@ export default function RAVINEPlayerRuntime({ src, poster, title, contentType, d
   }, [activeSrc, duration]);
 
   useEffect(() => {
-    const video = videoRef.current;
+    const video = mediaRef.current;
     if (!video) return;
     video.playbackRate = speed;
   }, [speed]);
 
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
+    const video = mediaRef.current;
+    if (!video || activeIsAudio) return;
     const handleEnter = () => setPipActive(true);
     const handleLeave = () => setPipActive(false);
     video.addEventListener("enterpictureinpicture", handleEnter);
@@ -126,10 +131,10 @@ export default function RAVINEPlayerRuntime({ src, poster, title, contentType, d
       video.removeEventListener("enterpictureinpicture", handleEnter);
       video.removeEventListener("leavepictureinpicture", handleLeave);
     };
-  }, [activeSrc]);
+  }, [activeSrc, activeIsAudio]);
 
   function togglePlay() {
-    const video = videoRef.current;
+    const video = mediaRef.current;
     if (!video) return;
     if (video.paused) {
       setMediaError(null);
@@ -141,7 +146,7 @@ export default function RAVINEPlayerRuntime({ src, poster, title, contentType, d
   }
 
   function seekBy(delta: number) {
-    const video = videoRef.current;
+    const video = mediaRef.current;
     if (!video) return;
     setEnded(false);
     const max = video.duration || activeDuration || 0;
@@ -150,7 +155,7 @@ export default function RAVINEPlayerRuntime({ src, poster, title, contentType, d
   }
 
   function seekTo(seconds: number) {
-    const video = videoRef.current;
+    const video = mediaRef.current;
     if (!video) return;
     const max = video.duration || activeDuration || 0;
     video.currentTime = Math.max(0, Math.min(max, seconds));
@@ -160,11 +165,11 @@ export default function RAVINEPlayerRuntime({ src, poster, title, contentType, d
   }
 
   async function toggleFullscreen() {
-    const video = videoRef.current;
+    const video = mediaRef.current;
     if (!video) return;
     try {
       if (document.fullscreenElement) await document.exitFullscreen();
-      else await video.requestFullscreen();
+      else await (activeIsAudio ? video.parentElement || video : video).requestFullscreen();
     } catch {
       setShowSettings(true);
       revealControls();
@@ -172,8 +177,8 @@ export default function RAVINEPlayerRuntime({ src, poster, title, contentType, d
   }
 
   async function togglePictureInPicture() {
-    const video = videoRef.current as (HTMLVideoElement & { requestPictureInPicture?: () => Promise<PictureInPictureWindow> }) | null;
-    if (!video || typeof document === "undefined") return;
+    const video = mediaRef.current as (HTMLMediaElement & { requestPictureInPicture?: () => Promise<PictureInPictureWindow> }) | null;
+    if (!video || activeIsAudio || typeof document === "undefined") return;
     try {
       if (document.pictureInPictureElement) await document.exitPictureInPicture();
       else if (video.requestPictureInPicture) await video.requestPictureInPicture();
@@ -203,7 +208,7 @@ export default function RAVINEPlayerRuntime({ src, poster, title, contentType, d
       seekBy(10);
     } else if (key === "m") {
       event.preventDefault();
-      const video = videoRef.current;
+      const video = mediaRef.current;
       if (!video) return;
       const next = video.muted ? volume || 1 : 0;
       video.muted = next === 0;
@@ -233,25 +238,61 @@ export default function RAVINEPlayerRuntime({ src, poster, title, contentType, d
     >
       <div className={`${styles.stage} ${ended ? styles.ended : ""}`} style={ended && poster ? { backgroundImage: `url(${poster})` } : undefined}>
         {activeSrc ? (
-          <video
-            ref={videoRef}
-            className="watch-video"
-            controls={false}
-            playsInline
-            preload="metadata"
-            poster={poster || undefined}
-            src={activeSrc}
-            onPlay={() => { setMediaError(null); syncPlaying(true); }}
-            onPause={() => syncPlaying(false)}
-            onTimeUpdate={(event) => setCurrent(event.currentTarget.currentTime)}
-            onLoadedMetadata={(event) => { setMediaError(null); setReadyDuration(event.currentTarget.duration || duration || 0); }}
-            onLoadedData={() => setMediaError(null)}
-            onError={(event) => { setMediaError(mediaErrorCopy(event.currentTarget.error?.code, ar)); syncPlaying(false); }}
-            onVolumeChange={(event) => { setVolume(event.currentTarget.volume); }}
-            onEnded={() => { setEnded(true); syncPlaying(false); if (activeAuxiliary) setIntroChoice("main"); }}
-          >
-            {ar ? "متصفحك لا يدعم تشغيل الفيديو." : "Your browser does not support video playback."}
-          </video>
+          activeIsAudio ? (
+            <>
+              <audio
+                ref={(element) => { mediaRef.current = element; }}
+                className="watch-video ravine-audio-element"
+                controls={false}
+                preload="metadata"
+                src={activeSrc}
+                onPlay={() => { setMediaError(null); syncPlaying(true); }}
+                onPause={() => syncPlaying(false)}
+                onTimeUpdate={(event) => setCurrent(event.currentTarget.currentTime)}
+                onLoadedMetadata={(event) => { setMediaError(null); setReadyDuration(event.currentTarget.duration || duration || 0); }}
+                onLoadedData={() => setMediaError(null)}
+                onError={(event) => { setMediaError(mediaErrorCopy(event.currentTarget.error?.code, ar)); syncPlaying(false); }}
+                onVolumeChange={(event) => { setVolume(event.currentTarget.volume); }}
+                onEnded={() => { setEnded(true); syncPlaying(false); if (activeAuxiliary) setIntroChoice("main"); }}
+              >
+                {ar ? "متصفحك لا يدعم تشغيل الصوت." : "Your browser does not support audio playback."}
+              </audio>
+              <div className={styles.audioCanvas} aria-label={ar ? "غلاف الحلقة الصوتية" : "Podcast audio artwork"}>
+                {poster ? <img className={styles.audioArtwork} src={poster} alt="" /> : null}
+                <div className={styles.audioShade} />
+                <div className={styles.audioContent}>
+                  <span className={styles.audioEyebrow}>RAVINE / AUDIO</span>
+                  <strong>{title}</strong>
+                  <div className={styles.audioWave} aria-hidden="true">
+                    {Array.from({ length: 36 }, (_, index) => (
+                      <i key={index} style={{ height: (18 + ((index * 17) % 66)) + "%" }} />
+                    ))}
+                  </div>
+                  <small>{formatRAVINETime(current)} / {formatRAVINETime(activeDuration || 0)}</small>
+                </div>
+              </div>
+            </>
+          ) : (
+            <video
+              ref={(element) => { mediaRef.current = element; }}
+              className="watch-video"
+              controls={false}
+              playsInline
+              preload="metadata"
+              poster={poster || undefined}
+              src={activeSrc}
+              onPlay={() => { setMediaError(null); syncPlaying(true); }}
+              onPause={() => syncPlaying(false)}
+              onTimeUpdate={(event) => setCurrent(event.currentTarget.currentTime)}
+              onLoadedMetadata={(event) => { setMediaError(null); setReadyDuration(event.currentTarget.duration || duration || 0); }}
+              onLoadedData={() => setMediaError(null)}
+              onError={(event) => { setMediaError(mediaErrorCopy(event.currentTarget.error?.code, ar)); syncPlaying(false); }}
+              onVolumeChange={(event) => { setVolume(event.currentTarget.volume); }}
+              onEnded={() => { setEnded(true); syncPlaying(false); if (activeAuxiliary) setIntroChoice("main"); }}
+            >
+              {ar ? "متصفحك لا يدعم تشغيل الفيديو." : "Your browser does not support video playback."}
+            </video>
+          )
         ) : (
           <div className={styles.empty}>{ar ? "العمل غير متاح للتشغيل حاليًا." : "This work is not available for playback yet."}</div>
         )}
@@ -260,7 +301,7 @@ export default function RAVINEPlayerRuntime({ src, poster, title, contentType, d
           <div className={styles.errorOverlay} role="alert">
             <strong>{ar ? "تعذر التشغيل" : "Playback unavailable"}</strong>
             <span>{mediaError}</span>
-            <button type="button" onClick={() => { setMediaError(null); videoRef.current?.load(); revealControls(); }}>{ar ? "إعادة المحاولة" : "Try again"}</button>
+            <button type="button" onClick={() => { setMediaError(null); mediaRef.current?.load(); revealControls(); }}>{ar ? "إعادة المحاولة" : "Try again"}</button>
           </div>
         ) : null}
 
@@ -295,7 +336,7 @@ export default function RAVINEPlayerRuntime({ src, poster, title, contentType, d
           <button type="button" onClick={() => seekBy(30)} title={ar ? "تقدم 30 ثانية" : "Forward 30 seconds"}><RotateCw size={17} /></button>
           <label className={styles.volume}>
             <Volume2 size={16} />
-            <input aria-label={ar ? "مستوى الصوت" : "Volume"} type="range" min="0" max="1" step="0.05" value={volume} onChange={(event) => { const value = Number(event.target.value); setVolume(value); if (videoRef.current) { videoRef.current.volume = value; videoRef.current.muted = value === 0; } }} />
+            <input aria-label={ar ? "مستوى الصوت" : "Volume"} type="range" min="0" max="1" step="0.05" value={volume} onChange={(event) => { const value = Number(event.target.value); setVolume(value); if (mediaRef.current) { mediaRef.current.volume = value; mediaRef.current.muted = value === 0; } }} />
           </label>
           <button type="button" onClick={() => { setShowChapters((value) => !value); revealControls(); }} aria-pressed={showChapters} title={ar ? "الفصول" : "Chapters"}><List size={17} /></button>
           <button type="button" onClick={() => { setShowSettings((value) => !value); revealControls(); }} aria-pressed={showSettings} title={ar ? "الإعدادات" : "Settings"}><Settings2 size={17} /></button>
