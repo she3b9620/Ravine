@@ -72,5 +72,5 @@ test("pagination links preserve search and filters while form submissions start 
     assert.ok(page.includes(`params.set("${name}"`));
   }
   assert.ok(manager.includes('name="workPage" value="1"'));
-  assert.ok(page.includes('params.set("creatorId", String(creator.id)'));
+  assert.ok(page.includes('new URLSearchParams({ creatorId: String(creator.id), workPage: String(pageNumber) })'));
 });
