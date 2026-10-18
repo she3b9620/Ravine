@@ -24,7 +24,7 @@ test("selected inbox thread determines the recipient instead of stale compose st
 
 test("saved collection loads only published public works from the current user's saved IDs", () => {
   const route = read("../app/[locale]/library/page.tsx");
-  assert.match(route, /from\("video_saves"\)/);
+  assert.match(route, /const table: "video_likes" \| "video_saves" = mode === "liked" \? "video_likes" : "video_saves"/);
   assert.match(route, /\.eq\("user_id", auth\.user\.id\)/);
   assert.match(route, /\.eq\("published", true\)/);
   assert.match(route, /\.eq\("visibility", "public"\)/);
@@ -34,7 +34,7 @@ test("saved collection loads only published public works from the current user's
 test("saved library uses the removable searchable saved-work UI", () => {
   const route = read("../app/[locale]/library/page.tsx");
   const component = read("../components/SavedWorksCollection.tsx");
-  assert.match(route, /<SavedWorksCollection locale=\{locale\} initialItems=\{works\} loadError=\{loadError\}/);
+  assert.match(route, /<SavedWorksCollection locale=\{locale\} mode=\{mode\} initialItems=\{items\} loadError=\{loadError\}/);
   assert.match(component, /type="search"/);
   assert.match(component, /Most viewed/);
   assert.match(component, /Most liked/);
@@ -79,14 +79,14 @@ test("notification links and read actions remain independent and accessible", ()
 
 test("Library separates saved work from liked work and keeps each view searchable", () => {
   const page = read("../app/[locale]/library/page.tsx");
-  const catalog = read("../components/RAVINEWorkCatalog.tsx");
+  const component = read("../components/SavedWorksCollection.tsx");
   assert.match(page, /filters\.tab === "liked"/);
-  assert.match(page, /from\("video_likes"\)/);
-  assert.match(page, /from\("video_saves"\)/);
+  assert.match(page, /const table: "video_likes" \| "video_saves" = mode === "liked" \? "video_likes" : "video_saves"/);
   assert.match(page, /tab=liked/);
-  assert.match(page, /<RAVINEWorkCatalog locale=\{locale\} items=\{items\}/);
-  assert.match(catalog, /const \[query, setQuery\] = useState/);
-  assert.match(catalog, /Most viewed/);
+  assert.match(page, /<SavedWorksCollection locale=\{locale\} mode=\{mode\}/);
+  assert.match(component, /mode === "liked" \? await removeLikedVideo\(workId\) : await removeSavedVideo\(workId\)/);
+  assert.match(component, /type="search"/);
+  assert.match(component, /Most viewed/);
 });
 
 test("starting a new message clears the selected thread and protects manual choice during initial loading", () => {
@@ -101,7 +101,7 @@ test("starting a new message clears the selected thread and protects manual choi
 test("primary Library route uses the same searchable and removable saved-work collection", () => {
   const library = read("../app/[locale]/library/page.tsx");
   assert.match(library, /<SavedWorksCollection/);
-  assert.match(library, /from\("video_saves"\)/);
+  assert.match(library, /const table: "video_likes" \| "video_saves" = mode === "liked" \? "video_likes" : "video_saves"/);
   assert.match(library, /\.eq\("published", true\)/);
   assert.match(library, /\.eq\("visibility", "public"\)/);
   assert.match(library, /initialItems=\{items\}/);

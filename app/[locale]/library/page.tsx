@@ -2,22 +2,25 @@ import { redirect } from "next/navigation";
 import { Library } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import SavedWorksCollection, { type SavedWorkItem } from "@/components/SavedWorksCollection";
+import styles from "./library.module.css";
 
 export const dynamic = "force-dynamic";
 
 type Locale = "ar" | "en";
 type SavedRow = { video_id: number };
 
-export default async function LibraryPage({ params }: { params: Promise<{ locale: string }> }) {
-  const { locale: rawLocale } = await params;
+export default async function LibraryPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ tab?: string }> }) {
+  const [{ locale: rawLocale }, filters] = await Promise.all([params, searchParams]);
   const locale: Locale = rawLocale === "en" ? "en" : "ar";
+  const mode: "saved" | "liked" = filters.tab === "liked" ? "liked" : "saved";
   const ar = locale === "ar";
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) redirect("/" + locale + "/auth?next=" + encodeURIComponent("/" + locale + "/library"));
+  if (!auth.user) redirect("/" + locale + "/auth?next=" + encodeURIComponent("/" + locale + "/library" + (mode === "liked" ? "?tab=liked" : "")));
 
+  const table: "video_likes" | "video_saves" = mode === "liked" ? "video_likes" : "video_saves";
   const { data: savedRows, error: savedError } = await supabase
-    .from("video_saves")
+    .from(table)
     .select("video_id")
     .eq("user_id", auth.user.id)
     .order("created_at", { ascending: false })
@@ -66,16 +69,24 @@ export default async function LibraryPage({ params }: { params: Promise<{ locale
       <div className="eyebrow">RAVINE / {ar ? "المكتبة" : "LIBRARY"}</div>
       <div className="section-head">
         <div>
-          <h1>{ar ? "أعمالك المحفوظة." : "Your saved work."}</h1>
+          <h1>{mode === "liked" ? (ar ? "الأعمال التي أعجبتك." : "Work you liked.") : (ar ? "أعمالك المحفوظة." : "Your saved work.")}</h1>
           <p className="section-note">
             {ar
-              ? "كل ما اخترت الاحتفاظ به في مكان واحد؛ ابحث، رتّب، أو أزل العمل عندما لا تحتاج إليه."
-              : "Everything you chose to keep in one place. Search, sort, or remove a work when you no longer need it."}
+              ? (mode === "liked" ? "كل الأعمال التي أعجبتك في مكان واحد؛ ابحث فيها ورتّبها وأزل إعجابك متى شئت." : "كل ما اخترت الاحتفاظ به في مكان واحد؛ ابحث، رتّب، أو أزل العمل عندما لا تحتاج إليه.")
+              : (mode === "liked" ? "Every work you liked in one place. Search, sort, or remove a like whenever you want." : "Everything you chose to keep in one place. Search, sort, or remove a work when you no longer need it.")}
           </p>
         </div>
         <Library size={28} strokeWidth={1.5} aria-hidden="true" />
       </div>
-      <SavedWorksCollection locale={locale} initialItems={items} loadError={loadError} />
+      <nav className={styles.tabs} aria-label={ar ? "المكتبة والأعمال المعجب بها" : "Library views"}>
+        <Link className={mode === "saved" ? styles.activeTab : styles.tab} href={"/" + locale + "/library"} aria-current={mode === "saved" ? "page" : undefined}>
+          {ar ? "المحفوظات" : "Saved"}
+        </Link>
+        <Link className={mode === "liked" ? styles.activeTab : styles.tab} href={"/" + locale + "/library?tab=liked"} aria-current={mode === "liked" ? "page" : undefined}>
+          {ar ? "أعجبتني" : "Liked"}
+        </Link>
+      </nav>
+      <SavedWorksCollection locale={locale} mode={mode} initialItems={items} loadError={loadError} />
     </section>
   );
 }

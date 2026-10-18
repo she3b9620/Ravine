@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ArrowDownUp, BookmarkMinus, Search, X } from "lucide-react";
-import { removeSavedVideo } from "@/app/actions/ravine-social";
+import { removeLikedVideo, removeSavedVideo } from "@/app/actions/ravine-social";
 import { formatRavineNumber } from "@/lib/ravine-number-formatter";
 import styles from "./SavedWorksCollection.module.css";
 
@@ -24,6 +24,7 @@ type SortMode = "newest" | "views" | "likes" | "title";
 type Props = {
   locale: "ar" | "en";
   initialItems: SavedWorkItem[];
+  mode?: "saved" | "liked";
   loadError?: boolean;
 };
 
@@ -53,8 +54,9 @@ function typeLabel(type: string | null, ar: boolean) {
   return ar ? pair[0] : pair[1];
 }
 
-export default function SavedWorksCollection({ locale, initialItems, loadError: initialLoadError = false }: Props) {
+export default function SavedWorksCollection({ locale, initialItems, mode = "saved", loadError: initialLoadError = false }: Props) {
   const ar = locale === "ar";
+  const isLiked = mode === "liked";
   const [items, setItems] = useState(initialItems);
   const [query, setQuery] = useState("");
   const [sortMode, setSortMode] = useState<SortMode>("newest");
@@ -85,20 +87,22 @@ export default function SavedWorksCollection({ locale, initialItems, loadError: 
     setError("");
     setAnnouncement("");
     try {
-      const result = await removeSavedVideo(workId);
+      const result = isLiked ? await removeLikedVideo(workId) : await removeSavedVideo(workId);
       if (!result.ok) {
         const copy = result.code === "AUTH_REQUIRED"
           ? (ar ? "انتهت جلسة الدخول. سجّل الدخول مجددًا." : "Your session has expired. Please sign in again.")
           : result.code === "INVALID_INPUT"
             ? (ar ? "تعذر تحديد العمل المطلوب." : "The selected work is invalid.")
+            : isLiked
+            ? (ar ? "تعذر إزالة الإعجاب. حاول مرة أخرى." : "The like could not be removed. Please try again.")
             : (ar ? "تعذر حذف العمل من المحفوظات. حاول مرة أخرى." : "The work could not be removed. Please try again.");
         setError(copy);
         return;
       }
       setItems((current) => current.filter((item) => item.id !== workId));
-      setAnnouncement(ar ? "تم حذف العمل من المحفوظات." : "Work removed from saved items.");
+      setAnnouncement(isLiked ? (ar ? "تمت إزالة الإعجاب." : "Like removed.") : (ar ? "تم حذف العمل من المحفوظات." : "Work removed from saved items."));
     } catch {
-      setError(ar ? "تعذر حذف العمل من المحفوظات. حاول مرة أخرى." : "The work could not be removed. Please try again.");
+      setError(isLiked ? (ar ? "تعذر إزالة الإعجاب. حاول مرة أخرى." : "The like could not be removed. Please try again.") : (ar ? "تعذر حذف العمل من المحفوظات. حاول مرة أخرى." : "The work could not be removed. Please try again."));
     } finally {
       setBusyId(null);
     }
@@ -140,7 +144,7 @@ export default function SavedWorksCollection({ locale, initialItems, loadError: 
         </label>
         <div className={styles.count} role="status" aria-live="polite">
           <strong>{formatRavineNumber(visibleItems.length, locale)}</strong>
-          <span>{ar ? "عمل محفوظ" : "saved works"}</span>
+          <span>{isLiked ? (ar ? "عمل أعجبك" : "liked works") : (ar ? "عمل محفوظ" : "saved works")}</span>
         </div>
       </div>
 
@@ -150,8 +154,8 @@ export default function SavedWorksCollection({ locale, initialItems, loadError: 
       {items.length === 0 ? (
         <div className={styles.empty}>
           <div className={styles.emptyIcon}><BookmarkMinus size={20} aria-hidden="true" /></div>
-          <strong>{ar ? "لا توجد أعمال محفوظة ظاهرة." : "No saved public works yet."}</strong>
-          <span>{ar ? "احفظ الأعمال من صفحة المشاهدة وستجدها هنا." : "Save works from their viewing page and find them here."}</span>
+          <strong>{isLiked ? (ar ? "لا توجد أعمال أعجبتك بعد." : "No liked public works yet.") : (ar ? "لا توجد أعمال محفوظة ظاهرة." : "No saved public works yet.")}</strong>
+          <span>{isLiked ? (ar ? "أبدِ إعجابك بالأعمال من صفحة المشاهدة وستجدها هنا." : "Like works on their watch page and find them here.") : (ar ? "احفظ الأعمال من صفحة المشاهدة وستجدها هنا." : "Save works from their viewing page and find them here.")}</span>
           <Link href={"/" + locale + "/discover"} className="button secondary">{ar ? "اكتشف الأعمال" : "Discover work"}</Link>
         </div>
       ) : visibleItems.length === 0 ? (
@@ -181,9 +185,9 @@ export default function SavedWorksCollection({ locale, initialItems, loadError: 
                 </div>
               </Link>
               <div className={styles.cardActions}>
-                <span>{ar ? "محفوظ" : "Saved"}</span>
-                <button type="button" aria-label={ar ? "إزالة " + (work.title || "العمل") + " من المحفوظات" : "Remove " + (work.title || "work") + " from saved items"} onClick={() => void removeSavedItem(work.id)} disabled={busyId !== null}>
-                  {busyId === work.id ? "…" : (ar ? "إزالة من المحفوظات" : "Remove saved item")}
+                <span>{isLiked ? (ar ? "أعجبك" : "Liked") : (ar ? "محفوظ" : "Saved")}</span>
+                <button type="button" aria-label={isLiked ? (ar ? "إزالة الإعجاب عن " + (work.title || "العمل") : "Remove like from " + (work.title || "work")) : (ar ? "إزالة " + (work.title || "العمل") + " من المحفوظات" : "Remove " + (work.title || "work") + " from saved items")} onClick={() => void removeSavedItem(work.id)} disabled={busyId !== null}>
+                  {busyId === work.id ? "…" : (isLiked ? (ar ? "إزالة الإعجاب" : "Remove like") : (ar ? "إزالة من المحفوظات" : "Remove saved item"))}
                 </button>
               </div>
             </article>

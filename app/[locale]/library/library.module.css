@@ -1,0 +1,7 @@
+.tabs{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:20px 0 26px;padding-bottom:16px;border-bottom:1px solid rgba(241,233,220,.1)}
+.tab,.activeTab{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 17px;border:1px solid rgba(241,233,220,.13);border-radius:999px;text-decoration:none;color:var(--stone,#9a9690);background:rgba(21,23,25,.45);font-size:12px;font-weight:650;transition:background .2s ease,border-color .2s ease,color .2s ease}
+.tab:hover,.activeTab{border-color:rgba(196,122,82,.48);color:var(--ivory,#f1e9dc);background:rgba(196,122,82,.1)}
+:global(html[data-theme="light"]) .tabs{border-color:rgba(23,23,23,.12)}
+:global(html[data-theme="light"]) .tab,:global(html[data-theme="light"]) .activeTab{border-color:rgba(112,64,47,.2);color:#70402f;background:rgba(255,250,246,.88)}
+:global(html[data-theme="light"]) .activeTab{border-color:rgba(196,122,82,.55);background:rgba(196,122,82,.13)}
+@media(prefers-reduced-motion:reduce){.tab,.activeTab{transition:none}}

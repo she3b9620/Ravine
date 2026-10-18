@@ -49,7 +49,7 @@ test("watch history hides unpublished or restricted work and library filters med
   const library = read("../app/[locale]/library/page.tsx");
   assert.match(library, /\.eq\("published", true\)/);
   assert.match(library, /\.eq\("visibility", "public"\)/);
-  assert.match(library, /from\("video_likes"\)/);
+  assert.match(library, /const table: "video_likes" \| "video_saves" = mode === "liked" \? "video_likes" : "video_saves"/);
   assert.match(library, /from\("video_saves"\)/);
 });
 
