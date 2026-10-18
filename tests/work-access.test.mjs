@@ -10,7 +10,7 @@ test("video access distinguishes public, unlisted, follower-only, and owner-only
   assert.match(policy, /"public" \| "unlisted" \| "followers"/);
   assert.match(policy, /case "unlisted": return true/);
   assert.match(policy, /context\.authenticated && context\.followsCreator/);
-  assert.match(videoAccess, /if \(video\.published !== true && !creatorIdentityOwner\) return false/);
+  assert.match(videoAccess, /if \(video\.published !== true && !creatorIdentityOwner && !admin\) return false/);
   assert.match(videoAccess, /from\("follows"\)/);
   assert.match(videoAccess, /custom: "private"/);
   assert.match(videoAccess, /member: false/);
