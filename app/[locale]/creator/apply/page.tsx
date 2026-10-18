@@ -8,6 +8,7 @@ import {
   Clock3, ExternalLink, FileText, Film, LoaderCircle, ShieldCheck, Sparkles, UserRound, Video,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { CREATOR_SPECIALTY_GROUPS as SPECIALTY_GROUPS, CREATOR_SPECIALTIES as SPECIALTIES } from "@/lib/creator-taxonomy";
 import styles from "../creator-flow.module.css";
 
 type Locale = "ar" | "en";
@@ -15,6 +16,7 @@ type ApplicationStatus = "pending" | "reviewing" | "approved" | "rejected" | "wi
 type WorkSample = { title: string; url: string };
 type CreatorDraft = {
   specialties: string[];
+  additionalSpecialty: string;
   bio: string;
   experience: string;
   tools: string;
@@ -42,26 +44,7 @@ type Copy = {
   required: string;
 };
 
-const SPECIALTIES = [
-  { value: "Direction", en: "Direction", ar: "الإخراج" },
-  { value: "Cinematography", en: "Cinematography", ar: "التصوير السينمائي" },
-  { value: "Editing", en: "Editing & post-production", ar: "المونتاج وما بعد الإنتاج" },
-  { value: "Screenwriting", en: "Screenwriting", ar: "كتابة السيناريو" },
-  { value: "Acting", en: "Acting & performance", ar: "التمثيل والأداء" },
-  { value: "Producing", en: "Producing", ar: "الإنتاج" },
-  { value: "Photography", en: "Photography", ar: "التصوير الفوتوغرافي" },
-  { value: "Color Grading", en: "Color grading", ar: "تصحيح الألوان" },
-  { value: "Sound", en: "Sound & music", ar: "الصوت والموسيقى" },
-  { value: "VFX", en: "Visual effects", ar: "المؤثرات البصرية" },
-  { value: "Motion", en: "Motion design", ar: "الموشن ديزاين" },
-  { value: "Animation", en: "Animation", ar: "التحريك" },
-  { value: "Documentary", en: "Documentary", ar: "الأفلام الوثائقية" },
-  { value: "Podcast", en: "Podcast & audio storytelling", ar: "البودكاست والسرد الصوتي" },
-  { value: "Criticism", en: "Film criticism & analysis", ar: "النقد والتحليل السينمائي" },
-  { value: "Writing", en: "Cultural & creative writing", ar: "الكتابة الثقافية والإبداعية" },
-  { value: "Design", en: "Visual design", ar: "التصميم البصري" },
-  { value: "Journalism", en: "Cultural journalism", ar: "الصحافة الثقافية" },
-] as const;
+
 
 const STEP_DEFINITIONS = [
   { key: "identity", number: "01", label: { ar: "هويتك الإبداعية", en: "Creative identity" }, hint: { ar: "مجالك وما الذي يميّز نظرتك.", en: "Your discipline and point of view." } },
@@ -99,6 +82,7 @@ function parseWorkSamples(value: string): WorkSample[] {
 
 function applyDraft(setters: {
   setSpecialties: (value: string[]) => void;
+  setAdditionalSpecialty: (value: string) => void;
   setBio: (value: string) => void;
   setExperience: (value: string) => void;
   setTools: (value: string) => void;
@@ -111,6 +95,7 @@ function applyDraft(setters: {
   setCredits: (value: boolean) => void;
 }, draft: Partial<CreatorDraft>) {
   if (Array.isArray(draft.specialties)) setters.setSpecialties(draft.specialties);
+  if (typeof draft.additionalSpecialty === "string") setters.setAdditionalSpecialty(draft.additionalSpecialty);
   if (typeof draft.bio === "string") setters.setBio(draft.bio);
   if (typeof draft.experience === "string") setters.setExperience(draft.experience);
   if (typeof draft.tools === "string") setters.setTools(draft.tools);
@@ -141,6 +126,8 @@ export default function CreatorApplyPage() {
   const [step, setStep] = useState(0);
 
   const [specialties, setSpecialties] = useState<string[]>([]);
+  const [specialtyQuery, setSpecialtyQuery] = useState("");
+  const [additionalSpecialty, setAdditionalSpecialty] = useState("");
   const [bio, setBio] = useState("");
   const [experience, setExperience] = useState("");
   const [tools, setTools] = useState("");
@@ -189,6 +176,14 @@ export default function CreatorApplyPage() {
     hint: item.hint[locale],
   })), [locale]);
 
+  const filteredSpecialtyGroups = useMemo(() => {
+    const query = specialtyQuery.trim().toLocaleLowerCase();
+    return SPECIALTY_GROUPS.map((group) => ({
+      ...group,
+      items: group.items.filter((item) => !query || (item.value + " " + item.en + " " + item.ar).toLocaleLowerCase().includes(query)),
+    })).filter((group) => group.items.length > 0);
+  }, [specialtyQuery]);
+
   useEffect(() => {
     let mounted = true;
     async function load() {
@@ -214,7 +209,12 @@ export default function CreatorApplyPage() {
         if (applicationError) throw applicationError;
 
         if (application) {
-          setSpecialties(Array.isArray(application.specialties) ? application.specialties : []);
+          const savedSpecialties = Array.isArray(application.specialties) ? application.specialties as string[] : [];
+          const savedCustomSpecialty = savedSpecialties.find((item) => item.startsWith("Other: "));
+          const hasOther = savedSpecialties.some((item) => item === "Other" || item.startsWith("Other: "));
+          const knownSpecialties = savedSpecialties.filter((item) => item !== "Other" && !item.startsWith("Other: "));
+          setSpecialties(hasOther ? [...knownSpecialties, "Other"] : knownSpecialties);
+          setAdditionalSpecialty(savedCustomSpecialty ? savedCustomSpecialty.slice("Other: ".length) : "");
           setBio(application.bio || "");
           setExperience(application.experience || "");
           setTools(Array.isArray(application.tools) ? application.tools.join(", ") : "");
@@ -236,7 +236,7 @@ export default function CreatorApplyPage() {
             if (rawDraft) {
               const draft = JSON.parse(rawDraft) as Partial<CreatorDraft>;
               applyDraft({
-                setSpecialties, setBio, setExperience, setTools, setPortfolio, setSamples,
+                setSpecialties, setAdditionalSpecialty, setBio, setExperience, setTools, setPortfolio, setSamples,
                 setOriginality, setCopyright, setStandards, setNoSpam, setCredits,
               }, draft);
             }
@@ -259,14 +259,14 @@ export default function CreatorApplyPage() {
 
   useEffect(() => {
     if (!draftReady || !userId || alreadyCreator || applicationStatus === "pending" || applicationStatus === "reviewing" || applicationStatus === "approved") return;
-    const draft: CreatorDraft = { specialties, bio, experience, tools, portfolio, samples, originality, copyright, standards, noSpam, credits };
+    const draft: CreatorDraft = { specialties, additionalSpecialty, bio, experience, tools, portfolio, samples, originality, copyright, standards, noSpam, credits };
     try {
       window.localStorage.setItem("ravine_creator_draft_" + userId, JSON.stringify(draft));
       setDraftSaved(true);
     } catch {
       setDraftSaved(false);
     }
-  }, [draftReady, userId, alreadyCreator, applicationStatus, specialties, bio, experience, tools, portfolio, samples, originality, copyright, standards, noSpam, credits]);
+  }, [draftReady, userId, alreadyCreator, applicationStatus, specialties, additionalSpecialty, bio, experience, tools, portfolio, samples, originality, copyright, standards, noSpam, credits]);
 
   function toggleSpecialty(value: string) {
     setMessage("");
@@ -277,6 +277,7 @@ export default function CreatorApplyPage() {
     if (index === 0) {
       if (!specialties.length) return ar ? "اختر مجالًا إبداعيًا واحدًا على الأقل." : "Choose at least one creative discipline.";
       if (bio.trim().length < 20) return ar ? "اكتب نبذة من 20 حرفًا على الأقل." : "Write a bio of at least 20 characters.";
+      if (specialties.includes("Other") && additionalSpecialty.trim().length < 2) return ar ? "اكتب اسم مجالك في خانة «مجال آخر»." : "Describe your field in the custom specialty field.";
     }
     if (index === 1) {
       if (experience.trim().length < 10) return ar ? "اكتب نبذة أوضح عن خبرتك ومسارك." : "Add more detail about your experience and path.";
@@ -330,7 +331,7 @@ export default function CreatorApplyPage() {
       const tools_array = tools.split(",").map((item) => item.trim()).filter(Boolean);
       const { error } = await supabase.from("creator_applications").insert({
         user_id: authData.user.id,
-        specialties,
+        specialties: [...specialties.filter((value) => value !== "Other"), ...(specialties.includes("Other") ? ["Other: " + additionalSpecialty.trim()] : [])],
         work_samples,
         bio: bio.trim(),
         experience: experience.trim(),
@@ -400,7 +401,9 @@ export default function CreatorApplyPage() {
   const activeStep = stepDetails[step];
   const completedPercent = ((step + 1) / stepDetails.length) * 100;
   const isRejected = applicationStatus === "rejected";
-  const selectedLabels = specialties.map((value) => SPECIALTIES.find((item) => item.value === value)?.[locale] || value);
+  const selectedLabels = specialties.map((value) => value === "Other"
+    ? (ar ? "مجال آخر: " + additionalSpecialty.trim() : "Other: " + additionalSpecialty.trim())
+    : (SPECIALTIES.find((item) => item.value === value)?.[locale] || value));
   const samplesParsed = parseWorkSamples(samples);
   const leftArrow = ar ? <ArrowRight size={15} /> : <ArrowLeft size={15} />;
   const rightArrow = ar ? <ArrowLeft size={15} /> : <ArrowRight size={15} />;
@@ -471,12 +474,27 @@ export default function CreatorApplyPage() {
             {step === 0 ? (
               <div className={styles.stepBody}>
                 <div className={styles.fieldGroup}>
-                  <div className={styles.fieldHeading}><label>{copy.specialties}</label><small>{ar ? "اختر كل المجالات التي تنطبق عليك." : "Select every discipline that fits your work."}</small></div>
-                  <div className={styles.specialtyGrid}>
-                    {SPECIALTIES.map((item) => {
-                      const selected = specialties.includes(item.value);
-                      return <button type="button" key={item.value} className={styles.specialtyChip + (selected ? " " + styles.specialtySelected : "")} aria-pressed={selected} onClick={() => toggleSpecialty(item.value)}><span className={styles.chipCheck}>{selected ? <Check size={12} /> : null}</span><span>{item[locale]}</span></button>;
-                    })}
+                  <div className={styles.fieldHeading}><label>{copy.specialties}</label><small>{ar ? "اختر كل المجالات التي تصف عملك. القائمة منظّمة في مجموعات ويمكنك البحث بالاسم." : "Choose every discipline that describes your work. Browse grouped categories or search by name."}</small></div>
+                  <div className={styles.specialtyCatalog}>
+                    <div className={styles.specialtyCatalogToolbar}>
+                      <input className={styles.specialtySearch} type="search" value={specialtyQuery} onChange={(event) => setSpecialtyQuery(event.target.value)} placeholder={ar ? "ابحث عن مجال: ألعاب، تعليم، سفر، تقنية..." : "Search fields: gaming, education, travel, tech..."} aria-label={ar ? "البحث في المجالات الإبداعية" : "Search creative disciplines"} />
+                      <span className={styles.selectedCount}>{ar ? "اختير " + specialties.length + " مجال" : specialties.length + " selected"}</span>
+                    </div>
+                    <div className={styles.specialtyGroups}>
+                      {filteredSpecialtyGroups.map((group) => (
+                        <section className={styles.specialtyGroup} key={group.id}>
+                          <div className={styles.specialtyGroupHeading}><strong>{group.title[locale]}</strong><span>{group.items.length}</span></div>
+                          <div className={styles.specialtyGrid}>
+                            {group.items.map((item) => {
+                              const selected = specialties.includes(item.value);
+                              return <button type="button" key={item.value} className={styles.specialtyChip + (selected ? " " + styles.specialtySelected : "")} aria-pressed={selected} onClick={() => toggleSpecialty(item.value)}><span className={styles.chipCheck}>{selected ? <Check size={12} /> : null}</span><span>{item[locale]}</span></button>;
+                            })}
+                          </div>
+                        </section>
+                      ))}
+                      {filteredSpecialtyGroups.length === 0 ? <div className={styles.specialtyEmpty}>{ar ? "لا توجد نتيجة مطابقة. جرّب كلمة أخرى أو اختر «مجالي غير موجود»." : "No matching fields. Try another search or choose “My field is not listed”."}</div> : null}
+                    </div>
+                    {specialties.includes("Other") ? <label className={styles.field}><span>{ar ? "اكتب مجالك الإبداعي" : "Describe your creative field"}<b>*</b></span><small>{ar ? "اكتب تخصصًا محددًا حتى لو كان خارج القوائم المعتادة." : "Name your specific niche, even if it does not fit standard categories."}</small><input value={additionalSpecialty} onChange={(event) => setAdditionalSpecialty(event.target.value)} maxLength={100} required placeholder={ar ? "مثال: ترميم الأفلام القديمة أو تصميم العرائس..." : "e.g. film restoration, puppetry design..."} /></label> : null}
                   </div>
                 </div>
                 <label className={styles.field}>
