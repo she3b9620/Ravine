@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
         .from("videos")
         .update({ published: false })
         .eq("id", videoId)
-        .select("id,title,description,content_type,quality,published,visibility,video_url,views,likes,created_at")
+        .select("id,series_id,title,description,content_type,quality,published,visibility,video_url,views,likes,created_at")
         .single();
 
       if (error || !data) return NextResponse.json({ error: error?.message || "Could not unpublish work." }, { status: 500 });
@@ -145,7 +145,7 @@ export async function POST(request: NextRequest) {
         visibility,
       })
       .eq("id", videoId)
-      .select("id,title,description,content_type,quality,published,visibility,video_url,views,likes,created_at")
+      .select("id,series_id,title,description,content_type,quality,published,visibility,video_url,views,likes,created_at")
       .single();
 
     if (error || !data) {
