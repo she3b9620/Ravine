@@ -29,3 +29,12 @@
 @media(max-width:820px){.ravine-header-inner{padding:0 18px;gap:14px}.ravine-nav{display:none}.ravine-mobile-menu-button{display:grid;place-items:center}.ravine-header-actions{justify-content:flex-end}.ravine-footer{padding:28px 18px;flex-direction:column}.ravine-footer-meta{align-items:flex-start}.hero{min-height:68vh;padding:88px 18px 72px}.hero h1{font-size:clamp(44px,14vw,78px)}.section{padding:54px 18px}.work-grid{grid-template-columns:1fr}.discover-page{padding-top:54px}.discover-filters{grid-template-columns:1fr}.video-grid{grid-template-columns:1fr}.watch-frame{padding:14px 12px 50px}.watch-video{border-radius:12px}}
 @media(max-width:480px){.ravine-minor-link{display:none}.ravine-brand{font-size:18px}.hero h1{letter-spacing:-.055em}.ravine-shell[lang="ar"] .hero h1{letter-spacing:-.015em}.hero-actions{width:100%}.button{width:100%}.auth-card{padding:24px}.auth-card h1{font-size:36px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.button,.ravine-nav-link,.ravine-minor-link,.ravine-language,.video-card,.auth-google,.auth-switch,.watch-action{transition:none}.button:hover,.video-card:hover{transform:none}}
+
+/* Secure creator media upload progress */
+.studio-upload-progress{margin:1rem 0;padding:1rem;border:1px solid var(--line,rgba(128,128,128,.28));border-radius:12px;background:var(--surface-soft,rgba(128,128,128,.06))}
+.studio-upload-progress__heading{display:flex;align-items:center;justify-content:space-between;gap:1rem;font-size:.92rem}
+.studio-upload-progress__heading span{font-variant-numeric:tabular-nums;white-space:nowrap}
+.studio-upload-progress__track{height:6px;overflow:hidden;margin:.8rem 0;border-radius:999px;background:rgba(128,128,128,.22)}
+.studio-upload-progress__track span{display:block;height:100%;border-radius:inherit;background:var(--accent,#c47a52);transition:width .15s linear}
+.studio-upload-progress__details{display:flex;flex-wrap:wrap;gap:.45rem 1rem;color:var(--muted,#777);font-size:.78rem;font-variant-numeric:tabular-nums}
+@media(max-width:640px){.studio-upload-progress__details{display:grid;grid-template-columns:1fr 1fr}.studio-upload-progress__details span:first-child{grid-column:1/-1}}

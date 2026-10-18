@@ -14,6 +14,48 @@ type CloudinaryUpload = {
   error?: { message?: string };
 };
 
+type CloudinarySignedUpload = {
+  cloudName?: string;
+  apiKey?: string;
+  timestamp?: number;
+  signature?: string;
+  folder?: string;
+  publicId?: string;
+  overwrite?: "false";
+  error?: string;
+};
+
+type StudioUploadProgress = {
+  label: string;
+  percent: number;
+  loadedBytes: number;
+  totalBytes: number;
+  elapsedSeconds: number;
+  speedBytesPerSecond: number;
+  remainingSeconds: number | null;
+  stage: "uploading" | "saving";
+};
+
+function formatUploadBytes(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  const units = ["KB", "MB", "GB", "TB"];
+  let value = bytes / 1024;
+  let unit = units[0];
+  for (let index = 1; value >= 1024 && index < units.length; index += 1) {
+    value /= 1024;
+    unit = units[index];
+  }
+  return `${value.toFixed(value >= 100 ? 0 : 1)} ${unit}`;
+}
+
+function formatUploadTime(seconds: number | null) {
+  if (seconds === null || !Number.isFinite(seconds)) return "—";
+  if (seconds < 60) return `${Math.max(0, Math.ceil(seconds))}s`;
+  const minutes = Math.floor(seconds / 60);
+  const remainder = Math.ceil(seconds % 60);
+  return remainder ? `${minutes}m ${remainder}s` : `${minutes}m`;
+}
+
 type MediaAsset = {
   work_id: number;
   kind: "main" | "trailer" | "preview";
@@ -39,6 +81,7 @@ function mapUploadError(error: unknown, ar: boolean) {
     RAVINE_SERIES_OWNER_MISMATCH: ["لا يمكنك إضافة حلقة إلى مسلسل لا تملكه.", "You cannot add an episode to a series you do not own."],
     RAVINE_PODCAST_QUOTA_EXCEEDED: ["وصلت إلى حد البودكاست الشهري لهذا الحساب.", "This account has reached its monthly Podcast limit."],
     RAVINE_INVALID_CONTENT_TYPE: ["نوع المحتوى غير مدعوم.", "This content type is not supported."],
+    RAVINE_CLOUDINARY_NOT_CONFIGURED: ["رفع الوسائط غير مهيأ بعد؛ يجب استكمال إعدادات Cloudinary على الخادم.", "Cloudinary is not configured on the server yet. Add the required server-side environment variables."],
   };
   if (copy[code]) return ar ? copy[code][0] : copy[code][1];
   return message;
@@ -60,6 +103,7 @@ export default function StudioUpload({ creatorId, locale }: Props) {
   const [trailerFile, setTrailerFile] = useState<File | null>(null);
   const [previewFile, setPreviewFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<StudioUploadProgress | null>(null);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
@@ -68,19 +112,97 @@ export default function StudioUpload({ creatorId, locale }: Props) {
   const isSeries = contentType === "series";
   const isVideoLike = contentType === "video" || contentType === "short_film" || contentType === "film" || contentType === "documentary" || isSeries;
 
-  async function uploadToCloudinary(uploadFile: File, cloudName: string, uploadPreset: string): Promise<CloudinaryUpload> {
+  async function uploadToCloudinary(
+    uploadFile: File,
+    creatorId: number,
+    label: string,
+    onProgress: (progress: StudioUploadProgress) => void,
+  ): Promise<CloudinaryUpload> {
+    onProgress({
+      label,
+      percent: 0,
+      loadedBytes: 0,
+      totalBytes: uploadFile.size,
+      elapsedSeconds: 0,
+      speedBytesPerSecond: 0,
+      remainingSeconds: null,
+      stage: "uploading",
+    });
+
+    const signatureResponse = await fetch("/api/studio/cloudinary-signature", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ creatorId }),
+    });
+    const signature = (await signatureResponse.json().catch(() => ({}))) as CloudinarySignedUpload;
+    if (!signatureResponse.ok || !signature.cloudName || !signature.apiKey || !signature.signature ||
+        !signature.timestamp || !signature.folder || !signature.publicId) {
+      throw new Error(signature.error || (ar ? "تعذر تجهيز رفع آمن إلى Cloudinary." : "Could not prepare a secure Cloudinary upload."));
+    }
+
     const formData = new FormData();
     formData.append("file", uploadFile);
-    formData.append("upload_preset", uploadPreset);
-    const response = await fetch(`https://api.cloudinary.com/v1_1/${encodeURIComponent(cloudName)}/video/upload`, {
-      method: "POST",
-      body: formData,
+    formData.append("api_key", signature.apiKey);
+    formData.append("timestamp", String(signature.timestamp));
+    formData.append("signature", signature.signature);
+    formData.append("folder", signature.folder);
+    formData.append("public_id", signature.publicId);
+    formData.append("overwrite", "false");
+
+    return await new Promise<CloudinaryUpload>((resolve, reject) => {
+      const request = new XMLHttpRequest();
+      const startedAt = Date.now();
+      request.open(
+        "POST",
+        `https://api.cloudinary.com/v1_1/${encodeURIComponent(signature.cloudName)}/video/upload`,
+      );
+      request.timeout = 30 * 60 * 1000;
+      request.upload.onprogress = (event) => {
+        const elapsedSeconds = Math.max(0.1, (Date.now() - startedAt) / 1000);
+        const loadedBytes = Math.min(event.loaded, uploadFile.size);
+        const speedBytesPerSecond = loadedBytes / elapsedSeconds;
+        const remainingBytes = Math.max(0, uploadFile.size - loadedBytes);
+        onProgress({
+          label,
+          percent: event.lengthComputable
+            ? Math.min(100, Math.round((event.loaded / event.total) * 100))
+            : Math.min(99, Math.round((loadedBytes / Math.max(1, uploadFile.size)) * 100)),
+          loadedBytes,
+          totalBytes: uploadFile.size,
+          elapsedSeconds,
+          speedBytesPerSecond,
+          remainingSeconds: speedBytesPerSecond > 0 ? Math.ceil(remainingBytes / speedBytesPerSecond) : null,
+          stage: "uploading",
+        });
+      };
+      request.onerror = () => reject(new Error(ar ? "انقطع الاتصال أثناء رفع الملف." : "The connection was interrupted during upload."));
+      request.ontimeout = () => reject(new Error(ar ? "انتهت مهلة رفع الملف. جرّب اتصالًا أكثر استقرارًا." : "The upload timed out. Please retry with a more stable connection."));
+      request.onload = () => {
+        let payload: CloudinaryUpload;
+        try {
+          payload = JSON.parse(request.responseText) as CloudinaryUpload;
+        } catch {
+          reject(new Error(ar ? "استجاب Cloudinary ببيانات غير مفهومة." : "Cloudinary returned an unreadable response."));
+          return;
+        }
+        if (request.status < 200 || request.status >= 300 || !payload.secure_url) {
+          reject(new Error(payload.error?.message || (ar ? "تعذر رفع الملف إلى Cloudinary." : "Cloudinary media upload failed.")));
+          return;
+        }
+        onProgress({
+          label,
+          percent: 100,
+          loadedBytes: uploadFile.size,
+          totalBytes: uploadFile.size,
+          elapsedSeconds: Math.max(0, (Date.now() - startedAt) / 1000),
+          speedBytesPerSecond: uploadFile.size / Math.max(0.1, (Date.now() - startedAt) / 1000),
+          remainingSeconds: 0,
+          stage: "uploading",
+        });
+        resolve(payload);
+      };
+      request.send(formData);
     });
-    const payload = (await response.json()) as CloudinaryUpload;
-    if (!response.ok || !payload.secure_url) {
-      throw new Error(payload.error?.message || (ar ? "تعذر رفع الملف." : "Media upload failed."));
-    }
-    return payload;
   }
 
   function validateAuxiliaryMedia(kind: "trailer" | "preview", upload: CloudinaryUpload) {
@@ -113,22 +235,26 @@ export default function StudioUpload({ creatorId, locale }: Props) {
       return;
     }
 
-    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
-    if (!cloudName || !uploadPreset) {
-      setError(ar ? "رفع الوسائط غير مهيأ بعد. يجب إعداد Cloudinary في إعدادات المشروع." : "Media upload is not configured yet. Configure Cloudinary in the project settings.");
-      return;
-    }
-
     setBusy(true);
+    setUploadProgress(null);
     try {
       const supabase = createClient();
       const { data: auth } = await supabase.auth.getUser();
       if (!auth.user) throw new Error("RAVINE_AUTH_REQUIRED");
 
-      const mainUpload = await uploadToCloudinary(file, cloudName, uploadPreset);
-      const trailerUpload = trailerFile ? await uploadToCloudinary(trailerFile, cloudName, uploadPreset) : null;
-      const previewUpload = previewFile ? await uploadToCloudinary(previewFile, cloudName, uploadPreset) : null;
+      const updateUploadProgress = (progress: StudioUploadProgress) => setUploadProgress(progress);
+      const mainUpload = await uploadToCloudinary(
+        file,
+        creatorId,
+        ar ? "ملف العمل الأساسي" : "Main work media",
+        updateUploadProgress,
+      );
+      const trailerUpload = trailerFile
+        ? await uploadToCloudinary(trailerFile, creatorId, ar ? "الـTrailer" : "Trailer", updateUploadProgress)
+        : null;
+      const previewUpload = previewFile
+        ? await uploadToCloudinary(previewFile, creatorId, ar ? "الـPreview" : "Preview", updateUploadProgress)
+        : null;
 
       if (previewUpload) validateAuxiliaryMedia("preview", previewUpload);
 
@@ -205,6 +331,16 @@ export default function StudioUpload({ creatorId, locale }: Props) {
           : []),
       ];
 
+      setUploadProgress({
+        label: ar ? "حفظ بيانات العمل" : "Saving work metadata",
+        percent: 100,
+        loadedBytes: file.size,
+        totalBytes: file.size,
+        elapsedSeconds: 0,
+        speedBytesPerSecond: 0,
+        remainingSeconds: 0,
+        stage: "saving",
+      });
       const { error: assetsError } = await supabase.from("work_media_assets").insert(mediaAssets);
       if (assetsError) throw assetsError;
 
@@ -221,11 +357,13 @@ export default function StudioUpload({ creatorId, locale }: Props) {
       setTrailerFile(null);
       setPreviewFile(null);
       setMessage(ar ? "تم رفع العمل وحفظه كمسودة مع إعدادات الظهور والـTrailer/Preview." : "The work was uploaded and saved as a draft with visibility and optional trailer/preview settings.");
+      setUploadProgress(null);
       router.refresh();
     } catch (submitError) {
       setError(mapUploadError(submitError, ar));
     } finally {
       setBusy(false);
+      setUploadProgress(null);
     }
   }
 
@@ -306,6 +444,22 @@ export default function StudioUpload({ creatorId, locale }: Props) {
       {error ? <div className="empty-state"><strong>{ar ? "تعذر حفظ العمل." : "Work could not be saved."}</strong><span>{error}</span></div> : null}
       {message ? <div className="empty-state"><strong>{ar ? "تم الحفظ." : "Saved."}</strong><span>{message}</span></div> : null}
 
+      {busy && uploadProgress ? (
+        <div className="studio-upload-progress" role="status" aria-live="polite">
+          <div className="studio-upload-progress__heading">
+            <strong>{uploadProgress.label}</strong>
+            <span>{uploadProgress.stage === "saving" ? (ar ? "جارٍ الحفظ" : "Saving") : `${uploadProgress.percent}%`}</span>
+          </div>
+          <div className="studio-upload-progress__track" aria-label={ar ? "تقدم الرفع" : "Upload progress"}>
+            <span style={{ width: `${uploadProgress.percent}%` }} />
+          </div>
+          <div className="studio-upload-progress__details">
+            <span>{formatUploadBytes(uploadProgress.loadedBytes)} / {formatUploadBytes(uploadProgress.totalBytes)}</span>
+            <span>{ar ? "السرعة" : "Speed"}: {uploadProgress.speedBytesPerSecond > 0 ? `${formatUploadBytes(uploadProgress.speedBytesPerSecond)}/s` : "—"}</span>
+            <span>{ar ? "المتبقي" : "ETA"}: {formatUploadTime(uploadProgress.remainingSeconds)}</span>
+          </div>
+        </div>
+      ) : null}
       <button className="button primary" type="submit" disabled={busy}>
         {busy ? (ar ? "جارٍ الرفع…" : "Uploading…") : (ar ? "رفع وحفظ كمسودة" : "Upload and save draft")}
       </button>
