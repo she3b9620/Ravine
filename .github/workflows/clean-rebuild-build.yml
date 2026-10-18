@@ -57,6 +57,9 @@ jobs:
       - name: Studio pagination tests
         run: node --test tests/studio-pagination.test.mjs
 
+      - name: Studio multi-identity tests
+        run: node --test tests/studio-multiple-identities.test.mjs
+
       - name: Studio work deletion and media cleanup tests
         run: node --test tests/studio-delete-work.test.mjs
 
