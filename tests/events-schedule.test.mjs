@@ -111,7 +111,7 @@ test("scheduled events have a focused detail route linked from public event cata
   const discover = read("../app/[locale]/discover/page.tsx");
   const live = read("../app/[locale]/live/page.tsx");
   assert.match(detail, /\.from\("live_events"\)/);
-  assert.match(detail, /\.in\("status", \["scheduled", "live", "ended"\]\)/);
+  assert.match(detail, /\.in\("status",\s*\["scheduled",\s*"live",\s*"ended"\]\)/);
   assert.match(detail, /\.eq\("published", true\)/);
   assert.match(detail, /\.eq\("visibility", "public"\)/);
   assert.match(detail, /streaming setup is complete/);
