@@ -95,7 +95,12 @@ export default function RAVINEShortsBrowse({ locale, works }: Props) {
         .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
       const active = candidates[0]?.target as HTMLElement | undefined;
 
-      if (!active) return;
+      if (!active) {
+        videosRef.current.forEach((video) => video.pause());
+        setPlayingId(null);
+        activeRef.current = null;
+        return;
+      }
       const rawId = Number(active.dataset.shortId);
       if (!Number.isInteger(rawId)) return;
       activeRef.current = rawId;
