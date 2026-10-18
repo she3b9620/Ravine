@@ -98,43 +98,46 @@ export default function HeroMediaManager({ locale }: { locale: Locale }) {
   async function uploadHeroVideo(file: File) {
     setError("");
     setNotice("");
-    const isRecognizedVideo = file.type.startsWith("video/") || /\.(mp4|webm|mov|mkv|m4v)$/i.test(file.name);
-    if (!isRecognizedVideo) {
-      setError(ar ? "اختَر ملف فيديو صالحًا." : "Choose a valid video file.");
+    const extension = file.name.split(".").pop()?.toLowerCase() || "";
+    const typeByExtension: Record<string, string> = {
+      mp4: "video/mp4",
+      m4v: "video/x-m4v",
+      webm: "video/webm",
+      mov: "video/quicktime",
+      mkv: "video/x-matroska",
+    };
+    const allowedTypes = new Set(Object.values(typeByExtension));
+    const contentType = allowedTypes.has(file.type) ? file.type : typeByExtension[extension];
+    if (!contentType) {
+      setError(ar ? "اختَر فيديو بصيغة MP4 أو WebM أو MOV أو MKV أو M4V." : "Choose an MP4, WebM, MOV, MKV, or M4V video.");
       return;
     }
-    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
-    if (!cloudName || !uploadPreset) {
-      setError(ar ? "إعدادات Cloudinary غير مكتملة في المشروع." : "Cloudinary is not configured for this project.");
+    if (file.size > 2 * 1024 * 1024 * 1024) {
+      setError(ar ? "حجم الفيديو أكبر من الحد المسموح به (2 جيجابايت)." : "Video size exceeds the 2 GB upload limit.");
       return;
     }
+
     setUploading(true);
     try {
-      const form = new FormData();
-      form.append("file", file);
-      form.append("upload_preset", uploadPreset);
-      const response = await fetch("https://api.cloudinary.com/v1_1/" + encodeURIComponent(cloudName) + "/video/upload", {
-        method: "POST",
-        body: form,
-      });
-      const payload = await response.json() as { secure_url?: string; duration?: number; error?: { message?: string } };
-      if (!response.ok || !payload.secure_url) {
-        throw new Error(payload.error?.message || (ar ? "تعذر رفع فيديو الهيرو." : "Hero video upload failed."));
-      }
-      let thumbnailUrl: string | null = null;
-      try {
-        const poster = new URL(payload.secure_url);
-        poster.pathname = poster.pathname
-          .replace("/video/upload/", "/video/upload/so_0/")
-          .replace(/\.(mp4|mov|webm|mkv|m4v)$/i, ".jpg");
-        thumbnailUrl = poster.toString();
-      } catch {}
+      const safeName = file.name.normalize("NFKD").replace(/[^\w.-]+/g, "-").replace(/^-+|-+$/g, "").slice(-120) || "hero-video";
+      const objectPath = "videos/" + Date.now() + "-" + crypto.randomUUID() + "-" + safeName;
+      const { data: uploaded, error: uploadError } = await supabase.storage
+        .from("ravine-hero-media")
+        .upload(objectPath, file, {
+          cacheControl: "3600",
+          upsert: false,
+          contentType,
+        });
+      if (uploadError || !uploaded) throw new Error(uploadError?.message || "Storage upload returned no file path.");
+
+      const { data: publicFile } = supabase.storage.from("ravine-hero-media").getPublicUrl(uploaded.path);
+      if (!publicFile.publicUrl) throw new Error("Could not create a public URL for the uploaded video.");
+
       const { data, error: insertError } = await supabase.from("ravine_hero_media_items").insert({
         media_type: "video",
         title: videoTitle.trim() || file.name.replace(/\.[^.]+$/, ""),
-        media_url: payload.secure_url,
-        thumbnail_url: thumbnailUrl,
+        media_url: publicFile.publicUrl,
+        thumbnail_url: null,
         video_id: null,
         sort_order: (sortedItems.reduce((highest, item) => Math.max(highest, item.sort_order), -10)) + 10,
         is_active: true,
@@ -153,33 +156,45 @@ export default function HeroMediaManager({ locale }: { locale: Locale }) {
   async function uploadImage(file: File) {
     setError("");
     setNotice("");
-    if (!file.type.startsWith("image/")) {
-      setError(ar ? "اختَر ملف صورة صالحًا." : "Choose a valid image file.");
+    const extension = file.name.split(".").pop()?.toLowerCase() || "";
+    const typeByExtension: Record<string, string> = {
+      jpg: "image/jpeg",
+      jpeg: "image/jpeg",
+      png: "image/png",
+      webp: "image/webp",
+    };
+    const allowedTypes = new Set(Object.values(typeByExtension));
+    const contentType = allowedTypes.has(file.type) ? file.type : typeByExtension[extension];
+    if (!contentType) {
+      setError(ar ? "اختَر صورة بصيغة JPG أو PNG أو WebP." : "Choose a JPG, PNG, or WebP image.");
       return;
     }
     if (file.size > 25 * 1024 * 1024) {
       setError(ar ? "حجم الصورة أكبر من 25 ميجابايت." : "Image size must be 25 MB or less.");
       return;
     }
-    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
-    if (!cloudName || !uploadPreset) {
-      setError(ar ? "إعدادات Cloudinary غير مكتملة في المشروع." : "Cloudinary is not configured for this project.");
-      return;
-    }
+
     setUploading(true);
     try {
-      const form = new FormData();
-      form.append("file", file);
-      form.append("upload_preset", uploadPreset);
-      const response = await fetch("https://api.cloudinary.com/v1_1/" + encodeURIComponent(cloudName) + "/image/upload", { method: "POST", body: form });
-      const payload = await response.json() as { secure_url?: string; error?: { message?: string } };
-      if (!response.ok || !payload.secure_url) throw new Error(payload.error?.message || "Cloudinary image upload failed.");
+      const safeName = file.name.normalize("NFKD").replace(/[^\w.-]+/g, "-").replace(/^-+|-+$/g, "").slice(-120) || "hero-image";
+      const objectPath = "images/" + Date.now() + "-" + crypto.randomUUID() + "-" + safeName;
+      const { data: uploaded, error: uploadError } = await supabase.storage
+        .from("ravine-hero-media")
+        .upload(objectPath, file, {
+          cacheControl: "3600",
+          upsert: false,
+          contentType,
+        });
+      if (uploadError || !uploaded) throw new Error(uploadError?.message || "Storage upload returned no file path.");
+
+      const { data: publicFile } = supabase.storage.from("ravine-hero-media").getPublicUrl(uploaded.path);
+      if (!publicFile.publicUrl) throw new Error("Could not create a public URL for the uploaded image.");
+
       const { data, error: insertError } = await supabase.from("ravine_hero_media_items").insert({
         media_type: "image",
         title: imageTitle.trim() || file.name.replace(/\.[^.]+$/, ""),
-        media_url: payload.secure_url,
-        thumbnail_url: payload.secure_url,
+        media_url: publicFile.publicUrl,
+        thumbnail_url: publicFile.publicUrl,
         video_id: null,
         sort_order: (sortedItems.reduce((highest, item) => Math.max(highest, item.sort_order), -10)) + 10,
         is_active: true,
