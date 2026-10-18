@@ -54,3 +54,16 @@ test("saved-work removal is scoped to the authenticated user and selected video"
   assert.match(removeAction, /\.eq\("video_id", videoId\)/);
   assert.match(removeAction, /AUTH_REQUIRED/);
 });
+
+
+test("video notifications can be opened or marked read independently", () => {
+  const page = read("../app/[locale]/notifications/page.tsx");
+  const start = page.indexOf("if (notification.video_id)");
+  const end = page.indexOf("return (", page.indexOf("</Link>", start));
+  const videoBranch = page.slice(start, end);
+  assert.match(videoBranch, /className="notification-link"/);
+  assert.match(videoBranch, /className="notification-action"/);
+  assert.match(videoBranch, /Mark as read/);
+  assert.match(videoBranch, /تحديد كمقروء/);
+  assert.ok(videoBranch.indexOf("</Link>") < videoBranch.indexOf("<form action={markRead}>"));
+});

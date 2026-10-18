@@ -85,15 +85,21 @@ export default async function NotificationsPage({ params }: { params: Promise<{ 
 
             if (notification.video_id) {
               return (
-                <form action={markRead} key={notification.id}>
-                  <input type="hidden" name="id" value={notification.id} />
-                  <Link href={`/${locale}/watch/${notification.video_id}`}>
+                <div className="notification-row" key={notification.id}>
+                  <Link className="notification-link" href={"/" + locale + "/watch/" + notification.video_id}>
                     {content}
                   </Link>
-                </form>
+                  {!notification.is_read ? (
+                    <form action={markRead}>
+                      <input type="hidden" name="id" value={notification.id} />
+                      <button type="submit" className="notification-action">
+                        {ar ? "تحديد كمقروء" : "Mark as read"}
+                      </button>
+                    </form>
+                  ) : null}
+                </div>
               );
             }
-
             return (
               <form action={markRead} key={notification.id}>
                 <input type="hidden" name="id" value={notification.id} />
