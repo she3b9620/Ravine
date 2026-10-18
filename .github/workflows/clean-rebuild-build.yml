@@ -57,6 +57,9 @@ jobs:
       - name: Work access policy regression tests
         run: node --test tests/work-access.test.mjs
 
+      - name: Watch interaction failure handling tests
+        run: node --test tests/watch-actions-errors.test.mjs
+
       - name: Work creator-follow integration tests
         run: node --test tests/work-creator-follow.test.mjs
 

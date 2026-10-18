@@ -54,24 +54,36 @@ export default function WatchActions({ videoId, duration, locale, returnPath, sh
     if (!requireAuth() || busy) return;
     setBusy("like");
     setMessage("");
-    const supabase = createClient();
-    const result = liked
-      ? await supabase.from("video_likes").delete().eq("user_id", userId!).eq("video_id", videoId)
-      : await supabase.from("video_likes").insert({ user_id: userId!, video_id: videoId });
-    if (result.error) setMessage(localizeSupabaseError(result.error, locale)); else setLiked(!liked);
-    setBusy(null);
+    try {
+      const supabase = createClient();
+      const result = liked
+        ? await supabase.from("video_likes").delete().eq("user_id", userId!).eq("video_id", videoId)
+        : await supabase.from("video_likes").insert({ user_id: userId!, video_id: videoId });
+      if (result.error) setMessage(localizeSupabaseError(result.error, locale, ar ? "تعذر تحديث الإعجاب. حاول مرة أخرى." : "Could not update your like. Please try again."));
+      else setLiked(!liked);
+    } catch (error) {
+      setMessage(localizeSupabaseError(error, locale, ar ? "تعذر تحديث الإعجاب بسبب مشكلة في الاتصال." : "A connection problem prevented updating your like."));
+    } finally {
+      setBusy(null);
+    }
   }
 
   async function toggleSave() {
     if (!requireAuth() || busy) return;
     setBusy("save");
     setMessage("");
-    const supabase = createClient();
-    const result = saved
-      ? await supabase.from("video_saves").delete().eq("user_id", userId!).eq("video_id", videoId)
-      : await supabase.from("video_saves").insert({ user_id: userId!, video_id: videoId });
-    if (result.error) setMessage(localizeSupabaseError(result.error, locale)); else setSaved(!saved);
-    setBusy(null);
+    try {
+      const supabase = createClient();
+      const result = saved
+        ? await supabase.from("video_saves").delete().eq("user_id", userId!).eq("video_id", videoId)
+        : await supabase.from("video_saves").insert({ user_id: userId!, video_id: videoId });
+      if (result.error) setMessage(localizeSupabaseError(result.error, locale, ar ? "تعذر تحديث المحفوظات. حاول مرة أخرى." : "Could not update your saved work. Please try again."));
+      else setSaved(!saved);
+    } catch (error) {
+      setMessage(localizeSupabaseError(error, locale, ar ? "تعذر تحديث المحفوظات بسبب مشكلة في الاتصال." : "A connection problem prevented updating your saved work."));
+    } finally {
+      setBusy(null);
+    }
   }
 
   async function share() {
