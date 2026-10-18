@@ -53,6 +53,48 @@ async function loadAllGuestHeroWorks(supabase: ReturnType<typeof createClient>) 
   return all;
 }
 
+type CuratedHeroConfiguration = { useCuratedMedia: boolean; videos: Work[]; images: StillImage[] };
+
+async function loadCuratedHeroMedia(supabase: ReturnType<typeof createClient>): Promise<CuratedHeroConfiguration> {
+  const [settingsResult, itemsResult] = await Promise.all([
+    supabase.from("ravine_hero_settings").select("use_curated_media").eq("id", 1).maybeSingle(),
+    supabase.from("ravine_hero_media_items")
+      .select("id,media_type,title,media_url,thumbnail_url,video_id,sort_order,is_active")
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true })
+      .order("id", { ascending: true }),
+  ]);
+
+  // If the management schema is unavailable for any reason, preserve the legacy
+  // automatic hero experience rather than leaving the guest landing blank.
+  if (settingsResult.error || itemsResult.error) {
+    return { useCuratedMedia: false, videos: [], images: [] };
+  }
+
+  const items = itemsResult.data ?? [];
+  const videos: Work[] = items.flatMap((item) => {
+    if (item.media_type !== "video" || !item.video_id || !item.media_url) return [];
+    return [{
+      id: Number(item.video_id),
+      video_url: item.media_url,
+      thumbnail_url: item.thumbnail_url ?? null,
+      duration: null,
+      content_type: "video",
+    }];
+  });
+  const images: StillImage[] = items.flatMap((item) => {
+    if (item.media_type !== "image" || !item.media_url) return [];
+    const id = Number(item.id);
+    return Number.isSafeInteger(id) && id > 0 ? [{ id, thumbnail_url: item.media_url }] : [];
+  });
+
+  return {
+    useCuratedMedia: Boolean(settingsResult.data?.use_curated_media),
+    videos,
+    images,
+  };
+}
+
 async function loadGuestPhotographyImages(supabase: ReturnType<typeof createClient>): Promise<StillImage[]> {
   // The newer Work model has a first-class photography type. It is optional
   // during the staged schema rollout, so callers fall back to public work
@@ -82,24 +124,29 @@ export default function GuestCinematicBackdrop({ locale }: GuestCinematicBackdro
   const [isGuestHome, setIsGuestHome] = useState(false);
   const [works, setWorks] = useState<Work[]>([]);
   const [photoWorks, setPhotoWorks] = useState<StillImage[]>([]);
+  const [heroCuratedMode, setHeroCuratedMode] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [imageIndex, setImageIndex] = useState(0);
   const [muted, setMuted] = useState(true);
   const [volume, setVolume] = useState(DEFAULT_VOLUME);
   const [repeat, setRepeat] = useState(false);
   const [backgroundMode, setBackgroundMode] = useState<BackgroundMode>("video");
-  const playableWorks = useMemo(
-    () => stableMix(works.map((work) => ({ ...work, src: toPlaybackSource(work) }))
-      .filter((work) => work.src && work.content_type !== "podcast" && work.content_type !== "live")) as Array<Work & { src: string }>,
-    [works],
-  );
-  // Still imagery has its own stable list. Image mode is a real still-image
-  // gallery sourced from public artwork thumbnails, not a frozen video frame.
-  const imageWorks = useMemo(
-    () => stableMix(photoWorks.length ? photoWorks : works.filter((work) => Boolean(work.thumbnail_url)) as Array<StillImage | Work>)
-      .filter((work) => Boolean(work.thumbnail_url)),
-    [photoWorks, works],
-  );
+  const playableWorks = useMemo(() => {
+    const available = works.map((work) => ({ ...work, src: toPlaybackSource(work) }))
+      .filter((work) => work.src && work.content_type !== "podcast" && work.content_type !== "live") as Array<Work & { src: string }>;
+    // Curated video order is controlled by the administrator in Hero Media.
+    return heroCuratedMode ? available : stableMix(available);
+  }, [heroCuratedMode, works]);
+  // Curated mode uses only explicitly chosen stills; automatic mode can fall
+  // back to thumbnails of public works when no separate photo feed is available.
+  const imageWorks = useMemo(() => {
+    if (heroCuratedMode) return [...photoWorks];
+    const available = photoWorks.length
+      ? photoWorks
+      : works.filter((work): work is Work & { thumbnail_url: string } => Boolean(work.thumbnail_url))
+          .map((work) => ({ id: work.id, thumbnail_url: work.thumbnail_url }));
+    return stableMix(available);
+  }, [heroCuratedMode, photoWorks, works]);
   const current = playableWorks[currentIndex] ?? null;
   const currentImage = imageWorks[imageIndex] ?? null;
 
@@ -115,8 +162,33 @@ export default function GuestCinematicBackdrop({ locale }: GuestCinematicBackdro
     if (!isGuestHome) return;
     let mounted = true;
     const supabase = createClient();
-    void loadAllGuestHeroWorks(supabase).then((data) => { if (mounted) setWorks(data); }, () => { if (mounted) setWorks([]); });
-    void loadGuestPhotographyImages(supabase).then((data) => { if (mounted) setPhotoWorks(data); }, () => { if (mounted) setPhotoWorks([]); });
+    void loadCuratedHeroMedia(supabase).then(async (configuration) => {
+      if (!mounted) return;
+      if (configuration.useCuratedMedia) {
+        setHeroCuratedMode(true);
+        setWorks(configuration.videos);
+        setPhotoWorks(configuration.images);
+        return;
+      }
+      setHeroCuratedMode(false);
+      const [legacyWorks, legacyImages] = await Promise.all([
+        loadAllGuestHeroWorks(supabase).catch(() => [] as Work[]),
+        loadGuestPhotographyImages(supabase).catch(() => [] as StillImage[]),
+      ]);
+      if (!mounted) return;
+      setWorks(legacyWorks);
+      setPhotoWorks(legacyImages);
+    }, async () => {
+      if (!mounted) return;
+      setHeroCuratedMode(false);
+      const [legacyWorks, legacyImages] = await Promise.all([
+        loadAllGuestHeroWorks(supabase).catch(() => [] as Work[]),
+        loadGuestPhotographyImages(supabase).catch(() => [] as StillImage[]),
+      ]);
+      if (!mounted) return;
+      setWorks(legacyWorks);
+      setPhotoWorks(legacyImages);
+    });
     return () => { mounted = false; };
   }, [isGuestHome]);
 
@@ -132,7 +204,11 @@ export default function GuestCinematicBackdrop({ locale }: GuestCinematicBackdro
 
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || !current) return;
+    if (!video) return;
+    if (!current) {
+      video.pause();
+      return;
+    }
     if (backgroundMode === "image") {
       video.pause();
       return;
