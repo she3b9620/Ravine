@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Scissors, Clapperboard, Film, Mic2, type LucideIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { formatRavineNumber } from "@/lib/ravine-number-formatter";
+import RAVINEShortsBrowse from "@/components/RAVINEShortsBrowse";
 
 export type RAVINEMediaCatalogType = "short" | "short_film" | "film" | "podcast";
 
@@ -40,7 +41,7 @@ const configs: Record<RAVINEMediaCatalogType, {
   },
 };
 
-type Work = { id: number; title: string | null; description: string | null; thumbnail_url: string | null; duration: number | null; views: number | null; likes: number | null; quality: string | null };
+type Work = { id: number; title: string | null; description: string | null; thumbnail_url: string | null; video_url: string | null; duration: number | null; views: number | null; likes: number | null; quality: string | null };
 
 function durationLabel(seconds: number | null) {
   if (!seconds || seconds < 1) return "—";
@@ -54,7 +55,7 @@ export default async function RAVINEMediaCatalog({ locale, contentType }: { loca
   const Icon = config.icon;
   const supabase = await createClient();
   const { data, error } = await supabase.from("videos")
-    .select("id,title,description,thumbnail_url,duration,views,likes,quality")
+    .select("id,title,description,thumbnail_url,video_url,duration,views,likes,quality")
     .eq("published", true).eq("visibility", "public").eq("content_type", contentType)
     .order("created_at", { ascending: false }).limit(60);
   const works = (data ?? []) as Work[];
@@ -68,7 +69,8 @@ export default async function RAVINEMediaCatalog({ locale, contentType }: { loca
     </div>
     {error ? <div className="empty-state"><strong>{ar ? (contentType === "podcast" ? "تعذر تحميل البودكاست." : "تعذر تحميل المحتوى.") : (contentType === "podcast" ? "We could not load podcasts." : "We could not load this content.")}</strong><span>{error.message}</span></div>
       : works.length === 0 ? <div className="empty-state"><strong>{ar ? config.arEmpty : config.enEmpty}</strong><span>{ar ? "ستظهر الأعمال هنا بعد اعتماد نشرها من مساحة المبدع." : "Published work will appear here after creator publication."}</span></div>
-      : <div className={`video-grid ravine-documentaries-grid ${contentType === "short" ? "ravine-shorts-grid" : ""}`}>{works.map(work => (
+      : contentType === "short" ? <RAVINEShortsBrowse locale={locale} works={works} />
+      : <div className="video-grid ravine-documentaries-grid">{works.map(work => (
         <Link href={`/${locale}/watch/${work.id}`} className={`video-card ${contentType === "podcast" ? "ravine-podcast-card" : ""}`} key={work.id}>
           <div className="video-thumb"><img src={work.thumbnail_url || "/RAVINE.PNG"} alt="" loading="lazy" /><span className="duration">{durationLabel(work.duration)}</span><span className={`documentary-pill ${contentType === "podcast" ? "ravine-podcast-pill" : ""}`}>{contentType === "podcast" ? <Mic2 size={12} strokeWidth={1.8} aria-hidden="true" /> : null}{ar ? config.arLabel : config.enLabel}</span></div>
           <div className="video-meta"><div className="video-kicker">{config.enLabel}{work.quality ? ` · ${work.quality}` : ""}</div><h2>{work.title || (ar ? "بدون عنوان" : "Untitled")}</h2>
