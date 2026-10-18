@@ -41,3 +41,19 @@ test("Discover searches published work and creator identities together", () => {
   assert.ok(page.includes("المبدعون المطابقون"));
   assert.ok(page.includes('.eq("visibility", "public")'));
 });
+
+
+test("Discover includes public creator identities, categories, scheduled events, and public communities", () => {
+  const page = read("../app/[locale]/discover/page.tsx");
+  assert.ok(page.includes('from("creators")'));
+  assert.ok(page.includes('from("categories")'));
+  assert.ok(page.includes('from("live_events")'));
+  assert.ok(page.includes('from("communities")'));
+  assert.ok(page.includes('.eq("is_active", true)'));
+  assert.ok(page.includes('.eq("privacy", "public")'));
+  assert.ok(page.includes('className="discover-category-list"'));
+  assert.ok(page.includes('className="discover-event-results"'));
+  assert.ok(page.includes('className="discover-community-results"'));
+  assert.ok(page.includes('eq("visibility", "public")'));
+  assert.ok(page.includes("<RAVINEEventsCatalog locale={locale} items={eventItems} />"));
+});
