@@ -20,7 +20,7 @@ const navigation = [
   ["community", "Community", "المجتمع"],
 ] as const;
 
-const GUEST_GATED = new Set(["shorts", "videos", "podcasts", "documentaries", "short-films", "films", "series", "live", "community"]);
+const GUEST_GATED = new Set(["shorts", "videos", "podcasts", "documentaries", "short-films", "films", "series", "live"]);
 type Locale = "ar" | "en";
 const CLOSE_MS = 220;
 

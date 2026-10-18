@@ -29,3 +29,17 @@ test("creating a community post requires an active membership and applies a body
   assert.match(action, /\.eq\("user_id", user\.id\)/);
   assert.match(action, /membership\?\.status !== "active"/);
 });
+
+
+test("guest navigation allows the public community preview without unlocking member actions", () => {
+  for (const path of ["../components/PrimaryNav.tsx", "../components/SidebarNav.tsx", "../components/MobileNav.tsx"]) {
+    const source = read(path);
+    const gatedStart = source.indexOf("const GUEST_GATED = new Set(");
+    const gatedEnd = source.indexOf(");", gatedStart);
+    assert.ok(gatedStart >= 0 && gatedEnd > gatedStart);
+    assert.doesNotMatch(source.slice(gatedStart, gatedEnd), /community/);
+  }
+  const detail = read("../app/[locale]/community/[slug]/page.tsx");
+  assert.match(detail, /canJoin = Boolean\(user\)/);
+  assert.match(detail, /const canPost = Boolean\(user\) && isMember/);
+});
