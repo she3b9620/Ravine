@@ -92,15 +92,12 @@ async function destroyCloudinaryVideo(publicId: string, cloudName: string, apiKe
 type CreatorOwnership = { user_id: string | null };
 type WorkWithCreator = {
   id: number;
-  creator_id: number | null;
-  user_id: string | null;
   video_url: string | null;
   series_id: number | null;
   creators?: CreatorOwnership | CreatorOwnership[] | null;
 };
 type WorkMediaAsset = {
   id: number;
-  work_id: number;
   media_url: string;
   kind: string;
 };
@@ -129,7 +126,7 @@ export async function POST(request: NextRequest) {
 
     const { data: rawWork, error: workError } = await supabase
       .from("videos")
-      .select("id,creator_id,user_id,video_url,series_id,creators!inner(user_id)")
+      .select("id,video_url,series_id,creators!inner(user_id)")
       .eq("id", videoId)
       .maybeSingle();
 
@@ -142,7 +139,6 @@ export async function POST(request: NextRequest) {
       ? work.creators[0]?.user_id ?? null
       : work.creators?.user_id ?? null;
     const ownsViaCreator = creatorOwner === auth.user.id;
-    const ownsViaWork = work.user_id === auth.user.id;
 
     // Match the database's creator-owner delete policy exactly. A user_id
     // match alone is not enough authority to remove the linked media.
@@ -170,7 +166,7 @@ export async function POST(request: NextRequest) {
     // failure must not turn into a partial deletion of the parent work.
     const { data: assetRows, error: assetsError } = await supabase
       .from("work_media_assets")
-      .select("id,work_id,media_url,kind")
+      .select("id,media_url,kind")
       .eq("work_id", videoId);
 
     if (assetsError) {
