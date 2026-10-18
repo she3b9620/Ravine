@@ -11,9 +11,18 @@ const videoMigration = readFileSync(resolve(root, "supabase/migrations/202610180
 
 assert.match(manager, /ravine_hero_media_items/);
 assert.match(manager, /ravine_hero_settings/);
-assert.match(manager, /image\\/upload/);
-assert.match(manager, /video\\/upload/);
+assert.match(manager, /uploadFileWithProgress/);
+assert.match(manager, /XMLHttpRequest/);
 assert.match(manager, /uploadHeroVideo/);
+assert.match(manager, /request\\.upload\\.onprogress/);
+assert.match(manager, /loadedBytes/);
+assert.match(manager, /remainingSeconds/);
+assert.match(manager, /formatDuration/);
+assert.match(manager, /renderUploadProgress\\("video"\\)/);
+assert.match(manager, /renderUploadProgress\\("image"\\)/);
+assert.match(manager, /ravine-hero-media/);
+assert.doesNotMatch(manager, /NEXT_PUBLIC_CLOUDINARY_/);
+assert.doesNotMatch(manager, /Cloudinary is not configured/);
 assert.match(manager, /video_id: null/);
 assert.match(manager, /sort_order/);
 assert.match(manager, /use_curated_media/);
