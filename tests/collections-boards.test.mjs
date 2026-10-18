@@ -88,7 +88,7 @@ test("collection detail denies non-owners before reading private or members-only
   const guard = page.indexOf('if (collectionRow.visibility !== "public" && !canManage) notFound()', detailStart);
   const itemsQuery = page.indexOf('from("ravine_collection_items")', detailStart);
   assert.ok(detailStart >= 0 && guard > detailStart && itemsQuery > guard);
-  assert.match(page, /if \\(!canManage && userId && collectionRow\\.owner_creator_id\\)/);
+  assert.ok(page.includes("if (!canManage && userId && collectionRow.owner_creator_id)"));
   assert.match(page, /Members-only access is not enabled yet|Member access is not enabled yet/);
 });
 
