@@ -23,7 +23,6 @@ const navigation = [
   ["community", "Community", "المجتمع"],
 ] as const;
 
-const GUEST_GATED = new Set(["shorts", "videos", "podcasts", "documentaries", "short-films", "films", "series", "live"]);
 type Locale = "ar" | "en";
 const CLOSE_MS = 220;
 
@@ -54,13 +53,11 @@ export default function MobileNav({ locale, authenticated }: { locale: Locale; a
         <div className={`${styles.panel} ${closing ? styles.closing : ""}`} role="dialog" aria-modal="true" aria-label={ar ? "قائمة RAVINE" : "RAVINE menu"} onPointerDown={(event) => { if (event.target === event.currentTarget) close(); }}>
           <div className={styles.head}><span className="ravine-brand">RAVINE<span>.</span></span><button type="button" className={styles.close} onClick={close} aria-label={ar ? "إغلاق القائمة" : "Close menu"}><X size={20} /></button></div>
           <nav className={styles.links}>
-            {navigation.map(([slug, en, arLabel]) => {
-              const label = locale === "ar" ? arLabel : en;
-              const gated = !authenticated && GUEST_GATED.has(slug);
-              return gated
-                ? <button key={slug} type="button" onClick={() => { close(); window.setTimeout(() => requestRavineAuth(`/${locale}/${slug}`), CLOSE_MS); }}>{label} — {ar ? "سجّل للدخول" : "Sign in"}</button>
-                : <Link key={slug} href={`/${locale}/${slug}`} onClick={close}>{label}</Link>;
-            })}
+            {navigation.map(([slug, en, arLabel]) => (
+              <Link key={slug} href={`/${locale}/${slug}`} onClick={close}>
+                {locale === "ar" ? arLabel : en}
+              </Link>
+            ))}
             {!authenticated ? <button type="button" onClick={() => { close(); window.setTimeout(() => requestRavineAuth(`/${locale}`), CLOSE_MS); }}>{ar ? "دخول" : "Sign in"}</button> : <><Link href={`/${locale}/library`} onClick={close}>{ar ? "المكتبة" : "Library"}</Link><Link href={`/${locale}/account`} onClick={close}>{ar ? "الحساب" : "Account"}</Link></>}
           </nav>
         </div>

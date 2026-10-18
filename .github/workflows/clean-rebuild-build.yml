@@ -36,6 +36,9 @@ jobs:
       - name: Guest hero background mode regression test
         run: node --test tests/guest-hero-background-mode.test.mjs
 
+      - name: Guest public browsing navigation tests
+        run: node --test tests/guest-browse-navigation.test.mjs
+
       - name: Series and shared media catalog regression tests
         run: node --test tests/series-content-type.test.mjs
 
