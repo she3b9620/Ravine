@@ -31,8 +31,14 @@ test("work detail routes apply an explicit access check before returning media",
   const work = read("../app/[locale]/work/[id]/page.tsx");
   assert.match(watch, /await canAccessRAVINEVideo\(supabase, video\)/);
   assert.match(work, /await canAccessRAVINEVideo\(supabase, data\)/);
-  assert.doesNotMatch(watch, /\.eq\("visibility", "public"\)/);
-  assert.doesNotMatch(work, /\.eq\("visibility", "public"\)/);
+  const watchAccess = watch.indexOf("await canAccessRAVINEVideo(supabase, video)");
+  const watchAssets = watch.indexOf('from("work_media_assets")');
+  const workAccess = work.indexOf("await canAccessRAVINEVideo(supabase, data)");
+  const workAssets = work.indexOf('from("work_media_assets")');
+  const workRelatedVisibility = work.indexOf('.eq("visibility", "public")');
+  assert.ok(watchAccess >= 0 && watchAssets > watchAccess);
+  assert.ok(workAccess >= 0 && workAssets > workAccess);
+  assert.ok(workRelatedVisibility > workAccess, "Related catalogue queries must filter to public works after the primary work passes its own access check.");
 });
 
 test("live search API filters public visibility as well as explicit search visibility", () => {
