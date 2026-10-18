@@ -121,3 +121,40 @@ test("regular videos and documentaries use the shared public searchable catalog"
   assert.match(catalog, /enTitle: "Videos\."/);
   assert.match(catalog, /enTitle: "Documentaries\."/);
 });
+
+
+const seriesDetail = read("../app/[locale]/series/[id]/page.tsx");
+const seriesDetailStyles = read("../app/[locale]/series/series.module.css");
+
+test("public series detail route resolves the series card destination and hides restricted titles", () => {
+  assert.match(seriesDetail, /params: Promise<\{ locale: string; id: string \}>/);
+  assert.match(seriesDetail, /Number\.isSafeInteger\(seriesId\)/);
+  assert.match(seriesDetail, /from\("ravine_series_titles"\)/);
+  assert.match(seriesDetail, /\.eq\("id", seriesId\)/);
+  assert.match(seriesDetail, /\.eq\("published", true\)/);
+  assert.match(seriesDetail, /\.eq\("visibility", "public"\)/);
+  assert.match(seriesDetail, /if \(seriesError \|\| !seriesData\) notFound\(\)/);
+});
+
+test("series detail separates episodes by season and enforces public episode visibility", () => {
+  assert.match(seriesDetail, /function groupEpisodes\(/);
+  assert.match(seriesDetail, /\.eq\("series_id", series\.id\)/);
+  assert.match(seriesDetail, /\.eq\("content_type", "series"\)/);
+  assert.match(seriesDetail, /\.eq\("published", true\)/);
+  assert.match(seriesDetail, /\.eq\("visibility", "public"\)/);
+  assert.match(seriesDetail, /\.order\("season_number", \{ ascending: true \}\)/);
+  assert.match(seriesDetail, /\.order\("episode_number", \{ ascending: true \}\)/);
+  assert.match(seriesDetail, /seasonEpisodes\.sort/);
+});
+
+test("series detail provides bilingual season headings, episode playback links, and responsive styling", () => {
+  assert.match(seriesDetail, /الموسم/);
+  assert.match(seriesDetail, /Season/);
+  assert.match(seriesDetail, /الحلقة/);
+  assert.match(seriesDetail, /href=\{\`\/\$\{locale\}\/watch\/\$\{work\.id\}\`\}/);
+  assert.match(seriesDetail, /detailEmptyState/);
+  assert.match(seriesDetailStyles, /\.detailHero/);
+  assert.match(seriesDetailStyles, /\.episodeGrid/);
+  assert.match(seriesDetailStyles, /@media \(max-width: 720px\)/);
+  assert.match(seriesDetailStyles, /@media \(max-width: 480px\)/);
+});
