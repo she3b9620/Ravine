@@ -22,7 +22,17 @@ function toPlaybackSource(work: Work) {
   } catch { return null; }
   return work.video_url;
 }
-function shuffle<T>(items: T[]) { const result = [...items]; for (let i = result.length - 1; i > 0; i -= 1) { const j = Math.floor(Math.random() * (i + 1)); [result[i], result[j]] = [result[j], result[i]]; } return result; }
+function stableMix<T extends { id: number }>(items: T[]) {
+  const stableHash = (value: string) => {
+    let hash = 2166136261;
+    for (let index = 0; index < value.length; index += 1) {
+      hash ^= value.charCodeAt(index);
+      hash = Math.imul(hash, 16777619);
+    }
+    return hash >>> 0;
+  };
+  return [...items].sort((a, b) => stableHash(String(a.id)) - stableHash(String(b.id)) || a.id - b.id);
+}
 
 async function loadAllGuestHeroWorks(supabase: ReturnType<typeof createClient>) {
   const all: Work[] = [];
@@ -31,7 +41,7 @@ async function loadAllGuestHeroWorks(supabase: ReturnType<typeof createClient>) 
       .from("videos")
       .select("id,video_url,thumbnail_url,duration,content_type")
       .eq("published", true)
-      .not("video_url", "is", null)
+      .eq("visibility", "public")
       .order("created_at", { ascending: false })
       .range(from, from + HERO_PAGE_SIZE - 1);
     if (error) throw error;
@@ -48,12 +58,24 @@ export default function GuestCinematicBackdrop({ locale }: GuestCinematicBackdro
   const [isGuestHome, setIsGuestHome] = useState(false);
   const [works, setWorks] = useState<Work[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [imageIndex, setImageIndex] = useState(0);
   const [muted, setMuted] = useState(true);
   const [volume, setVolume] = useState(DEFAULT_VOLUME);
   const [repeat, setRepeat] = useState(false);
   const [backgroundMode, setBackgroundMode] = useState<BackgroundMode>("video");
-  const playableWorks = useMemo(() => shuffle(works.map((work) => ({ ...work, src: toPlaybackSource(work) })).filter((work) => work.src && work.content_type !== "podcast" && work.content_type !== "live")) as Array<Work & { src: string }>, [works]);
+  const playableWorks = useMemo(
+    () => stableMix(works.map((work) => ({ ...work, src: toPlaybackSource(work) }))
+      .filter((work) => work.src && work.content_type !== "podcast" && work.content_type !== "live")) as Array<Work & { src: string }>,
+    [works],
+  );
+  // Still imagery has its own stable list. Image mode is a real still-image
+  // gallery sourced from public artwork thumbnails, not a frozen video frame.
+  const imageWorks = useMemo(
+    () => stableMix(works.filter((work) => Boolean(work.thumbnail_url))),
+    [works],
+  );
   const current = playableWorks[currentIndex] ?? null;
+  const currentImage = imageWorks[imageIndex] ?? null;
 
   useEffect(() => {
     if (pathname !== `/${locale}`) { setIsGuestHome(false); return; }
@@ -72,6 +94,7 @@ export default function GuestCinematicBackdrop({ locale }: GuestCinematicBackdro
   }, [isGuestHome]);
 
   useEffect(() => { setCurrentIndex(0); }, [playableWorks.length]);
+  useEffect(() => { setImageIndex(0); }, [imageWorks.length]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -106,13 +129,19 @@ export default function GuestCinematicBackdrop({ locale }: GuestCinematicBackdro
         case "toggle-repeat": setRepeat(detail.repeat ?? !repeat); break;
         case "seek": if (Number.isFinite(detail.time)) video.currentTime = Math.max(0, detail.time as number); break;
         case "replay": if (backgroundMode === "image") setBackgroundMode("video"); video.currentTime = 0; void video.play().then(() => undefined, () => undefined); break;
-        case "next": setCurrentIndex((index) => playableWorks.length ? (index + 1) % playableWorks.length : 0); break;
-        case "previous": setCurrentIndex((index) => playableWorks.length ? (index - 1 + playableWorks.length) % playableWorks.length : 0); break;
+        case "next":
+          if (backgroundMode === "image") setImageIndex((index) => imageWorks.length ? (index + 1) % imageWorks.length : 0);
+          else setCurrentIndex((index) => playableWorks.length ? (index + 1) % playableWorks.length : 0);
+          break;
+        case "previous":
+          if (backgroundMode === "image") setImageIndex((index) => imageWorks.length ? (index - 1 + imageWorks.length) % imageWorks.length : 0);
+          else setCurrentIndex((index) => playableWorks.length ? (index - 1 + playableWorks.length) % playableWorks.length : 0);
+          break;
       }
     };
     window.addEventListener("ravine-video-control", handleControl as EventListener);
     return () => window.removeEventListener("ravine-video-control", handleControl as EventListener);
-  }, [backgroundMode, playableWorks.length, repeat, volume]);
+  }, [backgroundMode, imageWorks.length, playableWorks.length, repeat, volume]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -131,21 +160,26 @@ export default function GuestCinematicBackdrop({ locale }: GuestCinematicBackdro
     window.dispatchEvent(new CustomEvent("ravine-video-background-mode-state", { detail: { backgroundMode } }));
   }, [backgroundMode]);
 
-  if (!isGuestHome || !current) return null;
+  if (!isGuestHome || (!current && !currentImage)) return null;
   return (
     <div className="ravine-guest-cinematic-backdrop" data-background-mode={backgroundMode} aria-hidden="true">
-      {current.thumbnail_url ? (
-        <img className="ravine-guest-cinematic-image" src={current.thumbnail_url} alt="" decoding="async" />
+      {(backgroundMode === "image" ? currentImage?.thumbnail_url : current?.thumbnail_url || currentImage?.thumbnail_url) ? (
+        <img
+          className="ravine-guest-cinematic-image"
+          src={(backgroundMode === "image" ? currentImage?.thumbnail_url : current?.thumbnail_url || currentImage?.thumbnail_url) ?? undefined}
+          alt=""
+          decoding="async"
+        />
       ) : null}
       <video
         id="ravine-guest-cinematic-player"
         ref={videoRef}
         className="ravine-guest-cinematic-video"
-        src={current.src}
-        poster={current.thumbnail_url || undefined}
+        src={current?.src}
+        poster={(current?.thumbnail_url || currentImage?.thumbnail_url) ?? undefined}
         muted={muted}
         playsInline
-        autoPlay={backgroundMode === "video"}
+        autoPlay={backgroundMode === "video" && Boolean(current)}
         loop={false}
         controls={false}
         preload="metadata"
