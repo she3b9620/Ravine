@@ -123,11 +123,11 @@ test("regular videos and documentaries use the shared public searchable catalog"
 });
 
 
-const seriesDetail = read("../app/[locale]/series/[id]/page.tsx");
+const seriesDetail = read("../app/[locale]/series/[seriesId]/page.tsx");
 const seriesDetailStyles = read("../app/[locale]/series/series.module.css");
 
 test("public series detail route resolves the series card destination and hides restricted titles", () => {
-  assert.match(seriesDetail, /params: Promise<\{ locale: string; id: string \}>/);
+  assert.match(seriesDetail, /params: Promise<\{ locale: string; seriesId: string \}>/);
   assert.match(seriesDetail, /Number\.isSafeInteger\(seriesId\)/);
   assert.match(seriesDetail, /from\("ravine_series_titles"\)/);
   assert.match(seriesDetail, /\.eq\("id", seriesId\)/);
