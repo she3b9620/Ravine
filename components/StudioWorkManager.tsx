@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowDownUp, Search } from "lucide-react";
@@ -94,8 +94,7 @@ function contentTypeLabel(value: string | null, ar: boolean) {
 export default function StudioWorkManager({ works: initialWorks, locale, creatorId, resultCount, totalWorksCount, filters }: Props) {
   const ar = locale === "ar";
   const router = useRouter();
-  const [works, setWorks] = useState(initialWorks);
-  useEffect(() => setWorks(initialWorks), [initialWorks]);
+  const works = initialWorks;
   const [busyId, setBusyId] = useState<number | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editTitle, setEditTitle] = useState("");
@@ -218,7 +217,6 @@ export default function StudioWorkManager({ works: initialWorks, locale, creator
           }
         }
 
-        setWorks((current) => current.map((work) => (work.id === id ? (data as Work) : work)));
         setEditingId(null);
         router.refresh();
       }
@@ -262,7 +260,6 @@ export default function StudioWorkManager({ works: initialWorks, locale, creator
         throw new Error("RAVINE_STUDIO_PUBLISH_STATE_FAILED");
       }
 
-      setWorks((current) => current.map((item) => (item.id === work.id ? payload.work as Work : item)));
       router.refresh();
     } catch {
       setError(studioActionError(ar, nextPublished ? "publish" : "unpublish"));
@@ -292,7 +289,6 @@ export default function StudioWorkManager({ works: initialWorks, locale, creator
           ? "RAVINE_WORK_HAS_FINANCIAL_RECORDS"
           : "RAVINE_STUDIO_DELETE_FAILED");
       }
-      setWorks((current) => current.filter((item) => item.id !== work.id));
       router.refresh();
     } catch (deleteError) {
       if (deleteError instanceof Error && deleteError.message === "RAVINE_WORK_HAS_FINANCIAL_RECORDS") {

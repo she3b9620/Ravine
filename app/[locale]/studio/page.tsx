@@ -91,7 +91,7 @@ export default async function StudioPage({ params, searchParams }: { params: Pro
     .trim()
     .slice(0, 100)
     .replace(/[(),%_*"\\]/g, " ")
-    .replace(/\\s+/g, " ");
+    .replace(/\s+/g, " ");
   const rawWorkStatus = Array.isArray(query.workStatus) ? query.workStatus[0] : query.workStatus;
   const workStatus = (["all", "published", "draft"].includes(rawWorkStatus || "") ? rawWorkStatus : "all") as "all" | "published" | "draft";
   const rawWorkType = Array.isArray(query.workType) ? query.workType[0] : query.workType;

@@ -55,10 +55,12 @@ test("Studio metadata editor only offers quality values accepted by the database
   assert.doesNotMatch(qualityOptions, /1440p|2160p/);
 });
 
-test("Studio refreshes server props after upload, edits, publish/hide, and deletion", () => {
-  assert.ok(manager.includes("useEffect(() => setWorks(initialWorks), [initialWorks])"));
+test("Studio uses server-returned work as its source of truth and refreshes after mutations", () => {
+  assert.ok(manager.includes("const works = initialWorks"));
   assert.ok(manager.includes("const router = useRouter()"));
   assert.ok(manager.includes("router.refresh()"));
+  assert.doesNotMatch(manager, /setState synchronously within an effect/);
+  assert.doesNotMatch(manager, /setWorks\(/);
 });
 
 test("Studio explains why a work with retained financial records can only be hidden, not deleted", () => {
