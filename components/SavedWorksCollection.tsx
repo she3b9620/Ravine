@@ -182,7 +182,7 @@ export default function SavedWorksCollection({ locale, initialItems, loadError: 
               </Link>
               <div className={styles.cardActions}>
                 <span>{ar ? "محفوظ" : "Saved"}</span>
-                <button type="button" onClick={() => void removeSavedItem(work.id)} disabled={busyId !== null}>
+                <button type="button" aria-label={ar ? "إزالة " + (work.title || "العمل") + " من المحفوظات" : "Remove " + (work.title || "work") + " from saved items"} onClick={() => void removeSavedItem(work.id)} disabled={busyId !== null}>
                   {busyId === work.id ? "…" : (ar ? "إزالة من المحفوظات" : "Remove saved item")}
                 </button>
               </div>

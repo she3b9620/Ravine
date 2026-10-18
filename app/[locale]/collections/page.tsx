@@ -45,11 +45,9 @@ export default async function CollectionsPage({ params }: { params: Promise<{ lo
       .eq("visibility", "public");
 
     loadError = Boolean(worksError);
-    const byId = new Map((workRows ?? []).map((work) => [Number(work.id), work]));
-    workItems = savedIds
-      .map((id) => byId.get(id))
-      .filter((work): work is NonNullable<typeof work> => Boolean(work))
-      .map((work) => ({
+    const byId = new Map<number, SavedWorkItem>();
+    for (const work of workRows ?? []) {
+      byId.set(Number(work.id), {
         id: Number(work.id),
         title: work.title ?? null,
         description: work.description ?? null,
@@ -60,7 +58,11 @@ export default async function CollectionsPage({ params }: { params: Promise<{ lo
         content_type: work.content_type ?? null,
         quality: work.quality ?? null,
         created_at: work.created_at ?? null,
-      }));
+      });
+    }
+    workItems = savedIds
+      .map((id) => byId.get(id))
+      .filter((work): work is SavedWorkItem => work !== undefined);
   }
 
   return (

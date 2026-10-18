@@ -22,7 +22,7 @@ function localizedStatus(status: string, ar: boolean) {
 
 export default function DirectMessages({ locale, initialRecipient, initialCreatorId, compact = false }: { locale: Locale; initialRecipient?: string; initialCreatorId?: number; compact?: boolean }) {
   const ar = locale === "ar";
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const [userId, setUserId] = useState<string | null>(null);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [people, setPeople] = useState<Record<string, Person>>({});
@@ -44,27 +44,42 @@ export default function DirectMessages({ locale, initialRecipient, initialCreato
       const { data: auth } = await supabase.auth.getUser();
       if (!mounted || !auth.user) return;
       setUserId(auth.user.id);
-      const { data, error: conversationsError } = await supabase.from("direct_conversations").select("id,participant_a,participant_b,requester_id,creator_id,status,requester_message_count,creator_message_count,last_message_at").order("last_message_at", { ascending: false, nullsFirst: false });
+      const { data, error: conversationsError } = await supabase
+        .from("direct_conversations")
+        .select("id,participant_a,participant_b,requester_id,creator_id,status,requester_message_count,creator_message_count,last_message_at")
+        .order("last_message_at", { ascending: false, nullsFirst: false });
       if (!mounted) return;
       if (conversationsError) setError(ravineErrorMessage(conversationsError, locale));
       const rows = (data || []) as Conversation[];
       setConversations(rows);
+
+      const preferredConversation = initialRecipient
+        ? rows.find((row) => row.participant_a === initialRecipient || row.participant_b === initialRecipient)
+        : rows[0];
+      if (preferredConversation) {
+        setSelectedId((current) => current || preferredConversation.id);
+      } else if (initialRecipient) {
+        setRecipientId(initialRecipient);
+      }
+
       const ids = Array.from(new Set(rows.flatMap((row) => [row.participant_a, row.participant_b])));
       if (ids.length) {
-        const { data: profiles, error: profilesError } = await supabase.from("profiles").select("id,username,display_name,avatar_url,is_creator").in("id", ids);
+        const { data: profiles, error: profilesError } = await supabase
+          .from("profiles")
+          .select("id,username,display_name,avatar_url,is_creator")
+          .in("id", ids);
         if (profilesError) setError(ravineErrorMessage(profilesError, locale));
         const mapped: Record<string, Person> = {};
         for (const person of (profiles || []) as Person[]) mapped[person.id] = person;
         if (mounted) setPeople(mapped);
       }
-      if (mounted && rows.length && !selectedId) setSelectedId(rows[0].id);
     }
     void load();
     return () => { mounted = false; };
-  }, []);
+  }, [initialRecipient, locale, supabase]);
 
   useEffect(() => {
-    if (!selectedId) { setMessages([]); return; }
+    if (!selectedId) return;
     let mounted = true;
     let channel: ReturnType<typeof supabase.channel> | null = null;
     async function load() {
@@ -78,14 +93,7 @@ export default function DirectMessages({ locale, initialRecipient, initialCreato
     }
     void load();
     return () => { mounted = false; if (channel) void supabase.removeChannel(channel); };
-  }, [selectedId]);
-
-  useEffect(() => {
-    if (!initialRecipient) return;
-    const existing = conversations.find((row) => row.participant_a === initialRecipient || row.participant_b === initialRecipient);
-    if (existing) setSelectedId(existing.id);
-    else setRecipientId(initialRecipient);
-  }, [initialRecipient, conversations]);
+  }, [selectedId, locale, supabase]);
 
   const sendBlockedReason = useMemo(() => {
     if (!selected) return "";
@@ -153,7 +161,7 @@ export default function DirectMessages({ locale, initialRecipient, initialCreato
           {selected ? <>
             <header className="direct-thread-head"><div><strong>{selectedPerson?.display_name || selectedPerson?.username || (ar ? "مستخدم" : "User")}</strong><span>{selectedPerson?.username ? `@${selectedPerson.username}` : ""}</span></div><button type="button" className="direct-close" onClick={() => setSelectedId(null)} aria-label={ar ? "إغلاق" : "Close"}><X size={16}/></button></header>
             <div className="direct-thread-status">{pendingCreatorContact ? (ar ? `تواصل مع المبدع: ${selected.requester_message_count}/3 رسائل أرسلت. بمجرد أن يرد المبدع تفتح المحادثة بالكامل.` : `Creator contact: ${selected.requester_message_count}/3 messages sent. The conversation opens fully when the creator replies.`) : null}{sendBlockedReason ? <strong>{sendBlockedReason}</strong> : null}</div>
-            <div className="direct-thread-messages">{messages.map((message) => <div key={message.id} className={`direct-bubble ${message.sender_id === userId ? "mine" : "theirs"}`}>{message.body}<time>{new Date(message.created_at).toLocaleTimeString(locale === "ar" ? "ar-EG" : "en-US", { hour: "2-digit", minute: "2-digit" })}</time></div>)}</div>
+            <div className="direct-thread-messages">{messages.filter((message) => message.conversation_id === selected.id).map((message) => <div key={message.id} className={`direct-bubble ${message.sender_id === userId ? "mine" : "theirs"}`}>{message.body}<time>{new Date(message.created_at).toLocaleTimeString(locale === "ar" ? "ar-EG" : "en-US", { hour: "2-digit", minute: "2-digit" })}</time></div>)}</div>
           </> : null}
           <div className="direct-compose">
             {(error || (!selected && !recipientId)) ? <div className="direct-error">{error || (ar ? "اختر محادثة أو ابدأ واحدة جديدة." : "Select a conversation or start a new one.")}</div> : null}

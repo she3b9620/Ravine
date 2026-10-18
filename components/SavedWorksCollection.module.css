@@ -1,4 +1,7 @@
 .collection{display:grid;gap:20px;min-width:0;width:100%}
+:global(.saved-collection-page h1){margin:0;font-size:clamp(36px,6vw,72px);line-height:1.02;letter-spacing:-.045em}
+:global(.ravine-shell[lang="ar"] .saved-collection-page h1){font-family:var(--font-arabic-display);line-height:1.15;letter-spacing:-.02em}
+:global(.ravine-shell[lang="en"] .saved-collection-page h1){font-family:var(--font-latin);line-height:.98;letter-spacing:-.05em}
 .controls{display:grid;grid-template-columns:minmax(0,1fr) minmax(210px,270px) auto;align-items:center;gap:12px;margin:8px 0 2px}
 .search,.sort{display:flex;align-items:center;gap:10px;min-width:0;min-height:48px;padding:0 14px;border:1px solid rgba(241,233,220,.13);border-radius:14px;background:rgba(21,23,25,.56);color:var(--stone,#9a9690)}
 .search:focus-within,.sort:focus-within{border-color:rgba(196,122,82,.58);box-shadow:0 0 0 3px rgba(196,122,82,.07)}
