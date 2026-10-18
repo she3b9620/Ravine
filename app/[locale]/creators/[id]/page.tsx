@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import FollowCreator from "@/components/FollowCreator";
+import RAVINEEventsCatalog, { type RAVINEEventItem } from "@/components/RAVINEEventsCatalog";
 import styles from "./creator-profile.module.css";
 
 export const dynamic = "force-dynamic";
@@ -18,6 +19,18 @@ type Creator = {
   user_id: string | null;
 };
 type Profile = { cover_url: string | null; website_url: string | null; bio: string | null };
+type CreatorEventRow = {
+  id: number;
+  creator_id: number;
+  title: string;
+  description: string | null;
+  live_type: string;
+  mode: string;
+  status: string;
+  scheduled_at: string | null;
+  started_at: string | null;
+  ended_at: string | null;
+};
 type Work = {
   id: number;
   title: string | null;
@@ -130,7 +143,7 @@ export default async function CreatorProfilePage({ params }: { params: Promise<{
   const creator = creatorData as Creator | null;
   if (creatorError || !creator) notFound();
 
-  const [{ data: worksData }, { data: profileData }] = await Promise.all([
+  const [{ data: worksData }, { data: profileData }, { data: eventData }] = await Promise.all([
     supabase
       .from("videos")
       .select("id,title,description,thumbnail_url,video_url,duration,views,likes,content_type,quality")
@@ -142,8 +155,30 @@ export default async function CreatorProfilePage({ params }: { params: Promise<{
     creator.user_id
       ? supabase.from("profiles").select("cover_url,website_url,bio").eq("id", creator.user_id).maybeSingle()
       : Promise.resolve({ data: null }),
+    supabase
+      .from("live_events")
+      .select("id,creator_id,title,description,live_type,mode,status,scheduled_at,started_at,ended_at")
+      .eq("creator_id", creatorId)
+      .in("status", ["scheduled", "live"])
+      .order("scheduled_at", { ascending: true, nullsFirst: false })
+      .limit(12),
   ]);
 
+  const creatorEvents = ((eventData ?? []) as CreatorEventRow[]).map((event): RAVINEEventItem => ({
+    id: event.id,
+    title: event.title,
+    description: event.description,
+    type: event.live_type,
+    mode: event.mode,
+    status: event.status,
+    scheduledAt: event.scheduled_at,
+    startedAt: event.started_at,
+    endedAt: event.ended_at,
+    creatorId: creator.id,
+    creatorName: creator.name || creator.username || (ar ? "مبدع رَافِين" : "RAVINE creator"),
+    creatorAvatar: creator.avatar_url,
+    recordingHref: null,
+  }));
   const works = (worksData || []) as Work[];
   const profile = profileData as Profile | null;
   const trailer = works.find((w) => Boolean(w.video_url));
@@ -240,6 +275,20 @@ export default async function CreatorProfilePage({ params }: { params: Promise<{
               </div>
             </div>
           </div>
+        </section>
+      ) : null}
+
+      {creatorEvents.length ? (
+        <section className="section" aria-label={ar ? "أحداث المبدع القادمة" : "Upcoming creator events"}>
+          <div className="section-head">
+            <div>
+              <div className="eyebrow">RAVINE / EVENTS</div>
+              <h2>{ar ? "مواعيد هذا المبدع." : "This creator’s upcoming sessions."}</h2>
+              <p className="section-note">{ar ? "الجلسات المجدولة والمباشرة التي أعلن عنها هذا المبدع." : "Scheduled and live sessions announced by this creator."}</p>
+            </div>
+            <Link className="button secondary" href={"/" + locale + "/events"}>{ar ? "كل الأحداث" : "All events"}</Link>
+          </div>
+          <RAVINEEventsCatalog locale={locale} items={creatorEvents} />
         </section>
       ) : null}
 

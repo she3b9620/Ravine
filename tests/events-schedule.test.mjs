@@ -94,3 +94,12 @@ test("events, Spaces, and public collections are reachable from desktop and mobi
   assert.match(sidebar, /\["spaces", "Spaces", "المساحات", Headphones\]/);
   assert.match(sidebar, /\["collections", "Collections & Boards", "المجموعات واللوحات", BookmarkPlus\]/);
 });
+
+test("creator profiles surface that creator's scheduled and live sessions", () => {
+  const page = read("../app/[locale]/creators/[id]/page.tsx");
+  assert.match(page, /from\("live_events"\)/);
+  assert.match(page, /\.eq\("creator_id", creatorId\)/);
+  assert.match(page, /\.in\("status", \["scheduled", "live"\]\)/);
+  assert.match(page, /<RAVINEEventsCatalog locale=\{locale\} items=\{creatorEvents\}/);
+  assert.match(page, /All events/);
+});
