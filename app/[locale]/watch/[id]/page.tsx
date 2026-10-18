@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import RAVINEWorkPlayer from "@/components/RAVINEWorkPlayer";
 import WatchActions from "@/components/WatchActions";
+import RAVINEWorkCatalog, { type RAVINECatalogItem } from "@/components/RAVINEWorkCatalog";
 import FollowCreator from "@/components/FollowCreator";
 import styles from "./watch-creator.module.css";
 import { isYouTubeUrl, resolveAssetPlaybackUrl, type RAVINEPlaybackAsset } from "@/lib/ravine-playback-core";
@@ -15,6 +16,7 @@ type Locale = "ar" | "en";
 type Creator = { id: number; name: string | null; username: string | null; avatar_url: string | null; specialty: string | null; user_id: string | null };
 type Chapter = { id: number; title: string; start_seconds: number; end_seconds: number | null; thumbnail_url: string | null };
 type Asset = RAVINEPlaybackAsset;
+type RelatedVideo = { id: number; title: string | null; description: string | null; thumbnail_url: string | null; duration: number | null; views: number | null; likes: number | null; content_type: string | null; quality: string | null; created_at: string | null };
 
 export default async function WatchPage({ params }: { params: Promise<{ locale: string; id: string }> }) {
   const { locale: rawLocale, id } = await params;
@@ -39,6 +41,50 @@ export default async function WatchPage({ params }: { params: Promise<{ locale: 
     supabase.from("work_chapters").select("id,title,start_seconds,end_seconds,thumbnail_url").eq("work_id", videoId).order("sort_order", { ascending: true }),
     supabase.from("work_media_assets").select("id,kind,media_url,duration,label,language,mime_type").eq("work_id", videoId).order("sort_order", { ascending: true }),
   ]);
+
+  const [{ data: creatorWorksData }, { data: typeWorksData }] = await Promise.all([
+    video.creator_id
+      ? supabase.from("videos")
+          .select("id,title,description,thumbnail_url,duration,views,likes,content_type,quality,created_at")
+          .eq("creator_id", video.creator_id)
+          .eq("published", true)
+          .eq("visibility", "public")
+          .eq("search_visible", true)
+          .neq("id", videoId)
+          .order("created_at", { ascending: false })
+          .limit(6)
+      : Promise.resolve({ data: [] }),
+    video.content_type
+      ? supabase.from("videos")
+          .select("id,title,description,thumbnail_url,duration,views,likes,content_type,quality,created_at")
+          .eq("content_type", video.content_type)
+          .eq("published", true)
+          .eq("visibility", "public")
+          .eq("search_visible", true)
+          .neq("id", videoId)
+          .order("created_at", { ascending: false })
+          .limit(6)
+      : Promise.resolve({ data: [] }),
+  ]);
+  const relatedById = new Map<number, RelatedVideo>();
+  for (const item of [...((creatorWorksData ?? []) as RelatedVideo[]), ...((typeWorksData ?? []) as RelatedVideo[])]) {
+    if (Number(item.id) !== videoId && !relatedById.has(Number(item.id))) relatedById.set(Number(item.id), item);
+    if (relatedById.size >= 6) break;
+  }
+  const relatedItems: RAVINECatalogItem[] = Array.from(relatedById.values()).map((item) => ({
+    id: item.id,
+    href: "/" + locale + "/work/" + item.id,
+    title: item.title || (ar ? "عمل بدون عنوان" : "Untitled work"),
+    description: item.description || (ar ? "عمل إبداعي من مجتمع رَافِين." : "A creative work from the RAVINE community."),
+    imageUrl: item.thumbnail_url,
+    duration: item.duration,
+    views: item.views,
+    likes: item.likes,
+    quality: item.quality,
+    createdAt: item.created_at,
+    badge: item.content_type || (ar ? "عمل" : "WORK"),
+    kicker: (item.content_type || "WORK").toUpperCase(),
+  }));
 
   const work = toRAVINEWork(video as RAVINEWorkSource);
   const playbackAllowed = isPlayableRAVINEWork(work);
@@ -105,6 +151,18 @@ export default async function WatchPage({ params }: { params: Promise<{ locale: 
         </div>
         {video.published ? <WatchActions videoId={video.id} duration={video.duration} locale={locale} /> : null}
       </div>
+      {relatedItems.length ? (
+        <section className="section ravine-related-work" aria-labelledby="ravine-watch-related-heading">
+          <div className="section-head">
+            <div>
+              <div className="eyebrow">RAVINE / MORE TO EXPLORE</div>
+              <h2 id="ravine-watch-related-heading">{ar ? "واصل رحلتك مع أعمال قريبة." : "Continue with related work."}</h2>
+              <p className="section-note">{ar ? "أعمال عامة أخرى من المبدع نفسه أو من النوع نفسه، مع احترام إعدادات ظهورها." : "Other public work by this creator or in the same format, respecting each work’s visibility settings."}</p>
+            </div>
+          </div>
+          <RAVINEWorkCatalog locale={locale} items={relatedItems} />
+        </section>
+      ) : null}
     </main>
   );
 }

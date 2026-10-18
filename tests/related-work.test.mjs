@@ -24,3 +24,19 @@ test("related work metadata is fetched only after primary work access is verifie
   const relatedQuery = page.lastIndexOf('from("videos")');
   assert.ok(accessCheck >= 0 && relatedQuery > accessCheck);
 });
+
+
+test("cinematic Watch experience also continues into related, public-only work", () => {
+  const page = read("../app/[locale]/watch/[id]/page.tsx");
+  assert.match(page, /await canAccessRAVINEVideo\(supabase, video\)/);
+  assert.match(page, /\.eq\("creator_id", video\.creator_id\)/);
+  assert.match(page, /\.eq\("content_type", video\.content_type\)/);
+  assert.match(page, /\.eq\("published", true\)/);
+  assert.match(page, /\.eq\("visibility", "public"\)/);
+  assert.match(page, /\.eq\("search_visible", true\)/);
+  assert.match(page, /\.neq\("id", videoId\)/);
+  assert.match(page, /<RAVINEWorkCatalog locale=\{locale\} items=\{relatedItems\}/);
+  const accessCheck = page.indexOf("await canAccessRAVINEVideo(supabase, video)");
+  const relatedQuery = page.lastIndexOf('from("videos")');
+  assert.ok(accessCheck >= 0 && relatedQuery > accessCheck);
+});
