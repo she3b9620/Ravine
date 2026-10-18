@@ -86,6 +86,21 @@ export default function StudioWorkManager({ works: initialWorks, locale }: Props
       setError(ar ? "نوع المحتوى غير صالح." : "Invalid content type.");
       return;
     }
+
+    // A series episode carries series_id, season_number, and episode_number.
+    // Do not convert ordinary works into series, or detach a series episode
+    // from that structure through this metadata-only editor.
+    const originalWork = works.find((work) => work.id === id);
+    const originalType = originalWork?.content_type || "video";
+    if ((originalType === "series" || editType === "series") && originalType !== editType) {
+      setError(
+        ar
+          ? "لا يمكن تغيير نوع العمل إلى مسلسل أو إلغاء تصنيفه كمسلسل من شاشة التعديل؛ للحفاظ على ارتباط الحلقة بالمسلسل والموسم ورقم الحلقة."
+          : "A work cannot be converted into or out of a series from this editor because its series, season, and episode relationship must remain intact.",
+      );
+      return;
+    }
+
     if (!allowedVisibility.has(editVisibility)) {
       setError(ar ? "إعداد الظهور غير صالح." : "Invalid visibility setting.");
       return;
@@ -223,14 +238,14 @@ export default function StudioWorkManager({ works: initialWorks, locale }: Props
                     <input value={editTitle} onChange={(event) => setEditTitle(event.target.value)} placeholder={ar ? "العنوان" : "Title"} />
                     <textarea value={editDescription} onChange={(event) => setEditDescription(event.target.value)} rows={3} placeholder={ar ? "الوصف" : "Description"} />
                     <div className="studio-form-grid">
-                      <select value={editType} onChange={(event) => setEditType(event.target.value)}>
+                      <select value={editType} disabled={work.content_type === "series"} onChange={(event) => setEditType(event.target.value)}>
                         <option value="short">{ar ? "شورتات" : "Shorts"}</option>
                         <option value="video">{ar ? "فيديو" : "Video"}</option>
                         <option value="podcast">{ar ? "بودكاست" : "Podcast"}</option>
                         <option value="documentary">{ar ? "وثائقي" : "Documentary"}</option>
                         <option value="short_film">{ar ? "فيلم قصير" : "Short Film"}</option>
                         <option value="film">{ar ? "فيلم مطوّل" : "Feature Film"}</option>
-                        <option value="series">{ar ? "مسلسل / حلقة" : "Series episode"}</option>
+                        <option value="series" disabled={work.content_type !== "series"}>{ar ? "مسلسل / حلقة" : "Series episode"}</option>
                       </select>
                       <select value={editQuality} onChange={(event) => setEditQuality(event.target.value)}>
                         <option value="1080p">1080p</option>
