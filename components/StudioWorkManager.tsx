@@ -431,8 +431,8 @@ export default function StudioWorkManager({ works: initialWorks, locale, creator
                       </select>
                       <select value={editQuality} onChange={(event) => setEditQuality(event.target.value)}>
                         <option value="1080p">1080p</option>
-                        <option value="1440p">1440p</option>
-                        <option value="2160p">4K</option>
+                        <option value="2k">2K</option>
+                        <option value="4k">4K</option>
                       </select>
                       <select value={editVisibility} onChange={(event) => setEditVisibility(event.target.value)}>
                         <option value="public">{ar ? "عام" : "Public"}</option>

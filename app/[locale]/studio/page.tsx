@@ -82,36 +82,38 @@ export default async function StudioPage({ params, searchParams }: { params: Pro
   const pageSize = 50;
   const rawPage = Array.isArray(query.workPage) ? query.workPage[0] : query.workPage;
   const requestedPage = Number(rawPage);
-  let currentPage = Number.isSafeInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
-  const [{ data: initialWorks, count: totalWorks, error: worksError }, publishedCountResult, draftCountResult] = await Promise.all([
-    supabase
-      .from("videos")
-      .select("id,series_id,title,description,content_type,quality,published,visibility,video_url,views,likes,created_at", { count: "exact" })
-      .eq("creator_id", creator.id)
-      .order("created_at", { ascending: false })
-      .range((currentPage - 1) * pageSize, currentPage * pageSize - 1),
+  const validRequestedPage = Number.isSafeInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+
+  // Count first, then clamp the requested page before asking PostgREST for a
+  // range. A forged or stale giant page number must not create an invalid range
+  // and turn an otherwise healthy Studio list into a false load error.
+  const [{ count: totalWorks, error: totalWorksError }, publishedCountResult, draftCountResult] = await Promise.all([
+    supabase.from("videos").select("id", { count: "exact", head: true }).eq("creator_id", creator.id),
     supabase.from("videos").select("id", { count: "exact", head: true }).eq("creator_id", creator.id).eq("published", true),
     supabase.from("videos").select("id", { count: "exact", head: true }).eq("creator_id", creator.id).eq("published", false),
   ]);
 
   const safeTotalWorks = totalWorks ?? 0;
   const pageCount = Math.max(1, Math.ceil(safeTotalWorks / pageSize));
-  if (currentPage > pageCount) currentPage = pageCount;
-  let worksData = initialWorks;
-  if (!worksError && currentPage !== (Number.isSafeInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1)) {
-    const correctedPage = await supabase
+  const currentPage = Math.min(validRequestedPage, pageCount);
+
+  let worksData: Work[] = [];
+  let worksError = totalWorksError;
+  if (!worksError) {
+    const pageResult = await supabase
       .from("videos")
-      .select("id,series_id,title,description,content_type,quality,published,visibility,video_url,views,likes,created_at", { count: "exact" })
+      .select("id,series_id,title,description,content_type,quality,published,visibility,video_url,views,likes,created_at")
       .eq("creator_id", creator.id)
       .order("created_at", { ascending: false })
       .range((currentPage - 1) * pageSize, currentPage * pageSize - 1);
-    worksData = correctedPage.data;
+    worksData = (pageResult.data ?? []) as Work[];
+    worksError = pageResult.error;
   }
 
-  const works = (worksData ?? []) as Work[];
+  const works = worksData;
   const publishedCount = publishedCountResult.count;
   const draftCount = draftCountResult.count;
-  const statisticsError = Boolean(publishedCountResult.error || draftCountResult.error);
+  const statisticsError = Boolean(totalWorksError || publishedCountResult.error || draftCountResult.error);
 
   return (
     <section className="section studio-page">

@@ -46,6 +46,14 @@ test("Studio work actions use localized recovery messages instead of raw provide
 });
 
 
+test("Studio metadata editor only offers quality values accepted by the database schema", () => {
+  const qualityOptions = manager.match(/<select value=\{editQuality\}[^>]*>([\s\S]*?)<\/select>/)?.[1] ?? "";
+  assert.match(qualityOptions, /value="1080p"/);
+  assert.match(qualityOptions, /value="2k"/);
+  assert.match(qualityOptions, /value="4k"/);
+  assert.doesNotMatch(qualityOptions, /1440p|2160p/);
+});
+
 test("Studio explains why a work with retained financial records can only be hidden, not deleted", () => {
   assert.match(manager, /RAVINE_WORK_HAS_FINANCIAL_RECORDS/);
   assert.match(manager, /لا يمكن حذف هذا العمل نهائيًا لوجود سجل مالي مرتبط به/);

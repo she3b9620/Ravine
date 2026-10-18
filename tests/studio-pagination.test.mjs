@@ -27,13 +27,22 @@ test("the Studio summary counts all published works and drafts, independent of t
 
 test("pagination navigation is accessible, localized, and keeps page numbers bounded", () => {
   assert.match(page, /Math\.max\(1, Math\.ceil\(safeTotalWorks \/ pageSize\)\)/);
-  assert.match(page, /if \(currentPage > pageCount\) currentPage = pageCount/);
+  assert.match(page, /const currentPage = Math\.min\(validRequestedPage, pageCount\)/);
+  assert.match(page, /const validRequestedPage = Number\.isSafeInteger\(requestedPage\) && requestedPage > 0 \? requestedPage : 1/);
   assert.match(page, /workPage=\$\{currentPage - 1\}/);
   assert.match(page, /workPage=\$\{currentPage \+ 1\}/);
   assert.match(page, /aria-label=\{ar \? "صفحات الأعمال" : "Work pages"\}/);
   assert.match(page, /aria-current="page"/);
   assert.match(page, /"السابق"/);
   assert.match(page, /"Next"/);
+});
+
+test("invalid and very large page numbers are normalized before the works range query", () => {
+  const countQuery = page.indexOf('select("id", { count: "exact", head: true }).eq("creator_id", creator.id)');
+  const rangeQuery = page.indexOf('.range((currentPage - 1) * pageSize, currentPage * pageSize - 1)');
+  assert.ok(countQuery >= 0 && rangeQuery > countQuery);
+  assert.match(page, /const currentPage = Math\.min\(validRequestedPage, pageCount\)/);
+  assert.doesNotMatch(page, /const \[\{ data: initialWorks, count: totalWorks/);
 });
 
 test("pagination styling responds to small screens and reduced-motion preferences", () => {
