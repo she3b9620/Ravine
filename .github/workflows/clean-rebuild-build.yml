@@ -24,6 +24,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Production dependency security audit
+        run: npm audit --omit=dev --audit-level=moderate
+
+      - name: Media catalog lint
+        run: npx eslint components/RAVINEShortsBrowse.tsx components/RAVINEMediaCatalog.tsx 'app/[locale]/podcasts/page.tsx' 'app/[locale]/series/page.tsx' components/StudioUpload.tsx components/StudioWorkManager.tsx
+
       - name: Governance checks
         run: npm run verify:ravine
 
