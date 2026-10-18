@@ -12,7 +12,7 @@ const studioPage = read("../app/[locale]/studio/page.tsx");
 const workModel = read("../lib/ravine-work-universe.ts");
 const player = read("../components/RAVINEWorkPlayer.tsx");
 const workContext = read("../components/RAVINEWorkContext.tsx");
-const migration = read("../supabase/migrations/20261017100000_ravine_series_content_type.sql");
+const migration = read("../supabase/migrations/20261017140355_ravine_media_taxonomy_and_series_structure.sql");
 
 test("series page lists published series work and links to its RAVINE watch page", () => {
   assert.match(page, /\.eq\("published", true\)/);
@@ -46,7 +46,10 @@ test("series uses the canonical RAVINE work type and standard video player", () 
 
 test("series content type shares existing video quota; no separate permission bypass", () => {
   assert.match(migration, /'documentary','series'/);
-  assert.match(migration, /'video','film','documentary','series'/);
+  assert.match(migration, /new\.content_type in \('video','film','short_film','documentary','series'\)/);
+  assert.match(manager, /originalType === "series" \|\| editType === "series"/);
+  assert.match(manager, /disabled=\{work\.content_type === "series"\}/);
+  assert.match(manager, /value="series" disabled=\{work\.content_type !== "series"\}/);
   assert.match(migration, /new\.user_id <> actor and not is_ravine_admin\(\)/);
   assert.match(migration, /where c\.id = new\.creator_id and c\.user_id = actor/);
 });
