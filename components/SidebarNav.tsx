@@ -14,7 +14,7 @@ const privateGroups: Group[] = [["YOUR SPACE", "مساحتك", [["creators?tab=f
 const adminGroups: Group[] = [["ADMINISTRATION", "إدارة المنصة", [["hero-media", "Hero media", "إدارة الهيرو", Images]]]];
 const GUEST_GATED = new Set(["community", "shorts", "cuts", "videos", "series", "live", "podcasts", "documentaries", "short-films", "films"]);
 
-export default function SidebarNav({ locale, authenticated, isCreator = false }: { locale: Locale; authenticated: boolean; isCreator?: boolean }) {
+export default function SidebarNav({ locale, authenticated, isCreator = false, isAdmin = false }: { locale: Locale; authenticated: boolean; isCreator?: boolean; isAdmin?: boolean }) {
   const pathname = usePathname() || `/${locale}`;
   const groups = authenticated ? [...publicGroups, ...privateGroups, ...(isAdmin ? adminGroups : [])] : publicGroups;
   const isActive = (slug: string) => { const [path] = slug.split("?"); return !path ? pathname === `/${locale}` : pathname === `/${locale}/${path}` || pathname.startsWith(`/${locale}/${path}/`); };
