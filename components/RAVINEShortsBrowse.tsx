@@ -41,6 +41,8 @@ export default function RAVINEShortsBrowse({ locale, works }: Props) {
   const videosRef = useRef(new Map<number, HTMLVideoElement>());
   const observersRef = useRef<IntersectionObserver | null>(null);
   const activeRef = useRef<number | null>(null);
+  const visibilityRatiosRef = useRef(new Map<HTMLElement, number>());
+  const manuallyPausedRef = useRef(new Set<number>());
 
   useEffect(() => {
     try {
@@ -84,42 +86,67 @@ export default function RAVINEShortsBrowse({ locale, works }: Props) {
       observersRef.current?.disconnect();
       observersRef.current = null;
       videosRef.current.forEach((video) => video.pause());
+      visibilityRatiosRef.current.clear();
+      manuallyPausedRef.current.clear();
       setPlayingId(null);
       activeRef.current = null;
       return;
     }
 
     const observer = new IntersectionObserver((entries) => {
-      const candidates = entries
-        .filter((entry) => entry.isIntersecting)
-        .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
-      const active = candidates[0]?.target as HTMLElement | undefined;
+      entries.forEach((entry) => {
+        const reel = entry.target as HTMLElement;
+        visibilityRatiosRef.current.set(reel, entry.isIntersecting ? entry.intersectionRatio : 0);
+      });
 
-      if (!active) {
+      // Choose from every currently visible reel, not only targets that changed
+      // in this particular IntersectionObserver callback.
+      const activeReel = [...visibilityRatiosRef.current.entries()]
+        .filter(([, ratio]) => ratio >= 0.25)
+        .sort((a, b) => b[1] - a[1])[0]?.[0];
+      const rawId = activeReel ? Number(activeReel.dataset.shortId) : Number.NaN;
+
+      if (!activeReel || !Number.isInteger(rawId)) {
+        if (activeRef.current !== null) manuallyPausedRef.current.delete(activeRef.current);
+        activeRef.current = null;
         videosRef.current.forEach((video) => video.pause());
         setPlayingId(null);
-        activeRef.current = null;
         return;
       }
-      const rawId = Number(active.dataset.shortId);
-      if (!Number.isInteger(rawId)) return;
+
+      const previousId = activeRef.current;
+      if (previousId !== null && previousId !== rawId) {
+        // A manual pause applies only while the viewer remains on that reel.
+        manuallyPausedRef.current.delete(previousId);
+      }
       activeRef.current = rawId;
 
       videosRef.current.forEach((video, id) => {
         if (id !== rawId) video.pause();
       });
+
       const video = videosRef.current.get(rawId);
-      if (video && video.dataset.playbackUnavailable !== "true") {
-        void video.play().then(() => setPlayingId(rawId)).catch(() => setPlayingId(null));
+      if (video && video.dataset.playbackUnavailable !== "true" && !manuallyPausedRef.current.has(rawId)) {
+        if (video.paused) {
+          void video.play().then(() => setPlayingId(rawId)).catch(() => setPlayingId(null));
+        } else {
+          setPlayingId(rawId);
+        }
+      } else if (!video || video.paused) {
+        setPlayingId(null);
       }
     }, { threshold: [0.25, 0.6, 0.8] });
 
-    document.querySelectorAll<HTMLElement>("[data-ravine-short-reel]").forEach((node) => observer.observe(node));
+    document.querySelectorAll<HTMLElement>("[data-ravine-short-reel]").forEach((node) => {
+      visibilityRatiosRef.current.set(node, 0);
+      observer.observe(node);
+    });
     observersRef.current = observer;
     return () => {
       observer.disconnect();
       observersRef.current = null;
       videosRef.current.forEach((video) => video.pause());
+      visibilityRatiosRef.current.clear();
       activeRef.current = null;
     };
   }, [mode, works]);
@@ -132,11 +159,17 @@ export default function RAVINEShortsBrowse({ locale, works }: Props) {
 
   function togglePlayback(workId: number) {
     const video = videosRef.current.get(workId);
-    if (!video) return;
+    if (!video || video.dataset.playbackUnavailable === "true") return;
     if (video.paused) {
+      videosRef.current.forEach((other, id) => {
+        if (id !== workId) other.pause();
+      });
+      manuallyPausedRef.current.delete(workId);
+      activeRef.current = workId;
       void video.play().then(() => setPlayingId(workId)).catch(() => setPlayingId(null));
     } else {
       video.pause();
+      manuallyPausedRef.current.add(workId);
       setPlayingId(null);
     }
   }
