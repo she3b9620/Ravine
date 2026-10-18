@@ -48,6 +48,14 @@ export default async function RavineShell({ locale, children }: { locale: Locale
     } catch {}
   }
 
+  let isAdmin = false;
+  if (user) {
+    try {
+      const { data, error } = await supabase.rpc("is_ravine_admin");
+      if (!error) isAdmin = data === true;
+    } catch {}
+  }
+
   const isAuthenticated = Boolean(user);
   const displayName = profile?.display_name || profile?.username || user?.email?.split("@")[0] || (isArabic ? "مستخدم RAVINE" : "RAVINE user");
 
@@ -55,7 +63,7 @@ export default async function RavineShell({ locale, children }: { locale: Locale
     <div className={`ravine-shell${isAuthenticated ? "" : " guest-shell"}`} lang={locale} dir={isArabic ? "rtl" : "ltr"}>
       <div className="ravine-platform-reading-glass" aria-hidden="true" />
       <header className="ravine-header"><div className="ravine-header-inner"><div className="ravine-header-start"><SidebarToggle locale={locale} /><Link href={`/${locale}`} className="ravine-brand ravine-brand-lockup" aria-label="RAVINE"><RavineLockup /></Link></div><div className="ravine-header-search"><SearchLauncher locale={locale} categories={categories} /></div><div className="ravine-header-actions"><MobileNav locale={locale} authenticated={isAuthenticated} /><div className="ravine-header-social" aria-label={isArabic ? "التنبيهات والرسائل والراديو" : "Notifications, messages, and radio"}>{isAuthenticated ? <><NotificationBell locale={locale} /><ChatLauncher locale={locale} /><RadioPlayerLauncher locale={locale} /></> : null}<RadioLauncher locale={locale} /></div>{isAuthenticated ? <AccountMenu locale={locale} displayName={displayName} username={profile?.username || null} avatarUrl={profile?.avatar_url || null} isCreator={Boolean(profile?.is_creator)} /> : <AuthTrigger locale={locale} label={isArabic ? "دخول" : "Sign in"} mode="signin" />}<div className="ravine-header-preferences"><ThemeToggle locale={locale} /><Suspense fallback={<span className="ravine-language" aria-hidden="true">{locale === "ar" ? "العربية" : "English"}</span>}><LanguageSwitcher locale={locale} /></Suspense></div></div></div></header>
-      <aside className="ravine-sidebar" aria-label={isArabic ? "القائمة الجانبية الرئيسية" : "Primary sidebar"}><SidebarNav locale={locale} authenticated={isAuthenticated} isCreator={Boolean(profile?.is_creator)} /></aside>
+      <aside className="ravine-sidebar" aria-label={isArabic ? "القائمة الجانبية الرئيسية" : "Primary sidebar"}><SidebarNav locale={locale} authenticated={isAuthenticated} isCreator={Boolean(profile?.is_creator)} isAdmin={isAdmin} /></aside>
       <main className="ravine-main">{children}</main>
       <footer className="ravine-footer"><div><div className="ravine-footer-brand ravine-brand-lockup"><RavineLockup compact /></div><p>{isArabic ? "منصة إبداعية سينمائية تُقدّر العمل وسياقه ومن يقف خلفه." : "A cinematic creative platform that values the work, its context, and the people behind it."}</p></div><div className="ravine-footer-meta"><span>{isArabic ? "لا شيء زخرفي بلا معنى" : "Nothing Decorative Without Meaning"}</span><span>© {new Date().getFullYear()} RAVINE</span></div></footer>
       <RavineRadio locale={locale} />
