@@ -31,3 +31,14 @@ test("user dashboard summarizes unread notifications and links to the inbox", ()
   assert.match(dashboard, /الإشعارات غير المقروءة/);
   assert.ok(dashboard.includes("/notifications"));
 });
+
+
+test("user dashboard summarizes liked work and links to the dedicated Library tab", () => {
+  const dashboard = read("../app/[locale]/dashboard/page.tsx");
+  assert.match(dashboard, /from\("video_likes"\)/);
+  assert.match(dashboard, /likedCount/);
+  assert.match(dashboard, /Liked work/);
+  assert.match(dashboard, /أعمال أعجبتك/);
+  assert.match(dashboard, /library\?tab=liked/);
+  assert.match(dashboard, /icon: Heart/);
+});
