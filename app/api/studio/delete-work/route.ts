@@ -159,7 +159,13 @@ export async function POST(request: NextRequest) {
       return jsonError("Could not verify financial records; the work was not deleted.", 503);
     }
     if (earningsRows?.length) {
-      return jsonError("This work has financial records and cannot be permanently deleted. Hide it instead.", 409);
+      return NextResponse.json(
+        {
+          error: "This work has financial records and cannot be permanently deleted. Hide it instead.",
+          code: "RAVINE_WORK_HAS_FINANCIAL_RECORDS",
+        },
+        { status: 409, headers: { "Cache-Control": "no-store, max-age=0" } },
+      );
     }
 
     // Read related media only after ownership has been established. A query
