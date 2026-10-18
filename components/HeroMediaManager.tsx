@@ -98,7 +98,8 @@ export default function HeroMediaManager({ locale }: { locale: Locale }) {
   async function uploadHeroVideo(file: File) {
     setError("");
     setNotice("");
-    if (!file.type.startsWith("video/")) {
+    const isRecognizedVideo = file.type.startsWith("video/") || /\.(mp4|webm|mov|mkv|m4v)$/i.test(file.name);
+    if (!isRecognizedVideo) {
       setError(ar ? "اختَر ملف فيديو صالحًا." : "Choose a valid video file.");
       return;
     }
@@ -126,12 +127,12 @@ export default function HeroMediaManager({ locale }: { locale: Locale }) {
         const poster = new URL(payload.secure_url);
         poster.pathname = poster.pathname
           .replace("/video/upload/", "/video/upload/so_0/")
-          .replace(/\\.(mp4|mov|webm|mkv|m4v)$/i, ".jpg");
+          .replace(/\.(mp4|mov|webm|mkv|m4v)$/i, ".jpg");
         thumbnailUrl = poster.toString();
       } catch {}
       const { data, error: insertError } = await supabase.from("ravine_hero_media_items").insert({
         media_type: "video",
-        title: videoTitle.trim() || file.name.replace(/\\.[^.]+$/, ""),
+        title: videoTitle.trim() || file.name.replace(/\.[^.]+$/, ""),
         media_url: payload.secure_url,
         thumbnail_url: thumbnailUrl,
         video_id: null,
