@@ -5,8 +5,8 @@
 .ravine-search-extra-card small{color:var(--stone,#9a9690);font-size:10px;line-height:1.6;overflow-wrap:anywhere}
 .ravine-search-extra-eyebrow{color:var(--copper,#c47a52);font-size:9px;letter-spacing:.12em;text-transform:uppercase}
 .ravine-search-extra-card p{margin:0;color:var(--stone,#9a9690);font-size:10px;line-height:1.65}
-:global(html[data-theme="light"]) .ravine-search-extra-card{border-color:rgba(23,23,23,.12);background:rgba(255,250,246,.72)}
-:global(html[data-theme="light"]) .ravine-search-extra-card strong{color:#201c19}
-:global(html[data-theme="light"]) .ravine-search-extra-card small,:global(html[data-theme="light"]) .ravine-search-extra-card p{color:#70665f}
+html[data-theme="light"] .ravine-search-extra-card{border-color:rgba(23,23,23,.12);background:rgba(255,250,246,.72)}
+html[data-theme="light"] .ravine-search-extra-card strong{color:#201c19}
+html[data-theme="light"] .ravine-search-extra-card small,html[data-theme="light"] .ravine-search-extra-card p{color:#70665f}
 @media(max-width:560px){.ravine-search-extra-grid{grid-template-columns:minmax(0,1fr)}}
 @media(prefers-reduced-motion:reduce){.ravine-search-extra-card{transition:none}}
