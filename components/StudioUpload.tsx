@@ -85,7 +85,7 @@ function mapUploadError(error: unknown, ar: boolean) {
     RAVINE_CLOUDINARY_NOT_CONFIGURED: ["رفع الوسائط غير مهيأ بعد؛ يجب استكمال إعدادات Cloudinary على الخادم.", "Cloudinary is not configured on the server yet. Add the required server-side environment variables."],
   };
   if (copy[code]) return ar ? copy[code][0] : copy[code][1];
-  return message;
+  return ar ? "تعذّر رفع العمل أو حفظ بياناته. تحقق من الملف والاتصال ثم حاول مجددًا." : "The work could not be uploaded or saved. Check the file and connection, then try again.";
 }
 
 export default function StudioUpload({ creatorId, locale }: Props) {
@@ -258,6 +258,8 @@ export default function StudioUpload({ creatorId, locale }: Props) {
 
     setBusy(true);
     setUploadProgress(null);
+    const uploadedPublicIds: string[] = [];
+    let createdWorkId: number | null = null;
     try {
       const supabase = createClient();
       const { data: auth } = await supabase.auth.getUser();
@@ -270,12 +272,17 @@ export default function StudioUpload({ creatorId, locale }: Props) {
         ar ? "ملف العمل الأساسي" : "Main work media",
         updateUploadProgress,
       );
+      if (mainUpload.public_id) uploadedPublicIds.push(mainUpload.public_id);
+
       const trailerUpload = trailerFile
         ? await uploadToCloudinary(trailerFile, creatorId, ar ? "الـTrailer" : "Trailer", updateUploadProgress)
         : null;
+      if (trailerUpload?.public_id) uploadedPublicIds.push(trailerUpload.public_id);
+
       const previewUpload = previewFile
         ? await uploadToCloudinary(previewFile, creatorId, ar ? "الـPreview" : "Preview", updateUploadProgress)
         : null;
+      if (previewUpload?.public_id) uploadedPublicIds.push(previewUpload.public_id);
 
       if (previewUpload) validateAuxiliaryMedia("preview", previewUpload);
 
@@ -333,6 +340,7 @@ export default function StudioUpload({ creatorId, locale }: Props) {
         .select("id")
         .single();
       if (insertError || !work) throw insertError || new Error(ar ? "تعذر إنشاء العمل." : "Could not create the work.");
+      createdWorkId = Number(work.id);
 
       const mediaAssets: MediaAsset[] = [
         {
@@ -381,7 +389,46 @@ export default function StudioUpload({ creatorId, locale }: Props) {
       setUploadProgress(null);
       router.refresh();
     } catch (submitError) {
-      setError(mapUploadError(submitError, ar));
+      let cleanupVerified = true;
+      if (uploadedPublicIds.length) {
+        let mayCleanUploads = createdWorkId === null;
+
+        if (createdWorkId !== null) {
+          try {
+            const deleteResponse = await fetch("/api/studio/delete-work", {
+              method: "POST",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify({ videoId: createdWorkId }),
+            });
+            const deletePayload = await deleteResponse.json().catch(() => ({})) as { ok?: boolean };
+            mayCleanUploads = deleteResponse.ok && deletePayload.ok === true;
+          } catch {
+            mayCleanUploads = false;
+          }
+        }
+
+        if (mayCleanUploads) {
+          try {
+            const cleanupResponse = await fetch("/api/studio/cleanup-uploads", {
+              method: "POST",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify({ creatorId, publicIds: uploadedPublicIds }),
+            });
+            const cleanupPayload = await cleanupResponse.json().catch(() => ({})) as { ok?: boolean };
+            cleanupVerified = cleanupResponse.ok && cleanupPayload.ok === true;
+          } catch {
+            cleanupVerified = false;
+          }
+        } else {
+          cleanupVerified = false;
+        }
+      }
+
+      const baseMessage = mapUploadError(submitError, ar);
+      const cleanupNotice = ar
+        ? " لم نتمكن من تأكيد تنظيف كل ملفات الرفع المؤقتة. افتح الاستوديو وتحقق من حالة المسودة قبل إعادة الرفع."
+        : " We could not verify cleanup of every temporary upload. Check Studio for a retained draft before uploading again.";
+      setError(cleanupVerified ? baseMessage : baseMessage + cleanupNotice);
     } finally {
       setBusy(false);
       setUploadProgress(null);
