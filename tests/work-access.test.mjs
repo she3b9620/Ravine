@@ -51,3 +51,17 @@ test("Supabase video and auxiliary-media proxy routes enforce the same per-work 
   assert.match(videoRoute, /select\("video_url,published,visibility,discovery_enabled,user_id,creator_id"\)/);
   assert.match(assetRoute, /select\("published,visibility,discovery_enabled,user_id,creator_id"\)/);
 });
+
+test("public work-detail route exposes save, like, share, and history actions without pretending it has Watch cinema layout", () => {
+  const workPage = read("../app/[locale]/work/[id]/page.tsx");
+  const actions = read("../components/WatchActions.tsx");
+  assert.match(workPage, /<WatchActions videoId=\{workId\} duration=\{data\.duration\} locale=\{locale\} returnPath=\{/);
+  assert.match(workPage, /data\.published \? <WatchActions/);
+  assert.match(workPage, /showCinemaMode=\{false\}/);
+  assert.match(actions, /showCinemaMode = true/);
+  assert.match(actions, /requestRavineAuth\(authReturnPath\)/);
+  assert.match(actions, /watch_history/);
+  assert.match(actions, /toggleSave/);
+  assert.match(actions, /toggleLike/);
+  assert.match(actions, /async function share/);
+});

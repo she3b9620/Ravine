@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import RAVINEWorkContext from "@/components/RAVINEWorkContext";
 import RAVINEWorkPlayer from "@/components/RAVINEWorkPlayer";
+import WatchActions from "@/components/WatchActions";
 import { createClient } from "@/lib/supabase/server";
 import type { RAVINEPlaybackAsset } from "@/lib/ravine-playback-core";
 import { isPlayableRAVINEWork, toRAVINEWork, type RAVINEWorkSource } from "@/lib/ravine-work-universe";
@@ -84,6 +85,7 @@ export default async function WorkPage({ params }: { params: Promise<{ locale: s
 
       <RAVINEWorkPlayer work={work} locale={locale} chapters={chapters} assets={assets} />
       <RAVINEWorkContext work={work} locale={locale} playable={playable} />
+      {data.published ? <WatchActions videoId={workId} duration={data.duration} locale={locale} returnPath={"/" + locale + "/work/" + workId} showCinemaMode={false} /> : null}
 
       {!playable && work.mediaUrl && work.mediaUrl.includes("youtube.com") ? (
         <div className="empty-state">

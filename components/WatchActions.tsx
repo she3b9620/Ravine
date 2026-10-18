@@ -7,8 +7,9 @@ import { requestRavineAuth } from "./AuthModal";
 import { localizeSupabaseError } from "@/lib/localizeSupabaseError";
 import "./WatchActions.module.css";
 
-export default function WatchActions({ videoId, duration, locale }: { videoId: number; duration: number | null; locale: "ar" | "en" }) {
+export default function WatchActions({ videoId, duration, locale, returnPath, showCinemaMode = true }: { videoId: number; duration: number | null; locale: "ar" | "en"; returnPath?: string; showCinemaMode?: boolean }) {
   const ar = locale === "ar";
+  const authReturnPath = returnPath || `/${locale}/watch/${videoId}`;
   const [userId, setUserId] = useState<string | null>(null);
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -45,7 +46,7 @@ export default function WatchActions({ videoId, duration, locale }: { videoId: n
   function requireAuth() {
     if (userId) return true;
     setMessage(ar ? "سجّل الدخول لاستخدام التفاعل والحفظ." : "Sign in to like, save, and keep your progress.");
-    requestRavineAuth(`/${locale}/watch/${videoId}`);
+    requestRavineAuth(authReturnPath);
     return false;
   }
 
@@ -121,12 +122,14 @@ export default function WatchActions({ videoId, duration, locale }: { videoId: n
         <button className="watch-action" type="button" onClick={() => void share()}>
           <Share2 size={17} />{ar ? "مشاركة" : "Share"}
         </button>
-        <button className={`watch-action ${cinemaMode ? "active" : ""}`} type="button" onClick={toggleCinemaMode} aria-pressed={cinemaMode}>
-          {cinemaMode ? <Minimize2 size={17} /> : <Maximize2 size={17} />}
-          {cinemaMode ? (ar ? "الخروج من السينما" : "Exit Cinema") : (ar ? "وضع السينما" : "Cinema Mode")}
-        </button>
+        {showCinemaMode ? (
+          <button className={`watch-action ${cinemaMode ? "active" : ""}`} type="button" onClick={toggleCinemaMode} aria-pressed={cinemaMode}>
+            {cinemaMode ? <Minimize2 size={17} /> : <Maximize2 size={17} />}
+            {cinemaMode ? (ar ? "الخروج من السينما" : "Exit Cinema") : (ar ? "وضع السينما" : "Cinema Mode")}
+          </button>
+        ) : null}
         {!userId && (
-          <button className="watch-action" type="button" onClick={() => requestRavineAuth(`/${locale}/watch/${videoId}`)}>
+          <button className="watch-action" type="button" onClick={() => requestRavineAuth(authReturnPath)}>
             <LogIn size={17} />{ar ? "دخول" : "Sign in"}
           </button>
         )}
