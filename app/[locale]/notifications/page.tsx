@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ravineErrorMessage } from "@/lib/ravine-error";
+import styles from "./notifications.module.css";
 
 export const dynamic = "force-dynamic";
 
@@ -54,9 +55,9 @@ export default async function NotificationsPage({ params }: { params: Promise<{ 
   const errorMessage = error ? ravineErrorMessage(error, locale) : "";
 
   return (
-    <section className="section notifications-page">
+    <section className={`section ${styles.page}`}>
       <div className="eyebrow">RAVINE / {ar ? "الإشعارات" : "NOTIFICATIONS"}</div>
-      <div className="section-head">
+      <div className={`section-head ${styles.headerRow}`}>
         <div>
           <h1>{ar ? "ما يستحق انتباهك." : "What deserves your attention."}</h1>
           <p className="section-note">{ar ? "إشعاراتك المهمة فقط، بدون ضجيج مستمر." : "Important signals only, without a constant stream of noise."}</p>
@@ -72,27 +73,27 @@ export default async function NotificationsPage({ params }: { params: Promise<{ 
       ) : notifications.length === 0 ? (
         <div className="empty-state"><strong>{ar ? "لا توجد إشعارات بعد." : "No notifications yet."}</strong><span>{ar ? "ستظهر التحديثات المهمة هنا." : "Important updates will appear here."}</span></div>
       ) : (
-        <div className="notification-list">
+        <div className={styles.list}>
           {notifications.map((notification) => {
             const content = (
-              <div className={`notification-item ${notification.is_read ? "" : "unread"}`}>
+              <div className={`${styles.item} ${notification.is_read ? "" : styles.unread}`}>
                 <div className="video-kicker">{ar ? "إشعار" : "Notification"}</div>
                 <strong>{notification.title || (ar ? "تحديث جديد" : "New update")}</strong>
                 <p>{notification.body || ""}</p>
-                <span>{new Date(notification.created_at).toLocaleString(locale === "ar" ? "ar-EG" : "en-US")}</span>
+                <span className={styles.timestamp}>{new Date(notification.created_at).toLocaleString(locale === "ar" ? "ar-EG" : "en-US")}</span>
               </div>
             );
 
             if (notification.video_id) {
               return (
-                <div className="notification-row" key={notification.id}>
-                  <Link className="notification-link" href={"/" + locale + "/watch/" + notification.video_id}>
+                <div className={styles.row} key={notification.id}>
+                  <Link className={styles.link} href={"/" + locale + "/watch/" + notification.video_id}>
                     {content}
                   </Link>
                   {!notification.is_read ? (
                     <form action={markRead}>
                       <input type="hidden" name="id" value={notification.id} />
-                      <button type="submit" className="notification-action">
+                      <button type="submit" className={styles.markRead}>
                         {ar ? "تحديد كمقروء" : "Mark as read"}
                       </button>
                     </form>
@@ -101,10 +102,17 @@ export default async function NotificationsPage({ params }: { params: Promise<{ 
               );
             }
             return (
-              <form action={markRead} key={notification.id}>
-                <input type="hidden" name="id" value={notification.id} />
-                <button type="submit" className="notification-action">{content}</button>
-              </form>
+              <div className={styles.row} key={notification.id}>
+                <div className={styles.itemContent}>{content}</div>
+                {!notification.is_read ? (
+                  <form action={markRead}>
+                    <input type="hidden" name="id" value={notification.id} />
+                    <button type="submit" className={styles.markRead}>
+                      {ar ? "تحديد كمقروء" : "Mark as read"}
+                    </button>
+                  </form>
+                ) : null}
+              </div>
             );
           })}
         </div>

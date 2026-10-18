@@ -56,14 +56,20 @@ test("saved-work removal is scoped to the authenticated user and selected video"
 });
 
 
-test("video notifications can be opened or marked read independently", () => {
+test("notification links and read actions remain independent and accessible", () => {
   const page = read("../app/[locale]/notifications/page.tsx");
+  const css = read("../app/[locale]/notifications/notifications.module.css");
   const start = page.indexOf("if (notification.video_id)");
-  const end = page.indexOf("return (", page.indexOf("</Link>", start));
+  const end = page.indexOf("            return (", page.indexOf("</Link>", start));
   const videoBranch = page.slice(start, end);
-  assert.match(videoBranch, /className="notification-link"/);
-  assert.match(videoBranch, /className="notification-action"/);
+  assert.match(page, /import styles from "\.\/notifications\.module\.css"/);
+  assert.match(videoBranch, /className=\{styles\.link\}/);
+  assert.match(videoBranch, /className=\{styles\.markRead\}/);
   assert.match(videoBranch, /Mark as read/);
   assert.match(videoBranch, /تحديد كمقروء/);
   assert.ok(videoBranch.indexOf("</Link>") < videoBranch.indexOf("<form action={markRead}>"));
+  assert.match(page, /className=\{styles\.itemContent\}/);
+  assert.match(css, /grid-template-columns: minmax\(0, 1fr\) auto/);
+  assert.match(css, /@media \(max-width: 680px\)/);
+  assert.match(css, /prefers-reduced-motion: reduce/);
 });
