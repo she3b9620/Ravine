@@ -86,7 +86,7 @@ async function destroyCloudinaryVideo(publicId: string, cloudName: string, apiKe
     error?: { message?: string };
   };
 
-  return response.ok && (!payload.result || payload.result === "ok" || payload.result === "not found") && !payload.error;
+  return response.ok && (payload.result === "ok" || payload.result === "not found") && !payload.error;
 }
 
 type CreatorOwnership = { user_id: string | null };
@@ -102,7 +102,6 @@ type WorkMediaAsset = {
   id: number;
   work_id: number;
   media_url: string;
-  public_id: string | null;
   kind: string;
 };
 
@@ -145,15 +144,33 @@ export async function POST(request: NextRequest) {
     const ownsViaCreator = creatorOwner === auth.user.id;
     const ownsViaWork = work.user_id === auth.user.id;
 
-    if (!ownsViaCreator && !ownsViaWork) {
+    // Match the database's creator-owner delete policy exactly. A user_id
+    // match alone is not enough authority to remove the linked media.
+    if (!ownsViaCreator) {
       return jsonError("You are not allowed to delete this work.", 403);
+    }
+
+    // Financial records retain a restrictive foreign key to the work. Check
+    // them before touching Cloudinary so a valid ledger cannot leave a broken
+    // media record if the final database deletion is rejected.
+    const { data: earningsRows, error: earningsError } = await supabase
+      .from("creator_earnings")
+      .select("content_id")
+      .eq("content_id", videoId)
+      .limit(1);
+
+    if (earningsError) {
+      return jsonError("Could not verify financial records; the work was not deleted.", 503);
+    }
+    if (earningsRows?.length) {
+      return jsonError("This work has financial records and cannot be permanently deleted. Hide it instead.", 409);
     }
 
     // Read related media only after ownership has been established. A query
     // failure must not turn into a partial deletion of the parent work.
     const { data: assetRows, error: assetsError } = await supabase
       .from("work_media_assets")
-      .select("id,work_id,media_url,public_id,kind")
+      .select("id,work_id,media_url,kind")
       .eq("work_id", videoId);
 
     if (assetsError) {
