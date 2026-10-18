@@ -25,3 +25,9 @@ test("Studio work manager has responsive bilingual discovery and no-result state
   assert.match(styles, /@media \(max-width: 760px\)/);
   assert.match(styles, /data-theme="light"/);
 });
+
+test("creators can preview a draft or published work from the Studio manager", () => {
+  assert.match(manager, /href=\{"\/" \+ locale \+ "\/watch\/" \+ work\.id\}/);
+  assert.match(manager, /"معاينة"/);
+  assert.match(manager, /"Preview"/);
+});
