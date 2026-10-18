@@ -121,6 +121,7 @@ export default function StudioUpload({ creatorId, locale }: Props) {
     creatorId: number,
     label: string,
     onProgress: (progress: StudioUploadProgress) => void,
+    onSignedPublicId: (publicId: string) => void,
   ): Promise<CloudinaryUpload> {
     onProgress({
       label,
@@ -149,6 +150,12 @@ export default function StudioUpload({ creatorId, locale }: Props) {
         !uploadSignature || !folder || !publicId) {
       throw new Error(signed.error || (ar ? "تعذر تجهيز رفع آمن إلى Cloudinary." : "Could not prepare a secure Cloudinary upload."));
     }
+
+    // Record the signed ID before the request starts. If Cloudinary accepts the
+    // bytes but the response times out or is malformed, rollback still knows
+    // which exact asset to remove.
+    const expectedPublicId = `${folder}/${publicId}`;
+    onSignedPublicId(expectedPublicId);
 
     const formData = new FormData();
     formData.append("file", uploadFile);
@@ -199,6 +206,11 @@ export default function StudioUpload({ creatorId, locale }: Props) {
           reject(new Error(payload.error?.message || (ar ? "تعذر رفع الملف إلى Cloudinary." : "Cloudinary media upload failed.")));
           return;
         }
+        if (payload.public_id && payload.public_id !== expectedPublicId) {
+          reject(new Error(ar ? "معرّف الملف المرفوع لا يطابق طلب الرفع الآمن." : "The uploaded media ID does not match the signed upload request."));
+          return;
+        }
+        payload.public_id = payload.public_id || expectedPublicId;
         onProgress({
           label,
           percent: 100,
@@ -262,6 +274,9 @@ export default function StudioUpload({ creatorId, locale }: Props) {
     setBusy(true);
     setUploadProgress(null);
     const uploadedPublicIds: string[] = [];
+    const trackUploadedPublicId = (publicId: string) => {
+      if (!uploadedPublicIds.includes(publicId)) uploadedPublicIds.push(publicId);
+    };
     let createdWorkId: number | null = null;
     let createdSeriesId: number | null = null;
     let signedInUserId: string | null = null;
@@ -278,18 +293,16 @@ export default function StudioUpload({ creatorId, locale }: Props) {
         creatorId,
         ar ? "ملف العمل الأساسي" : "Main work media",
         updateUploadProgress,
+        trackUploadedPublicId,
       );
-      if (mainUpload.public_id) uploadedPublicIds.push(mainUpload.public_id);
 
       const trailerUpload = trailerFile
-        ? await uploadToCloudinary(trailerFile, creatorId, ar ? "الـTrailer" : "Trailer", updateUploadProgress)
+        ? await uploadToCloudinary(trailerFile, creatorId, ar ? "الـTrailer" : "Trailer", updateUploadProgress, trackUploadedPublicId)
         : null;
-      if (trailerUpload?.public_id) uploadedPublicIds.push(trailerUpload.public_id);
 
       const previewUpload = previewFile
-        ? await uploadToCloudinary(previewFile, creatorId, ar ? "الـPreview" : "Preview", updateUploadProgress)
+        ? await uploadToCloudinary(previewFile, creatorId, ar ? "الـPreview" : "Preview", updateUploadProgress, trackUploadedPublicId)
         : null;
-      if (previewUpload?.public_id) uploadedPublicIds.push(previewUpload.public_id);
 
       if (previewUpload) validateAuxiliaryMedia("preview", previewUpload);
 

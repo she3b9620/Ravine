@@ -74,6 +74,23 @@ test("the cleanup endpoint rejects oversized raw rollback arrays before deduplic
   assert.match(cleanup, /body\.publicIds\.length < 1 \|\| body\.publicIds\.length > 3/);
 });
 
+test("signed media IDs are registered before Cloudinary requests and remain available on timeout", () => {
+  assert.match(upload, /onSignedPublicId: \(publicId: string\) => void/);
+  assert.match(upload, /const expectedPublicId = `\$\{folder\}\/\$\{publicId\}`/);
+  assert.match(upload, /onSignedPublicId\(expectedPublicId\)/);
+  assert.match(upload, /const trackUploadedPublicId = \(publicId: string\) => \{/);
+  assert.match(upload, /uploadedPublicIds\.includes\(publicId\)/);
+  const recordedId = upload.indexOf("onSignedPublicId(expectedPublicId)");
+  const requestSent = upload.indexOf("request.send(formData)");
+  assert.ok(recordedId >= 0 && requestSent > recordedId);
+  assert.match(upload, /trackUploadedPublicId,/);
+});
+
+test("missing public_id responses fall back to the exact signed identifier while mismatches fail closed", () => {
+  assert.match(upload, /if \(payload\.public_id && payload\.public_id !== expectedPublicId\)/);
+  assert.match(upload, /payload\.public_id = payload\.public_id \|\| expectedPublicId/);
+});
+
 test("successful uploads clear native main, trailer, and preview file inputs", () => {
   for (const refName of ["fileInputRef", "trailerInputRef", "previewInputRef"]) {
     assert.ok(upload.includes(`const ${refName} = useRef<HTMLInputElement>(null)`));
