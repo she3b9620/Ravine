@@ -212,10 +212,10 @@
 /* Application-page layout and typography refinement */
 .applyPage{
   width:100%;
-  max-width:1480px;
+  max-width:1440px;
   box-sizing:border-box;
   margin-inline:auto;
-  padding-inline:clamp(24px,5vw,76px);
+  padding-inline:clamp(32px,5.4vw,84px);
   overflow-wrap:anywhere;
 }
 .applyPage *{min-width:0}
@@ -445,27 +445,5 @@
   .formFooter .backButton {
     min-width: 0;
     white-space: normal;
-  }
-}
-
-/* Creator application: a centered frame with deliberate, balanced side gutters. */
-.applyPage {
-  box-sizing: border-box;
-  width: 100%;
-  max-width: 1640px;
-  margin-inline: auto;
-  padding-inline: clamp(24px, 4.2vw, 72px);
-}
-
-@media (max-width: 860px) {
-  .applyPage {
-    padding-inline: clamp(18px, 4vw, 32px);
-  }
-}
-
-@media (max-width: 560px) {
-  .applyPage {
-    padding-inline: 16px;
-    padding-bottom: 38px;
   }
 }
