@@ -60,6 +60,9 @@ jobs:
       - name: Work creator-follow integration tests
         run: node --test tests/work-creator-follow.test.mjs
 
+      - name: Related work regression tests
+        run: node --test tests/related-work.test.mjs
+
       - name: Audio-only podcast playback regression tests
         run: node --test tests/audio-only-podcast.test.mjs
 

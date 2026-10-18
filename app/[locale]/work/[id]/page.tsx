@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import RAVINEWorkContext from "@/components/RAVINEWorkContext";
+import RAVINEWorkCatalog, { type RAVINECatalogItem } from "@/components/RAVINEWorkCatalog";
 import RAVINEWorkPlayer from "@/components/RAVINEWorkPlayer";
 import WatchActions from "@/components/WatchActions";
 import FollowCreator from "@/components/FollowCreator";
@@ -28,6 +29,7 @@ type WorkRow = {
   user_id: string | null;
 };
 type Creator = { id: number; name: string | null; username: string | null; avatar_url: string | null; specialty: string | null; user_id: string | null };
+type RelatedVideo = { id: number; title: string | null; description: string | null; thumbnail_url: string | null; duration: number | null; views: number | null; likes: number | null; content_type: string | null; quality: string | null; created_at: string | null };
 type Chapter = {
   id: number;
   title: string;
@@ -73,6 +75,50 @@ export default async function WorkPage({ params }: { params: Promise<{ locale: s
     supabase.from("work_media_assets").select("id,kind,media_url,public_id,duration,language,label,mime_type,sort_order,metadata").eq("work_id", workId).order("sort_order", { ascending: true }),
   ]);
   const creator = creatorData as Creator | null;
+
+  const [{ data: creatorWorksData }, { data: typeWorksData }] = await Promise.all([
+    data.creator_id
+      ? supabase.from("videos")
+          .select("id,title,description,thumbnail_url,duration,views,likes,content_type,quality,created_at")
+          .eq("creator_id", data.creator_id)
+          .eq("published", true)
+          .eq("visibility", "public")
+          .eq("search_visible", true)
+          .neq("id", workId)
+          .order("created_at", { ascending: false })
+          .limit(6)
+      : Promise.resolve({ data: [] }),
+    data.content_type
+      ? supabase.from("videos")
+          .select("id,title,description,thumbnail_url,duration,views,likes,content_type,quality,created_at")
+          .eq("content_type", data.content_type)
+          .eq("published", true)
+          .eq("visibility", "public")
+          .eq("search_visible", true)
+          .neq("id", workId)
+          .order("created_at", { ascending: false })
+          .limit(6)
+      : Promise.resolve({ data: [] }),
+  ]);
+  const relatedById = new Map<number, RelatedVideo>();
+  for (const item of [...((creatorWorksData ?? []) as RelatedVideo[]), ...((typeWorksData ?? []) as RelatedVideo[])]) {
+    if (Number(item.id) !== workId && !relatedById.has(Number(item.id))) relatedById.set(Number(item.id), item);
+    if (relatedById.size >= 6) break;
+  }
+  const relatedItems: RAVINECatalogItem[] = Array.from(relatedById.values()).map((item) => ({
+    id: item.id,
+    href: "/" + locale + "/work/" + item.id,
+    title: item.title || (ar ? "عمل بدون عنوان" : "Untitled work"),
+    description: item.description || (ar ? "عمل إبداعي من مجتمع رَافِين." : "A creative work from the RAVINE community."),
+    imageUrl: item.thumbnail_url,
+    duration: item.duration,
+    views: item.views,
+    likes: item.likes,
+    quality: item.quality,
+    createdAt: item.created_at,
+    badge: item.content_type || (ar ? "عمل" : "WORK"),
+    kicker: (item.content_type || "WORK").toUpperCase(),
+  }));
 
   const work = toRAVINEWork(data as WorkRow & RAVINEWorkSource);
   const playable = isPlayableRAVINEWork(work);
@@ -121,6 +167,18 @@ export default async function WorkPage({ params }: { params: Promise<{ locale: s
           <strong>{ar ? "هذا المصدر مرجعي فقط." : "This source is reference-only."}</strong>
           <span>{ar ? "يحتاج العمل إلى ملف تشغيل متوافق مع مشغل RAVINE." : "This work needs a browser-compatible media source for the RAVINE player."}</span>
         </div>
+      ) : null}
+      {relatedItems.length ? (
+        <section className="section ravine-related-work" aria-labelledby="ravine-related-work-heading">
+          <div className="section-head">
+            <div>
+              <div className="eyebrow">RAVINE / MORE TO EXPLORE</div>
+              <h2 id="ravine-related-work-heading">{ar ? "أعمال قريبة من هذا المسار." : "More work along this path."}</h2>
+              <p className="section-note">{ar ? "أعمال عامة أخرى من المبدع نفسه أو من النوع نفسه، مع احترام إعدادات ظهورها." : "Other public work by this creator or in the same format, respecting each work’s visibility settings."}</p>
+            </div>
+          </div>
+          <RAVINEWorkCatalog locale={locale} items={relatedItems} />
+        </section>
       ) : null}
     </section>
   );
