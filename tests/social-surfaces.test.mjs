@@ -97,3 +97,13 @@ test("starting a new message clears the selected thread and protects manual choi
   assert.match(component, /manualInboxChoice\.current = true; setRecipientId\(""\); setSelectedId\(conversation\.id\)/);
   assert.match(component, /selectedOtherId \|\| recipientId/);
 });
+
+test("primary Library route uses the same searchable and removable saved-work collection", () => {
+  const library = read("../app/[locale]/library/page.tsx");
+  assert.match(library, /<SavedWorksCollection/);
+  assert.match(library, /from\("video_saves"\)/);
+  assert.match(library, /\.eq\("published", true\)/);
+  assert.match(library, /\.eq\("visibility", "public"\)/);
+  assert.match(library, /initialItems=\{items\}/);
+  assert.match(library, /loadError=\{loadError\}/);
+});
