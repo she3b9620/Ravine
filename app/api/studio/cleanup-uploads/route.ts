@@ -15,7 +15,24 @@ function jsonError(error: string, status: number) {
 function isCreatorUploadPublicId(value: unknown, creatorId: number) {
   if (typeof value !== "string" || value.length > 200) return false;
   return new RegExp(
-    `^ravine/creators/${creatorId}/works/${creatorId}-[0-9a-f-]{36}$`,
+    `^ravine/creators/${creatorId}/works/${creatorId}-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}import { createHash } from "node:crypto";
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+function jsonError(error: string, status: number) {
+  return NextResponse.json(
+    { error },
+    { status, headers: { "Cache-Control": "no-store, max-age=0" } },
+  );
+}
+
+function isCreatorUploadPublicId(value: unknown, creatorId: number) {
+  if (typeof value !== "string" || value.length > 200) return false;
+  return new RegExp(
+,
     "i",
   ).test(value);
 }
@@ -86,6 +103,28 @@ export async function POST(request: NextRequest) {
     const apiSecret = process.env.CLOUDINARY_API_SECRET;
     if (!cloudName || !apiKey || !apiSecret) {
       return jsonError("Cloudinary cleanup is not configured.", 503);
+    }
+
+    // Rollback accepts only newly generated IDs, but syntax alone is not proof
+    // that an ID is temporary. Refuse cleanup if any visible work or media
+    // metadata already points at it. Complete every preflight before destroying
+    // anything so a later referenced ID cannot leave a partially cleaned batch.
+    const referenceChecks = await Promise.all((publicIds as string[]).map(async (publicId) => {
+      const [videoReference, assetPublicIdReference, assetUrlReference] = await Promise.all([
+        supabase.from("videos").select("id").ilike("video_url", `%${publicId}%`).limit(1),
+        supabase.from("work_media_assets").select("id").eq("public_id", publicId).limit(1),
+        supabase.from("work_media_assets").select("id").ilike("media_url", `%${publicId}%`).limit(1),
+      ]);
+      const queryFailed = Boolean(videoReference.error || assetPublicIdReference.error || assetUrlReference.error);
+      const referenced = Boolean(videoReference.data?.length || assetPublicIdReference.data?.length || assetUrlReference.data?.length);
+      return { queryFailed, referenced };
+    }));
+
+    if (referenceChecks.some((check) => check.queryFailed)) {
+      return jsonError("Could not verify whether temporary media is already in use; no media was removed.", 503);
+    }
+    if (referenceChecks.some((check) => check.referenced)) {
+      return jsonError("An upload is already attached to work metadata and cannot be removed by rollback.", 409);
     }
 
     for (const publicId of publicIds as string[]) {

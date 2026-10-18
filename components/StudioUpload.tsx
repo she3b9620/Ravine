@@ -260,10 +260,13 @@ export default function StudioUpload({ creatorId, locale }: Props) {
     setUploadProgress(null);
     const uploadedPublicIds: string[] = [];
     let createdWorkId: number | null = null;
+    let createdSeriesId: number | null = null;
+    let signedInUserId: string | null = null;
     try {
       const supabase = createClient();
       const { data: auth } = await supabase.auth.getUser();
       if (!auth.user) throw new Error("RAVINE_AUTH_REQUIRED");
+      signedInUserId = auth.user.id;
 
       const updateUploadProgress = (progress: StudioUploadProgress) => setUploadProgress(progress);
       const mainUpload = await uploadToCloudinary(
@@ -314,6 +317,7 @@ export default function StudioUpload({ creatorId, locale }: Props) {
             .single();
           if (seriesInsertError || !newSeries) throw seriesInsertError || new Error(ar ? "تعذر إنشاء سجل المسلسل." : "Could not create the series record.");
           seriesId = Number(newSeries.id);
+          createdSeriesId = seriesId;
         }
       }
 
@@ -390,7 +394,10 @@ export default function StudioUpload({ creatorId, locale }: Props) {
       router.refresh();
     } catch (submitError) {
       let cleanupVerified = true;
-      if (uploadedPublicIds.length) {
+      let seriesRollbackVerified = true;
+      if (uploadedPublicIds.length || createdWorkId !== null || createdSeriesId !== null) {
+        // Always attempt to remove a partially created work, even if a
+        // malformed/partial media response did not yield a public_id.
         let mayCleanUploads = createdWorkId === null;
 
         if (createdWorkId !== null) {
@@ -407,7 +414,34 @@ export default function StudioUpload({ creatorId, locale }: Props) {
           }
         }
 
-        if (mayCleanUploads) {
+        // Remove only the new, still-empty series record created by this
+        // submission. If its episode cannot be ruled out, preserve the series.
+        if (mayCleanUploads && createdSeriesId !== null && signedInUserId) {
+          try {
+            const { data: remainingEpisodes, error: episodeCheckError } = await supabase
+              .from("videos")
+              .select("id")
+              .eq("series_id", createdSeriesId)
+              .limit(1);
+            if (episodeCheckError || remainingEpisodes?.length) {
+              seriesRollbackVerified = false;
+            } else {
+              const { error: seriesDeleteError } = await supabase
+                .from("ravine_series_titles")
+                .delete()
+                .eq("id", createdSeriesId)
+                .eq("creator_id", creatorId)
+                .eq("user_id", signedInUserId);
+              if (seriesDeleteError) seriesRollbackVerified = false;
+            }
+          } catch {
+            seriesRollbackVerified = false;
+          }
+        } else if (createdSeriesId !== null && !mayCleanUploads) {
+          seriesRollbackVerified = false;
+        }
+
+        if (mayCleanUploads && uploadedPublicIds.length) {
           try {
             const cleanupResponse = await fetch("/api/studio/cleanup-uploads", {
               method: "POST",
@@ -419,7 +453,9 @@ export default function StudioUpload({ creatorId, locale }: Props) {
           } catch {
             cleanupVerified = false;
           }
-        } else {
+        } else if (!mayCleanUploads && uploadedPublicIds.length) {
+          // Never delete media if deleting a partially created database work
+          // was not confirmed.
           cleanupVerified = false;
         }
       }
@@ -428,7 +464,10 @@ export default function StudioUpload({ creatorId, locale }: Props) {
       const cleanupNotice = ar
         ? " لم نتمكن من تأكيد تنظيف كل ملفات الرفع المؤقتة. افتح الاستوديو وتحقق من حالة المسودة قبل إعادة الرفع."
         : " We could not verify cleanup of every temporary upload. Check Studio for a retained draft before uploading again.";
-      setError(cleanupVerified ? baseMessage : baseMessage + cleanupNotice);
+      const seriesNotice = ar
+        ? " لم نتمكن من تأكيد إزالة سجل المسلسل المؤقت؛ تحقق من الاستوديو قبل تكرار العملية."
+        : " We could not confirm removal of the temporary series record; check Studio before retrying.";
+      setError(baseMessage + (cleanupVerified ? "" : cleanupNotice) + (seriesRollbackVerified ? "" : seriesNotice));
     } finally {
       setBusy(false);
       setUploadProgress(null);
