@@ -52,6 +52,15 @@ export default function RAVINEShortsBrowse({ locale, works }: Props) {
     setReady(true);
   }, []);
 
+  useEffect(() => {
+    if (mode !== "reels") {
+      document.documentElement.removeAttribute("data-ravine-shorts-reels");
+      return;
+    }
+    document.documentElement.setAttribute("data-ravine-shorts-reels", "true");
+    return () => document.documentElement.removeAttribute("data-ravine-shorts-reels");
+  }, [mode]);
+
   const chooseMode = useCallback((next: ViewMode) => {
     setMode(next);
     try {
