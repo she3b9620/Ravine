@@ -58,7 +58,7 @@
 .field{display:grid;gap:9px;min-width:0}
 .field>span{display:flex;align-items:center;gap:5px}
 .field>span b,.agreements legend b{color:var(--copper,#c47a52)}
-.field textarea,.field input{display:block;width:100%;box-sizing:border-box;border:1px solid rgba(241,233,220,.12);border-radius:14px;background:rgba(5,8,9,.38);color:var(--ivory,#f1e9dc);font:500 14px/1.75 inherit;outline:none;transition:border-color .2s,background .2s,box-shadow .2s}
+.field textarea,.field input{display:block;width:100%;box-sizing:border-box;border:1px solid rgba(241,233,220,.12);border-radius:14px;background:rgba(5,8,9,.38);color:var(--ivory,#f1e9dc);font-size:14px;font-weight:500;line-height:1.75;font-family:inherit;outline:none;transition:border-color .2s,background .2s,box-shadow .2s}
 .field textarea{min-height:125px;padding:13px 15px;resize:vertical}
 .field input{height:49px;padding:0 14px}
 .field textarea::placeholder,.field input::placeholder{color:rgba(167,160,152,.58);opacity:1}
@@ -178,7 +178,7 @@
 :global(html[data-theme="light"]) .hubIntroMark{color:rgba(23,23,23,.08)}
 .specialtyCatalog{display:grid;gap:13px;min-width:0}
 .specialtyCatalogToolbar{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px}
-.specialtySearch{width:100%;min-width:0;height:46px;box-sizing:border-box;padding:0 14px;border:1px solid rgba(241,233,220,.13);border-radius:13px;background:rgba(5,8,9,.38);color:var(--ivory,#f1e9dc);font:500 13px/1.5 inherit;outline:none;transition:border-color .2s,box-shadow .2s}
+.specialtySearch{width:100%;min-width:0;height:46px;box-sizing:border-box;padding:0 14px;border:1px solid rgba(241,233,220,.13);border-radius:13px;background:rgba(5,8,9,.38);color:var(--ivory,#f1e9dc);font-size:13px;font-weight:500;line-height:1.5;font-family:inherit;outline:none;transition:border-color .2s,box-shadow .2s}
 .specialtySearch:focus{border-color:rgba(196,122,82,.6);box-shadow:0 0 0 3px rgba(196,122,82,.07)}
 .specialtySearch::placeholder{color:rgba(167,160,152,.65)}
 .selectedCount{white-space:nowrap;color:var(--copper,#c47a52);font-size:10px;font-weight:800}
