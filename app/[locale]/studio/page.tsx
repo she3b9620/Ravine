@@ -111,6 +111,9 @@ export default async function StudioPage({ params, searchParams }: { params: Pro
             ? `عرض ${safeTotalWorks === 0 ? 0 : (currentPage - 1) * pageSize + 1}–${Math.min(currentPage * pageSize, safeTotalWorks)} من ${safeTotalWorks.toLocaleString(locale)} عمل`
             : `Showing ${safeTotalWorks === 0 ? 0 : (currentPage - 1) * pageSize + 1}–${Math.min(currentPage * pageSize, safeTotalWorks)} of ${safeTotalWorks.toLocaleString(locale)} works`}</span>
         </div>
+        <p className={styles.paginationHint}>{ar
+          ? "البحث والتصفية هنا يطبّقان على أعمال الصفحة الحالية فقط؛ استخدم التنقل أسفل القائمة للانتقال بين الصفحات."
+          : "Search and filters apply to the current page only. Use the navigation below the list to move between pages."}</p>
         <StudioWorkManager works={works} locale={locale} />
         {pageCount > 1 ? <nav className={styles.pagination} dir={ar ? "rtl" : "ltr"} aria-label={ar ? "صفحات الأعمال" : "Work pages"}>
           {currentPage > 1
