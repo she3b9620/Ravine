@@ -26,12 +26,13 @@ test("live catalog and creator profile only include public published work", () =
   }
 });
 
-test("both work detail routes refuse non-public or unpublished media", () => {
-  for (const path of ["../app/[locale]/watch/[id]/page.tsx", "../app/[locale]/work/[id]/page.tsx"]) {
-    const source = read(path);
-    assert.match(source, /\.eq\("published", true\)/, path);
-    assert.match(source, publicVisibility, path);
-  }
+test("work detail routes apply an explicit access check before returning media", () => {
+  const watch = read("../app/[locale]/watch/[id]/page.tsx");
+  const work = read("../app/[locale]/work/[id]/page.tsx");
+  assert.match(watch, /await canAccessRAVINEVideo\(supabase, video\)/);
+  assert.match(work, /await canAccessRAVINEVideo\(supabase, data\)/);
+  assert.doesNotMatch(watch, /\.eq\("visibility", "public"\)/);
+  assert.doesNotMatch(work, /\.eq\("visibility", "public"\)/);
 });
 
 test("live search API filters public visibility as well as explicit search visibility", () => {

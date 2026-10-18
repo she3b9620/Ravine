@@ -7,12 +7,13 @@ export type RAVINEAccessContext = {
   admin: boolean;
 };
 
-export type RAVINEAccessPolicy = "public" | "followers" | "members" | "tier" | "invite_only" | "private";
+export type RAVINEAccessPolicy = "public" | "unlisted" | "followers" | "members" | "tier" | "invite_only" | "private";
 
 export function canAccessRAVINEWork(policy: RAVINEAccessPolicy, context: RAVINEAccessContext) {
   if (context.admin || context.creatorIdentityOwner) return true;
   switch (policy) {
-    case "public": return true;
+    case "public":
+    case "unlisted": return true;
     case "followers": return context.authenticated && context.followsCreator;
     case "members":
     case "tier": return context.authenticated && context.member;

@@ -11,7 +11,7 @@ export const RAVINE_WORK_TYPES = [
 
 export type RAVINEWorkType = (typeof RAVINE_WORK_TYPES)[number];
 
-export type RAVINEWorkAccess = "public" | "followers" | "members" | "tier" | "invite_only";
+export type RAVINEWorkAccess = "public" | "unlisted" | "followers" | "members" | "tier" | "invite_only" | "private" | "custom";
 
 export type RAVINEWork = {
   id: number;
@@ -53,7 +53,15 @@ export function normalizeRAVINEWorkType(value: string | null | undefined): RAVIN
   return "video";
 }
 
-export function toRAVINEWork(source: RAVINEWorkSource, access: RAVINEWorkAccess = "public"): RAVINEWork {
+function normalizeRAVINEWorkAccess(value: string | null | undefined): RAVINEWorkAccess {
+  const normalized = (value || "public").trim().toLowerCase();
+  if (["public", "unlisted", "followers", "members", "tier", "invite_only", "private", "custom"].includes(normalized)) {
+    return normalized as RAVINEWorkAccess;
+  }
+  return "private";
+}
+
+export function toRAVINEWork(source: RAVINEWorkSource, access?: RAVINEWorkAccess): RAVINEWork {
   return {
     id: source.id,
     title: source.title || "Untitled",
@@ -66,10 +74,12 @@ export function toRAVINEWork(source: RAVINEWorkSource, access: RAVINEWorkAccess 
     published: source.published === true,
     visibility: source.visibility || "public",
     discoveryEnabled: source.discovery_enabled !== false,
-    access,
+    access: access ?? normalizeRAVINEWorkAccess(source.visibility),
   };
 }
 
 export function isPlayableRAVINEWork(work: RAVINEWork) {
-  return work.published && work.visibility === "public" && work.discoveryEnabled && Boolean(work.mediaUrl);
+  // Access and discovery are enforced separately; an authorized owner preview,
+  // unlisted link, or follower-only work can play even when it is not discoverable.
+  return Boolean(work.mediaUrl);
 }

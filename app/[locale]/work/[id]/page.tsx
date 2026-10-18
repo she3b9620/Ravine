@@ -5,6 +5,7 @@ import RAVINEWorkPlayer from "@/components/RAVINEWorkPlayer";
 import { createClient } from "@/lib/supabase/server";
 import type { RAVINEPlaybackAsset } from "@/lib/ravine-playback-core";
 import { isPlayableRAVINEWork, toRAVINEWork, type RAVINEWorkSource } from "@/lib/ravine-work-universe";
+import { canAccessRAVINEVideo } from "@/lib/ravine-video-access";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,7 @@ type WorkRow = {
   discovery_enabled: boolean | null;
   content_type: string | null;
   creator_id: number | null;
+  user_id: string | null;
 };
 type Chapter = {
   id: number;
@@ -38,25 +40,11 @@ export default async function WorkPage({ params }: { params: Promise<{ locale: s
   if (!Number.isInteger(workId) || workId <= 0) notFound();
 
   const supabase = await createClient();
-  const [{ data, error }, { data: chapterData }, { data: assetData }] = await Promise.all([
-    supabase
-      .from("videos")
-      .select("id,title,description,thumbnail_url,video_url,duration,published,visibility,discovery_enabled,content_type,creator_id")
-      .eq("id", workId)
-      .eq("published", true)
-      .eq("visibility", "public")
-      .maybeSingle(),
-    supabase
-      .from("work_chapters")
-      .select("id,title,start_seconds,end_seconds,thumbnail_url,sort_order")
-      .eq("work_id", workId)
-      .order("sort_order", { ascending: true }),
-    supabase
-      .from("work_media_assets")
-      .select("id,kind,media_url,public_id,duration,language,label,mime_type,sort_order,metadata")
-      .eq("work_id", workId)
-      .order("sort_order", { ascending: true }),
-  ]);
+  const { data, error } = await supabase
+    .from("videos")
+    .select("id,title,description,thumbnail_url,video_url,duration,published,visibility,discovery_enabled,content_type,creator_id,user_id")
+    .eq("id", workId)
+    .maybeSingle();
 
   if (error) {
     return (
@@ -71,6 +59,12 @@ export default async function WorkPage({ params }: { params: Promise<{ locale: s
   }
 
   if (!data) notFound();
+  if (!(await canAccessRAVINEVideo(supabase, data))) notFound();
+
+  const [{ data: chapterData }, { data: assetData }] = await Promise.all([
+    supabase.from("work_chapters").select("id,title,start_seconds,end_seconds,thumbnail_url,sort_order").eq("work_id", workId).order("sort_order", { ascending: true }),
+    supabase.from("work_media_assets").select("id,kind,media_url,public_id,duration,language,label,mime_type,sort_order,metadata").eq("work_id", workId).order("sort_order", { ascending: true }),
+  ]);
 
   const work = toRAVINEWork(data as WorkRow & RAVINEWorkSource);
   const playable = isPlayableRAVINEWork(work);

@@ -25,6 +25,9 @@ const accessLabel: Record<RAVINEWork["access"], { ar: string; en: string }> = {
   members: { ar: "للأعضاء", en: "Members" },
   tier: { ar: "باشتراك", en: "Tier" },
   invite_only: { ar: "بدعوة", en: "Invite only" },
+  unlisted: { ar: "غير مُدرج", en: "Unlisted" },
+  private: { ar: "خاص", en: "Private" },
+  custom: { ar: "جمهور مخصص", en: "Custom audience" },
 };
 
 function durationLabel(seconds: number | null, ar: boolean) {

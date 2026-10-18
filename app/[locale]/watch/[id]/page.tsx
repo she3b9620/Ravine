@@ -6,6 +6,7 @@ import WatchActions from "@/components/WatchActions";
 import styles from "./watch-creator.module.css";
 import { isYouTubeUrl, resolveAssetPlaybackUrl, type RAVINEPlaybackAsset } from "@/lib/ravine-playback-core";
 import { isPlayableRAVINEWork, toRAVINEWork, type RAVINEWorkSource } from "@/lib/ravine-work-universe";
+import { canAccessRAVINEVideo } from "@/lib/ravine-video-access";
 
 export const dynamic = "force-dynamic";
 
@@ -24,12 +25,11 @@ export default async function WatchPage({ params }: { params: Promise<{ locale: 
   const supabase = await createClient();
   const { data: video, error } = await supabase
     .from("videos")
-    .select("id,title,description,thumbnail_url,video_url,duration,views,likes,category,content_type,quality,published,visibility,discovery_enabled,creator_id")
+    .select("id,title,description,thumbnail_url,video_url,duration,views,likes,category,content_type,quality,published,visibility,discovery_enabled,creator_id,user_id")
     .eq("id", videoId)
-    .eq("published", true)
-    .eq("visibility", "public")
     .maybeSingle();
   if (error || !video) notFound();
+  if (!(await canAccessRAVINEVideo(supabase, video))) notFound();
 
   const [{ data: creator }, { data: chaptersData }, { data: assetsData }] = await Promise.all([
     video.creator_id
@@ -99,7 +99,7 @@ export default async function WatchPage({ params }: { params: Promise<{ locale: 
             </Link>
           )}
         </div>
-        <WatchActions videoId={video.id} duration={video.duration} locale={locale} />
+        {video.published ? <WatchActions videoId={video.id} duration={video.duration} locale={locale} /> : null}
       </div>
     </main>
   );
