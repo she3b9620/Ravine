@@ -12,7 +12,9 @@ test("Studio work manager provides local search, status and format filters, and 
   assert.match(manager, /const \[sortMode, setSortMode\] = useState/);
   assert.match(manager, /const visibleWorks = useMemo/);
   assert.match(manager, /visibleWorks\.map\(\(work\)/);
-  assert.match(manager, /RAVINEWorkCatalog|most-viewed/i.test(manager) ? /.*/ : /visibleWorks/);
+  assert.match(manager, /if \(sortMode === "views"\)/);
+  assert.match(manager, /if \(sortMode === "likes"\)/);
+  assert.match(manager, /if \(sortMode === "title"\)/);
 });
 
 test("Studio work manager has responsive bilingual discovery and no-result states", () => {
