@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import test from "node:test";
 
 const read = (path) => readFileSync(new URL(path, import.meta.url), "utf8");
@@ -178,4 +178,15 @@ test("watching a public series episode provides a privacy-safe return link to it
   assert.ok(watchPage.includes("/${locale}/series/${seriesRecord.id}"));
   assert.match(watchPage, /seriesContext/);
   assert.match(watchStyles, /\.seriesContext/);
+});
+
+
+test("series details keep one canonical dynamic route segment", () => {
+  const duplicateRoute = new URL("../app/[locale]/series/[id]/page.tsx", import.meta.url);
+  assert.equal(
+    existsSync(duplicateRoute),
+    false,
+    "Do not define both [id] and [seriesId] under the same series URL pattern.",
+  );
+  assert.ok(existsSync(new URL("../app/[locale]/series/[seriesId]/page.tsx", import.meta.url)));
 });
