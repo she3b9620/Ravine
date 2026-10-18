@@ -52,3 +52,28 @@ test("deleting the last public episode updates the visibility of its parent seri
   assert.match(route, /published: Boolean\(remainingEpisodes\?\.length\)/);
   assert.match(route, /\.eq\("user_id", auth\.user\.id\)/);
 });
+
+
+test("financially referenced works cannot be physically deleted before media cleanup", () => {
+  const auth = route.indexOf("supabase.auth.getUser()");
+  const earningsCheck = route.indexOf('from("creator_earnings")');
+  const assetsLookup = route.indexOf('from("work_media_assets")');
+  const cleanupLoop = route.indexOf("for (const publicId of publicIds)");
+  const deleteWork = route.indexOf('.from("videos")\n      .delete()');
+
+  assert.ok(earningsCheck > auth);
+  assert.ok(assetsLookup > earningsCheck);
+  assert.ok(cleanupLoop > earningsCheck);
+  assert.ok(deleteWork > cleanupLoop);
+  assert.match(route, /\.eq\("content_id", videoId\)/);
+  assert.match(route, /This work has financial records and cannot be permanently deleted/);
+  assert.match(route, /Could not verify financial records; the work was not deleted/);
+  assert.match(route, /payload\.result === "ok" \|\| payload\.result === "not found"/);
+});
+
+test("the deletion API mirrors the creator-owner database policy and does not trust work.user_id alone", () => {
+  assert.match(route, /if \(!ownsViaCreator\)/);
+  assert.doesNotMatch(route, /ownsViaWork/);
+  assert.doesNotMatch(route, /work\.user_id/);
+  assert.match(route, /creators!inner\(user_id\)/);
+});
