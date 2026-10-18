@@ -21,3 +21,13 @@ test("account menu links to notifications and reads the signed-in user's unread 
   assert.match(css, /\.ravine-account-notification-count/);
   assert.match(css, /data-theme="light"/);
 });
+
+test("user dashboard summarizes unread notifications and links to the inbox", () => {
+  const dashboard = read("../app/[locale]/dashboard/page.tsx");
+  assert.match(dashboard, /from\("notifications"\)/);
+  assert.match(dashboard, /\.eq\("user_id", auth\.user\.id\)/);
+  assert.match(dashboard, /\.eq\("is_read", false\)/);
+  assert.match(dashboard, /Unread notifications/);
+  assert.match(dashboard, /الإشعارات غير المقروءة/);
+  assert.ok(dashboard.includes("/notifications"));
+});

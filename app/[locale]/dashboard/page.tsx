@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowUpRight, Compass, Library, Settings2 } from "lucide-react";
+import { ArrowUpRight, Bell, Compass, Library, Settings2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { westernDigits, ravineNumber } from "@/lib/ravine-format";
 import styles from "./dashboard.module.css";
@@ -18,11 +18,12 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) redirect(`/${locale}/auth?next=/${locale}/dashboard`);
 
-  const [{ data: profileData }, { count: savedCount }, { count: historyCount }, { count: followingCount }] = await Promise.all([
+  const [{ data: profileData }, { count: savedCount }, { count: historyCount }, { count: followingCount }, { count: unreadCount }] = await Promise.all([
     supabase.from("profiles").select("display_name,username,avatar_url,is_creator,is_verified").eq("id", auth.user.id).maybeSingle(),
     supabase.from("video_saves").select("id", { count: "exact", head: true }).eq("user_id", auth.user.id),
     supabase.from("watch_history").select("id", { count: "exact", head: true }).eq("user_id", auth.user.id),
     supabase.from("follows").select("id", { count: "exact", head: true }).eq("follower_id", auth.user.id),
+    supabase.from("notifications").select("id", { count: "exact", head: true }).eq("user_id", auth.user.id).eq("is_read", false),
   ]);
 
   const profile = profileData as Profile | null;
@@ -32,6 +33,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
     { label: ar ? "المحفوظات" : "Saved", value: savedCount ?? 0, action: ar ? "افتح المكتبة" : "Open library", href: `/${locale}/library`, icon: Library },
     { label: ar ? "سجل المشاهدة" : "Watch history", value: historyCount ?? 0, action: ar ? "تابع المشاهدة" : "Continue watching", href: `/${locale}/history`, icon: ArrowUpRight },
     { label: ar ? "المتابَعون" : "Following", value: followingCount ?? 0, action: ar ? "اكتشف المبدعين" : "Discover creators", href: `/${locale}/creators`, icon: Compass },
+    { label: ar ? "الإشعارات غير المقروءة" : "Unread notifications", value: unreadCount ?? 0, action: ar ? "عرض الإشعارات" : "View notifications", href: `/${locale}/notifications`, icon: Bell },
   ];
 
   return (
