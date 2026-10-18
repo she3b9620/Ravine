@@ -31,11 +31,13 @@ export default function SearchLauncher({ locale, categories }: Props) {
   const [format, setFormat] = useState("");
   const [quality, setQuality] = useState("");
   const closeTimerRef = useRef<number | null>(null);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
   const close = useCallback(() => {
     if (!open || closing) return;
     setClosing(true);
     if (closeTimerRef.current) window.clearTimeout(closeTimerRef.current);
-    closeTimerRef.current = window.setTimeout(() => { setOpen(false); setClosing(false); setAdvanced(false); closeTimerRef.current = null; }, CLOSE_MS);
+    closeTimerRef.current = window.setTimeout(() => { setOpen(false); setClosing(false); setAdvanced(false); closeTimerRef.current = null; triggerRef.current?.focus(); }, CLOSE_MS);
   }, [open, closing]);
 
   useEffect(() => () => { if (closeTimerRef.current) window.clearTimeout(closeTimerRef.current); }, []);
@@ -49,7 +51,28 @@ export default function SearchLauncher({ locale, categories }: Props) {
     document.documentElement.style.overflow = "hidden";
     document.body.style.overflow = "hidden";
     if (scrollbarWidth > 0) document.body.style.paddingRight = `${scrollbarWidth}px`;
-    const onKeyDown = (event: KeyboardEvent) => { if (event.key === "Escape") close(); };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") { close(); return; }
+      if (event.key !== "Tab") return;
+      const dialog = dialogRef.current;
+      if (!dialog) return;
+      const focusable = Array.from(dialog.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      )).filter((item) => item.getClientRects().length > 0 && !item.closest('[aria-hidden="true"]'));
+      if (!focusable.length) { event.preventDefault(); dialog.focus(); return; }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (!dialog.contains(document.activeElement)) {
+        event.preventDefault();
+        (event.shiftKey ? last : first).focus();
+      } else if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
     window.addEventListener("keydown", onKeyDown);
     return () => { document.documentElement.style.overflow = previousHtmlOverflow; document.body.style.overflow = previousBodyOverflow; document.body.style.paddingRight = previousPaddingRight; window.removeEventListener("keydown", onKeyDown); };
   }, [open, close]);
@@ -74,7 +97,7 @@ export default function SearchLauncher({ locale, categories }: Props) {
 
   const modal = open ? (
     <div className={`ravine-search-overlay${closing ? " is-closing" : ""}`} role="presentation" onPointerDown={(event) => { if (event.target === event.currentTarget) close(); }}>
-      <div className={`ravine-search-dialog${advanced ? " is-advanced" : ""}${closing ? " is-closing" : ""}`} role="dialog" aria-modal="true" aria-labelledby="ravine-search-title" dir={ar ? "rtl" : "ltr"} onPointerDown={(event) => event.stopPropagation()}>
+      <div ref={dialogRef} id="ravine-search-dialog" tabIndex={-1} className={`ravine-search-dialog${advanced ? " is-advanced" : ""}${closing ? " is-closing" : ""}`} role="dialog" aria-modal="true" aria-labelledby="ravine-search-title" dir={ar ? "rtl" : "ltr"} onPointerDown={(event) => event.stopPropagation()}>
         <div className="ravine-search-dialog-head"><div><div className="eyebrow">{ar ? "رَافِين / البحث" : "RAVINE / SEARCH"}</div><h2 id="ravine-search-title">{ar ? "ابحث داخل عالم رَافِين." : "Search inside the RAVINE world."}</h2></div><button type="button" className="ravine-search-close" onClick={close} aria-label={ar ? "إغلاق البحث" : "Close search"}><X size={18} /></button></div>
         <form className="ravine-search-form" onSubmit={submit}>
           <div className="ravine-search-input"><Search size={18} aria-hidden="true" /><input name="q" value={query} onChange={(event) => setQuery(event.target.value)} autoFocus dir="auto" placeholder={ar ? "اسم عمل، فكرة، مبدع، موضوع..." : "A work, idea, creator, topic..."} /></div>
@@ -88,7 +111,7 @@ export default function SearchLauncher({ locale, categories }: Props) {
     </div>
   ) : null;
 
-  return <><button type="button" className="ravine-minor-link ravine-search-trigger" onPointerDown={(event) => event.stopPropagation()} onClick={() => { setClosing(false); setOpen(true); }} aria-label={ar ? "ابحث عن عمل، مبدع، مسلسل أو فكرة" : "Search work, creators, series or ideas"} title={ar ? "ابحث عن عمل، مبدع، مسلسل أو فكرة" : "Search work, creators, series or ideas"}><Search size={17} aria-hidden="true" /><span>{ar ? "ابحث عن عمل، مبدع، مسلسل أو فكرة..." : "Search work, creators, series or ideas..."}</span></button>{modal && typeof document !== "undefined" ? createPortal(modal, document.body) : null}</>;
+  return <><button ref={triggerRef} type="button" className="ravine-minor-link ravine-search-trigger" onPointerDown={(event) => event.stopPropagation()} onClick={() => { setClosing(false); setOpen(true); }} aria-label={ar ? "ابحث عن عمل، مبدع، مسلسل أو فكرة" : "Search work, creators, series or ideas"} aria-haspopup="dialog" aria-expanded={open} aria-controls="ravine-search-dialog" title={ar ? "ابحث عن عمل، مبدع، مسلسل أو فكرة" : "Search work, creators, series or ideas"}><Search size={17} aria-hidden="true" /><span>{ar ? "ابحث عن عمل، مبدع، مسلسل أو فكرة..." : "Search work, creators, series or ideas..."}</span></button>{modal && typeof document !== "undefined" ? createPortal(modal, document.body) : null}</>;
 }
 
 function SearchSelect({ label, value, locale, placeholder, options, onChange, disabled = false }: { label: string; value: string; locale: Locale; placeholder: string; options: Option[]; onChange: (value: string) => void; disabled?: boolean }) {
