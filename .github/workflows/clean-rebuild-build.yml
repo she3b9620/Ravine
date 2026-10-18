@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - ravine/clean-rebuild
+      - ravine/creator-growth-flow-2026-10-18
   workflow_dispatch:
 
 jobs:
@@ -29,7 +30,7 @@ jobs:
       - name: Guest hero background mode regression test
         run: node --test tests/guest-hero-background-mode.test.mjs
 
-      - name: Series content type and publisher policy regression test
+      - name: Series and shared media catalog regression tests
         run: node --test tests/series-content-type.test.mjs
 
       - name: Build
