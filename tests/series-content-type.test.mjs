@@ -168,3 +168,14 @@ test("public catalog failures show localized recovery guidance instead of raw pr
   assert.match(page, /The series catalogue could not be retrieved right now/);
   assert.match(page, /تعذّر استرجاع قائمة المسلسلات الآن/);
 });
+
+
+test("watching a public series episode provides a privacy-safe return link to its series", () => {
+  const watchPage = read("../app/[locale]/watch/[id]/page.tsx");
+  const watchStyles = read("../app/[locale]/watch/[id]/watch-creator.module.css");
+  assert.match(watchPage, /series_id,season_number,episode_number/);
+  assert.match(watchPage, /from\("ravine_series_titles"\)[\s\S]*?\.eq\("published", true\)[\s\S]*?\.eq\("visibility", "public"\)/);
+  assert.ok(watchPage.includes("/${locale}/series/${seriesRecord.id}"));
+  assert.match(watchPage, /seriesContext/);
+  assert.match(watchStyles, /\.seriesContext/);
+});
