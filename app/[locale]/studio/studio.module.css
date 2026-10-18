@@ -91,3 +91,87 @@
   font-size: 0.8rem;
   line-height: 1.65;
 }
+
+.creatorSwitch {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0 0 1.5rem;
+  padding: 1rem;
+  border: 1px solid var(--ravine-border, rgba(127, 127, 127, 0.3));
+  border-radius: 1rem;
+  background: var(--ravine-surface, rgba(127, 127, 127, 0.04));
+}
+
+.creatorSwitchLabel {
+  color: var(--ravine-muted, #777);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.creatorSwitchOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.creatorOption,
+.creatorOptionActive {
+  display: grid;
+  gap: 0.2rem;
+  min-width: min(100%, 12rem);
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--ravine-border, rgba(127, 127, 127, 0.35));
+  border-radius: 0.75rem;
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 160ms ease, background-color 160ms ease;
+}
+
+.creatorOption strong,
+.creatorOptionActive strong {
+  overflow-wrap: anywhere;
+  font-size: 0.9rem;
+}
+
+.creatorOption small,
+.creatorOptionActive small {
+  color: var(--ravine-muted, #777);
+  font-size: 0.75rem;
+}
+
+.creatorOptionActive {
+  border-color: var(--ravine-accent, #c47a52);
+  background: color-mix(in srgb, var(--ravine-accent, #c47a52) 10%, transparent);
+}
+
+.creatorOption:hover,
+.creatorOptionActive:hover {
+  border-color: var(--ravine-accent, #c47a52);
+}
+
+.creatorOption:focus-visible,
+.creatorOptionActive:focus-visible {
+  outline: 2px solid var(--ravine-accent, #c47a52);
+  outline-offset: 3px;
+}
+
+@media (max-width: 520px) {
+  .creatorSwitchOptions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .creatorOption,
+  .creatorOptionActive {
+    min-width: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .creatorOption,
+  .creatorOptionActive {
+    transition: none;
+  }
+}
