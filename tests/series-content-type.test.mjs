@@ -4,6 +4,9 @@ import test from "node:test";
 
 const read = (path) => readFileSync(new URL(path, import.meta.url), "utf8");
 const page = read("../app/[locale]/series/page.tsx");
+const podcastsPage = read("../app/[locale]/podcasts/page.tsx");
+const catalog = read("../components/RAVINEMediaCatalog.tsx");
+const podcastStyles = read("../app/[locale]/podcasts/podcasts.module.css");
 const nav = read("../components/SidebarNav.tsx");
 const upload = read("../components/StudioUpload.tsx");
 const manager = read("../components/StudioWorkManager.tsx");
@@ -22,7 +25,6 @@ test("series page lists published series work and links to its RAVINE watch page
 });
 
 test("series is discoverable in the sidebar and follows guest gating", () => {
-  assert.match(nav, /\["series", "Series", "المسلسلات", Tv\]/);
   assert.match(nav, /\["series", "Series", "المسلسلات", Tv\]/);
   assert.match(nav, /new Set\(\["community", "cuts", "videos", "series", "live"/);
 });
@@ -52,4 +54,13 @@ test("series content type shares existing video quota; no separate permission by
   assert.match(manager, /value="series" disabled=\{work\.content_type !== "series"\}/);
   assert.match(migration, /new\.user_id <> actor and not is_ravine_admin\(\)/);
   assert.match(migration, /where c\.id = new\.creator_id and c\.user_id = actor/);
+});
+
+test("podcasts share the same public media-catalog layout used by film pages", () => {
+  assert.match(podcastsPage, /RAVINEMediaCatalog locale=\{locale\} contentType="podcast"/);
+  assert.match(catalog, /RAVINEMediaCatalogType = "short" \| "short_film" \| "film" \| "podcast"/);
+  assert.match(catalog, /enTitle: "Podcasts\."/);
+  assert.match(catalog, /\.eq\("published", true\)\.eq\("visibility", "public"\)\.eq\("content_type", contentType\)/);
+  assert.match(catalog, /href=\{\`\/\$\{locale\}\/watch\/\$\{work\.id\}\`\}/);
+  assert.match(podcastStyles, /ravine-podcast-pill/);
 });
