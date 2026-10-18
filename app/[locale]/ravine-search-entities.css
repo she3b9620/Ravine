@@ -1,0 +1,12 @@
+.ravine-search-extra-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.ravine-search-extra-card{display:grid;align-content:start;gap:6px;min-width:0;padding:12px 13px;border:1px solid rgba(241,233,220,.11);border-radius:13px;background:rgba(21,23,25,.48);color:inherit;text-decoration:none;transition:border-color 140ms ease,background-color 140ms ease}
+.ravine-search-extra-card:hover{border-color:rgba(196,122,82,.45);background:rgba(196,122,82,.075)}
+.ravine-search-extra-card strong{font-size:12px;line-height:1.55;overflow-wrap:anywhere}
+.ravine-search-extra-card small{color:var(--stone,#9a9690);font-size:10px;line-height:1.6;overflow-wrap:anywhere}
+.ravine-search-extra-eyebrow{color:var(--copper,#c47a52);font-size:9px;letter-spacing:.12em;text-transform:uppercase}
+.ravine-search-extra-card p{margin:0;color:var(--stone,#9a9690);font-size:10px;line-height:1.65}
+:global(html[data-theme="light"]) .ravine-search-extra-card{border-color:rgba(23,23,23,.12);background:rgba(255,250,246,.72)}
+:global(html[data-theme="light"]) .ravine-search-extra-card strong{color:#201c19}
+:global(html[data-theme="light"]) .ravine-search-extra-card small,:global(html[data-theme="light"]) .ravine-search-extra-card p{color:#70665f}
+@media(max-width:560px){.ravine-search-extra-grid{grid-template-columns:minmax(0,1fr)}}
+@media(prefers-reduced-motion:reduce){.ravine-search-extra-card{transition:none}}

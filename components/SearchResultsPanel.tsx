@@ -34,6 +34,9 @@ type Creator = {
   specialty: string | null;
   followers: number | null;
 };
+type CategoryResult = { id: number; name: string; slug: string | null };
+type EventResult = { id: number; creator_id: number; title: string; description: string | null; live_type: string; mode: string; status: string; scheduled_at: string | null; started_at: string | null };
+type CommunityResult = { slug: string; type: string; name_en: string; name_ar: string; description_en: string | null; description_ar: string | null };
 
 function durationLabel(seconds: number | null) {
   if (!seconds || seconds < 1) return "";
@@ -60,6 +63,9 @@ export default function SearchResultsPanel(props: SearchResultsPanelProps) {
   const ar = locale === "ar";
   const [videos, setVideos] = useState<Video[]>([]);
   const [creators, setCreators] = useState<Creator[]>([]);
+  const [categories, setCategories] = useState<CategoryResult[]>([]);
+  const [events, setEvents] = useState<EventResult[]>([]);
+  const [communities, setCommunities] = useState<CommunityResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
@@ -83,15 +89,21 @@ export default function SearchResultsPanel(props: SearchResultsPanelProps) {
       try {
         const response = await fetch(`/api/search${queryString ? `?${queryString}` : ""}`, { cache: "no-store", signal: controller.signal });
         if (!response.ok) throw new Error("Search request failed");
-        const payload = (await response.json()) as { videos?: Video[]; creators?: Creator[] };
+        const payload = (await response.json()) as { videos?: Video[]; creators?: Creator[]; categories?: CategoryResult[]; events?: EventResult[]; communities?: CommunityResult[] };
         if (controller.signal.aborted) return;
         setVideos(payload.videos ?? []);
         setCreators(payload.creators ?? []);
+        setCategories(payload.categories ?? []);
+        setEvents(payload.events ?? []);
+        setCommunities(payload.communities ?? []);
         setHasLoaded(true);
       } catch (requestError) {
         if (controller.signal.aborted) return;
         setVideos([]);
         setCreators([]);
+        setCategories([]);
+        setEvents([]);
+        setCommunities([]);
         setError(Boolean(requestError));
         setHasLoaded(true);
       } finally {
@@ -153,7 +165,7 @@ export default function SearchResultsPanel(props: SearchResultsPanelProps) {
     <div className="ravine-search-live-results" aria-live="polite">
       <div className="ravine-search-results-heading">
         <span>{loading ? (ar ? "تحديث النتائج…" : "Updating results…") : (ar ? "النتائج" : "RESULTS")}</span>
-        <b>{videos.length + creators.length}</b>
+        <b>{videos.length + creators.length + categories.length + events.length + communities.length}</b>
       </div>
 
       {creators.length > 0 ? (
@@ -164,6 +176,52 @@ export default function SearchResultsPanel(props: SearchResultsPanelProps) {
               <Link href={`/${locale}/creators/${creator.id}`} className="ravine-search-creator-card" key={creator.id}>
                 <img src={creator.avatar_url || "/RAVINE.PNG"} alt="" />
                 <div><strong>{creator.name || creator.username || (ar ? "مبدع" : "Creator")}</strong><small>{creator.specialty || creator.username || "RAVINE"}</small></div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {categories.length ? (
+        <section className="ravine-search-result-section">
+          <div className="ravine-search-result-label">{ar ? "التصنيفات" : "CATEGORIES"}</div>
+          <div className="ravine-search-extra-grid">
+            {categories.map((category) => (
+              <Link key={category.id} href={"/" + locale + "/discover?category=" + category.id} className="ravine-search-extra-card">
+                <span className="ravine-search-extra-eyebrow">{category.slug || (ar ? "تصنيف" : "CATEGORY")}</span>
+                <strong>{category.name}</strong>
+                <small>{ar ? "استكشف الأعمال داخل التصنيف" : "Explore work in this category"}</small>
+              </Link>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {events.length ? (
+        <section className="ravine-search-result-section">
+          <div className="ravine-search-result-label">{ar ? "الأحداث والمواعيد" : "EVENTS & SCHEDULES"}</div>
+          <div className="ravine-search-extra-grid">
+            {events.map((event) => (
+              <Link key={event.id} href={"/" + locale + "/events/" + event.id} className="ravine-search-extra-card">
+                <span className="ravine-search-extra-eyebrow">{event.status === "live" ? (ar ? "مباشر" : "LIVE") : event.status === "ended" ? (ar ? "انتهى" : "ENDED") : (ar ? "موعد قادم" : "UPCOMING")}</span>
+                <strong>{event.title}</strong>
+                <small>{event.scheduled_at ? new Intl.DateTimeFormat(locale === "ar" ? "ar-EG" : "en-US", { dateStyle: "medium", timeStyle: "short" }).format(new Date(event.scheduled_at)) : (ar ? "الموعد لم يحدد" : "Time to be announced")}</small>
+                {event.description ? <p>{shorten(event.description, 96)}</p> : null}
+              </Link>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {communities.length ? (
+        <section className="ravine-search-result-section">
+          <div className="ravine-search-result-label">{ar ? "المجتمعات العامة" : "PUBLIC COMMUNITIES"}</div>
+          <div className="ravine-search-extra-grid">
+            {communities.map((community) => (
+              <Link key={community.slug} href={"/" + locale + "/community/" + community.slug} className="ravine-search-extra-card">
+                <span className="ravine-search-extra-eyebrow">{community.type.toUpperCase()}</span>
+                <strong>{locale === "ar" ? community.name_ar : community.name_en}</strong>
+                <small>{(locale === "ar" ? community.description_ar : community.description_en) || (ar ? "مجتمع من رَافِين" : "A RAVINE community")}</small>
               </Link>
             ))}
           </div>

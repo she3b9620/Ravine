@@ -75,8 +75,39 @@ export async function GET(request: NextRequest) {
         .or(`name.ilike.%${q.replace(/[,()]/g, " ") }%,username.ilike.%${q.replace(/[,()]/g, " ") }%,specialty.ilike.%${q.replace(/[,()]/g, " ") }%`)
         .limit(5)
     : Promise.resolve({ data: [], error: null });
+  const categoriesQuery = q
+    ? supabase
+        .from("categories")
+        .select("id,name,slug")
+        .or("name.ilike.%" + q + "%,slug.ilike.%" + q + "%")
+        .order("name", { ascending: true })
+        .limit(6)
+    : Promise.resolve({ data: [], error: null });
 
-  const [videosResult, creatorsResult] = await Promise.all([videosQuery, creatorsQuery]);
+  const eventsQuery = q
+    ? supabase
+        .from("live_events")
+        .select("id,creator_id,title,description,live_type,mode,status,scheduled_at,started_at")
+        .in("status", ["scheduled", "live", "ended"])
+        .or("title.ilike.%" + q + "%,description.ilike.%" + q + "%")
+        .order("scheduled_at", { ascending: true, nullsFirst: false })
+        .limit(6)
+    : Promise.resolve({ data: [], error: null });
+
+  const communitiesQuery = q
+    ? supabase
+        .from("communities")
+        .select("slug,type,name_en,name_ar,description_en,description_ar")
+        .eq("is_active", true)
+        .eq("privacy", "public")
+        .or("name_en.ilike.%" + q + "%,name_ar.ilike.%" + q + "%,description_en.ilike.%" + q + "%,description_ar.ilike.%" + q + "%")
+        .order("name_en", { ascending: true })
+        .limit(6)
+    : Promise.resolve({ data: [], error: null });
+
+  const [videosResult, creatorsResult, categoriesResult, eventsResult, communitiesResult] = await Promise.all([
+    videosQuery, creatorsQuery, categoriesQuery, eventsQuery, communitiesQuery,
+  ]);
 
   if (videosResult.error || creatorsResult.error) {
     return NextResponse.json(
@@ -87,7 +118,11 @@ export async function GET(request: NextRequest) {
 
   const videos = videosResult.data ?? [];
   const creators = creatorsResult.data ?? [];
+  // Optional entity results are additive; a missing secondary catalogue must not break core work search.
+  const categories = categoriesResult.data ?? [];
+  const events = eventsResult.data ?? [];
+  const communities = communitiesResult.data ?? [];
   const mode = hasQuery || hasFilters ? "results" : "discovery";
 
-  return NextResponse.json({ videos, creators, mode });
+  return NextResponse.json({ videos, creators, categories, events, communities, mode });
 }
