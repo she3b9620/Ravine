@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 type GuestCinematicBackdropProps = { locale: "ar" | "en" };
 type Work = { id: number; video_url: string | null; thumbnail_url: string | null; duration: number | null; content_type: string | null };
 type BackgroundMode = "image" | "video";
+type StillImage = { id: number; thumbnail_url: string };
 type VideoControlEvent = CustomEvent<{ action: "play" | "pause" | "next" | "previous" | "toggle-audio" | "set-volume" | "toggle-repeat" | "seek" | "replay" | "set-background-mode"; muted?: boolean; volume?: number; repeat?: boolean; time?: number; backgroundMode?: BackgroundMode }>;
 
 const DEFAULT_VOLUME = 60;
@@ -52,11 +53,35 @@ async function loadAllGuestHeroWorks(supabase: ReturnType<typeof createClient>) 
   return all;
 }
 
+async function loadGuestPhotographyImages(supabase: ReturnType<typeof createClient>): Promise<StillImage[]> {
+  // The newer Work model has a first-class photography type. It is optional
+  // during the staged schema rollout, so callers fall back to public work
+  // thumbnails whenever that table is not available yet.
+  const { data, error } = await supabase
+    .from("ravine_next_works")
+    .select("id,poster_url,artwork_url,primary_media_url")
+    .eq("status", "published")
+    .eq("visibility", "public")
+    .eq("discovery_enabled", true)
+    .eq("work_type", "photography")
+    .order("published_at", { ascending: false })
+    .limit(500);
+
+  if (error || !data) return [];
+  return data.flatMap((row) => {
+    const imageUrl = [row.artwork_url, row.poster_url, row.primary_media_url]
+      .find((value): value is string => typeof value === "string" && value.trim().length > 0);
+    const id = Number(row.id);
+    return imageUrl && Number.isSafeInteger(id) && id > 0 ? [{ id, thumbnail_url: imageUrl }] : [];
+  });
+}
+
 export default function GuestCinematicBackdrop({ locale }: GuestCinematicBackdropProps) {
   const pathname = usePathname();
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [isGuestHome, setIsGuestHome] = useState(false);
   const [works, setWorks] = useState<Work[]>([]);
+  const [photoWorks, setPhotoWorks] = useState<StillImage[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [imageIndex, setImageIndex] = useState(0);
   const [muted, setMuted] = useState(true);
@@ -71,8 +96,9 @@ export default function GuestCinematicBackdrop({ locale }: GuestCinematicBackdro
   // Still imagery has its own stable list. Image mode is a real still-image
   // gallery sourced from public artwork thumbnails, not a frozen video frame.
   const imageWorks = useMemo(
-    () => stableMix(works.filter((work) => Boolean(work.thumbnail_url))),
-    [works],
+    () => stableMix(photoWorks.length ? photoWorks : works.filter((work) => Boolean(work.thumbnail_url)) as Array<StillImage | Work>)
+      .filter((work) => Boolean(work.thumbnail_url)),
+    [photoWorks, works],
   );
   const current = playableWorks[currentIndex] ?? null;
   const currentImage = imageWorks[imageIndex] ?? null;
@@ -90,6 +116,7 @@ export default function GuestCinematicBackdrop({ locale }: GuestCinematicBackdro
     let mounted = true;
     const supabase = createClient();
     void loadAllGuestHeroWorks(supabase).then((data) => { if (mounted) setWorks(data); }, () => { if (mounted) setWorks([]); });
+    void loadGuestPhotographyImages(supabase).then((data) => { if (mounted) setPhotoWorks(data); }, () => { if (mounted) setPhotoWorks([]); });
     return () => { mounted = false; };
   }, [isGuestHome]);
 
