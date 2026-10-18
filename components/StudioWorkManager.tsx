@@ -28,6 +28,30 @@ type StatusFilter = "all" | "published" | "draft";
 type TypeFilter = "all" | "short" | "video" | "podcast" | "documentary" | "short_film" | "film" | "series";
 type SortMode = "newest" | "views" | "likes" | "title";
 
+type StudioAction = "save" | "publish" | "unpublish" | "delete";
+
+function studioActionError(ar: boolean, action: StudioAction) {
+  const messages: Record<StudioAction, { ar: string; en: string }> = {
+    save: {
+      ar: "تعذّر حفظ تعديلات العمل. تحقق من الاتصال والصلاحيات ثم حاول مجددًا.",
+      en: "Could not save these changes. Check your connection and permissions, then try again.",
+    },
+    publish: {
+      ar: "تعذّر نشر العمل. راجع بياناته وإعدادات الوصول ثم حاول مجددًا.",
+      en: "Could not publish this work. Check its metadata and access settings, then try again.",
+    },
+    unpublish: {
+      ar: "تعذّر إخفاء العمل. تحقق من الاتصال ثم حاول مجددًا.",
+      en: "Could not unpublish this work. Check your connection, then try again.",
+    },
+    delete: {
+      ar: "تعذّر حذف العمل. تحقق من الاتصال والصلاحيات ثم حاول مجددًا.",
+      en: "Could not delete this work. Check your connection and permissions, then try again.",
+    },
+  };
+  return ar ? messages[action].ar : messages[action].en;
+}
+
 const allowedContentTypes = new Set(["short", "video", "podcast", "documentary", "short_film", "film", "series"]);
 const allowedVisibility = new Set(["public", "followers", "unlisted", "private", "custom"]);
 
@@ -159,13 +183,13 @@ export default function StudioWorkManager({ works: initialWorks, locale }: Props
         .single();
 
       if (updateError || !data) {
-        setError(updateError?.message || (ar ? "تعذر التحديث." : "Update failed."));
+        setError(studioActionError(ar, "save"));
       } else {
         setWorks((current) => current.map((work) => (work.id === id ? (data as Work) : work)));
         setEditingId(null);
       }
-    } catch (saveError) {
-      setError(saveError instanceof Error ? saveError.message : String(saveError));
+    } catch {
+      setError(studioActionError(ar, "save"));
     } finally {
       setBusyId(null);
     }
@@ -201,12 +225,12 @@ export default function StudioWorkManager({ works: initialWorks, locale }: Props
       };
 
       if (!response.ok || !payload.ok || !payload.work) {
-        throw new Error(payload.error || (ar ? "تعذر تغيير حالة النشر." : "Could not change publishing state."));
+        throw new Error("RAVINE_STUDIO_PUBLISH_STATE_FAILED");
       }
 
       setWorks((current) => current.map((item) => (item.id === work.id ? payload.work as Work : item)));
-    } catch (publishError) {
-      setError(publishError instanceof Error ? publishError.message : String(publishError));
+    } catch {
+      setError(studioActionError(ar, nextPublished ? "publish" : "unpublish"));
     } finally {
       setBusyId(null);
     }
@@ -229,11 +253,11 @@ export default function StudioWorkManager({ works: initialWorks, locale }: Props
       });
       const payload = (await response.json()) as { ok?: boolean; error?: string };
       if (!response.ok || !payload.ok) {
-        throw new Error(payload.error || (ar ? "تعذر حذف العمل." : "Could not delete work."));
+        throw new Error("RAVINE_STUDIO_DELETE_FAILED");
       }
       setWorks((current) => current.filter((item) => item.id !== work.id));
-    } catch (deleteError) {
-      setError(deleteError instanceof Error ? deleteError.message : String(deleteError));
+    } catch {
+      setError(studioActionError(ar, "delete"));
     } finally {
       setBusyId(null);
     }
