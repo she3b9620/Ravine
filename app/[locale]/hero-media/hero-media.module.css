@@ -1,0 +1,8 @@
+.page{max-width:1180px;margin:0 auto;padding:clamp(24px,4vw,56px) clamp(16px,3vw,32px) 72px;color:var(--foreground,#f1e9dc)}
+.header{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:30px}
+.eyebrow{font-size:11px;letter-spacing:.18em;font-weight:800;color:#c47a52;margin-bottom:12px}
+.header h1{margin:0;font-size:clamp(28px,4vw,44px);line-height:1.15;letter-spacing:-.035em}
+.header p{max-width:760px;color:var(--muted-foreground,#a6a19b);line-height:1.8;margin:14px 0 0;font-size:14px}
+.headerMark{flex:none;font-size:40px;font-weight:900;letter-spacing:-.12em;color:#c47a52;opacity:.8;padding:0 8px 8px}
+.headerMark span{color:#183f46;margin:0 5px}
+@media(max-width:640px){.header{align-items:flex-start}.headerMark{display:none}}
