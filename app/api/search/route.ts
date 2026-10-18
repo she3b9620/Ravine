@@ -10,7 +10,7 @@ function clean(value: string | null) {
 }
 
 function normalizeSearchPattern(value: string) {
-  return value.replace(/[,()%*]/g, " ").replace(/\s+/g, " ").trim();
+  return value.replace(/[,()%*\\]/g, " ").replace(/\s+/g, " ").trim();
 }
 
 type VideoSearchQuery = ReturnType<ReturnType<Awaited<ReturnType<typeof createClient>>["from"]>["select"]>;

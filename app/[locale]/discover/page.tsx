@@ -78,7 +78,7 @@ function normalizeQuery(value: string | undefined) {
   return (value ?? "")
     .trim()
     .slice(0, 120)
-    .replace(/[,()%*]/g, " ")
+    .replace(/[,()%*\\]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 }

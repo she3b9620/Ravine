@@ -23,9 +23,9 @@ test("Search API accepts the full Discover media taxonomy", () => {
 test("Search API and Discover sanitize PostgREST delimiters and wildcard characters", () => {
   const route = read("../app/api/search/route.ts");
   const discover = read("../app/[locale]/discover/page.tsx");
-  assert.ok(route.includes('replace(/[,()%*]/g, " ")'));
+  assert.ok(route.includes('replace(/[,()%*\\\\]/g, " ")'));
   assert.ok(route.includes('replace(/\\s+/g, " ")'));
-  assert.ok(discover.includes('replace(/[,()%*]/g, " ")'));
+  assert.ok(discover.includes('replace(/[,()%*\\\\]/g, " ")'));
   assert.ok(discover.includes('replace(/\\s+/g, " ")'));
   assert.ok(discover.includes("slice(0, 120)"));
 });
