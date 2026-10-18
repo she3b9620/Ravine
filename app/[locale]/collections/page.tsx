@@ -382,6 +382,9 @@ export default async function CollectionsPage({
       canManage = Boolean(ownedIdentity);
     }
 
+    // Private and members-only collections remain owner-only until a membership policy is defined.
+    if (collectionRow.visibility !== "public" && !canManage) notFound();
+
     const { data: itemRows, error: itemsError } = await supabase
       .from("ravine_collection_items")
       .select("work_id,sort_order,note")

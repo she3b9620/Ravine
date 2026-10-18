@@ -80,3 +80,21 @@ test("public collections expose a localized share action while private collectio
   assert.match(button, /مشاركة المجموعة العامة/);
   assert.match(css, /focus-visible/);
 });
+
+
+test("collection detail denies non-owners before reading private or members-only items", () => {
+  const page = read("../app/[locale]/collections/page.tsx");
+  const guard = page.indexOf('if (collectionRow.visibility !== "public" && !canManage) notFound()');
+  const itemsQuery = page.indexOf('from("ravine_collection_items")');
+  assert.ok(guard >= 0 && itemsQuery > guard);
+  assert.match(page, /if \\(!canManage && userId && collectionRow\\.owner_creator_id\\)/);
+  assert.match(page, /Members-only access is not enabled yet|Member access is not enabled yet/);
+});
+
+test("collection directory only exposes private and members-only filters for owned collections", () => {
+  const component = read("../components/RAVINECollectionsDirectory.tsx");
+  assert.match(component, /visibility === "private" && item\\.owned/);
+  assert.match(component, /visibility === "members" && item\\.owned/);
+  assert.match(component, /owned && item\\.visibility === "private"/);
+  assert.match(component, /owned && item\\.visibility === "members"/);
+});
