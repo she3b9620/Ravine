@@ -34,8 +34,8 @@ test("guest hero media order is stable and image mode browses still assets indep
   assert.match(backdrop, /loadGuestPhotographyImages/);
   assert.match(backdrop, /from\("ravine_next_works"\)/);
   assert.match(backdrop, /\.eq\("work_type", "photography"\)/);
-  assert.match(home, /function stableMix/);
-  assert.doesNotMatch(home, /Math\.random\(\)|randomInt/);
+  assert.match(home, /\.order\("created_at", \{ ascending: false \}\)/);
+  assert.doesNotMatch(home, /Math\.random\(\)|randomInt|stableMix\(/);
   assert.match(backdrop, /setImageIndex\(\(index\) => imageWorks\.length/);
   assert.match(backdrop, /backgroundMode === "image" \? currentImage\?\.thumbnail_url/);
 });
