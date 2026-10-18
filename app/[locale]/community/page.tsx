@@ -72,6 +72,7 @@ export default async function CommunityPage({ params }: { params: Promise<{ loca
     .from("communities")
     .select("slug,type,name_en,name_ar,description_en,description_ar,privacy")
     .eq("is_active", true)
+    .eq("privacy", "public")
     .order("type", { ascending: true })
     .order("name_en", { ascending: true });
 

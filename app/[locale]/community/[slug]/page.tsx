@@ -55,12 +55,23 @@ export async function createCommunityPostAction(formData: FormData) {
 
   if (!community || !community.is_active || community.privacy !== "public") return;
 
-  await supabase.from("community_posts").insert({
+  if (body.length > 5000) return;
+
+  const { data: membership } = await supabase
+    .from("community_members")
+    .select("status")
+    .eq("community_id", community.id)
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (membership?.status !== "active") return;
+
+  const { error: insertError } = await supabase.from("community_posts").insert({
     community_id: community.id,
     author_id: user.id,
     post_type: "post",
     body,
   });
+  if (insertError) return;
 
   revalidatePath(`/${locale}/community/${slug}`);
 }
@@ -90,19 +101,19 @@ export default async function CommunityDetailPage({
 
   if (!dbCommunity || !dbCommunity.is_active) notFound();
 
-  const [{ data: memberships }, { data: posts }] = await Promise.all([
-    user
-      ? supabase.from("community_members").select("role,status").eq("community_id", dbCommunity.id).eq("user_id", user.id).maybeSingle()
-      : Promise.resolve({ data: null }),
-    supabase
-      .from("community_posts")
-      .select("id,post_type,body,created_at,author_id")
-      .eq("community_id", dbCommunity.id)
-      .order("created_at", { ascending: false })
-      .limit(40),
-  ]);
+  const { data: memberships } = user
+    ? await supabase.from("community_members").select("role,status").eq("community_id", dbCommunity.id).eq("user_id", user.id).maybeSingle()
+    : { data: null };
 
   const isMember = memberships?.status === "active";
+  if (dbCommunity.privacy !== "public" && !isMember) notFound();
+
+  const { data: posts } = await supabase
+    .from("community_posts")
+    .select("id,post_type,body,created_at,author_id")
+    .eq("community_id", dbCommunity.id)
+    .order("created_at", { ascending: false })
+    .limit(40);
   const canJoin = Boolean(user) && dbCommunity.privacy === "public" && ["platform", "topic"].includes(dbCommunity.type) && !isMember;
   const canPost = Boolean(user) && isMember;
   const hasOperationalSystem = ["platform", "topic"].includes(dbCommunity.type);
