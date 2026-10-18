@@ -92,3 +92,11 @@ test("live search returns public event, community, and category suggestions alon
   assert.match(css, /ravine-search-extra-grid/);
   assert.match(css, /data-theme="light"/);
 });
+
+
+test("Discover respects the same search-visible flag as live search suggestions", () => {
+  const discover = read("../app/[locale]/discover/page.tsx");
+  const api = read("../app/api/search/route.ts");
+  assert.match(discover, /\.eq\("published", true\)[\s\S]*?\.eq\("visibility", "public"\)[\s\S]*?\.eq\("search_visible", true\)/);
+  assert.match(api, /\.eq\("visibility", "public"\)\.eq\("search_visible", true\)/);
+});

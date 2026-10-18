@@ -108,6 +108,7 @@ export default async function DiscoverPage({
     .select("id,title,description,thumbnail_url,video_url,duration,views,likes,content_type,quality,aspect_ratio")
     .eq("published", true)
     .eq("visibility", "public")
+    .eq("search_visible", true)
     .limit(48);
 
   if (query) request = request.or("title.ilike.%" + query + "%,description.ilike.%" + query + "%");
