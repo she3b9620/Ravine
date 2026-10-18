@@ -12,7 +12,7 @@ const navigation: Item[] = [["", "Home", "الرئيسية", Home], ["discover",
 export default function PrimaryNav({ locale, authenticated = false }: { locale: Locale; authenticated?: boolean }) {
   const pathname = usePathname() || `/${locale}`;
   function isActive(slug: string) { return !slug ? pathname === `/${locale}` : pathname === `/${locale}/${slug}` || pathname.startsWith(`/${locale}/${slug}/`); }
-  function handleGuestNavigation() { requestRavineAuth(pathname); return true; }
+  void authenticated;
   return (
     <nav className="ravine-nav" aria-label={locale === "ar" ? "التنقل الرئيسي" : "Primary navigation"}>
       {navigation.map(([slug, en, ar, Icon]) => {

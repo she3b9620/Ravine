@@ -9,7 +9,7 @@ test("guest navigation exposes public browse pages without forcing sign-in first
   const sidebar = read("../components/SidebarNav.tsx");
   const mobile = read("../components/MobileNav.tsx");
 
-  assert.doesNotMatch(primary, /GUEST_GATED|ravine-nav-gated|requestRavineAuth|LockKeyhole/);
+  assert.doesNotMatch(primary, /GUEST_GATED|ravine-nav-gated|requestRavineAuth|LockKeyhole|handleGuestNavigation/);
   assert.doesNotMatch(sidebar, /GUEST_GATED|requestRavineAuth/);
   assert.doesNotMatch(mobile, /GUEST_GATED/);
 
