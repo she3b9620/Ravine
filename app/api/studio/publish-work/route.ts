@@ -152,13 +152,60 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error?.message || "Could not publish work." }, { status: 500 });
     }
 
-    if (contentType === "series" && visibility === "public" && seriesIdForPublish) {
+    if (contentType === "series" && seriesIdForPublish) {
+      // Keep the public series card in sync when an episode is published or
+      // its visibility changes. One private episode must not expose an
+      // otherwise empty series page, and another public episode must keep it live.
+      const { data: remainingPublicEpisodes, error: publicEpisodesError } = await supabase
+        .from("videos")
+        .select("id")
+        .eq("series_id", seriesIdForPublish)
+        .eq("content_type", "series")
+        .eq("published", true)
+        .eq("visibility", "public")
+        .limit(1);
+
+      if (publicEpisodesError) {
+        await supabase.from("videos").update({
+          published: Boolean(work.published),
+          title: work.title,
+          description: work.description,
+          content_type: work.content_type,
+          quality: work.quality,
+          visibility: work.visibility || "public",
+        }).eq("id", videoId);
+        return NextResponse.json(
+          { error: "Could not verify public episodes; the publishing change could not be confirmed." },
+          { status: 503 },
+        );
+      }
+
+      const seriesIsPublic = Boolean(remainingPublicEpisodes?.length);
       const { error: seriesUpdateError } = await supabase
         .from("ravine_series_titles")
-        .update({ published: true, visibility: "public", updated_at: new Date().toISOString() })
+        .update({
+          published: seriesIsPublic,
+          ...(seriesIsPublic ? { visibility: "public" } : {}),
+          updated_at: new Date().toISOString(),
+        })
         .eq("id", seriesIdForPublish)
-        .eq("creator_id", creator.id);
-      if (seriesUpdateError) return NextResponse.json({ error: seriesUpdateError.message }, { status: 500 });
+        .eq("creator_id", creator.id)
+        .eq("user_id", auth.user.id);
+
+      if (seriesUpdateError) {
+        await supabase.from("videos").update({
+          published: Boolean(work.published),
+          title: work.title,
+          description: work.description,
+          content_type: work.content_type,
+          quality: work.quality,
+          visibility: work.visibility || "public",
+        }).eq("id", videoId);
+        return NextResponse.json(
+          { error: "Could not synchronize series visibility; the publishing change could not be confirmed." },
+          { status: 503 },
+        );
+      }
     }
 
     return NextResponse.json({ ok: true, work: data });
