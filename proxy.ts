@@ -6,7 +6,7 @@ import { supabasePublishableKey, supabaseUrl } from "./lib/supabase/config";
 
 const intlMiddleware = createMiddleware(routing);
 
-const protectedRoutes = ["/account", "/dashboard", "/history", "/library", "/notifications", "/settings", "/creator", "/studio", "/onboarding", "/security"];
+const protectedRoutes = ["/account", "/dashboard", "/history", "/library", "/notifications", "/settings", "/creator", "/studio", "/hero-media", "/onboarding", "/security"];
 
 function isProtectedPath(pathname: string) {
   const segments = pathname.split("/").filter(Boolean);
