@@ -63,7 +63,7 @@ test("series content type shares existing video quota; no separate permission by
 test("podcasts share the same public media-catalog layout used by film pages", () => {
   assert.match(podcastsPage, /RAVINEMediaCatalog locale=\{locale\} contentType="podcast"/);
   assert.match(catalog, /RAVINEMediaCatalogType = "short" \| "short_film" \| "film" \| "podcast"/);
-  assert.match(catalog, /enTitle:\\s*"Podcasts\\."/);
+  assert.match(catalog, /enTitle:\s*"Podcasts\."/);
   assert.match(catalog, /\.eq\("published",\s*true\)\.eq\("visibility",\s*"public"\)\.eq\("content_type",\s*contentType\)/);
   assert.match(catalog, /href:.*watch.*work\.id/);
   assert.match(workCatalog, /<Link href=\{work\.href\}/);
@@ -72,7 +72,7 @@ test("podcasts share the same public media-catalog layout used by film pages", (
 
 test("Shorts viewers can switch between a standard grid and a vertical reels feed", () => {
   assert.match(mediaCatalog, /\.select\("id,title,description,thumbnail_url,video_url,duration,views,likes,quality,created_at"\)/);
-  assert.match(mediaCatalog, /contentType\s*===\s*"short"\s*\?\s*<RAVINEShortsBrowse locale=\{locale\} works=\{works\} \/>/);
+  assert.match(mediaCatalog, /contentType\s*===\s*"short"\s*\?\s*<RAVINEShortsBrowse locale=\{locale\} works=\{works\}\s*\/>/);
   assert.match(shortsBrowse, /type ViewMode = "grid" \| "reels"/);
   assert.match(shortsBrowse, /ravine\.shorts\.view-mode\.v1/);
   assert.match(shortsBrowse, /localStorage\.getItem\(PREFERENCE_KEY\)/);
@@ -108,3 +108,4 @@ test("Shorts keep both view modes and add local search plus sort options", () =>
   assert.match(shortsBrowse, /Search Shorts/);
   assert.match(shortsBrowse, /Most viewed/);
 });
+
