@@ -6,7 +6,7 @@ const route = readFileSync(new URL("../app/api/studio/delete-work/route.ts", imp
 
 test("work deletion checks the current user and creator ownership before loading or deleting media", () => {
   const authCheck = route.indexOf("supabase.auth.getUser()");
-  const ownershipCheck = route.indexOf("if (!ownsViaCreator && !ownsViaWork)");
+  const ownershipCheck = route.indexOf("if (!ownsViaCreator)");
   const relatedMediaLookup = route.indexOf('from("work_media_assets")');
   const workDelete = route.indexOf('.from("videos")\n      .delete()');
 
