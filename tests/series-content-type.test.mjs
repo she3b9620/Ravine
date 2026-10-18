@@ -5,6 +5,9 @@ import test from "node:test";
 const read = (path) => readFileSync(new URL(path, import.meta.url), "utf8");
 const page = read("../app/[locale]/series/page.tsx");
 const podcastsPage = read("../app/[locale]/podcasts/page.tsx");
+const mediaCatalog = read("../components/RAVINEMediaCatalog.tsx");
+const shortsBrowse = read("../components/RAVINEShortsBrowse.tsx");
+const shortsStyles = read("../components/RAVINEShortsBrowse.module.css");
 const catalog = read("../components/RAVINEMediaCatalog.tsx");
 const podcastStyles = read("../app/[locale]/podcasts/podcasts.module.css");
 const nav = read("../components/SidebarNav.tsx");
@@ -63,4 +66,19 @@ test("podcasts share the same public media-catalog layout used by film pages", (
   assert.match(catalog, /\.eq\("published", true\)\.eq\("visibility", "public"\)\.eq\("content_type", contentType\)/);
   assert.match(catalog, /href=\{\`\/\$\{locale\}\/watch\/\$\{work\.id\}\`\}/);
   assert.match(podcastStyles, /ravine-podcast-pill/);
+});
+
+test("Shorts viewers can switch between a standard grid and a vertical reels feed", () => {
+  assert.match(mediaCatalog, /\.select\("id,title,description,thumbnail_url,video_url,duration,views,likes,quality"\)/);
+  assert.match(mediaCatalog, /contentType === "short" \? <RAVINEShortsBrowse locale=\{locale\} works=\{works\} \/>/);
+  assert.match(shortsBrowse, /type ViewMode = "grid" \| "reels"/);
+  assert.match(shortsBrowse, /ravine\.shorts\.view-mode\.v1/);
+  assert.match(shortsBrowse, /localStorage\.getItem\(PREFERENCE_KEY\)/);
+  assert.match(shortsBrowse, /localStorage\.setItem\(PREFERENCE_KEY, next\)/);
+  assert.match(shortsBrowse, /IntersectionObserver/);
+  assert.match(shortsBrowse, /video\.play\(\)/);
+  assert.match(shortsBrowse, /video\.pause\(\)/);
+  assert.match(shortsBrowse, /resolveWorkPlaybackUrl\(work\.id, work\.video_url\)/);
+  assert.match(shortsStyles, /scroll-snap-type: y proximity/);
+  assert.match(shortsStyles, /@media \(max-width: 620px\)/);
 });
