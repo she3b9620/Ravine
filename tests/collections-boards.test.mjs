@@ -84,17 +84,18 @@ test("public collections expose a localized share action while private collectio
 
 test("collection detail denies non-owners before reading private or members-only items", () => {
   const page = read("../app/[locale]/collections/page.tsx");
-  const guard = page.indexOf('if (collectionRow.visibility !== "public" && !canManage) notFound()');
-  const itemsQuery = page.indexOf('from("ravine_collection_items")');
-  assert.ok(guard >= 0 && itemsQuery > guard);
+  const detailStart = page.indexOf("if (collectionId) {");
+  const guard = page.indexOf('if (collectionRow.visibility !== "public" && !canManage) notFound()', detailStart);
+  const itemsQuery = page.indexOf('from("ravine_collection_items")', detailStart);
+  assert.ok(detailStart >= 0 && guard > detailStart && itemsQuery > guard);
   assert.match(page, /if \\(!canManage && userId && collectionRow\\.owner_creator_id\\)/);
   assert.match(page, /Members-only access is not enabled yet|Member access is not enabled yet/);
 });
 
 test("collection directory only exposes private and members-only filters for owned collections", () => {
   const component = read("../components/RAVINECollectionsDirectory.tsx");
-  assert.match(component, /visibility === "private" && item\\.owned/);
-  assert.match(component, /visibility === "members" && item\\.owned/);
-  assert.match(component, /owned && item\\.visibility === "private"/);
-  assert.match(component, /owned && item\\.visibility === "members"/);
+  assert.ok(component.includes('item.visibility === "private" && item.owned'));
+  assert.ok(component.includes('item.visibility === "members" && item.owned'));
+  assert.ok(component.includes('owned && item.visibility === "private"'));
+  assert.ok(component.includes('owned && item.visibility === "members"'));
 });
