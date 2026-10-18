@@ -34,6 +34,19 @@ function extractCloudinaryPublicId(videoUrl: string | null, cloudName: string) {
   }
 }
 
+function belongsToCloudinaryAccount(value: string | null, cloudName: string) {
+  if (!value || !cloudName) return false;
+  try {
+    const url = new URL(value);
+    const parts = url.pathname.split("/").filter(Boolean);
+    return url.protocol === "https:"
+      && url.hostname.toLowerCase() === CLOUDINARY_HOST
+      && parts[0] === cloudName;
+  } catch {
+    return false;
+  }
+}
+
 function isCloudinaryUrl(value: string | null) {
   if (!value) return false;
   try {
@@ -156,6 +169,11 @@ export async function POST(request: NextRequest) {
 
     if (hasCloudinaryMedia && (!cloudName || !apiKey || !apiSecret)) {
       return jsonError("Cloud media cleanup is unavailable; the work was not deleted.", 503);
+    }
+
+    const cloudinaryOwnedUrls = mediaUrls.filter((url) => belongsToCloudinaryAccount(url, cloudName));
+    if (cloudinaryOwnedUrls.some((url) => !extractCloudinaryPublicId(url, cloudName))) {
+      return jsonError("A media URL could not be verified for safe cleanup; the work was not deleted.", 422);
     }
 
     const mainPublicId = extractCloudinaryPublicId(work.video_url, cloudName);
