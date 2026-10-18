@@ -29,3 +29,15 @@ test("Search API and Discover sanitize PostgREST delimiters and wildcard charact
   assert.ok(discover.includes('replace(/\\s+/g, " ")'));
   assert.ok(discover.includes("slice(0, 120)"));
 });
+
+
+test("Discover searches published work and creator identities together", () => {
+  const page = read("../app/[locale]/discover/page.tsx");
+  assert.ok(page.includes("creatorRequest"));
+  assert.ok(page.includes('from("creators")'));
+  assert.ok(page.includes("name.ilike.%"));
+  assert.ok(page.includes('className="discover-creator-results"'));
+  assert.ok(page.includes("Matching creators"));
+  assert.ok(page.includes("المبدعون المطابقون"));
+  assert.ok(page.includes('.eq("visibility", "public")'));
+});
