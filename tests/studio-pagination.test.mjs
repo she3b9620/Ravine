@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 const page = readFileSync(new URL("../app/[locale]/studio/page.tsx", import.meta.url), "utf8");
+const manager = readFileSync(new URL("../components/StudioWorkManager.tsx", import.meta.url), "utf8");
 const styles = readFileSync(new URL("../app/[locale]/studio/studio.module.css", import.meta.url), "utf8");
 
 test("Creator Studio uses query-driven, server-side pagination instead of silently truncating at 50 works", () => {
@@ -70,6 +71,6 @@ test("pagination links preserve search and filters while form submissions start 
   for (const name of ["workSearch", "workStatus", "workType", "workSort"]) {
     assert.ok(page.includes(`params.set("${name}"`));
   }
-  assert.ok(page.includes('name="workPage" value="1"'));
+  assert.ok(manager.includes('name="workPage" value="1"'));
   assert.ok(page.includes('params.set("creatorId", String(creator.id)'));
 });
