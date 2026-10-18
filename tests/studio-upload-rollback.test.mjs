@@ -8,17 +8,21 @@ const cleanup = read("../app/api/studio/cleanup-uploads/route.ts");
 const deleteWork = read("../app/api/studio/delete-work/route.ts");
 const signature = read("../app/api/studio/cloudinary-signature/route.ts");
 
-test("Studio records every successful Cloudinary upload immediately for rollback", () => {
+test("Studio registers the exact signed ID for main, trailer, and preview before awaiting each upload", () => {
   assert.match(upload, /const uploadedPublicIds: string\[\] = \[\]/);
-  assert.match(upload, /if \(mainUpload\.public_id\) uploadedPublicIds\.push\(mainUpload\.public_id\)/);
-  assert.match(upload, /if \(trailerUpload\?\.public_id\) uploadedPublicIds\.push\(trailerUpload\.public_id\)/);
-  assert.match(upload, /if \(previewUpload\?\.public_id\) uploadedPublicIds\.push\(previewUpload\.public_id\)/);
-  const main = upload.indexOf("uploadedPublicIds.push(mainUpload.public_id)");
-  const trailer = upload.indexOf("uploadedPublicIds.push(trailerUpload.public_id)");
-  const preview = upload.indexOf("uploadedPublicIds.push(previewUpload.public_id)");
-  const previewUploadAttempt = upload.indexOf("const previewUpload = previewFile");
+  assert.match(upload, /const trackUploadedPublicId = \(publicId: string\) => \{/);
+  const main = upload.indexOf("const mainUpload = await uploadToCloudinary");
+  const trailer = upload.indexOf("const trailerUpload = trailerFile");
+  const preview = upload.indexOf("const previewUpload = previewFile");
   assert.ok(main >= 0 && trailer > main && preview > trailer);
-  assert.ok(preview < previewUploadAttempt + 300);
+  assert.ok(upload.slice(main, trailer).includes("trackUploadedPublicId"));
+  assert.ok(upload.slice(trailer, preview).includes("trackUploadedPublicId"));
+  assert.ok(upload.slice(preview, upload.indexOf("if (previewUpload) validateAuxiliaryMedia")).includes("trackUploadedPublicId"));
+  assert.match(upload, /const expectedPublicId = `\$\{folder\}\/\$\{publicId\}`/);
+  assert.match(upload, /onSignedPublicId\(expectedPublicId\)/);
+  assert.doesNotMatch(upload, /uploadedPublicIds\.push\(mainUpload\.public_id\)/);
+  assert.doesNotMatch(upload, /uploadedPublicIds\.push\(trailerUpload\.public_id\)/);
+  assert.doesNotMatch(upload, /uploadedPublicIds\.push\(previewUpload\.public_id\)/);
 });
 
 test("a partial database work creation is deleted before the remaining temporary uploads are cleaned", () => {
