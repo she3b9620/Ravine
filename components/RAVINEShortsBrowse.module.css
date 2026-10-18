@@ -414,5 +414,5 @@
 
 :global(html[data-ravine-shorts-reels="true"]) {
   scroll-snap-type: y proximity;
-  scroll-padding-top: 88px;
+  scroll-padding-top: 0;
 }
