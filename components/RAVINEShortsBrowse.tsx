@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { startTransition, useCallback, useEffect, useRef, useState } from "react";
 import { AudioLines, Check, Grid2X2, Pause, Play, Volume2, VolumeX } from "lucide-react";
 import { resolveWorkPlaybackUrl } from "@/lib/ravine-playback-core";
 import styles from "./RAVINEShortsBrowse.module.css";
@@ -35,7 +35,6 @@ function formatDuration(seconds: number | null, fallback: string) {
 export default function RAVINEShortsBrowse({ locale, works }: Props) {
   const ar = locale === "ar";
   const [mode, setMode] = useState<ViewMode>("grid");
-  const [ready, setReady] = useState(false);
   const [muted, setMuted] = useState(true);
   const [playingId, setPlayingId] = useState<number | null>(null);
   const videosRef = useRef(new Map<number, HTMLVideoElement>());
@@ -47,11 +46,10 @@ export default function RAVINEShortsBrowse({ locale, works }: Props) {
   useEffect(() => {
     try {
       const saved = window.localStorage.getItem(PREFERENCE_KEY);
-      if (saved === "grid" || saved === "reels") setMode(saved);
+      if (saved === "reels") startTransition(() => setMode("reels"));
     } catch {
       // Storage can be unavailable in privacy-restricted browser contexts.
     }
-    setReady(true);
   }, []);
 
   useEffect(() => {
@@ -64,6 +62,12 @@ export default function RAVINEShortsBrowse({ locale, works }: Props) {
   }, [mode]);
 
   const chooseMode = useCallback((next: ViewMode) => {
+    if (next === "grid") {
+      videosRef.current.forEach((video) => video.pause());
+      activeRef.current = null;
+      manuallyPausedRef.current.clear();
+      setPlayingId(null);
+    }
     setMode(next);
     try {
       window.localStorage.setItem(PREFERENCE_KEY, next);
@@ -88,11 +92,12 @@ export default function RAVINEShortsBrowse({ locale, works }: Props) {
       videosRef.current.forEach((video) => video.pause());
       visibilityRatiosRef.current.clear();
       manuallyPausedRef.current.clear();
-      setPlayingId(null);
       activeRef.current = null;
       return;
     }
 
+    const videos = videosRef.current;
+    const visibilityRatios = visibilityRatiosRef.current;
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         const reel = entry.target as HTMLElement;
@@ -149,8 +154,8 @@ export default function RAVINEShortsBrowse({ locale, works }: Props) {
     return () => {
       observer.disconnect();
       observersRef.current = null;
-      videosRef.current.forEach((video) => video.pause());
-      visibilityRatiosRef.current.clear();
+      videos.forEach((video) => video.pause());
+      visibilityRatios.clear();
       activeRef.current = null;
     };
   }, [mode, works]);
@@ -278,7 +283,6 @@ export default function RAVINEShortsBrowse({ locale, works }: Props) {
           </div>
         </div>
       )}
-      {!ready ? <span className={styles.preferenceNote} aria-live="polite">{ar ? "جاري استعادة تفضيل العرض…" : "Restoring your view preference…"}</span> : null}
     </div>
   );
 }
