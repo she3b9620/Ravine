@@ -122,6 +122,13 @@ export default function GuestCinematicBackdrop({ locale }: GuestCinematicBackdro
 
   useEffect(() => { setCurrentIndex(0); }, [playableWorks.length]);
   useEffect(() => { setImageIndex(0); }, [imageWorks.length]);
+  useEffect(() => {
+    // Keep the hero visible on catalogues that have photography but no playable
+    // public video yet. With videos available, the normal initial mode remains video.
+    if (playableWorks.length === 0 && imageWorks.length > 0 && backgroundMode !== "image") {
+      setBackgroundMode("image");
+    }
+  }, [backgroundMode, imageWorks.length, playableWorks.length]);
 
   useEffect(() => {
     const video = videoRef.current;
