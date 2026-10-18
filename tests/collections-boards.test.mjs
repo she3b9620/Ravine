@@ -51,3 +51,20 @@ test("collections directory supports search, visibility filters and sorting", ()
   assert.match(component, /value="works"/);
   assert.ok(component.includes('item.owned && item.visibility === "private"'));
 });
+
+test("collection owners can reorder items without violating the collection-order primary key", () => {
+  const page = read("../app/[locale]/collections/page.tsx");
+  const actionStart = page.indexOf("export async function moveCollectionItemAction");
+  const actionEnd = page.indexOf("export async function updateCollectionDetailsAction", actionStart);
+  const action = page.slice(actionStart, actionEnd);
+  assert.ok(actionStart >= 0 && actionEnd > actionStart);
+  assert.match(action, /resolveManagedCollection\(supabase, auth\.user\.id, collectionId\)/);
+  assert.match(action, /const occupiedOrders = new Set/);
+  assert.match(action, /temporaryOrder/);
+  assert.match(action, /\.update\(\{ sort_order: temporaryOrder \}\)/);
+  assert.match(action, /direction === "up" \? -1 : 1/);
+  assert.match(page, /name="direction" value="up"/);
+  assert.match(page, /name="direction" value="down"/);
+  assert.match(page, /disabled=\{index === 0\}/);
+  assert.match(page, /disabled=\{index === orderedItems\.length - 1\}/);
+});

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { BookmarkPlus, Eye, LockKeyhole, Plus, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, BookmarkPlus, Eye, LockKeyhole, Plus, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import styles from "./collections.module.css";
 import RAVINECollectionsDirectory, { type RAVINECollectionDirectoryItem } from "@/components/RAVINECollectionsDirectory";
@@ -168,6 +168,79 @@ export async function removeCollectionItemAction(formData: FormData) {
   redirect("/" + locale + "/collections?id=" + collectionId + "&notice=removed");
 }
 
+export async function moveCollectionItemAction(formData: FormData) {
+  "use server";
+  const locale = safeLocale(formData.get("locale"));
+  const collectionId = String(formData.get("collection_id") ?? "");
+  const sortOrder = Number(formData.get("sort_order"));
+  const direction = formData.get("direction") === "up" ? "up" : formData.get("direction") === "down" ? "down" : "";
+  if (!collectionIdPattern.test(collectionId) || !Number.isSafeInteger(sortOrder) || sortOrder < 0 || !direction) {
+    redirect("/" + locale + "/collections?error=input");
+  }
+
+  const supabase = await createClient();
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) redirect("/" + locale + "/auth?next=" + encodeURIComponent("/" + locale + "/collections?id=" + collectionId));
+  const collection = await resolveManagedCollection(supabase, auth.user.id, collectionId);
+  if (!collection) redirect("/" + locale + "/collections?error=access");
+
+  const { data: rows, error: rowsError } = await supabase
+    .from("ravine_collection_items")
+    .select("work_id,sort_order")
+    .eq("collection_id", collectionId)
+    .order("sort_order", { ascending: true });
+  if (rowsError) redirect("/" + locale + "/collections?id=" + collectionId + "&error=item");
+
+  const items = (rows ?? []) as CollectionItemRow[];
+  const currentIndex = items.findIndex((item) => item.sort_order === sortOrder);
+  if (currentIndex < 0) redirect("/" + locale + "/collections?id=" + collectionId + "&error=item");
+  const targetIndex = currentIndex + (direction === "up" ? -1 : 1);
+  if (targetIndex < 0 || targetIndex >= items.length) {
+    redirect("/" + locale + "/collections?id=" + collectionId);
+  }
+
+  const current = items[currentIndex];
+  const target = items[targetIndex];
+  const occupiedOrders = new Set(items.map((item) => item.sort_order));
+  let temporaryOrder = -1;
+  while (occupiedOrders.has(temporaryOrder) && temporaryOrder > -2147483648) temporaryOrder -= 1;
+  if (occupiedOrders.has(temporaryOrder)) redirect("/" + locale + "/collections?id=" + collectionId + "&error=item");
+
+  const { error: stageError } = await supabase
+    .from("ravine_collection_items")
+    .update({ sort_order: temporaryOrder })
+    .eq("collection_id", collectionId)
+    .eq("sort_order", current.sort_order);
+  if (stageError) redirect("/" + locale + "/collections?id=" + collectionId + "&error=item");
+
+  const { error: targetError } = await supabase
+    .from("ravine_collection_items")
+    .update({ sort_order: current.sort_order })
+    .eq("collection_id", collectionId)
+    .eq("sort_order", target.sort_order);
+  if (targetError) {
+    await supabase.from("ravine_collection_items").update({ sort_order: current.sort_order })
+      .eq("collection_id", collectionId).eq("sort_order", temporaryOrder);
+    redirect("/" + locale + "/collections?id=" + collectionId + "&error=item");
+  }
+
+  const { error: finalError } = await supabase
+    .from("ravine_collection_items")
+    .update({ sort_order: target.sort_order })
+    .eq("collection_id", collectionId)
+    .eq("sort_order", temporaryOrder);
+  if (finalError) {
+    await supabase.from("ravine_collection_items").update({ sort_order: target.sort_order })
+      .eq("collection_id", collectionId).eq("sort_order", current.sort_order);
+    await supabase.from("ravine_collection_items").update({ sort_order: current.sort_order })
+      .eq("collection_id", collectionId).eq("sort_order", temporaryOrder);
+    redirect("/" + locale + "/collections?id=" + collectionId + "&error=item");
+  }
+
+  revalidatePath("/" + locale + "/collections");
+  redirect("/" + locale + "/collections?id=" + collectionId + "&notice=reordered");
+}
+
 export async function updateCollectionDetailsAction(formData: FormData) {
   "use server";
   const locale = safeLocale(formData.get("locale"));
@@ -271,6 +344,7 @@ export default async function CollectionsPage({
     removed: ["تمت إزالة العمل من المجموعة.", "Work removed from the collection."],
     deleted: ["تم حذف المجموعة.", "Collection deleted."],
     updated: ["تم حفظ تفاصيل المجموعة.", "Collection details saved."],
+    reordered: ["تم تغيير ترتيب الأعمال.", "Collection order updated."],
   };
   pageError = query.error && errorCopy[query.error] ? errorCopy[query.error][ar ? 0 : 1] : "";
   if (query.notice && noticeCopy[query.notice]) notice = noticeCopy[query.notice][ar ? 0 : 1];
@@ -398,7 +472,7 @@ export default async function CollectionsPage({
           <div className={styles.error} role="alert">{ar ? "تعذر تحميل عناصر المجموعة." : "Could not load collection items."}</div>
         ) : orderedItems.length ? (
           <div className={styles.workGrid}>
-            {orderedItems.map(({ item, work }) => (
+            {orderedItems.map(({ item, work }, index) => (
               <article className={styles.workCard} key={item.sort_order}>
                 <Link href={"/" + locale + "/watch/" + work.id} className={styles.workLink}>
                   <div className={styles.workVisual}>
@@ -414,12 +488,30 @@ export default async function CollectionsPage({
                   </div>
                 </Link>
                 {canManage ? (
-                  <form action={removeCollectionItemAction} className={styles.removeForm}>
-                    <input type="hidden" name="locale" value={locale} />
-                    <input type="hidden" name="collection_id" value={collectionId} />
-                    <input type="hidden" name="sort_order" value={item.sort_order} />
-                    <button type="submit"><Trash2 size={13} />{ar ? "إزالة من المجموعة" : "Remove from collection"}</button>
-                  </form>
+                  <div className={styles.itemActions}>
+                    <div className={styles.orderActions}>
+                      <form action={moveCollectionItemAction}>
+                        <input type="hidden" name="locale" value={locale} />
+                        <input type="hidden" name="collection_id" value={collectionId} />
+                        <input type="hidden" name="sort_order" value={item.sort_order} />
+                        <input type="hidden" name="direction" value="up" />
+                        <button type="submit" className={styles.orderButton} disabled={index === 0} aria-label={ar ? "نقل العمل لأعلى" : "Move work up"} title={ar ? "نقل لأعلى" : "Move up"}><ArrowUp size={14} /></button>
+                      </form>
+                      <form action={moveCollectionItemAction}>
+                        <input type="hidden" name="locale" value={locale} />
+                        <input type="hidden" name="collection_id" value={collectionId} />
+                        <input type="hidden" name="sort_order" value={item.sort_order} />
+                        <input type="hidden" name="direction" value="down" />
+                        <button type="submit" className={styles.orderButton} disabled={index === orderedItems.length - 1} aria-label={ar ? "نقل العمل لأسفل" : "Move work down"} title={ar ? "نقل لأسفل" : "Move down"}><ArrowDown size={14} /></button>
+                      </form>
+                    </div>
+                    <form action={removeCollectionItemAction} className={styles.removeForm}>
+                      <input type="hidden" name="locale" value={locale} />
+                      <input type="hidden" name="collection_id" value={collectionId} />
+                      <input type="hidden" name="sort_order" value={item.sort_order} />
+                      <button type="submit"><Trash2 size={13} />{ar ? "إزالة من المجموعة" : "Remove from collection"}</button>
+                    </form>
+                  </div>
                 ) : null}
               </article>
             ))}
