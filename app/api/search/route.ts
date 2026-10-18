@@ -9,7 +9,9 @@ function clean(value: string | null) {
   return (value ?? "").trim().slice(0, 120);
 }
 
-function applyVideoFilters(query: any, params: URLSearchParams) {
+type VideoSearchQuery = ReturnType<ReturnType<Awaited<ReturnType<typeof createClient>>["from"]>["select"]>;
+
+function applyVideoFilters(query: VideoSearchQuery, params: URLSearchParams) {
   const type = clean(params.get("type"));
   const category = Number(params.get("category"));
   const duration = clean(params.get("duration"));
