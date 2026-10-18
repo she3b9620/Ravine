@@ -1,0 +1,4 @@
+.ravine-account-notification-link{display:flex;align-items:center;gap:10px;min-width:0}
+.ravine-account-notification-count{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding-inline:5px;margin-inline-start:auto;border:1px solid rgba(196,122,82,.32);border-radius:999px;background:rgba(196,122,82,.12);color:var(--copper,#c47a52);font-size:10px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1;white-space:nowrap}
+html[data-theme="light"] .ravine-account-notification-count{border-color:rgba(112,64,47,.25);background:rgba(196,122,82,.08);color:#70402f}
+@media(prefers-reduced-motion:reduce){.ravine-account-notification-count{transition:none}}

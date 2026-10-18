@@ -17,6 +17,7 @@ import "./ravine-overrides.css";
 import "./home-spacing.css";
 import "./ravine-home-experience-fixes.css";
 import "./ravine-final-visual-fixes.css";
+import "./ravine-account-notifications.css";
 import "./search-permission-fixes.css";
 import "./messaging-header.css";
 import "./ravine-typography-search-final.css";
