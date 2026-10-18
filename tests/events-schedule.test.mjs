@@ -103,3 +103,18 @@ test("creator profiles surface that creator's scheduled and live sessions", () =
   assert.match(page, /<RAVINEEventsCatalog locale=\{locale\} items=\{creatorEvents\}/);
   assert.match(page, /All events/);
 });
+
+test("scheduled events have a focused detail route linked from public event catalogues", () => {
+  const detail = read("../app/[locale]/events/[id]/page.tsx");
+  const catalog = read("../components/RAVINEEventsCatalog.tsx");
+  const list = read("../app/[locale]/events/page.tsx");
+  const discover = read("../app/[locale]/discover/page.tsx");
+  const live = read("../app/[locale]/live/page.tsx");
+  assert.match(detail, /\.from\("live_events"\)/);
+  assert.match(detail, /\.in\("status", \["scheduled", "live", "ended"\]\)/);
+  assert.match(detail, /\.eq\("published", true\)/);
+  assert.match(detail, /\.eq\("visibility", "public"\)/);
+  assert.match(detail, /streaming setup is complete/);
+  assert.match(catalog, /event\.detailHref \? <Link/);
+  for (const page of [list, discover, live]) assert.match(page, /detailHref: "\/" \+ locale \+ "\/events\/" \+ event\.id/);
+});

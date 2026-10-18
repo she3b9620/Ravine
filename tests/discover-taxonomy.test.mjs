@@ -73,3 +73,22 @@ test("Search launcher offers the full media taxonomy and only quality/format val
   assert.ok(launcher.includes('value: "other"'));
   assert.ok(route.includes('"other"'));
 });
+
+test("live search returns public event, community, and category suggestions alongside media", () => {
+  const route = read("../app/api/search/route.ts");
+  const panel = read("../components/SearchResultsPanel.tsx");
+  const css = read("../app/[locale]/ravine-search-entities.css");
+  assert.match(route, /from\("categories"\)/);
+  assert.match(route, /from\("live_events"\)/);
+  assert.match(route, /from\("communities"\)/);
+  assert.match(route, /\.eq\("privacy", "public"\)/);
+  assert.match(route, /return NextResponse\.json\(\{ videos, creators, categories, events, communities, mode \}\)/);
+  assert.match(panel, /payload\.categories/);
+  assert.match(panel, /payload\.events/);
+  assert.match(panel, /payload\.communities/);
+  assert.match(panel, /\/events\/" \+ event\.id/);
+  assert.match(panel, /\/community\/" \+ community\.slug/);
+  assert.match(panel, /\/discover\?category=" \+ category\.id/);
+  assert.match(css, /ravine-search-extra-grid/);
+  assert.match(css, /data-theme="light"/);
+});
