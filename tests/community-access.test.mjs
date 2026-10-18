@@ -31,15 +31,18 @@ test("creating a community post requires an active membership and applies a body
 });
 
 
-test("guest navigation allows the public community preview without unlocking member actions", () => {
-  for (const path of ["../components/PrimaryNav.tsx", "../components/SidebarNav.tsx", "../components/MobileNav.tsx"]) {
-    const source = read(path);
-    const gatedStart = source.indexOf("const GUEST_GATED = new Set(");
-    const gatedEnd = source.indexOf(");", gatedStart);
-    assert.ok(gatedStart >= 0 && gatedEnd > gatedStart);
-    assert.doesNotMatch(source.slice(gatedStart, gatedEnd), /community/);
+test("guest navigation exposes public community previews while join and posting actions require identity and membership", () => {
+  const primary = read("../components/PrimaryNav.tsx");
+  const sidebar = read("../components/SidebarNav.tsx");
+  const mobile = read("../components/MobileNav.tsx");
+  for (const [name, source] of [["primary", primary], ["sidebar", sidebar], ["mobile", mobile]]) {
+    assert.match(source, /\["community", "Community", "المجتمع", MessagesSquare\]/, name + " navigation should expose Community");
+    assert.doesNotMatch(source, /GUEST_GATED/, name + " navigation should not block public browsing");
   }
+
   const detail = read("../app/[locale]/community/[slug]/page.tsx");
   assert.match(detail, /canJoin = Boolean\(user\)/);
   assert.match(detail, /const canPost = Boolean\(user\) && isMember/);
+  assert.match(detail, /if \(!user\) return/);
+  assert.match(detail, /if \(membership\?\.status !== "active"\) return/);
 });
