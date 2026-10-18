@@ -63,7 +63,7 @@ test("series content type shares existing video quota; no separate permission by
 test("podcasts share the same public media-catalog layout used by film pages", () => {
   assert.match(podcastsPage, /RAVINEMediaCatalog locale=\{locale\} contentType="podcast"/);
   assert.match(catalog, /RAVINEMediaCatalogType = "short" \| "short_film" \| "film" \| "podcast"/);
-  assert.match(catalog, /enTitle:\s*"Podcasts\."//);
+  assert.match(catalog, /enTitle:\\s*"Podcasts\\."/);
   assert.match(catalog, /\.eq\("published",\s*true\)\.eq\("visibility",\s*"public"\)\.eq\("content_type",\s*contentType\)/);
   assert.match(catalog, /href:.*watch.*work\.id/);
   assert.match(workCatalog, /<Link href=\{work\.href\}/);
