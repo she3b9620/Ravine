@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { Scissors, Clapperboard, Film, type LucideIcon } from "lucide-react";
+import { Scissors, Clapperboard, Film, Mic2, type LucideIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { formatRavineNumber } from "@/lib/ravine-number-formatter";
 
-export type RAVINEMediaCatalogType = "short" | "short_film" | "film";
+export type RAVINEMediaCatalogType = "short" | "short_film" | "film" | "podcast";
 
 const configs: Record<RAVINEMediaCatalogType, {
   enTitle: string; arTitle: string; enEyebrow: string; arEyebrow: string;
@@ -31,6 +31,13 @@ const configs: Record<RAVINEMediaCatalogType, {
     enLabel: "FEATURE FILM", arLabel: "فيلم مطوّل", enEmpty: "No published feature films yet.", arEmpty: "لا توجد أفلام مطوّلة منشورة بعد.",
     icon: Clapperboard, className: "ravine-feature-films-page",
   },
+  podcast: {
+    enTitle: "Podcasts.", arTitle: "البودكاست.", enEyebrow: "RAVINE / AUDIO", arEyebrow: "رَافِين / الصوت",
+    enDescription: "Conversations, ideas, and audio programs given the time and space to breathe.",
+    arDescription: "حوارات وأفكار وبرامج صوتية تمنح الفكرة وقتها ومساحتها.",
+    enLabel: "PODCAST", arLabel: "بودكاست", enEmpty: "No podcast episodes published yet.", arEmpty: "لا توجد حلقات بودكاست منشورة بعد.",
+    icon: Mic2, className: "ravine-podcasts-page",
+  },
 };
 
 type Work = { id: number; title: string | null; description: string | null; thumbnail_url: string | null; duration: number | null; views: number | null; likes: number | null; quality: string | null };
@@ -56,16 +63,16 @@ export default async function RAVINEMediaCatalog({ locale, contentType }: { loca
     <div className="ravine-documentaries-hero"><div className="ravine-documentaries-mark" aria-hidden="true"><Icon size={28} strokeWidth={1.6} /></div>
       <div><div className="eyebrow">{ar ? config.arEyebrow : config.enEyebrow}</div><h1>{ar ? config.arTitle : config.enTitle}</h1>
         <p className="section-note">{ar ? config.arDescription : config.enDescription}</p>
-        {!error && works.length > 0 ? <div className="ravine-series-count">{formatRavineNumber(works.length, locale)} {ar ? "عمل منشور" : "published works"}</div> : null}
+        {!error && works.length > 0 ? <div className="ravine-series-count">{formatRavineNumber(works.length, locale)} {ar ? (contentType === "podcast" ? "حلقة منشورة" : "عمل منشور") : (contentType === "podcast" ? "published episodes" : "published works")}</div> : null}
       </div>
     </div>
-    {error ? <div className="empty-state"><strong>{ar ? "تعذر تحميل المحتوى." : "We could not load this content."}</strong><span>{error.message}</span></div>
+    {error ? <div className="empty-state"><strong>{ar ? (contentType === "podcast" ? "تعذر تحميل البودكاست." : "تعذر تحميل المحتوى.") : (contentType === "podcast" ? "We could not load podcasts." : "We could not load this content.")}</strong><span>{error.message}</span></div>
       : works.length === 0 ? <div className="empty-state"><strong>{ar ? config.arEmpty : config.enEmpty}</strong><span>{ar ? "ستظهر الأعمال هنا بعد اعتماد نشرها من مساحة المبدع." : "Published work will appear here after creator publication."}</span></div>
       : <div className={`video-grid ravine-documentaries-grid ${contentType === "short" ? "ravine-shorts-grid" : ""}`}>{works.map(work => (
-        <Link href={`/${locale}/watch/${work.id}`} className="video-card" key={work.id}>
-          <div className="video-thumb"><img src={work.thumbnail_url || "/RAVINE.PNG"} alt="" loading="lazy" /><span className="duration">{durationLabel(work.duration)}</span><span className="documentary-pill">{ar ? config.arLabel : config.enLabel}</span></div>
+        <Link href={`/${locale}/watch/${work.id}`} className={`video-card ${contentType === "podcast" ? "ravine-podcast-card" : ""}`} key={work.id}>
+          <div className="video-thumb"><img src={work.thumbnail_url || "/RAVINE.PNG"} alt="" loading="lazy" /><span className="duration">{durationLabel(work.duration)}</span><span className={`documentary-pill ${contentType === "podcast" ? "ravine-podcast-pill" : ""}`}>{contentType === "podcast" ? <Mic2 size={12} strokeWidth={1.8} aria-hidden="true" /> : null}{ar ? config.arLabel : config.enLabel}</span></div>
           <div className="video-meta"><div className="video-kicker">{config.enLabel}{work.quality ? ` · ${work.quality}` : ""}</div><h2>{work.title || (ar ? "بدون عنوان" : "Untitled")}</h2>
-            <p>{work.description || (ar ? "عمل من مجتمع رَافِين." : "A work from the RAVINE community.")}</p>
+            <p>{work.description || (ar ? (contentType === "podcast" ? "برنامج صوتي من مجتمع رَافِين." : "عمل من مجتمع رَافِين.") : (contentType === "podcast" ? "An audio program from the RAVINE community." : "A work from the RAVINE community."))}</p>
             <div className="video-stats"><span>{formatRavineNumber(Number(work.views || 0), locale)} {ar ? "مشاهدة" : "views"}</span><span>{formatRavineNumber(Number(work.likes || 0), locale)} {ar ? "إعجاب" : "likes"}</span></div>
           </div>
         </Link>
