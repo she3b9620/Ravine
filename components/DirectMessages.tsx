@@ -1,7 +1,7 @@
 "use client";
 
 import { MessageCircle, Send, X } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { ravineErrorMessage } from "@/lib/ravine-error";
 
@@ -27,6 +27,7 @@ export default function DirectMessages({ locale, initialRecipient, initialCreato
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [people, setPeople] = useState<Record<string, Person>>({});
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const manualInboxChoice = useRef(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [recipientId, setRecipientId] = useState(initialRecipient || "");
   const [creatorId, setCreatorId] = useState<number | undefined>(initialCreatorId);
@@ -53,13 +54,16 @@ export default function DirectMessages({ locale, initialRecipient, initialCreato
       const rows = (data || []) as Conversation[];
       setConversations(rows);
 
-      const preferredConversation = initialRecipient
-        ? rows.find((row) => row.participant_a === initialRecipient || row.participant_b === initialRecipient)
-        : rows[0];
-      if (preferredConversation) {
-        setSelectedId((current) => current || preferredConversation.id);
-      } else if (initialRecipient) {
-        setRecipientId(initialRecipient);
+      if (!manualInboxChoice.current) {
+        const preferredConversation = initialRecipient
+          ? rows.find((row) => row.participant_a === initialRecipient || row.participant_b === initialRecipient)
+          : rows[0];
+        if (preferredConversation) {
+          setSelectedId((current) => current || preferredConversation.id);
+        } else if (initialRecipient) {
+          setRecipientId(initialRecipient);
+        }
+  
       }
 
       const ids = Array.from(new Set(rows.flatMap((row) => [row.participant_a, row.participant_b])));
@@ -128,6 +132,8 @@ export default function DirectMessages({ locale, initialRecipient, initialCreato
     if (!data) { setError(ar ? "لم يتم العثور على المستخدم." : "User not found."); return; }
     const person = data as Person;
     setPeople((current) => ({ ...current, [person.id]: person }));
+    manualInboxChoice.current = true;
+    setSelectedId(null);
     setRecipientId(person.id);
     setCreatorId(undefined);
     setError("");
@@ -152,7 +158,7 @@ export default function DirectMessages({ locale, initialRecipient, initialCreato
             {conversations.length ? conversations.map((conversation) => {
               const other = userId ? (conversation.participant_a === userId ? conversation.participant_b : conversation.participant_a) : "";
               const person = people[other];
-              return <button key={conversation.id} type="button" className={`direct-conversation ${selectedId === conversation.id ? "active" : ""}`} onClick={() => setSelectedId(conversation.id)}><span className="direct-avatar">{person?.avatar_url ? <img src={person.avatar_url} alt=""/> : (person?.display_name || person?.username || "R").slice(0,1).toUpperCase()}</span><span><strong>{person?.display_name || person?.username || (ar ? "مستخدم" : "User")}</strong><small>{conversation.creator_id && conversation.status === "pending" ? (ar ? "في انتظار رد المبدع" : "Waiting for creator reply") : localizedStatus(conversation.status, ar)}</small></span></button>;
+              return <button key={conversation.id} type="button" className={`direct-conversation ${selectedId === conversation.id ? "active" : ""}`} onClick={() => { manualInboxChoice.current = true; setRecipientId(""); setSelectedId(conversation.id); }}><span className="direct-avatar">{person?.avatar_url ? <img src={person.avatar_url} alt=""/> : (person?.display_name || person?.username || "R").slice(0,1).toUpperCase()}</span><span><strong>{person?.display_name || person?.username || (ar ? "مستخدم" : "User")}</strong><small>{conversation.creator_id && conversation.status === "pending" ? (ar ? "في انتظار رد المبدع" : "Waiting for creator reply") : localizedStatus(conversation.status, ar)}</small></span></button>;
             }) : <div className="direct-empty">{ar ? "ابدأ محادثة من اسم مستخدم أو من صفحة مبدع." : "Start a conversation from a username or a creator profile."}</div>}
           </div>
         </aside>

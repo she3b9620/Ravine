@@ -88,3 +88,12 @@ test("Library separates saved work from liked work and keeps each view searchabl
   assert.match(catalog, /const \[query, setQuery\] = useState/);
   assert.match(catalog, /Most viewed/);
 });
+
+test("starting a new message clears the selected thread and protects manual choice during initial loading", () => {
+  const component = read("../components/DirectMessages.tsx");
+  assert.match(component, /const manualInboxChoice = useRef\(false\)/);
+  assert.match(component, /if \(!manualInboxChoice\.current\) \{/);
+  assert.match(component, /manualInboxChoice\.current = true;[\s\S]*?setSelectedId\(null\);[\s\S]*?setRecipientId\(person\.id\)/);
+  assert.match(component, /manualInboxChoice\.current = true; setRecipientId\(""\); setSelectedId\(conversation\.id\)/);
+  assert.match(component, /selectedOtherId \|\| recipientId/);
+});
