@@ -3,16 +3,54 @@ import { createClient } from "@/lib/supabase/server";
 import RAVINEShortsBrowse from "@/components/RAVINEShortsBrowse";
 import RAVINEWorkCatalog, { type RAVINECatalogItem } from "@/components/RAVINEWorkCatalog";
 
-export type RAVINEMediaCatalogType = "short" | "short_film" | "film" | "podcast";
+export type RAVINEMediaCatalogType = "short" | "short_film" | "film" | "podcast" | "video" | "documentary";
 const configs: Record<RAVINEMediaCatalogType, {
-  enTitle:string; arTitle:string; enEyebrow:string; arEyebrow:string;
-  enDescription:string; arDescription:string; enLabel:string; arLabel:string;
-  enEmpty:string; arEmpty:string; icon:LucideIcon; className:string;
+  enTitle: string; arTitle: string; enEyebrow: string; arEyebrow: string;
+  enDescription: string; arDescription: string; enLabel: string; arLabel: string;
+  enEmpty: string; arEmpty: string; icon: LucideIcon; className: string;
 }> = {
-  short:{enTitle:"Shorts.",arTitle:"الشورتات.",enEyebrow:"RAVINE / SHORTS",arEyebrow:"رَافِين / الشورتات",enDescription:"Short, focused clips with their own discovery experience—separate from regular videos and short films.",arDescription:"مقاطع قصيرة ومكثفة، لها تجربة اكتشاف مستقلة عن الفيديوهات والأفلام القصيرة.",enLabel:"SHORT",arLabel:"شورت",enEmpty:"No published Shorts yet.",arEmpty:"لا توجد شورتات منشورة بعد.",icon:Scissors,className:"ravine-shorts-page"},
-  short_film:{enTitle:"Short Films.",arTitle:"الأفلام القصيرة.",enEyebrow:"RAVINE / SHORT FILMS",arEyebrow:"رَافِين / سينما قصيرة",enDescription:"Complete, compact cinematic works—not vertical Shorts or regular video posts.",arDescription:"أفلام سردية مكتملة ومكثفة؛ ليست شورتات عمودية ولا مقاطع فيديو عادية.",enLabel:"SHORT FILM",arLabel:"فيلم قصير",enEmpty:"No published short films yet.",arEmpty:"لا توجد أفلام قصيرة منشورة بعد.",icon:Film,className:"ravine-short-films-page"},
-  film:{enTitle:"Feature Films.",arTitle:"الأفلام المطوّلة.",enEyebrow:"RAVINE / FEATURE FILMS",arEyebrow:"رَافِين / سينما طويلة",enDescription:"Completed feature-length cinema, kept separate from short films and documentaries.",arDescription:"أفلام سينمائية طويلة مكتملة، بتصنيف مستقل عن الأفلام القصيرة والوثائقيات.",enLabel:"FEATURE FILM",arLabel:"فيلم مطوّل",enEmpty:"No published feature films yet.",arEmpty:"لا توجد أفلام مطوّلة منشورة بعد.",icon:Clapperboard,className:"ravine-feature-films-page"},
-  podcast:{enTitle:"Podcasts.",arTitle:"البودكاست.",enEyebrow:"RAVINE / AUDIO",arEyebrow:"رَافِين / الصوت",enDescription:"Conversations, ideas, and audio programs given the time and space to breathe.",arDescription:"حوارات وأفكار وبرامج صوتية تمنح الفكرة وقتها ومساحتها.",enLabel:"PODCAST",arLabel:"بودكاست",enEmpty:"No podcast episodes published yet.",arEmpty:"لا توجد حلقات بودكاست منشورة بعد.",icon:Mic2,className:"ravine-podcasts-page"},
+  short: {
+    enTitle: "Shorts.", arTitle: "الشورتات.", enEyebrow: "RAVINE / SHORTS", arEyebrow: "رَافِين / الشورتات",
+    enDescription: "Short, focused clips with their own discovery experience—separate from regular videos and short films.",
+    arDescription: "مقاطع قصيرة ومكثفة، لها تجربة اكتشاف مستقلة عن الفيديوهات والأفلام القصيرة.",
+    enLabel: "SHORT", arLabel: "شورت", enEmpty: "No published Shorts yet.", arEmpty: "لا توجد شورتات منشورة بعد.",
+    icon: Scissors, className: "ravine-shorts-page",
+  },
+  video: {
+    enTitle: "Videos.", arTitle: "الفيديوهات.", enEyebrow: "RAVINE / VIDEOS", arEyebrow: "رَافِين / الفيديوهات",
+    enDescription: "Standalone video work, kept distinct from short-form clips, short films, documentaries, and feature cinema.",
+    arDescription: "أعمال فيديو مستقلة، منفصلة عن الشورتات والأفلام القصيرة والوثائقيات والأفلام المطوّلة.",
+    enLabel: "VIDEO", arLabel: "فيديو", enEmpty: "No published videos yet.", arEmpty: "لا توجد فيديوهات منشورة بعد.",
+    icon: Clapperboard, className: "ravine-videos-page",
+  },
+  short_film: {
+    enTitle: "Short Films.", arTitle: "الأفلام القصيرة.", enEyebrow: "RAVINE / SHORT FILMS", arEyebrow: "رَافِين / سينما قصيرة",
+    enDescription: "Complete, compact cinematic works—not vertical Shorts or regular video posts.",
+    arDescription: "أفلام سردية مكتملة ومكثفة؛ ليست شورتات عمودية ولا مقاطع فيديو عادية.",
+    enLabel: "SHORT FILM", arLabel: "فيلم قصير", enEmpty: "No published short films yet.", arEmpty: "لا توجد أفلام قصيرة منشورة بعد.",
+    icon: Film, className: "ravine-short-films-page",
+  },
+  film: {
+    enTitle: "Feature Films.", arTitle: "الأفلام المطوّلة.", enEyebrow: "RAVINE / FEATURE FILMS", arEyebrow: "رَافِين / سينما طويلة",
+    enDescription: "Completed feature-length cinema, kept separate from short films and documentaries.",
+    arDescription: "أفلام سينمائية طويلة مكتملة، بتصنيف مستقل عن الأفلام القصيرة والوثائقيات.",
+    enLabel: "FEATURE FILM", arLabel: "فيلم مطوّل", enEmpty: "No published feature films yet.", arEmpty: "لا توجد أفلام مطوّلة منشورة بعد.",
+    icon: Clapperboard, className: "ravine-feature-films-page",
+  },
+  documentary: {
+    enTitle: "Documentaries.", arTitle: "الوثائقيات.", enEyebrow: "RAVINE / DOCUMENTARY", arEyebrow: "رَافِين / الوثائقي",
+    enDescription: "Long-form stories given the time, context, and space they deserve.",
+    arDescription: "قصص طويلة تُمنح الوقت، والسياق، والمساحة التي تستحقها.",
+    enLabel: "DOCUMENTARY", arLabel: "وثائقي", enEmpty: "No documentaries published yet.", arEmpty: "لا توجد وثائقيات منشورة بعد.",
+    icon: Film, className: "ravine-documentaries-page",
+  },
+  podcast: {
+    enTitle: "Podcasts.", arTitle: "البودكاست.", enEyebrow: "RAVINE / AUDIO", arEyebrow: "رَافِين / الصوت",
+    enDescription: "Conversations, ideas, and audio programs given the time and space to breathe.",
+    arDescription: "حوارات وأفكار وبرامج صوتية تمنح الفكرة وقتها ومساحتها.",
+    enLabel: "PODCAST", arLabel: "بودكاست", enEmpty: "No podcast episodes published yet.", arEmpty: "لا توجد حلقات بودكاست منشورة بعد.",
+    icon: Mic2, className: "ravine-podcasts-page",
+  },
 };
 type Work={id:number;title:string|null;description:string|null;thumbnail_url:string|null;video_url:string|null;duration:number|null;views:number|null;likes:number|null;quality:string|null;created_at:string|null};
 
@@ -25,10 +63,10 @@ export default async function RAVINEMediaCatalog({locale,contentType}:{locale:"a
   const works=(data??[]) as Work[];
   const items:RAVINECatalogItem[]=works.map(work=>({
     id:work.id,href:`/${locale}/watch/${work.id}`,title:work.title||(ar?"بدون عنوان":"Untitled"),
-    description:work.description||(ar?(contentType==="podcast"?"برنامج صوتي من مجتمع رَافِين.":"عمل من مجتمع رَافِين."):(contentType==="podcast"?"An audio program from the RAVINE community.":"A work from the RAVINE community.")),
+    description:work.description||(ar?(contentType==="podcast"?"برنامج صوتي من مجتمع رَافِين.":contentType==="documentary"?"عمل وثائقي من مجتمع رَافِين.":contentType==="video"?"عمل فيديو من مجتمع رَافِين.":"عمل من مجتمع رَافِين."):(contentType==="podcast"?"An audio program from the RAVINE community.":contentType==="documentary"?"A documentary from the RAVINE community.":contentType==="video"?"A video work from the RAVINE community.":"A work from the RAVINE community.")),
     imageUrl:work.thumbnail_url,duration:work.duration,views:work.views,likes:work.likes,quality:work.quality,createdAt:work.created_at,
     badge:ar?config.arLabel:config.enLabel,kicker:config.enLabel,
-    badgeIcon:contentType==="podcast"?"podcast":contentType==="film"?"film":contentType==="short_film"?"short-film":undefined,
+    badgeIcon:contentType==="podcast"?"podcast":contentType==="film"||contentType==="documentary"?"film":contentType==="short_film"?"short-film":undefined,
     badgeTone:contentType==="podcast"?"podcast":undefined,
     badgeClassName:contentType==="podcast"?"ravine-podcast-pill":undefined,
     cardClassName:contentType==="podcast"?"ravine-podcast-card":undefined,

@@ -62,7 +62,7 @@ test("series content type shares existing video quota; no separate permission by
 
 test("podcasts share the same public media-catalog layout used by film pages", () => {
   assert.match(podcastsPage, /RAVINEMediaCatalog locale=\{locale\} contentType="podcast"/);
-  assert.match(catalog, /RAVINEMediaCatalogType = "short" \| "short_film" \| "film" \| "podcast"/);
+  assert.match(catalog, /RAVINEMediaCatalogType = "short" \| "short_film" \| "film" \| "podcast" \| "video" \| "documentary"/);
   assert.match(catalog, /enTitle:\s*"Podcasts\."/);
   assert.match(catalog, /\.eq\("published",\s*true\)\.eq\("visibility",\s*"public"\)\.eq\("content_type",\s*contentType\)/);
   assert.match(catalog, /href:.*watch.*work\.id/);
@@ -109,3 +109,14 @@ test("Shorts keep both view modes and add local search plus sort options", () =>
   assert.match(shortsBrowse, /Most viewed/);
 });
 
+
+
+test("regular videos and documentaries use the shared public searchable catalog", () => {
+  const videosPage = read("../app/[locale]/videos/page.tsx");
+  const documentariesPage = read("../app/[locale]/documentaries/page.tsx");
+  assert.match(videosPage, /RAVINEMediaCatalog locale=\{rawLocale === "en" \? "en" : "ar"\} contentType="video"/);
+  assert.match(documentariesPage, /RAVINEMediaCatalog locale=\{rawLocale === "en" \? "en" : "ar"\} contentType="documentary"/);
+  assert.match(catalog, /\.eq\("published",true\)\.eq\("visibility","public"\)\.eq\("content_type",contentType\)/);
+  assert.match(catalog, /enTitle: "Videos\."/);
+  assert.match(catalog, /enTitle: "Documentaries\."/);
+});
