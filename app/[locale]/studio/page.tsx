@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import StudioUpload from "@/components/StudioUpload";
 import StudioWorkManager from "@/components/StudioWorkManager";
+import styles from "./studio.module.css";
 
 export const dynamic = "force-dynamic";
 
@@ -22,8 +23,9 @@ type Work = {
   created_at: string | null;
 };
 
-export default async function StudioPage({ params }: { params: Promise<{ locale: string }> }) {
+export default async function StudioPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ workPage?: string | string[] }> }) {
   const { locale: rawLocale } = await params;
+  const query = await searchParams;
   const locale: Locale = rawLocale === "en" ? "en" : "ar";
   const ar = locale === "ar";
   const supabase = await createClient();
@@ -53,16 +55,39 @@ export default async function StudioPage({ params }: { params: Promise<{ locale:
     );
   }
 
-  const { data: worksData } = await supabase
-    .from("videos")
-    .select("id,title,description,content_type,quality,published,visibility,video_url,views,likes,created_at")
-    .eq("creator_id", creator.id)
-    .order("created_at", { ascending: false })
-    .limit(50);
+  const pageSize = 50;
+  const rawPage = Array.isArray(query.workPage) ? query.workPage[0] : query.workPage;
+  const requestedPage = Number(rawPage);
+  let currentPage = Number.isSafeInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+  const [{ data: initialWorks, count: totalWorks, error: worksError }, publishedCountResult, draftCountResult] = await Promise.all([
+    supabase
+      .from("videos")
+      .select("id,title,description,content_type,quality,published,visibility,video_url,views,likes,created_at", { count: "exact" })
+      .eq("creator_id", creator.id)
+      .order("created_at", { ascending: false })
+      .range((currentPage - 1) * pageSize, currentPage * pageSize - 1),
+    supabase.from("videos").select("id", { count: "exact", head: true }).eq("creator_id", creator.id).eq("published", true),
+    supabase.from("videos").select("id", { count: "exact", head: true }).eq("creator_id", creator.id).eq("published", false),
+  ]);
+
+  const safeTotalWorks = totalWorks ?? 0;
+  const pageCount = Math.max(1, Math.ceil(safeTotalWorks / pageSize));
+  if (currentPage > pageCount) currentPage = pageCount;
+  let worksData = initialWorks;
+  if (!worksError && currentPage !== (Number.isSafeInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1)) {
+    const correctedPage = await supabase
+      .from("videos")
+      .select("id,title,description,content_type,quality,published,visibility,video_url,views,likes,created_at", { count: "exact" })
+      .eq("creator_id", creator.id)
+      .order("created_at", { ascending: false })
+      .range((currentPage - 1) * pageSize, currentPage * pageSize - 1);
+    worksData = correctedPage.data;
+  }
 
   const works = (worksData ?? []) as Work[];
-  const publishedCount = works.filter((work) => work.published).length;
-  const draftCount = works.length - publishedCount;
+  const publishedCount = publishedCountResult.count;
+  const draftCount = draftCountResult.count;
+  const statisticsError = Boolean(publishedCountResult.error || draftCountResult.error);
 
   return (
     <section className="section studio-page">
@@ -76,11 +101,29 @@ export default async function StudioPage({ params }: { params: Promise<{ locale:
       </div>
       <div className="work-grid">
         <article className="work"><div className="work-art"/><div className="work-body"><div className="work-kicker">PROFILE</div><h3>{creator.specialty || "Creator"}</h3><p>@{creator.username || `creator-${creator.id}`}</p></div></article>
-        <article className="work"><div className="work-art"/><div className="work-body"><div className="work-kicker">WORKS</div><h3>{works.length.toLocaleString()}</h3><p>{ar ? `${publishedCount} منشور · ${draftCount} مسودة` : `${publishedCount} published · ${draftCount} drafts`}</p></div></article>
+        <article className="work"><div className="work-art"/><div className="work-body"><div className="work-kicker">WORKS</div><h3>{statisticsError ? "—" : safeTotalWorks.toLocaleString(locale)}</h3><p>{statisticsError ? (ar ? "تعذّر تحميل الإحصاءات" : "Statistics unavailable") : (ar ? `${Number(publishedCount || 0).toLocaleString(locale)} منشور · ${Number(draftCount || 0).toLocaleString(locale)} مسودة` : `${Number(publishedCount || 0).toLocaleString(locale)} published · ${Number(draftCount || 0).toLocaleString(locale)} drafts`)}</p></div></article>
         <article className="work"><div className="work-art"/><div className="work-body"><div className="work-kicker">AUDIENCE</div><h3>{Number(creator.followers || 0).toLocaleString()}</h3><p>{ar ? "متابع" : "followers"}</p></div></article>
       </div>
       <StudioUpload creatorId={creator.id} locale={locale} />
-      <StudioWorkManager works={works} locale={locale} />
+      {worksError ? <div className="empty-state" role="status"><strong>{ar ? "تعذّر تحميل قائمة الأعمال." : "Your work list could not be loaded."}</strong><span>{ar ? "تعذّر استرجاع الأعمال الآن. حاول تحديث الصفحة بعد قليل." : "Your works could not be retrieved right now. Please refresh the page shortly."}</span></div> : <>
+        <div className={styles.paginationSummary} dir={ar ? "rtl" : "ltr"}>
+          <span>{ar
+            ? `عرض ${safeTotalWorks === 0 ? 0 : (currentPage - 1) * pageSize + 1}–${Math.min(currentPage * pageSize, safeTotalWorks)} من ${safeTotalWorks.toLocaleString(locale)} عمل`
+            : `Showing ${safeTotalWorks === 0 ? 0 : (currentPage - 1) * pageSize + 1}–${Math.min(currentPage * pageSize, safeTotalWorks)} of ${safeTotalWorks.toLocaleString(locale)} works`}</span>
+        </div>
+        <StudioWorkManager works={works} locale={locale} />
+        {pageCount > 1 ? <nav className={styles.pagination} dir={ar ? "rtl" : "ltr"} aria-label={ar ? "صفحات الأعمال" : "Work pages"}>
+          {currentPage > 1
+            ? <Link className={styles.pageLink} href={`/${locale}/studio?workPage=${currentPage - 1}`}>{ar ? "السابق" : "Previous"}</Link>
+            : <span className={styles.pageDisabled}>{ar ? "السابق" : "Previous"}</span>}
+          <span className={styles.pageIndicator} aria-current="page">{ar
+            ? `صفحة ${currentPage.toLocaleString(locale)} من ${pageCount.toLocaleString(locale)}`
+            : `Page ${currentPage.toLocaleString(locale)} of ${pageCount.toLocaleString(locale)}`}</span>
+          {currentPage < pageCount
+            ? <Link className={styles.pageLink} href={`/${locale}/studio?workPage=${currentPage + 1}`}>{ar ? "التالي" : "Next"}</Link>
+            : <span className={styles.pageDisabled}>{ar ? "التالي" : "Next"}</span>}
+        </nav> : null}
+      </>}
     </section>
   );
 }
