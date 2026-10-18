@@ -43,6 +43,8 @@ export default async function WorkPage({ params }: { params: Promise<{ locale: s
       .from("videos")
       .select("id,title,description,thumbnail_url,video_url,duration,published,visibility,discovery_enabled,content_type,creator_id")
       .eq("id", workId)
+      .eq("published", true)
+      .eq("visibility", "public")
       .maybeSingle(),
     supabase
       .from("work_chapters")

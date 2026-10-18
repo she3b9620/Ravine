@@ -27,6 +27,7 @@ export default async function WatchPage({ params }: { params: Promise<{ locale: 
     .select("id,title,description,thumbnail_url,video_url,duration,views,likes,category,content_type,quality,published,visibility,discovery_enabled,creator_id")
     .eq("id", videoId)
     .eq("published", true)
+    .eq("visibility", "public")
     .maybeSingle();
   if (error || !video) notFound();
 

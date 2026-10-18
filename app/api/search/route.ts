@@ -16,7 +16,7 @@ function applyVideoFilters(query: any, params: URLSearchParams) {
   const format = clean(params.get("format"));
   const quality = clean(params.get("quality"));
 
-  let next = query.eq("published", true).eq("search_visible", true).limit(8);
+  let next = query.eq("published", true).eq("visibility", "public").eq("search_visible", true).limit(8);
   if (ALLOWED_TYPES.has(type)) next = next.eq("content_type", type);
   if (Number.isFinite(category) && category > 0) next = next.eq("category_id", category);
 

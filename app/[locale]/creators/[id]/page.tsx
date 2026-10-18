@@ -136,6 +136,7 @@ export default async function CreatorProfilePage({ params }: { params: Promise<{
       .select("id,title,description,thumbnail_url,video_url,duration,views,likes,content_type,quality")
       .eq("creator_id", creatorId)
       .eq("published", true)
+      .eq("visibility", "public")
       .order("created_at", { ascending: false })
       .limit(24),
     creator.user_id
