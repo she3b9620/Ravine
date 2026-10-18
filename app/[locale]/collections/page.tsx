@@ -167,6 +167,33 @@ export async function removeCollectionItemAction(formData: FormData) {
   redirect("/" + locale + "/collections?id=" + collectionId + "&notice=removed");
 }
 
+export async function updateCollectionDetailsAction(formData: FormData) {
+  "use server";
+  const locale = safeLocale(formData.get("locale"));
+  const collectionId = String(formData.get("collection_id") ?? "");
+  const title = String(formData.get("title") ?? "").trim().slice(0, 120);
+  const description = String(formData.get("description") ?? "").trim().slice(0, 1000);
+  if (!collectionIdPattern.test(collectionId)) redirect("/" + locale + "/collections?error=input");
+  if (!title) redirect("/" + locale + "/collections?id=" + encodeURIComponent(collectionId) + "&error=title");
+
+  const supabase = await createClient();
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) redirect("/" + locale + "/auth?next=" + encodeURIComponent("/" + locale + "/collections?id=" + collectionId));
+  const collection = await resolveManagedCollection(supabase, auth.user.id, collectionId);
+  if (!collection) redirect("/" + locale + "/collections?error=access");
+
+  const { data: updated, error } = await supabase
+    .from("ravine_collections")
+    .update({ title, description: description || null, updated_at: new Date().toISOString() })
+    .eq("id", collectionId)
+    .select("id")
+    .maybeSingle();
+  if (error || !updated) redirect("/" + locale + "/collections?id=" + collectionId + "&error=details");
+
+  revalidatePath("/" + locale + "/collections");
+  redirect("/" + locale + "/collections?id=" + encodeURIComponent(collectionId) + "&notice=updated");
+}
+
 export async function updateCollectionVisibilityAction(formData: FormData) {
   "use server";
   const locale = safeLocale(formData.get("locale"));
@@ -228,6 +255,7 @@ export default async function CollectionsPage({
   let notice = "";
   const errorCopy: Record<string, [string, string]> = {
     title: ["أدخل اسمًا للمجموعة.", "Enter a collection title."],
+    details: ["تعذر حفظ تفاصيل المجموعة.", "Could not save collection details."],
     create: ["تعذر إنشاء المجموعة. تحقق من إعداد صلاحيات المجموعات ثم حاول مرة أخرى.", "Could not create the collection. Check collection access policies and try again."],
     input: ["البيانات المرسلة غير صالحة.", "The submitted data is invalid."],
     access: ["لا تملك صلاحية إدارة هذه المجموعة.", "You do not have permission to manage this collection."],
@@ -241,6 +269,7 @@ export default async function CollectionsPage({
     added: ["تمت إضافة العمل إلى المجموعة.", "Work added to the collection."],
     removed: ["تمت إزالة العمل من المجموعة.", "Work removed from the collection."],
     deleted: ["تم حذف المجموعة.", "Collection deleted."],
+    updated: ["تم حفظ تفاصيل المجموعة.", "Collection details saved."],
   };
   pageError = query.error && errorCopy[query.error] ? errorCopy[query.error][ar ? 0 : 1] : "";
   if (query.notice && noticeCopy[query.notice]) notice = noticeCopy[query.notice][ar ? 0 : 1];
@@ -316,6 +345,25 @@ export default async function CollectionsPage({
 
         {canManage ? (
           <div className={styles.manager}>
+            <form action={updateCollectionDetailsAction} className={styles.detailsForm}>
+              <input type="hidden" name="locale" value={locale} />
+              <input type="hidden" name="collection_id" value={collectionId} />
+              <div className={styles.detailsFormHeading}>
+                <strong>{ar ? "تفاصيل المجموعة" : "Collection details"}</strong>
+                <span>{ar ? "يمكنك تحديث العنوان والوصف دون تغيير الأعمال الموجودة." : "Update the title and description without changing the works already inside."}</span>
+              </div>
+              <div className={styles.detailsFields}>
+                <label>
+                  <span>{ar ? "عنوان المجموعة" : "Collection title"}</span>
+                  <input name="title" required maxLength={120} defaultValue={collectionRow.title} />
+                </label>
+                <label>
+                  <span>{ar ? "الوصف" : "Description"}</span>
+                  <input name="description" maxLength={1000} defaultValue={collectionRow.description || ""} placeholder={ar ? "ما الفكرة التي تجمع هذه الأعمال؟" : "What brings these works together?"} />
+                </label>
+              </div>
+              <button className="button secondary" type="submit">{ar ? "حفظ التفاصيل" : "Save details"}</button>
+            </form>
             <form action={addCollectionItemAction} className={styles.addForm}>
               <input type="hidden" name="locale" value={locale} />
               <input type="hidden" name="collection_id" value={collectionId} />

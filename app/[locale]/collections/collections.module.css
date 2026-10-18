@@ -9,6 +9,15 @@
 .collectionHero p{max-width:780px;margin:0;color:var(--stone,#9a9690);font-size:14px;line-height:1.9}
 .helperNote{color:var(--stone,#9a9690);font-size:11px;line-height:1.8}
 .manager{display:grid;gap:14px;padding:clamp(17px,2.5vw,24px);border:1px solid rgba(241,233,220,.12);border-radius:20px;background:rgba(21,23,25,.42)}
+.detailsForm{display:grid;gap:13px;padding:15px;border:1px solid rgba(241,233,220,.09);border-radius:14px;background:rgba(9,9,9,.16)}
+.detailsFormHeading{display:grid;gap:4px}
+.detailsFormHeading strong{color:var(--ivory,#f1e9dc);font-size:13px}
+.detailsFormHeading span{color:var(--stone,#9a9690);font-size:11px;line-height:1.7}
+.detailsFields{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:12px}
+.detailsFields label{display:grid;gap:7px;min-width:0}
+.detailsFields label>span{color:var(--stone,#9a9690);font-size:11px}
+.detailsFields input{width:100%;min-width:0;min-height:43px;box-sizing:border-box;padding:0 12px;border:1px solid rgba(241,233,220,.14);border-radius:11px;background:rgba(9,9,9,.35);color:var(--ivory,#f1e9dc);font:inherit;font-size:12px}
+.detailsForm>button{justify-self:start}
 .addForm{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) auto;align-items:end;gap:12px}
 .addForm label,.createFields label{display:grid;gap:7px;min-width:0}
 .addForm label>span,.createFields label>span{color:var(--stone,#9a9690);font-size:11px}
@@ -55,13 +64,16 @@
 .emptyIcon{display:grid;place-items:center;width:44px;height:44px;margin-bottom:3px;border:1px solid rgba(196,122,82,.25);border-radius:14px;background:rgba(196,122,82,.07);color:var(--copper,#c47a52)}
 .empty strong{color:var(--ivory,#f1e9dc);font-size:14px}
 .empty>span{max-width:480px;color:var(--stone,#9a9690);font-size:12px;line-height:1.8}
-@media(max-width:1000px){.collectionGrid,.workGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.createFields{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.addForm{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.addForm button{grid-column:1/-1}}
-@media(max-width:640px){.page{padding-inline:16px;gap:18px}.collectionGrid,.workGrid{grid-template-columns:minmax(0,1fr)}.createFields,.addForm{grid-template-columns:minmax(0,1fr)}.addForm button{grid-column:auto}.collectionCard{padding:17px}.manager{padding:14px}.managerActions{justify-content:stretch}.managerActions form,.managerActions button{width:100%}.topRow{align-items:flex-start}}
+@media(max-width:1000px){.collectionGrid,.workGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.detailsFields,.createFields{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.addForm{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.addForm button{grid-column:1/-1}}
+@media(max-width:640px){.page{padding-inline:16px;gap:18px}.collectionGrid,.workGrid{grid-template-columns:minmax(0,1fr)}.detailsFields,.createFields,.addForm{grid-template-columns:minmax(0,1fr)}.addForm button{grid-column:auto}.collectionCard{padding:17px}.manager{padding:14px}.managerActions{justify-content:stretch}.managerActions form,.managerActions button{width:100%}.topRow{align-items:flex-start}}
 @media(prefers-reduced-motion:reduce){.collectionCard{transition:none}.collectionCard:hover{transform:none}}
 :global(html[data-theme="light"]) .manager,:global(html[data-theme="light"]) .createForm{border-color:rgba(112,64,47,.17);background:rgba(255,250,246,.84)}
 :global(html[data-theme="light"]) .collectionHero h1,:global(html[data-theme="light"]) .listHeader h1,:global(html[data-theme="light"]) .createIntro strong,:global(html[data-theme="light"]) .collectionCard h2,:global(html[data-theme="light"]) .workCopy h2,:global(html[data-theme="light"]) .empty strong,:global(html[data-theme="light"]) .guestNotice strong{color:#171717}
 :global(html[data-theme="light"]) .collectionCard,:global(html[data-theme="light"]) .workCard{border-color:rgba(23,23,23,.12);background:rgba(255,250,246,.88)}
 :global(html[data-theme="light"]) .collectionCard p,:global(html[data-theme="light"]) .workCopy p,:global(html[data-theme="light"]) .workCopy blockquote,:global(html[data-theme="light"]) .workStats,:global(html[data-theme="light"]) .collectionMeta,:global(html[data-theme="light"]) .createIntro span{color:#70665f}
-:global(html[data-theme="light"]) .addForm input,:global(html[data-theme="light"]) .addForm select,:global(html[data-theme="light"]) .createFields input,:global(html[data-theme="light"]) .createFields select{border-color:rgba(112,64,47,.18);background:#fffaf6;color:#24211f}
-:global(html[data-theme="light"]) .addForm option,:global(html[data-theme="light"]) .createFields option{background:#fffaf6;color:#24211f}
+:global(html[data-theme="light"]) .detailsFields input,:global(html[data-theme="light"]) .addForm input,:global(html[data-theme="light"]) .addForm select,:global(html[data-theme="light"]) .createFields input,:global(html[data-theme="light"]) .createFields select{border-color:rgba(112,64,47,.18);background:#fffaf6;color:#24211f}
+:global(html[data-theme="light"]) .detailsForm{border-color:rgba(112,64,47,.13);background:rgba(255,250,246,.55)}
+:global(html[data-theme="light"]) .detailsFormHeading strong{color:#171717}
+:global(html[data-theme="light"]) .detailsFields label>span,:global(html[data-theme="light"]) .detailsFormHeading span{color:#70665f}
+:global(html[data-theme="light"]) .detailsForm option,:global(html[data-theme="light"]) .addForm option,:global(html[data-theme="light"]) .createFields option{background:#fffaf6;color:#24211f}
 :global(html[data-theme="light"]) .empty,:global(html[data-theme="light"]) .guestNotice{border-color:rgba(23,23,23,.12);background:rgba(255,250,246,.94)}
