@@ -84,7 +84,7 @@ test("Library separates saved work from liked work and keeps each view searchabl
   assert.match(page, /const table: "video_likes" \| "video_saves" = mode === "liked" \? "video_likes" : "video_saves"/);
   assert.match(page, /tab=liked/);
   assert.match(page, /<SavedWorksCollection locale=\{locale\} mode=\{mode\}/);
-  assert.match(component, /const result = isLiked \\? await removeLikedVideo\\(workId\\) : await removeSavedVideo\\(workId\\)/);
+  assert.ok(component.includes('const result = isLiked ? await removeLikedVideo(workId) : await removeSavedVideo(workId)'));
   assert.match(component, /type="search"/);
   assert.match(component, /Most viewed/);
 });
