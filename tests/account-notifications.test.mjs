@@ -16,6 +16,8 @@ test("account menu links to notifications and reads the signed-in user's unread 
   assert.match(menu, /Notifications/);
   assert.match(menu, /unreadCount>99\?"99\+"/);
   assert.match(menu, /document\.addEventListener\("visibilitychange"/);
+  assert.match(menu, /usePathname/);
+  assert.ok(menu.includes("},[pathname]);"));
   assert.match(css, /\.ravine-account-notification-count/);
   assert.match(css, /data-theme="light"/);
 });

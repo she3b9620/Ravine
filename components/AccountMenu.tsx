@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ChevronDown, UserRound, UserCog, Settings, Library, MessageCircle, Compass, Video, LogOut, ExternalLink, Sparkles, Bell } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { westernDigits } from "@/lib/ravine-format";
@@ -10,7 +11,7 @@ import CreatorIdentitySwitcher from "./CreatorIdentitySwitcher";
 type Locale="ar"|"en"; type Props={locale:Locale;displayName:string;username:string|null;avatarUrl:string|null;isCreator:boolean};
 const CLOSE_MS=200;
 export default function AccountMenu({locale,displayName,username,avatarUrl,isCreator}:Props){
- const ar=locale==="ar"; const rootRef=useRef<HTMLDivElement>(null); const [open,setOpen]=useState(false); const [closing,setClosing]=useState(false); const [signingOut,setSigningOut]=useState(false); const [logoMotionEnabled,setLogoMotionEnabled]=useState(true); const [unreadCount,setUnreadCount]=useState(0);
+ const ar=locale==="ar"; const pathname=usePathname(); const rootRef=useRef<HTMLDivElement>(null); const [open,setOpen]=useState(false); const [closing,setClosing]=useState(false); const [signingOut,setSigningOut]=useState(false); const [logoMotionEnabled,setLogoMotionEnabled]=useState(true); const [unreadCount,setUnreadCount]=useState(0);
  useEffect(()=>{const down=(e:PointerEvent)=>{if(!rootRef.current?.contains(e.target as Node))close()};const key=(e:KeyboardEvent)=>{if(e.key==="Escape")close()};document.addEventListener("pointerdown",down);document.addEventListener("keydown",key);return()=>{document.removeEventListener("pointerdown",down);document.removeEventListener("keydown",key)}},[open,closing]);
  useEffect(()=>{if(typeof window==="undefined")return;const timer=window.setTimeout(()=>setLogoMotionEnabled(window.localStorage.getItem(RAVINE_LOGO_MOTION_KEY)!=="off"),0);return()=>window.clearTimeout(timer)},[]);
  useEffect(()=>{
@@ -32,7 +33,7 @@ export default function AccountMenu({locale,displayName,username,avatarUrl,isCre
   window.addEventListener("focus",onFocus);
   document.addEventListener("visibilitychange",onVisibility);
   return()=>{active=false;window.removeEventListener("focus",onFocus);document.removeEventListener("visibilitychange",onVisibility)};
- },[]);
+ },[pathname]);
 
  function close(){if(!open||closing)return;setClosing(true);window.setTimeout(()=>{setOpen(false);setClosing(false)},CLOSE_MS)}
  function toggle(){if(open)close();else{setClosing(false);setOpen(true)}}
