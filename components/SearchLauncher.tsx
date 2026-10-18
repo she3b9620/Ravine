@@ -95,7 +95,6 @@ function SearchSelect({ label, value, locale, placeholder, options, onChange, di
   const rootRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const current = options.find((item) => item.value === value);
-  const isArabic = locale === "ar";
   useEffect(() => { const onPointerDown = (event: PointerEvent) => { if (!rootRef.current?.contains(event.target as Node)) setOpen(false); }; document.addEventListener("pointerdown", onPointerDown); return () => document.removeEventListener("pointerdown", onPointerDown); }, []);
   return <div ref={rootRef} className={`ravine-search-select${open ? " is-open" : ""}${value ? " has-value" : ""}${disabled ? " is-disabled" : ""}`}><span className="ravine-search-field-label">{label}</span><button type="button" className="ravine-search-select-trigger" disabled={disabled} aria-expanded={open} onClick={() => { if (!disabled) setOpen((state) => !state); }}><span>{current ? current[locale] : placeholder}</span><ChevronDown size={16} aria-hidden="true" /></button>{open ? <div className="ravine-search-select-menu" role="listbox"><button type="button" className={!value ? "is-selected" : ""} onClick={() => { onChange(""); setOpen(false); }}><span>{placeholder}</span></button>{options.map((item) => <button type="button" key={item.value} className={value === item.value ? "is-selected" : ""} onClick={() => { onChange(item.value); setOpen(false); }}><span>{item[locale]}</span></button>)}</div> : null}</div>;
 }
