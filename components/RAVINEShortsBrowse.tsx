@@ -128,7 +128,11 @@ export default function RAVINEShortsBrowse({ locale, works }: Props) {
       const video = videosRef.current.get(rawId);
       if (video && video.dataset.playbackUnavailable !== "true" && !manuallyPausedRef.current.has(rawId)) {
         if (video.paused) {
-          void video.play().then(() => setPlayingId(rawId)).catch(() => setPlayingId(null));
+          void video.play().then(() => {
+            if (activeRef.current === rawId && !video.paused) setPlayingId(rawId);
+          }).catch(() => {
+            if (activeRef.current === rawId) setPlayingId(null);
+          });
         } else {
           setPlayingId(rawId);
         }
@@ -166,7 +170,11 @@ export default function RAVINEShortsBrowse({ locale, works }: Props) {
       });
       manuallyPausedRef.current.delete(workId);
       activeRef.current = workId;
-      void video.play().then(() => setPlayingId(workId)).catch(() => setPlayingId(null));
+      void video.play().then(() => {
+        if (activeRef.current === workId && !video.paused) setPlayingId(workId);
+      }).catch(() => {
+        if (activeRef.current === workId) setPlayingId(null);
+      });
     } else {
       video.pause();
       manuallyPausedRef.current.add(workId);
