@@ -24,3 +24,13 @@ test("guest hero defaults to video and can switch to its still image", () => {
   assert.match(styles, /data-background-mode="image"/);
   assert.match(controlStyles, /ravine-video-control-background-mode/);
 });
+
+test("guest hero media order is stable and image mode browses still assets independently", () => {
+  assert.match(backdrop, /function stableMix/);
+  assert.doesNotMatch(backdrop, /Math\.random\(\)/);
+  assert.match(backdrop, /\.eq\("visibility", "public"\)/);
+  assert.match(backdrop, /const imageWorks = useMemo/);
+  assert.match(backdrop, /setImageIndex\(\(index\) => imageWorks\.length/);
+  assert.match(backdrop, /backgroundMode === "image" \? currentImage\?\.thumbnail_url/);
+});
+
