@@ -44,3 +44,16 @@ test("shared event catalogue accepts string IDs for UUID-backed Spaces and numer
   assert.match(component, /id: number \| string/);
   assert.match(spaces, /id: space\.id/);
 });
+
+
+test("Live page unifies scheduled sessions with a public-only recording archive", () => {
+  const page = read("../app/[locale]/live/page.tsx");
+  assert.match(page, /\.from\("live_events"\)/);
+  assert.match(page, /\.from\("videos"\)/);
+  assert.match(page, /\.eq\("published", true\)/);
+  assert.match(page, /\.eq\("visibility", "public"\)/);
+  assert.match(page, /recordingHref:/);
+  assert.match(page, /<RAVINEEventsCatalog locale=\{locale\} items=\{eventItems\}/);
+  assert.match(page, /<RAVINEWorkCatalog locale=\{locale\} items=\{archiveItems\}/);
+  assert.match(page, /selected provider and its policies/);
+});
