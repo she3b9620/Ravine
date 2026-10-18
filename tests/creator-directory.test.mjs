@@ -22,6 +22,6 @@ test("creator directory supports localized search, sorting, and empty following 
   assert.match(component, /Name A–Z/);
   assert.match(component, /You do not follow any creators yet/);
   assert.match(component, /لا تتابع مبدعين بعد/);
-  assert.match(component, //creators/);
+  assert.ok(component.includes('href={"/" + locale + "/creators/" + creator.id}'));
   assert.match(component, /aria-live="polite"/);
 });

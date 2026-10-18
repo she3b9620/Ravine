@@ -27,7 +27,7 @@ const copy = {
   ar: {
     search: "ابحث بالاسم أو التخصص أو اسم المستخدم...",
     sort: "ترتيب",
-    followers: "الأكثر متابعة",
+    sortFollowers: "الأكثر متابعة",
     name: "الاسم أبجديًا",
     countAll: "مبدع",
     countFollowing: "مبدع تتابعهم",
@@ -38,12 +38,12 @@ const copy = {
     emptySearchHelp: "جرّب كلمة أخرى أو امسح البحث لعرض كل المبدعين في هذا القسم.",
     clear: "عرض الكل",
     apply: "استكشف مسار المبدع",
-    followers: "متابع",
+    followersLabel: "متابع",
   },
   en: {
     search: "Search by name, discipline, or username...",
     sort: "Sort",
-    followers: "Most followed",
+    sortFollowers: "Most followed",
     name: "Name A–Z",
     countAll: "creators",
     countFollowing: "followed creators",
@@ -54,7 +54,7 @@ const copy = {
     emptySearchHelp: "Try another term or clear your search to see every creator in this view.",
     clear: "Show all",
     apply: "Explore creator pathway",
-    followers: "followers",
+    followersLabel: "followers",
   },
 } as const;
 
@@ -101,7 +101,7 @@ export default function RAVINECreatorDirectory({ locale, view, creators }: Props
           <ArrowDownUp size={15} aria-hidden="true" />
           <span>{t.sort}</span>
           <select value={sort} onChange={(event) => setSort(event.target.value as SortMode)} aria-label={t.sort}>
-            <option value="followers">{t.followers}</option>
+            <option value="followers">{t.sortFollowers}</option>
             <option value="name">{t.name}</option>
           </select>
         </label>
@@ -124,7 +124,7 @@ export default function RAVINECreatorDirectory({ locale, view, creators }: Props
                 <p>{creator.bio || (ar ? "ملف إبداعي من مجتمع رَافِين." : "A creative identity from the RAVINE community.")}</p>
                 <div className="video-stats">
                   <span>@{creator.username || "creator-" + creator.id}</span>
-                  <span>{formatRavineNumber(creator.followers, locale)} {t.followers}</span>
+                  <span>{formatRavineNumber(creator.followers, locale)} {t.followersLabel}</span>
                 </div>
               </div>
             </Link>
