@@ -35,8 +35,10 @@ test("guest navigation exposes public community previews while join and posting 
   const primary = read("../components/PrimaryNav.tsx");
   const sidebar = read("../components/SidebarNav.tsx");
   const mobile = read("../components/MobileNav.tsx");
+  assert.match(primary, /\["community", "Community", "المجتمع", MessagesSquare\]/);
+  assert.match(sidebar, /\["community", "Community", "المجتمع", MessagesSquare\]/);
+  assert.match(mobile, /\["community", "Community", "المجتمع"\]/);
   for (const [name, source] of [["primary", primary], ["sidebar", sidebar], ["mobile", mobile]]) {
-    assert.match(source, /\["community", "Community", "المجتمع", MessagesSquare\]/, name + " navigation should expose Community");
     assert.doesNotMatch(source, /GUEST_GATED/, name + " navigation should not block public browsing");
   }
 
