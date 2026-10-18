@@ -81,3 +81,16 @@ test("only the owner can cancel an event and only while it is scheduled", () => 
   assert.match(actions, /status: "cancelled"/);
   assert.match(actions, /if \(event\.status !== "scheduled"\)/);
 });
+
+test("events, Spaces, and public collections are reachable from desktop and mobile navigation", () => {
+  for (const path of ["../components/SidebarNav.tsx", "../components/MobileNav.tsx"]) {
+    const source = read(path);
+    for (const slug of ["events", "spaces", "collections"]) {
+      assert.ok(source.includes('["' + slug + '"'), path + " is missing " + slug);
+    }
+  }
+  const sidebar = read("../components/SidebarNav.tsx");
+  assert.match(sidebar, /\["events", "Events & Premieres", "الأحداث والعروض", CalendarDays\]/);
+  assert.match(sidebar, /\["spaces", "Spaces", "المساحات", Headphones\]/);
+  assert.match(sidebar, /\["collections", "Collections & Boards", "المجموعات واللوحات", BookmarkPlus\]/);
+});

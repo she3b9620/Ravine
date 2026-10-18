@@ -16,6 +16,9 @@ const navigation = [
   ["films", "Feature Films", "الأفلام المطوّلة"],
   ["series", "Series", "المسلسلات"],
   ["live", "Live", "مباشر"],
+  ["events", "Events & Premieres", "الأحداث والعروض"],
+  ["spaces", "Spaces", "المساحات"],
+  ["collections", "Collections & Boards", "المجموعات واللوحات"],
   ["creators", "Creators", "المبدعون"],
   ["community", "Community", "المجتمع"],
 ] as const;

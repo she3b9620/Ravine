@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Compass, Scissors, Clapperboard, Users, History, Library, Heart, MessagesSquare, Radio, Mic2, Film, Tv, LayoutDashboard, UserRound, Settings, Images } from "lucide-react";
+import { Home, Compass, Scissors, Clapperboard, Users, History, Library, Heart, MessagesSquare, Radio, Mic2, Film, Tv, LayoutDashboard, UserRound, Settings, Images, CalendarDays, Headphones, BookmarkPlus } from "lucide-react";
 import { requestRavineAuth } from "./AuthModal";
 
 type Locale = "ar" | "en";
 type Item = readonly [slug: string, en: string, ar: string, icon: typeof Home];
 type Group = readonly [titleEn: string, titleAr: string, items: Item[]];
 
-const publicGroups: Group[] = [["RAVINE", "رَافِين", [["", "Home", "الرئيسية", Home], ["discover", "Discover", "اكتشف", Compass], ["shorts", "Shorts", "الشورتات", Scissors], ["videos", "Videos", "الفيديوهات", Clapperboard], ["podcasts", "Podcasts", "البودكاست", Mic2], ["documentaries", "Documentaries", "الأفلام الوثائقية", Film], ["short-films", "Short Films", "الأفلام القصيرة", Clapperboard], ["films", "Feature Films", "الأفلام المطوّلة", Film], ["series", "Series", "المسلسلات", Tv], ["live", "Live", "مباشر", Radio], ["creators", "Creators", "المبدعون", Users], ["community", "Community", "المجتمع", MessagesSquare]]]];
+const publicGroups: Group[] = [["RAVINE", "رَافِين", [["", "Home", "الرئيسية", Home], ["discover", "Discover", "اكتشف", Compass], ["shorts", "Shorts", "الشورتات", Scissors], ["videos", "Videos", "الفيديوهات", Clapperboard], ["podcasts", "Podcasts", "البودكاست", Mic2], ["documentaries", "Documentaries", "الأفلام الوثائقية", Film], ["short-films", "Short Films", "الأفلام القصيرة", Clapperboard], ["films", "Feature Films", "الأفلام المطوّلة", Film], ["series", "Series", "المسلسلات", Tv], ["live", "Live", "مباشر", Radio], ["events", "Events & Premieres", "الأحداث والعروض", CalendarDays], ["spaces", "Spaces", "المساحات", Headphones], ["collections", "Collections & Boards", "المجموعات واللوحات", BookmarkPlus], ["creators", "Creators", "المبدعون", Users], ["community", "Community", "المجتمع", MessagesSquare]]]];
 const privateGroups: Group[] = [["YOUR SPACE", "مساحتك", [["creators?tab=following", "Following", "تتابعهم", Users], ["library", "Library", "المكتبة", Library], ["history", "Watch history", "سجل المشاهدة", History], ["library?tab=liked", "Liked work", "الأعمال التي أعجبتك", Heart], ["messages", "Messages", "الرسائل", MessagesSquare]]], ["CREATE & MANAGE", "إنشاء وإدارة", [["creator", "Creator space", "مساحة المبدع", Clapperboard], ["dashboard", "Your dashboard", "لوحتك", LayoutDashboard], ["account", "Your account", "حسابك", UserRound]]]];
 const adminGroups: Group[] = [["ADMINISTRATION", "إدارة المنصة", [["hero-media", "Hero media", "إدارة الهيرو", Images]]]];
 const GUEST_GATED = new Set(["shorts", "cuts", "videos", "series", "live", "podcasts", "documentaries", "short-films", "films"]);
