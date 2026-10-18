@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Film } from "lucide-react";
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -32,13 +31,14 @@ export default async function DocumentariesPage({ params }: { params: Promise<{ 
   const locale: Locale = rawLocale === "en" ? "en" : "ar";
   const ar = locale === "ar";
   const supabase = await createClient();
-  const { data: userData } = await supabase.auth.getUser();
-  if (!userData.user) redirect(`/${locale}`);
 
+  // Guests can discover public work; private and follower-only works stay out
+  // of this public catalogue regardless of the current browser session.
   const { data, error } = await supabase
     .from("videos")
     .select("id,title,description,thumbnail_url,duration,views,likes,quality,content_type,created_at")
     .eq("published", true)
+    .eq("visibility", "public")
     .eq("content_type", "documentary")
     .order("created_at", { ascending: false })
     .limit(60);
@@ -46,7 +46,7 @@ export default async function DocumentariesPage({ params }: { params: Promise<{ 
   const documentaries = (data ?? []) as Documentary[];
 
   return (
-    <section className="section ravine-documentaries-page">
+    <section className="section ravine-documentaries-page" dir={ar ? "rtl" : "ltr"}>
       <div className="ravine-documentaries-hero">
         <div className="ravine-documentaries-mark" aria-hidden="true"><Film size={28} strokeWidth={1.6} /></div>
         <div>
