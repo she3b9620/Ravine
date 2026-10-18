@@ -73,3 +73,11 @@ test("public username profiles direct every visitor to Discover rather than anot
   assert.ok(source.includes("Explore RAVINE"));
   assert.doesNotMatch(source, /href={`\/${locale}\/account`}[^\n]*Back to my account/);
 });
+
+
+test("public work-detail failures show localized recovery guidance instead of raw database errors", () => {
+  const source = read("../app/[locale]/work/[id]/page.tsx");
+  assert.doesNotMatch(source, /<span>\{error\.message\}<\/span>/);
+  assert.match(source, /Work details could not be retrieved right now/);
+  assert.match(source, /تعذّر جلب تفاصيل العمل الآن/);
+});
