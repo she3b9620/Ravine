@@ -1,4 +1,4 @@
-.applyPage,.hubPage,.statusPage{position:relative;isolation:isolate;color:var(--ivory,#f1e9dc);font-family:var(--font-ravine-sans,Satoshi,sans-serif)}
+.applyPage,.hubPage,.statusPage{position:relative;isolation:isolate;color:var(--ivory,#f1e9dc);font-family:inherit;line-height:1.65}
 .applyPage,.hubPage{padding:clamp(24px,4vw,58px) 0 64px;min-width:0}
 .ambient{position:absolute;z-index:-1;top:-80px;inset-inline-start:4%;width:min(62vw,720px);height:430px;pointer-events:none;background:radial-gradient(ellipse at 28% 20%,rgba(24,63,70,.32),transparent 60%),radial-gradient(ellipse at 65% 4%,rgba(196,122,82,.12),transparent 52%);filter:blur(18px)}
 .eyebrow{margin:0 0 13px;color:var(--copper,#c47a52);font-size:10px;font-weight:900;letter-spacing:.16em;text-transform:uppercase}
@@ -58,7 +58,7 @@
 .field{display:grid;gap:9px;min-width:0}
 .field>span{display:flex;align-items:center;gap:5px}
 .field>span b,.agreements legend b{color:var(--copper,#c47a52)}
-.field textarea,.field input{display:block;width:100%;box-sizing:border-box;border:1px solid rgba(241,233,220,.12);border-radius:14px;background:rgba(5,8,9,.38);color:var(--ivory,#f1e9dc);font:500 13px/1.75 var(--font-ravine-sans,Satoshi,sans-serif);outline:none;transition:border-color .2s,background .2s,box-shadow .2s}
+.field textarea,.field input{display:block;width:100%;box-sizing:border-box;border:1px solid rgba(241,233,220,.12);border-radius:14px;background:rgba(5,8,9,.38);color:var(--ivory,#f1e9dc);font:500 14px/1.75 inherit;outline:none;transition:border-color .2s,background .2s,box-shadow .2s}
 .field textarea{min-height:125px;padding:13px 15px;resize:vertical}
 .field input{height:49px;padding:0 14px}
 .field textarea::placeholder,.field input::placeholder{color:rgba(167,160,152,.58);opacity:1}
@@ -178,7 +178,7 @@
 :global(html[data-theme="light"]) .hubIntroMark{color:rgba(23,23,23,.08)}
 .specialtyCatalog{display:grid;gap:13px;min-width:0}
 .specialtyCatalogToolbar{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px}
-.specialtySearch{width:100%;min-width:0;height:46px;box-sizing:border-box;padding:0 14px;border:1px solid rgba(241,233,220,.13);border-radius:13px;background:rgba(5,8,9,.38);color:var(--ivory,#f1e9dc);font:500 12px/1.5 var(--font-ravine-sans,Satoshi,sans-serif);outline:none;transition:border-color .2s,box-shadow .2s}
+.specialtySearch{width:100%;min-width:0;height:46px;box-sizing:border-box;padding:0 14px;border:1px solid rgba(241,233,220,.13);border-radius:13px;background:rgba(5,8,9,.38);color:var(--ivory,#f1e9dc);font:500 13px/1.5 inherit;outline:none;transition:border-color .2s,box-shadow .2s}
 .specialtySearch:focus{border-color:rgba(196,122,82,.6);box-shadow:0 0 0 3px rgba(196,122,82,.07)}
 .specialtySearch::placeholder{color:rgba(167,160,152,.65)}
 .selectedCount{white-space:nowrap;color:var(--copper,#c47a52);font-size:10px;font-weight:800}
@@ -198,3 +198,169 @@
 :global(html[data-theme="light"]) .specialtyGroup{border-color:rgba(23,23,23,.1);background:rgba(23,23,23,.012)}
 :global(html[data-theme="light"]) .specialtyGroupHeading strong{color:#171717}
 :global(html[data-theme="light"]) .specialtyEmpty{border-color:rgba(23,23,23,.15);color:#6f6962}
+
+
+/* Application-page layout and typography refinement */
+.applyPage{
+  width:min(var(--max,1440px),100%);
+  margin-inline:auto;
+  padding-inline:clamp(18px,3.2vw,48px);
+  overflow-wrap:anywhere;
+}
+.applyPage *{min-width:0}
+.applyPage button,.applyPage input,.applyPage textarea{font-family:inherit}
+.applyHero{gap:clamp(28px,5.2vw,84px);padding-bottom:clamp(38px,5vw,68px)}
+.heroCopy{max-width:860px}
+.heroCopy h1{max-width:820px;font-size:clamp(40px,5.2vw,74px);line-height:1.1;letter-spacing:-.035em;text-wrap:balance}
+.heroCopy>p{font-size:clamp(14px,1.15vw,16px);line-height:1.95}
+.heroPrinciples{gap:11px 20px;margin-top:27px}
+.heroPrinciples span{font-size:12px;line-height:1.7}
+.heroStamp{min-height:35px;font-size:12px}
+.heroCard{min-height:310px;padding:25px;border-radius:24px 17px 28px 17px}
+.heroCardTitle{font-size:clamp(25px,2.15vw,30px);line-height:1.3;letter-spacing:-.02em}
+.heroCardText{font-size:12px;line-height:1.9}
+.heroCardTop,.heroCardFooter{font-size:10px}
+.workflow{grid-template-columns:minmax(250px,.34fr) minmax(0,1fr);gap:clamp(20px,2.8vw,38px);padding-top:32px}
+.rail{top:94px;padding-top:8px}
+.railHeading{font-size:11px;margin-bottom:16px}
+.railStep{grid-template-columns:38px minmax(0,1fr) auto;min-height:78px;gap:12px;padding:13px 12px}
+.railStepCopy{gap:5px}
+.railStepCopy strong{font-size:13px;line-height:1.5}
+.railStepCopy small{font-size:11px;line-height:1.65}
+.railNote{padding:20px}
+.railNote strong{font-size:13px}
+.railNote p{font-size:12px;line-height:1.9}
+.draftStatus{font-size:11px;line-height:1.7}
+.formCard{border-radius:25px}
+.formTop{padding:clamp(24px,3vw,38px) clamp(22px,3.2vw,40px) 22px}
+.formTop h2{font-size:clamp(27px,2.6vw,37px);line-height:1.25;letter-spacing:-.02em}
+.formTop p{font-size:13px;line-height:1.85}
+.formEyebrow{font-size:10px}
+.stepGlyph{width:52px;height:52px;flex-basis:52px}
+.formCard form{padding:0 clamp(22px,3.2vw,40px) clamp(26px,3vw,38px)}
+.formMessage{font-size:12px;line-height:1.85}
+.stepBody{gap:25px;padding:30px 0}
+.fieldGroup{gap:16px}
+.fieldHeading{gap:8px}
+.fieldHeading label,.field>span{font-size:14px;line-height:1.7}
+.fieldHeading small,.field small{font-size:12px;line-height:1.85}
+.field{gap:9px}
+.field textarea{min-height:138px;padding:14px 16px;font-size:14px;line-height:1.8}
+.field input{height:52px;padding:0 15px;font-size:14px}
+.field em{font-size:11px}
+.specialtyCatalog{gap:15px}
+.specialtyCatalogToolbar{gap:13px}
+.specialtySearch{height:50px;padding-inline:15px;font-size:13px}
+.selectedCount{font-size:12px}
+.specialtyGroups{gap:12px}
+.specialtyGroup{padding:16px;border-radius:17px}
+.specialtyGroupHeading{margin-bottom:13px}
+.specialtyGroupHeading strong{font-size:13px;line-height:1.6}
+.specialtyGrid{gap:9px}
+.specialtyChip{min-height:47px;padding:10px 12px;font-size:12px;line-height:1.65}
+.chipCheck{width:19px;height:19px;flex-basis:19px}
+.specialtyEmpty{font-size:12px;line-height:1.85}
+.tipStrip,.finalNote{font-size:12px;line-height:1.9;padding:14px 16px}
+.summaryHead{padding:19px 20px}
+.summaryHead>div>span{font-size:10px}
+.summaryHead strong{font-size:14px;line-height:1.6}
+.summaryHead button{font-size:11px}
+.summaryRow{padding:16px 20px;gap:16px}
+.summaryRow>span{font-size:12px;line-height:1.7}
+.summaryRow p{font-size:13px;line-height:1.9}
+.summaryTags span{font-size:11px;padding:6px 9px}
+.agreements{gap:14px;padding:20px}
+.agreements legend{font-size:14px;line-height:1.65}
+.agreements>p,.agreements label{font-size:12px;line-height:1.9}
+.agreements input{width:17px;height:17px}
+.formFooter{padding-top:20px;gap:16px}
+.primaryAction,.secondaryAction,.backButton{min-height:47px;padding-inline:19px;font-size:13px;line-height:1.5}
+.rejectedNotice,.notice{padding:19px 21px}
+.rejectedNotice strong{font-size:14px}
+.rejectedNotice p,.notice{font-size:12px;line-height:1.9}
+.rejectedNotice>span{font-size:11px}
+:global(.ravine-shell[lang="ar"]) .heroCopy h1,
+:global(.ravine-shell[lang="ar"]) .hubCopy h1,
+:global(.ravine-shell[lang="ar"]) .formTop h2,
+:global(.ravine-shell[lang="ar"]) .statusCard h1,
+:global(.ravine-shell[lang="ar"]) .hubIntro h2{
+  font-family:var(--font-arabic-display,"Thmanyah Serif Display",serif);
+  letter-spacing:0;
+  line-height:1.25;
+}
+:global(.ravine-shell[lang="ar"]) .applyPage,
+:global(.ravine-shell[lang="ar"]) .applyPage input,
+:global(.ravine-shell[lang="ar"]) .applyPage textarea,
+:global(.ravine-shell[lang="ar"]) .applyPage button{
+  font-family:var(--font-arabic-ui,inherit);
+}
+:global(.ravine-shell[lang="en"]) .applyPage,
+:global(.ravine-shell[lang="en"]) .applyPage input,
+:global(.ravine-shell[lang="en"]) .applyPage textarea,
+:global(.ravine-shell[lang="en"]) .applyPage button{
+  font-family:var(--font-mixed,inherit);
+}
+:global(html[data-theme="light"]) .railNote{background:linear-gradient(150deg,rgba(24,63,70,.075),#fffdf9);border-color:rgba(24,63,70,.18)}
+:global(html[data-theme="light"]) .railStepCopy strong{color:#24211f}
+:global(html[data-theme="light"]) .field textarea:focus,
+:global(html[data-theme="light"]) .field input:focus,
+:global(html[data-theme="light"]) .specialtySearch:focus{background:#fff;border-color:rgba(160,88,51,.65);box-shadow:0 0 0 3px rgba(196,122,82,.1)}
+:global(html[data-theme="light"]) .specialtyChip:hover{background:#fbf0e7;color:#171717}
+:global(html[data-theme="light"]) .backButton:not(:disabled):hover{background:rgba(23,23,23,.035);border-color:rgba(23,23,23,.25)}
+@media(max-width:1120px){
+ .workflow{grid-template-columns:minmax(215px,.33fr) minmax(0,1fr)}
+ .railStep{grid-template-columns:34px minmax(0,1fr) auto;gap:8px;padding-inline:9px}
+ .railStepCopy strong{font-size:12px}
+ .railStepCopy small{font-size:10px}
+}
+@media(max-width:860px){
+ .applyPage{padding-inline:clamp(16px,3vw,26px)}
+ .workflow{grid-template-columns:minmax(0,1fr);gap:18px}
+ .railSteps{grid-template-columns:repeat(4,minmax(0,1fr))}
+ .railStep{grid-template-columns:1fr;justify-items:start;min-height:105px;padding:12px}
+ .railStepCopy strong{font-size:12px}
+ .formTop{padding:25px 26px 20px}
+ .formCard form{padding-inline:26px}
+ .progressTrack{margin-inline:26px}
+ .formMessage{margin-inline:26px}
+}
+@media(max-width:560px){
+ .applyPage{padding-inline:15px;padding-bottom:38px}
+ .applyHero{padding-bottom:28px}
+ .heroCopy h1{font-size:clamp(35px,10vw,48px);line-height:1.22}
+ .heroCopy>p{font-size:14px;line-height:1.9}
+ .heroPrinciples{gap:8px 12px}
+ .heroPrinciples span{font-size:11px}
+ .heroCard{min-height:220px;padding:18px}
+ .heroCardMark{width:48px;height:48px;font-size:25px}
+ .workflow{padding-top:20px}
+ .railSteps{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+ .railStep{min-height:88px;padding:10px}
+ .railStepCopy strong{font-size:11px}
+ .formTop{padding:20px 17px 17px}
+ .formTop h2{font-size:25px}
+ .formTop p{font-size:12px}
+ .stepGlyph{width:42px;height:42px;flex-basis:42px}
+ .formCard form{padding:0 17px 21px}
+ .progressTrack{margin-inline:17px}
+ .formMessage{margin-inline:17px;font-size:11px}
+ .stepBody{gap:20px;padding:23px 0}
+ .fieldHeading label,.field>span{font-size:13px}
+ .fieldHeading small,.field small{font-size:11px}
+ .field textarea{min-height:120px;font-size:13px}
+ .field input{height:48px;font-size:13px}
+ .specialtyCatalogToolbar{grid-template-columns:minmax(0,1fr)}
+ .specialtyGroup{padding:11px}
+ .specialtyChip{min-height:45px;font-size:12px}
+ .summaryRow{grid-template-columns:1fr;gap:7px;padding:13px 15px}
+ .summaryHead{align-items:flex-start;padding:14px}
+ .agreements{padding:14px}
+ .agreements>p,.agreements label{font-size:11px}
+ .formFooter .primaryAction,.formFooter .backButton{min-height:43px;padding-inline:12px;font-size:11px}
+ .rejectedNotice{display:grid}
+ .rejectedNotice>span{white-space:normal}
+}
+@media(prefers-reduced-motion:reduce){
+ .railStep,.specialtyChip,.guideCard,.primaryAction,.progressTrack span{transition:none}
+ .guideCard:hover,.primaryAction:hover{transform:none}
+}
