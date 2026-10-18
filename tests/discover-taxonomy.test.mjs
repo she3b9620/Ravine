@@ -52,8 +52,8 @@ test("Discover includes public creator identities, categories, scheduled events,
   assert.ok(page.includes('.eq("is_active", true)'));
   assert.ok(page.includes('.eq("privacy", "public")'));
   assert.ok(page.includes('className="discover-category-list"'));
-  assert.ok(page.includes('className="discover-event-results"'));
-  assert.ok(page.includes('className="discover-community-results"'));
+  assert.ok(page.includes('discover-result-section discover-event-results'));
+  assert.ok(page.includes('discover-result-section discover-community-results'));
   assert.ok(page.includes('eq("visibility", "public")'));
   assert.ok(page.includes("<RAVINEEventsCatalog locale={locale} items={eventItems} />"));
 });
