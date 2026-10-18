@@ -13,7 +13,7 @@ const publicGroups: Group[] = [["RAVINE", "رَافِين", [["", "Home", "ال�
 const privateGroups: Group[] = [["YOUR SPACE", "مساحتك", [["creators?tab=following", "Following", "تتابعهم", Users], ["library", "Library", "المكتبة", Library], ["history", "Watch history", "سجل المشاهدة", History], ["library?tab=liked", "Liked work", "الأعمال التي أعجبتك", Heart], ["messages", "Messages", "الرسائل", MessagesSquare]]], ["CREATE & MANAGE", "إنشاء وإدارة", [["creator", "Creator space", "مساحة المبدع", Clapperboard], ["dashboard", "Your dashboard", "لوحتك", LayoutDashboard], ["account", "Your account", "حسابك", UserRound]]]];
 const GUEST_GATED = new Set(["community", "shorts", "cuts", "videos", "series", "live", "podcasts", "documentaries", "short-films", "films"]);
 
-export default function SidebarNav({ locale, authenticated }: { locale: Locale; authenticated: boolean }) {
+export default function SidebarNav({ locale, authenticated, isCreator = false }: { locale: Locale; authenticated: boolean; isCreator?: boolean }) {
   const pathname = usePathname() || `/${locale}`;
   const groups = authenticated ? [...publicGroups, ...privateGroups] : publicGroups;
   const isActive = (slug: string) => { const [path] = slug.split("?"); return !path ? pathname === `/${locale}` : pathname === `/${locale}/${path}` || pathname.startsWith(`/${locale}/${path}/`); };
@@ -26,8 +26,11 @@ export default function SidebarNav({ locale, authenticated }: { locale: Locale; 
           <div className="ravine-sidebar-nav-label">{locale === "ar" ? titleAr : titleEn}</div>
           <div className="ravine-sidebar-nav-list">
             {items.map(([slug, en, ar, Icon]) => {
-              const active = isActive(slug);
-              const href = slug ? `/${locale}/${slug}` : `/${locale}`;
+              // Approved creators should enter their working studio directly.
+              // Non-creators keep the application/pathway entry at /creator.
+              const targetSlug = slug === "creator" && isCreator ? "studio" : slug;
+              const active = isActive(targetSlug);
+              const href = targetSlug ? `/${locale}/${targetSlug}` : `/${locale}`;
               const gated = !authenticated && GUEST_GATED.has(slug.split("?")[0]);
               return gated ? (
                 <button key={slug} type="button" className={`ravine-sidebar-link${active ? " is-active" : ""}${slug === "live" ? " is-live-link" : ""}`} onClick={() => requestRavineAuth(authDestination())} aria-label={locale === "ar" ? `${ar} — سجّل للدخول` : `${en} — sign in to continue`}>
