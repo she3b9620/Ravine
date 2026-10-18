@@ -98,9 +98,11 @@ export default function DirectMessages({ locale, initialRecipient, initialCreato
   async function startOrSend() {
     const body = draft.trim();
     if (!body) return;
-    if (!recipientId) { setError(ar ? "اختر مستخدمًا أو افتح صفحة مبدع أولًا." : "Select a user or open a creator profile first."); return; }
+    const targetRecipientId = selectedOtherId || recipientId;
+    const targetCreatorId = selected ? (selected.creator_id ?? undefined) : creatorId;
+    if (!targetRecipientId) { setError(ar ? "اختر مستخدمًا أو افتح صفحة مبدع أولًا." : "Select a user or open a creator profile first."); return; }
     setError("");
-    const { data, error: rpcError } = await supabase.rpc("start_direct_conversation", { p_recipient_id: recipientId, p_creator_id: creatorId ?? null, p_body: body });
+    const { data, error: rpcError } = await supabase.rpc("start_direct_conversation", { p_recipient_id: targetRecipientId, p_creator_id: targetCreatorId ?? null, p_body: body });
     if (rpcError || !data) { setError(ravineErrorMessage(rpcError, locale)); return; }
     setDraft("");
     setSelectedId(String(data));

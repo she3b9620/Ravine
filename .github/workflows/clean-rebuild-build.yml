@@ -28,7 +28,7 @@ jobs:
         run: npm audit --omit=dev --audit-level=moderate
 
       - name: Media catalog lint
-        run: npx eslint components/RAVINEShortsBrowse.tsx components/RAVINEMediaCatalog.tsx components/RAVINEWorkCatalog.tsx 'app/[locale]/podcasts/page.tsx' 'app/[locale]/series/page.tsx' components/StudioUpload.tsx components/StudioWorkManager.tsx
+        run: npx eslint components/RAVINEShortsBrowse.tsx components/RAVINEMediaCatalog.tsx components/RAVINEWorkCatalog.tsx 'app/[locale]/podcasts/page.tsx' 'app/[locale]/series/page.tsx' components/StudioUpload.tsx components/StudioWorkManager.tsx components/DirectMessages.tsx components/SavedWorksCollection.tsx 'app/[locale]/messages/page.tsx' 'app/[locale]/collections/page.tsx' app/actions/ravine-social.ts
 
       - name: Governance checks
         run: npm run verify:ravine
@@ -44,6 +44,9 @@ jobs:
 
       - name: Studio work manager tests
         run: node --test tests/studio-work-manager.test.mjs
+
+      - name: Social surfaces regression tests
+        run: node --test tests/social-surfaces.test.mjs
 
       - name: Creator application UI regression tests
         run: node --test tests/creator-apply-ui.test.mjs

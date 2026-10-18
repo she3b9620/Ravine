@@ -63,6 +63,31 @@ export async function followCreator(
   return { ok: true, data: { following } };
 }
 
+export async function removeSavedVideo(
+  videoId: number,
+): Promise<RavineActionResult<{ removed: boolean }>> {
+  if (!Number.isInteger(videoId) || videoId <= 0) {
+    return { ok: false, code: "INVALID_INPUT", message: "Invalid video id." };
+  }
+
+  const { supabase, user } = await requireUser();
+  if (!user) {
+    return { ok: false, code: "AUTH_REQUIRED", message: "Authentication is required." };
+  }
+
+  const { error } = await supabase
+    .from("video_saves")
+    .delete()
+    .eq("user_id", user.id)
+    .eq("video_id", videoId);
+
+  if (error) {
+    return { ok: false, code: "DATABASE_ERROR", message: "Could not remove saved work." };
+  }
+
+  return { ok: true, data: { removed: true } };
+}
+
 export async function toggleSaveWork(
   workId: number,
   saved: boolean,
