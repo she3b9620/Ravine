@@ -4,7 +4,7 @@ import RAVINEEventCreateForm, { type RAVINEEventHostOption } from "@/components/
 import styles from "./RAVINEEventManagement.module.css";
 
 type Locale = "ar" | "en";
-type ManagedEvent = {
+export type RAVINEManagedEvent = {
   id: number;
   creator_id: number;
   title: string;
@@ -18,7 +18,7 @@ type ManagedEvent = {
 type Props = {
   locale: Locale;
   creators: RAVINEEventHostOption[];
-  events: ManagedEvent[];
+  events: RAVINEManagedEvent[];
   errorMessage?: string;
   noticeMessage?: string;
 };

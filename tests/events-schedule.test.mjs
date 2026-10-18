@@ -68,7 +68,8 @@ test("creator event scheduling validates identity ownership, time, and supported
   assert.match(actions, /\.eq\("user_id", auth\.user\.id\)/);
   assert.match(actions, /timestamp <= Date\.now\(\)/);
   assert.match(actions, /status: "scheduled"/);
-  assert.match(form, /new Date\(localDate\)\.toISOString\(\)/);
+  assert.match(form, /new Date\(localDate\)/);
+  assert.match(form, /parsed\.toISOString\(\)/);
   assert.match(form, /type="datetime-local"/);
   assert.match(page, /<RAVINEEventManagement locale=\{locale\} creators=\{hosts\} events=\{managedEvents\}/);
 });
