@@ -251,13 +251,21 @@ export default function StudioWorkManager({ works: initialWorks, locale }: Props
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ videoId: work.id }),
       });
-      const payload = (await response.json()) as { ok?: boolean; error?: string };
+      const payload = (await response.json().catch(() => ({}))) as { ok?: boolean; error?: string; code?: string };
       if (!response.ok || !payload.ok) {
-        throw new Error("RAVINE_STUDIO_DELETE_FAILED");
+        throw new Error(payload.code === "RAVINE_WORK_HAS_FINANCIAL_RECORDS"
+          ? "RAVINE_WORK_HAS_FINANCIAL_RECORDS"
+          : "RAVINE_STUDIO_DELETE_FAILED");
       }
       setWorks((current) => current.filter((item) => item.id !== work.id));
-    } catch {
-      setError(studioActionError(ar, "delete"));
+    } catch (deleteError) {
+      if (deleteError instanceof Error && deleteError.message === "RAVINE_WORK_HAS_FINANCIAL_RECORDS") {
+        setError(ar
+          ? "لا يمكن حذف هذا العمل نهائيًا لوجود سجل مالي مرتبط به. استخدم «إخفاء» بدلًا من الحذف."
+          : "This work has retained financial records and cannot be permanently deleted. Use “Unpublish” to hide it instead.");
+      } else {
+        setError(studioActionError(ar, "delete"));
+      }
     } finally {
       setBusyId(null);
     }
