@@ -44,3 +44,10 @@ test("Studio work actions use localized recovery messages instead of raw provide
   assert.doesNotMatch(manager, /setError\(publishError instanceof Error \? publishError\.message/);
   assert.doesNotMatch(manager, /setError\(deleteError instanceof Error \? deleteError\.message/);
 });
+
+
+test("Studio explains why a work with retained financial records can only be hidden, not deleted", () => {
+  assert.match(manager, /RAVINE_WORK_HAS_FINANCIAL_RECORDS/);
+  assert.match(manager, /لا يمكن حذف هذا العمل نهائيًا لوجود سجل مالي مرتبط به/);
+  assert.match(manager, /Use “Unpublish” to hide it instead/);
+});
