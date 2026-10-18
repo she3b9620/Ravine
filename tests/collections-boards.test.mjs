@@ -39,3 +39,15 @@ test("collection owners can safely edit titles and descriptions", () => {
   assert.match(page, /className=\{styles\.detailsForm\}/);
   assert.match(page, /defaultValue=\{collectionRow\.title\}/);
 });
+
+test("collections directory supports search, visibility filters and sorting", () => {
+  const page = read("../app/[locale]/collections/page.tsx");
+  const component = read("../components/RAVINECollectionsDirectory.tsx");
+  assert.match(page, /<RAVINECollectionsDirectory/);
+  assert.match(component, /type VisibilityFilter = "all" \| "public" \| "private" \| "members"/);
+  assert.match(component, /type="search"/);
+  assert.match(component, /itemCount/);
+  assert.match(component, /aria-pressed=\{visibility === item\.id\}/);
+  assert.match(component, /value="works"/);
+  assert.match(component, /private && item\.owned/);
+});

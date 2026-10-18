@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { BookmarkPlus, Eye, LockKeyhole, Plus, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import styles from "./collections.module.css";
+import RAVINECollectionsDirectory, { type RAVINECollectionDirectoryItem } from "@/components/RAVINECollectionsDirectory";
 
 export const dynamic = "force-dynamic";
 
@@ -489,22 +490,18 @@ export default async function CollectionsPage({
       {collectionsError ? (
         <div className={styles.error} role="alert"><strong>{ar ? "تعذر تحميل المجموعات." : "Collections are unavailable."}</strong><span>{ar ? "قد تحتاج سياسات قاعدة البيانات إلى التحديث قبل تشغيل المجموعات." : "Collection database policies may need to be installed before collections can operate."}</span></div>
       ) : collections.length ? (
-        <div className={styles.collectionGrid}>
-          {collections.map((collection) => {
-            const owned = Boolean(userId && (collection.owner_user_id === userId || creatorIds.includes(Number(collection.owner_creator_id))));
-            return (
-              <Link className={styles.collectionCard} href={"/" + locale + "/collections?id=" + encodeURIComponent(collection.id)} key={collection.id}>
-                <div className={styles.collectionCardTop}>
-                  <span>{owned ? (ar ? "مجموعتك" : "YOUR COLLECTION") : (ar ? "مجموعة عامة" : "PUBLIC COLLECTION")}</span>
-                  <span className={styles.visibilityPill}>{collection.visibility === "public" ? <Eye size={12} /> : <LockKeyhole size={12} />}{collection.visibility === "public" ? (ar ? "عامة" : "Public") : collection.visibility === "members" ? (ar ? "الأعضاء فقط" : "Members") : (ar ? "خاصة" : "Private")}</span>
-                </div>
-                <h2>{collection.title}</h2>
-                <p>{collection.description || (ar ? "مجموعة منتقاة من أعمال رَافِين." : "A curated collection of RAVINE work.")}</p>
-                <div className={styles.collectionMeta}><span>{(itemCounts.get(collection.id) ?? 0).toLocaleString(locale)} {ar ? "عمل" : "works"}</span><span>{new Date(collection.created_at).toLocaleDateString(ar ? "ar-EG" : "en-US")}</span></div>
-              </Link>
-            );
-          })}
-        </div>
+        <RAVINECollectionsDirectory
+          locale={locale}
+          collections={collections.map((collection) => ({
+            id: collection.id,
+            title: collection.title,
+            description: collection.description,
+            visibility: collection.visibility,
+            createdAt: collection.created_at,
+            owned: Boolean(userId && (collection.owner_user_id === userId || creatorIds.includes(Number(collection.owner_creator_id)))),
+            itemCount: itemCounts.get(collection.id) ?? 0,
+          } satisfies RAVINECollectionDirectoryItem))}
+        />
       ) : !collectionsError ? (
         <div className={styles.empty} role="status">
           <div className={styles.emptyIcon}><BookmarkPlus size={20} aria-hidden="true" /></div>
