@@ -1,16 +1,27 @@
-.podcastPill {
+/* Loads with the shared catalog route so the page structure matches films and Shorts. */
+.catalogHost {
+  display: contents;
+}
+
+:global(.ravine-podcast-pill) {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   color: #F1E9DC !important;
   border-color: rgba(241,233,220,.18) !important;
   background: rgba(9,9,9,.76) !important;
 }
-.podcastPill svg {
+
+:global(.ravine-podcast-pill svg) {
   flex: 0 0 auto;
 }
-html[data-theme="light"] .podcastPill {
+
+:global(html[data-theme="light"] .ravine-podcast-pill) {
   color: #70402F !important;
   border-color: rgba(112,64,47,.22) !important;
   background: rgba(255,250,246,.9) !important;
 }
-html[data-theme="light"] .ravine-podcast-card .video-meta h2 {
+
+:global(html[data-theme="light"] .ravine-podcast-card .video-meta h2) {
   color: #171717;
 }
