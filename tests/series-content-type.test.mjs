@@ -26,7 +26,7 @@ test("series page lists published series work and links to its RAVINE watch page
 
 test("series is discoverable in the sidebar and follows guest gating", () => {
   assert.match(nav, /\["series", "Series", "المسلسلات", Tv\]/);
-  assert.match(nav, /new Set\(\["community", "cuts", "videos", "series", "live"/);
+  assert.match(nav, /const GUEST_GATED = new Set\(\["community", "shorts", "cuts", "videos", "series", "live"/);
 });
 
 test("only the existing creator-owner publishing path is used for series", () => {
