@@ -57,3 +57,26 @@ test("Live page unifies scheduled sessions with a public-only recording archive"
   assert.match(page, /<RAVINEWorkCatalog locale=\{locale\} items=\{archiveItems\}/);
   assert.match(page, /selected provider and its policies/);
 });
+
+
+test("creator event scheduling validates identity ownership, time, and supported event formats", () => {
+  const actions = read("../app/actions/ravine-live-events.ts");
+  const form = read("../components/RAVINEEventCreateForm.tsx");
+  const page = read("../app/[locale]/events/page.tsx");
+  assert.match(actions, /allowedTypes = new Set/);
+  assert.match(actions, /allowedModes = new Set/);
+  assert.match(actions, /\.eq\("user_id", auth\.user\.id\)/);
+  assert.match(actions, /timestamp <= Date\.now\(\)/);
+  assert.match(actions, /status: "scheduled"/);
+  assert.match(form, /new Date\(localDate\)\.toISOString\(\)/);
+  assert.match(form, /type="datetime-local"/);
+  assert.match(page, /<RAVINEEventManagement locale=\{locale\} creators=\{hosts\} events=\{managedEvents\}/);
+});
+
+test("only the owner can cancel an event and only while it is scheduled", () => {
+  const actions = read("../app/actions/ravine-live-events.ts");
+  assert.match(actions, /\.eq\("status", "scheduled"\)/);
+  assert.match(actions, /\.eq\("creator_id", creator\.id\)/);
+  assert.match(actions, /status: "cancelled"/);
+  assert.match(actions, /if \(event\.status !== "scheduled"\)/);
+});

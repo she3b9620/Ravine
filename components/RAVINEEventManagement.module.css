@@ -1,0 +1,43 @@
+.management{display:grid;gap:22px;width:100%;min-width:0}
+.createForm{display:grid;gap:16px;padding:clamp(18px,2.8vw,28px);border:1px solid rgba(241,233,220,.12);border-radius:20px;background:linear-gradient(130deg,rgba(196,122,82,.07),rgba(21,23,25,.48))}
+.formIntro{display:flex;align-items:flex-start;gap:12px;color:var(--copper,#c47a52)}
+.formIntro>div{display:grid;gap:4px}
+.formIntro strong{color:var(--ivory,#f1e9dc);font-size:14px}
+.formIntro span{color:var(--stone,#9a9690);font-size:11px;line-height:1.8}
+.formGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.formGrid label{display:grid;gap:7px;min-width:0}
+.formGrid label>span{display:flex;align-items:center;gap:6px;color:var(--stone,#9a9690);font-size:11px}
+.formGrid input,.formGrid select,.formGrid textarea{width:100%;min-width:0;box-sizing:border-box;padding:11px 12px;border:1px solid rgba(241,233,220,.14);border-radius:11px;background:rgba(9,9,9,.35);color:var(--ivory,#f1e9dc);font:inherit;font-size:12px}
+.formGrid input,.formGrid select{min-height:43px;padding-block:0}
+.formGrid textarea{resize:vertical;min-height:84px;line-height:1.8}
+.formGrid option{background:#151719;color:#f1e9dc}
+.dateField,.descriptionField{grid-column:1/-1}
+.createForm>button{justify-self:start}
+.managedList{display:grid;gap:10px}
+.managedHeading{display:flex;justify-content:space-between;align-items:end;gap:14px;margin-bottom:4px}
+.managedHeading h2{margin:5px 0 0;color:var(--ivory,#f1e9dc);font-size:clamp(24px,3vw,34px)}
+.managedHeading>span{color:var(--copper,#c47a52);font-size:12px}
+.managedCard{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 18px;border:1px solid rgba(241,233,220,.11);border-radius:15px;background:rgba(21,23,25,.43)}
+.managedInfo{display:grid;gap:7px;min-width:0}
+.managedStatus{justify-self:start;padding:3px 8px;border-radius:999px;background:rgba(241,233,220,.07);color:var(--stone,#9a9690);font-size:10px}
+.managedStatus[data-status="scheduled"]{color:var(--copper,#c47a52);background:rgba(196,122,82,.08)}
+.managedStatus[data-status="cancelled"]{opacity:.66}
+.managedInfo h3{margin:0;color:var(--ivory,#f1e9dc);font-size:15px;overflow-wrap:anywhere}
+.managedInfo p{margin:0;color:var(--stone,#9a9690);font-size:11px;line-height:1.7;overflow-wrap:anywhere}
+.managedMeta{display:flex;align-items:center;flex-wrap:wrap;gap:8px;color:var(--stone,#9a9690);font-size:10px}
+.managedMeta svg{color:var(--copper,#c47a52)}
+.cancelButton{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:0 11px;border:1px solid rgba(196,122,82,.28);border-radius:10px;background:rgba(196,122,82,.05);color:var(--copper,#c47a52);font:inherit;font-size:10px;white-space:nowrap;cursor:pointer}
+.cancelButton:hover{background:rgba(196,122,82,.13)}
+.error,.notice{margin:0;padding:12px 14px;border-radius:12px;font-size:12px;line-height:1.8}
+.error{border:1px solid rgba(196,122,82,.28);background:rgba(196,122,82,.06);color:var(--copper,#c47a52)}
+.notice{color:var(--petrol,#183f46);background:rgba(24,63,70,.08)}
+.empty{padding:20px;border:1px dashed rgba(241,233,220,.15);border-radius:14px;color:var(--stone,#9a9690);font-size:12px}
+:global(html[data-theme="light"]) .createForm{border-color:rgba(112,64,47,.17);background:rgba(255,250,246,.84)}
+:global(html[data-theme="light"]) .formIntro strong,:global(html[data-theme="light"]) .managedHeading h2,:global(html[data-theme="light"]) .managedInfo h3{color:#171717}
+:global(html[data-theme="light"]) .formIntro span,:global(html[data-theme="light"]) .managedInfo p,:global(html[data-theme="light"]) .managedMeta{color:#70665f}
+:global(html[data-theme="light"]) .formGrid input,:global(html[data-theme="light"]) .formGrid select,:global(html[data-theme="light"]) .formGrid textarea{border-color:rgba(112,64,47,.18);background:#fffaf6;color:#24211f}
+:global(html[data-theme="light"]) .formGrid option{background:#fffaf6;color:#24211f}
+:global(html[data-theme="light"]) .managedCard{border-color:rgba(23,23,23,.12);background:rgba(255,250,246,.85)}
+:global(html[data-theme="light"]) .empty{border-color:rgba(23,23,23,.15)}
+@media(max-width:720px){.formGrid{grid-template-columns:minmax(0,1fr)}.dateField,.descriptionField{grid-column:auto}.managedCard{align-items:stretch;flex-direction:column}.managedCard>form,.cancelButton{width:100%}.managedHeading{align-items:flex-start;flex-direction:column}}
+@media(prefers-reduced-motion:reduce){.cancelButton{transition:none}}
