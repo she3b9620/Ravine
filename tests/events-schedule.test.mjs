@@ -112,8 +112,8 @@ test("scheduled events have a focused detail route linked from public event cata
   const live = read("../app/[locale]/live/page.tsx");
   assert.match(detail, /\.from\("live_events"\)/);
   assert.match(detail, /\.in\("status",\s*\["scheduled",\s*"live",\s*"ended"\]\)/);
-  assert.match(detail, /\.eq\("published", true\)/);
-  assert.match(detail, /\.eq\("visibility", "public"\)/);
+  assert.match(detail, /\.eq\("published"\s*,\s*true\)/);
+  assert.match(detail, /\.eq\("visibility"\s*,\s*"public"\)/);
   assert.match(detail, /streaming setup is complete/);
   assert.match(catalog, /event\.detailHref \? <Link/);
   for (const page of [list, discover, live]) assert.match(page, /detailHref: "\/" \+ locale \+ "\/events\/" \+ event\.id/);
