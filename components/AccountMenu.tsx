@@ -12,7 +12,7 @@ const CLOSE_MS=200;
 export default function AccountMenu({locale,displayName,username,avatarUrl,isCreator}:Props){
  const ar=locale==="ar"; const rootRef=useRef<HTMLDivElement>(null); const [open,setOpen]=useState(false); const [closing,setClosing]=useState(false); const [signingOut,setSigningOut]=useState(false); const [logoMotionEnabled,setLogoMotionEnabled]=useState(true); const [unreadCount,setUnreadCount]=useState(0);
  useEffect(()=>{const down=(e:PointerEvent)=>{if(!rootRef.current?.contains(e.target as Node))close()};const key=(e:KeyboardEvent)=>{if(e.key==="Escape")close()};document.addEventListener("pointerdown",down);document.addEventListener("keydown",key);return()=>{document.removeEventListener("pointerdown",down);document.removeEventListener("keydown",key)}},[open,closing]);
- useEffect(()=>{if(typeof window!=="undefined")setLogoMotionEnabled(window.localStorage.getItem(RAVINE_LOGO_MOTION_KEY)!=="off")},[]);
+ useEffect(()=>{if(typeof window==="undefined")return;const timer=window.setTimeout(()=>setLogoMotionEnabled(window.localStorage.getItem(RAVINE_LOGO_MOTION_KEY)!=="off"),0);return()=>window.clearTimeout(timer)},[]);
  useEffect(()=>{
   let active=true;
   const supabase=createClient();
