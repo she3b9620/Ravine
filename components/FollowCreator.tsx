@@ -56,7 +56,7 @@ export default function FollowCreator({ creatorId, locale, creatorUserId, return
     return () => {
       active = false;
     };
-  }, [creatorId, locale]);
+  }, [creatorId, creatorUserId, locale]);
 
   async function toggle() {
     if (!userId) {
