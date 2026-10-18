@@ -92,6 +92,7 @@ export default async function EventsPage({
       recordingHref: event.recording_video_id && publicRecordings.has(Number(event.recording_video_id))
         ? "/" + locale + "/watch/" + event.recording_video_id
         : null,
+      detailHref: "/" + locale + "/events/" + event.id,
     };
   });
 

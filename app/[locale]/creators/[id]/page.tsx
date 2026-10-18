@@ -178,6 +178,7 @@ export default async function CreatorProfilePage({ params }: { params: Promise<{
     creatorName: creator.name || creator.username || (ar ? "مبدع رَافِين" : "RAVINE creator"),
     creatorAvatar: creator.avatar_url,
     recordingHref: null,
+    detailHref: "/" + locale + "/events/" + event.id,
   }));
   const works = (worksData || []) as Work[];
   const profile = profileData as Profile | null;

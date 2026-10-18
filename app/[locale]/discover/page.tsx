@@ -216,6 +216,7 @@ export default async function DiscoverPage({
       recordingHref: event.recording_video_id && publicRecordingIds.has(Number(event.recording_video_id))
         ? "/" + locale + "/watch/" + event.recording_video_id
         : null,
+      detailHref: "/" + locale + "/events/" + event.id,
     };
   });
 
