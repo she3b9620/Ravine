@@ -57,3 +57,19 @@ test("Discover includes public creator identities, categories, scheduled events,
   assert.ok(page.includes('eq("visibility", "public")'));
   assert.ok(page.includes("<RAVINEEventsCatalog locale={locale} items={eventItems} />"));
 });
+
+
+test("Search launcher offers the full media taxonomy and only quality/format values accepted by the API", () => {
+  const launcher = read("../components/SearchLauncher.tsx");
+  const route = read("../app/api/search/route.ts");
+  for (const type of ["video", "short", "short_film", "film", "series", "documentary", "podcast", "live"]) {
+    assert.ok(launcher.includes('value: "' + type + '"'), "Missing modal type: " + type);
+    assert.ok(route.includes('"' + type + '"'), "API does not accept: " + type);
+  }
+  for (const quality of ["144p", "240p", "360p", "480p", "720p", "1080p", "1440p", "2k", "4K"]) {
+    assert.ok(launcher.includes('value: "' + quality + '"'), "Missing modal quality: " + quality);
+    assert.ok(route.includes('"' + quality + '"'), "API does not accept: " + quality);
+  }
+  assert.ok(launcher.includes('value: "other"'));
+  assert.ok(route.includes('"other"'));
+});

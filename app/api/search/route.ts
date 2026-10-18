@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 
 const ALLOWED_TYPES = new Set(["video", "short", "short_film", "film", "series", "documentary", "podcast", "live"]);
 const ALLOWED_FORMATS = new Set(["16:9", "9:16", "1:1", "other"]);
-const ALLOWED_QUALITIES = new Set(["720p", "1080p", "1440p", "2k", "4k", "4K"]);
+const ALLOWED_QUALITIES = new Set(["144p", "240p", "360p", "480p", "720p", "1080p", "1440p", "2k", "4k", "4K"]);
 
 function clean(value: string | null) {
   return (value ?? "").trim().slice(0, 120);
