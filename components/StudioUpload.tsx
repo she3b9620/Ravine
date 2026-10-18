@@ -134,19 +134,25 @@ export default function StudioUpload({ creatorId, locale }: Props) {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ creatorId }),
     });
-    const signature = (await signatureResponse.json().catch(() => ({}))) as CloudinarySignedUpload;
-    if (!signatureResponse.ok || !signature.cloudName || !signature.apiKey || !signature.signature ||
-        !signature.timestamp || !signature.folder || !signature.publicId) {
-      throw new Error(signature.error || (ar ? "تعذر تجهيز رفع آمن إلى Cloudinary." : "Could not prepare a secure Cloudinary upload."));
+    const signed = (await signatureResponse.json().catch(() => ({}))) as CloudinarySignedUpload;
+    const cloudName = signed.cloudName;
+    const apiKey = signed.apiKey;
+    const timestamp = signed.timestamp;
+    const uploadSignature = signed.signature;
+    const folder = signed.folder;
+    const publicId = signed.publicId;
+    if (!signatureResponse.ok || !cloudName || !apiKey || typeof timestamp !== "number" ||
+        !uploadSignature || !folder || !publicId) {
+      throw new Error(signed.error || (ar ? "تعذر تجهيز رفع آمن إلى Cloudinary." : "Could not prepare a secure Cloudinary upload."));
     }
 
     const formData = new FormData();
     formData.append("file", uploadFile);
-    formData.append("api_key", signature.apiKey);
-    formData.append("timestamp", String(signature.timestamp));
-    formData.append("signature", signature.signature);
-    formData.append("folder", signature.folder);
-    formData.append("public_id", signature.publicId);
+    formData.append("api_key", apiKey);
+    formData.append("timestamp", String(timestamp));
+    formData.append("signature", uploadSignature);
+    formData.append("folder", folder);
+    formData.append("public_id", publicId);
     formData.append("overwrite", "false");
 
     return await new Promise<CloudinaryUpload>((resolve, reject) => {
@@ -154,7 +160,7 @@ export default function StudioUpload({ creatorId, locale }: Props) {
       const startedAt = Date.now();
       request.open(
         "POST",
-        `https://api.cloudinary.com/v1_1/${encodeURIComponent(signature.cloudName)}/video/upload`,
+        `https://api.cloudinary.com/v1_1/${encodeURIComponent(cloudName)}/video/upload`,
       );
       request.timeout = 30 * 60 * 1000;
       request.upload.onprogress = (event) => {
