@@ -72,13 +72,36 @@ export async function POST(request: NextRequest) {
             .eq("published", true)
             .eq("visibility", "public")
             .limit(1);
-          if (remainingError) return NextResponse.json({ error: remainingError.message }, { status: 500 });
-          const { error: seriesUpdateError } = await supabase
+          if (remainingError) {
+            const { error: restoreError } = await supabase
+              .from("videos")
+              .update({ published: Boolean(work.published) })
+              .eq("id", videoId);
+            if (restoreError) console.error("RAVINE could not restore episode publication state after a series visibility lookup failure.");
+            return NextResponse.json(
+              { error: "Could not verify remaining public episodes; the unpublish change was reverted or needs review." },
+              { status: 503 },
+            );
+          }
+          const { data: updatedSeries, error: seriesUpdateError } = await supabase
             .from("ravine_series_titles")
             .update({ published: Boolean(remainingEpisodes?.length), updated_at: new Date().toISOString() })
             .eq("id", seriesMeta.series_id)
-            .eq("creator_id", creator.id);
-          if (seriesUpdateError) return NextResponse.json({ error: seriesUpdateError.message }, { status: 500 });
+            .eq("creator_id", creator.id)
+            .eq("user_id", auth.user.id)
+            .select("id")
+            .maybeSingle();
+          if (seriesUpdateError || !updatedSeries) {
+            const { error: restoreError } = await supabase
+              .from("videos")
+              .update({ published: Boolean(work.published) })
+              .eq("id", videoId);
+            if (restoreError) console.error("RAVINE could not restore episode publication state after a series visibility update failure.");
+            return NextResponse.json(
+              { error: "Could not synchronize series visibility; the unpublish change was reverted or needs review." },
+              { status: 503 },
+            );
+          }
         }
       }
       return NextResponse.json({ ok: true, work: data });

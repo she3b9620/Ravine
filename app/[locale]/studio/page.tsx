@@ -13,6 +13,7 @@ type CreatorIdentity = { id: number; name: string; username: string | null; spec
 
 type Work = {
   id: number;
+  series_id: number | null;
   title: string;
   description: string | null;
   content_type: string | null;
@@ -85,7 +86,7 @@ export default async function StudioPage({ params, searchParams }: { params: Pro
   const [{ data: initialWorks, count: totalWorks, error: worksError }, publishedCountResult, draftCountResult] = await Promise.all([
     supabase
       .from("videos")
-      .select("id,title,description,content_type,quality,published,visibility,video_url,views,likes,created_at", { count: "exact" })
+      .select("id,series_id,title,description,content_type,quality,published,visibility,video_url,views,likes,created_at", { count: "exact" })
       .eq("creator_id", creator.id)
       .order("created_at", { ascending: false })
       .range((currentPage - 1) * pageSize, currentPage * pageSize - 1),
@@ -100,7 +101,7 @@ export default async function StudioPage({ params, searchParams }: { params: Pro
   if (!worksError && currentPage !== (Number.isSafeInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1)) {
     const correctedPage = await supabase
       .from("videos")
-      .select("id,title,description,content_type,quality,published,visibility,video_url,views,likes,created_at", { count: "exact" })
+      .select("id,series_id,title,description,content_type,quality,published,visibility,video_url,views,likes,created_at", { count: "exact" })
       .eq("creator_id", creator.id)
       .order("created_at", { ascending: false })
       .range((currentPage - 1) * pageSize, currentPage * pageSize - 1);
@@ -151,7 +152,7 @@ export default async function StudioPage({ params, searchParams }: { params: Pro
         <p className={styles.paginationHint}>{ar
           ? "البحث والتصفية هنا يطبّقان على أعمال الصفحة الحالية فقط؛ استخدم التنقل أسفل القائمة للانتقال بين الصفحات."
           : "Search and filters apply to the current page only. Use the navigation below the list to move between pages."}</p>
-        <StudioWorkManager works={works} locale={locale} />
+        <StudioWorkManager works={works} locale={locale} creatorId={creator.id} />
         {pageCount > 1 ? <nav className={styles.pagination} dir={ar ? "rtl" : "ltr"} aria-label={ar ? "صفحات الأعمال" : "Work pages"}>
           {currentPage > 1
             ? <Link className={styles.pageLink} href={`/${locale}/studio?creatorId=${creator.id}&workPage=${currentPage - 1}`}>{ar ? "السابق" : "Previous"}</Link>

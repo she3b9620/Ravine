@@ -8,6 +8,7 @@ import styles from "./StudioWorkManager.module.css";
 
 type Work = {
   id: number;
+  series_id: number | null;
   title: string;
   description: string | null;
   content_type: string | null;
@@ -23,6 +24,7 @@ type Work = {
 type Props = {
   works: Work[];
   locale: "ar" | "en";
+  creatorId: number;
 };
 type StatusFilter = "all" | "published" | "draft";
 type TypeFilter = "all" | "short" | "video" | "podcast" | "documentary" | "short_film" | "film" | "series";
@@ -85,7 +87,7 @@ function contentTypeLabel(value: string | null, ar: boolean) {
   return ar ? label[0] : label[1];
 }
 
-export default function StudioWorkManager({ works: initialWorks, locale }: Props) {
+export default function StudioWorkManager({ works: initialWorks, locale, creatorId }: Props) {
   const ar = locale === "ar";
   const [works, setWorks] = useState(initialWorks);
   const [query, setQuery] = useState("");
@@ -179,12 +181,66 @@ export default function StudioWorkManager({ works: initialWorks, locale }: Props
           visibility: editVisibility,
         })
         .eq("id", id)
-        .select("id,title,description,content_type,quality,published,visibility,video_url,views,likes,created_at")
+        .select("id,series_id,title,description,content_type,quality,published,visibility,video_url,views,likes,created_at")
         .single();
 
       if (updateError || !data) {
         setError(studioActionError(ar, "save"));
       } else {
+        // Metadata edits can change an episode's visibility, so the parent
+        // series must be synchronized just like it is during publish/unpublish.
+        if (originalType === "series" && originalWork?.series_id) {
+          const { data: publicEpisodes, error: publicEpisodesError } = await supabase
+            .from("videos")
+            .select("id")
+            .eq("series_id", originalWork.series_id)
+            .eq("content_type", "series")
+            .eq("published", true)
+            .eq("visibility", "public")
+            .limit(1);
+
+          if (publicEpisodesError) {
+            const { error: restoreError } = await supabase.from("videos").update({
+              title: originalWork.title,
+              description: originalWork.description,
+              content_type: originalType,
+              quality: originalWork.quality,
+              visibility: originalWork.visibility || "public",
+            }).eq("id", id);
+            setError(studioActionError(ar, "save") + (restoreError
+              ? (ar ? " تعذّر التراجع عن تعديل الحلقة؛ راجع حالة العمل قبل المتابعة." : " The previous episode settings could not be restored; review the work before continuing.")
+              : ""));
+            return;
+          }
+
+          const hasPublicEpisode = Boolean(publicEpisodes?.length);
+          const { data: updatedSeries, error: seriesUpdateError } = await supabase
+            .from("ravine_series_titles")
+            .update({
+              published: hasPublicEpisode,
+              ...(hasPublicEpisode ? { visibility: "public" } : {}),
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", originalWork.series_id)
+            .eq("creator_id", creatorId)
+            .select("id")
+            .maybeSingle();
+
+          if (seriesUpdateError || !updatedSeries) {
+            const { error: restoreError } = await supabase.from("videos").update({
+              title: originalWork.title,
+              description: originalWork.description,
+              content_type: originalType,
+              quality: originalWork.quality,
+              visibility: originalWork.visibility || "public",
+            }).eq("id", id);
+            setError(studioActionError(ar, "save") + (restoreError
+              ? (ar ? " تعذّر التراجع عن تعديل الحلقة؛ راجع حالة العمل قبل المتابعة." : " The previous episode settings could not be restored; review the work before continuing.")
+              : ""));
+            return;
+          }
+        }
+
         setWorks((current) => current.map((work) => (work.id === id ? (data as Work) : work)));
         setEditingId(null);
       }
