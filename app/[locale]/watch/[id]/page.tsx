@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArrowLeft, ArrowRight, Tv } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import RAVINEWorkPlayer from "@/components/RAVINEWorkPlayer";
 import WatchActions from "@/components/WatchActions";
@@ -9,6 +10,7 @@ import styles from "./watch-creator.module.css";
 import { isYouTubeUrl, resolveAssetPlaybackUrl, type RAVINEPlaybackAsset } from "@/lib/ravine-playback-core";
 import { isPlayableRAVINEWork, toRAVINEWork, type RAVINEWorkSource } from "@/lib/ravine-work-universe";
 import { canAccessRAVINEVideo } from "@/lib/ravine-video-access";
+import { formatRavineNumber } from "@/lib/ravine-number-formatter";
 
 export const dynamic = "force-dynamic";
 
@@ -28,18 +30,26 @@ export default async function WatchPage({ params }: { params: Promise<{ locale: 
   const supabase = await createClient();
   const { data: video, error } = await supabase
     .from("videos")
-    .select("id,title,description,thumbnail_url,video_url,duration,views,likes,category,content_type,quality,published,visibility,discovery_enabled,creator_id,user_id")
+    .select("id,title,description,thumbnail_url,video_url,duration,views,likes,category,content_type,quality,published,visibility,discovery_enabled,creator_id,user_id,series_id,season_number,episode_number")
     .eq("id", videoId)
     .maybeSingle();
   if (error || !video) notFound();
   if (!(await canAccessRAVINEVideo(supabase, video))) notFound();
 
-  const [{ data: creator }, { data: chaptersData }, { data: assetsData }] = await Promise.all([
+  const [{ data: creator }, { data: chaptersData }, { data: assetsData }, { data: seriesRecord }] = await Promise.all([
     video.creator_id
       ? supabase.from("creators").select("id,name,username,avatar_url,specialty,user_id").eq("id", video.creator_id).maybeSingle()
       : Promise.resolve({ data: null }),
     supabase.from("work_chapters").select("id,title,start_seconds,end_seconds,thumbnail_url").eq("work_id", videoId).order("sort_order", { ascending: true }),
     supabase.from("work_media_assets").select("id,kind,media_url,duration,label,language,mime_type").eq("work_id", videoId).order("sort_order", { ascending: true }),
+    video.content_type === "series" && Number.isSafeInteger(Number(video.series_id)) && Number(video.series_id) > 0
+      ? supabase.from("ravine_series_titles")
+          .select("id,title")
+          .eq("id", video.series_id)
+          .eq("published", true)
+          .eq("visibility", "public")
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
   ]);
 
   const [{ data: creatorWorksData }, { data: typeWorksData }] = await Promise.all([
@@ -126,6 +136,21 @@ export default async function WatchPage({ params }: { params: Promise<{ locale: 
           </div>
         )}
         <div className="watch-copy">
+          {seriesRecord ? (
+            <Link className={styles.seriesContext} href={`/${locale}/series/${seriesRecord.id}`}>
+              <Tv size={19} aria-hidden="true" />
+              <span>
+                <small>{ar ? "رَافِين / المسلسل" : "RAVINE / SERIES"}</small>
+                <strong>{seriesRecord.title || (ar ? "المسلسل" : "Series")}</strong>
+                <em>
+                  {ar
+                    ? `الموسم ${formatRavineNumber(Math.max(1, Number(video.season_number) || 1), locale)} · الحلقة ${formatRavineNumber(Math.max(1, Number(video.episode_number) || 1), locale)}`
+                    : `Season ${formatRavineNumber(Math.max(1, Number(video.season_number) || 1), locale)} · Episode ${formatRavineNumber(Math.max(1, Number(video.episode_number) || 1), locale)}`}
+                </em>
+              </span>
+              {ar ? <ArrowLeft size={16} aria-hidden="true" /> : <ArrowRight size={16} aria-hidden="true" />}
+            </Link>
+          ) : null}
           <div className="watch-kicker">{workTypeLabels[work.type]}{video.quality ? ` · ${video.quality}` : ""}</div>
           <h1>{work.title}</h1>
           <p>{work.description || (ar ? "عمل إبداعي من مجتمع RAVINE." : "A creative work from the RAVINE community.")}</p>
