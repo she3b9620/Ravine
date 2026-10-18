@@ -39,5 +39,8 @@ jobs:
       - name: Series and shared media catalog regression tests
         run: node --test tests/series-content-type.test.mjs
 
+      - name: Creator application UI regression tests
+        run: node --test tests/creator-apply-ui.test.mjs
+
       - name: Build
         run: npm run build

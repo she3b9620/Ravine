@@ -1,0 +1,40 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import test from "node:test";
+
+const read = (path) => readFileSync(new URL(path, import.meta.url), "utf8");
+const page = read("../app/[locale]/creator/apply/page.tsx");
+const styles = read("../app/[locale]/creator/creator-flow.module.css");
+const workflow = read("../.github/workflows/clean-rebuild-build.yml");
+
+test("every CSS module class used by the creator application page has a selector", () => {
+  const referenced = [...page.matchAll(/styles\.([A-Za-z_][A-Za-z0-9_]*)/g)].map((match) => match[1]);
+  const missing = [...new Set(referenced.filter((name) => !new RegExp("\\." + name + "(?=[\\s:{,])").test(styles)))];
+  assert.deepEqual(missing, [], "creator application styles must not silently reference undefined CSS module classes");
+});
+
+test("creator application retains its four-step, bilingual evidence-first flow", () => {
+  assert.match(page, /STEP_DEFINITIONS/);
+  assert.match(page, /هويتك الإبداعية/);
+  assert.match(page, /Creative identity/);
+  assert.match(page, /Show your work, not your follower count\./);
+  assert.match(page, /creator_applications/);
+  assert.match(page, /work_samples/);
+});
+
+test("creator application layout includes responsive and keyboard-accessible states", () => {
+  assert.match(styles, /@media\(max-width:860px\)/);
+  assert.match(styles, /@media\(max-width:560px\)/);
+  assert.match(styles, /\.railStep:focus-visible/);
+  assert.match(styles, /\.specialtyChip:focus-visible/);
+  assert.match(styles, /\.statusSteps \.statusStep\s*\{/);
+});
+
+test("light-theme validation and rejected-application messages have explicit contrast styles", () => {
+  assert.match(styles, /:global\(html\[data-theme="light"\]\) \.formMessage/);
+  assert.match(styles, /:global\(html\[data-theme="light"\]\) \.rejectedNotice p/);
+});
+
+test("the creator application UI regression test is part of CI", () => {
+  assert.match(workflow, /node --test tests\/creator-apply-ui\.test\.mjs/);
+});

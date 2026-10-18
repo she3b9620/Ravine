@@ -364,3 +364,73 @@
  .railStep,.specialtyChip,.guideCard,.primaryAction,.progressTrack span{transition:none}
  .guideCard:hover,.primaryAction:hover{transform:none}
 }
+
+
+/* Final creator-application QA: clear pending states, keyboard focus, and light-theme contrast. */
+.statusSteps .statusStep {
+  color: rgba(241, 233, 220, .62);
+  border-color: rgba(241, 233, 220, .08);
+  background: rgba(241, 233, 220, .015);
+}
+.statusSteps .statusStep svg {
+  color: rgba(241, 233, 220, .48);
+}
+.railStep:not(:disabled):hover {
+  border-color: rgba(196, 122, 82, .22);
+  background: rgba(196, 122, 82, .045);
+}
+.railStep:focus-visible,
+.specialtyChip:focus-visible,
+.summaryHead button:focus-visible,
+.primaryAction:focus-visible,
+.secondaryAction:focus-visible,
+.backButton:focus-visible {
+  outline: 2px solid #d49a78;
+  outline-offset: 3px;
+}
+.agreements input:focus-visible {
+  outline: 2px solid #d49a78;
+  outline-offset: 3px;
+}
+.formMessage {
+  overflow-wrap: anywhere;
+}
+:global(html[data-theme="light"]) .formMessage {
+  color: #87382e;
+  border-color: rgba(164, 58, 45, .23);
+  background: rgba(164, 58, 45, .065);
+}
+:global(html[data-theme="light"]) .rejectedNotice {
+  border-color: rgba(112, 64, 47, .22);
+  background: rgba(196, 122, 82, .065);
+}
+:global(html[data-theme="light"]) .rejectedNotice strong {
+  color: #43271b;
+}
+:global(html[data-theme="light"]) .rejectedNotice p,
+:global(html[data-theme="light"]) .notice {
+  color: #665f58;
+}
+:global(html[data-theme="light"]) .statusSteps .statusStep {
+  color: #6f6962;
+  border-color: rgba(23, 23, 23, .1);
+  background: #fffaf6;
+}
+:global(html[data-theme="light"]) .statusSteps .statusStep svg {
+  color: #81786f;
+}
+@media(max-width:560px) {
+  .statusCard {
+    padding: 28px 18px;
+  }
+  .statusSteps>div {
+    min-height: 88px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+  .formFooter .primaryAction,
+  .formFooter .backButton {
+    min-width: 0;
+    white-space: normal;
+  }
+}
