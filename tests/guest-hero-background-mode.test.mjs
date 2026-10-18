@@ -4,6 +4,7 @@ import test from "node:test";
 
 const read = (path) => readFileSync(new URL(path, import.meta.url), "utf8");
 const backdrop = read("../components/GuestCinematicBackdrop.tsx");
+const home = read("../app/[locale]/page.tsx");
 const controls = read("../components/VideoAudioToggle.tsx");
 const styles = read("../app/[locale]/guest-cinematic-backdrop.css");
 const controlStyles = read("../app/[locale]/ravine-hero-control-fixes.css");
@@ -30,6 +31,11 @@ test("guest hero media order is stable and image mode browses still assets indep
   assert.doesNotMatch(backdrop, /Math\.random\(\)/);
   assert.match(backdrop, /\.eq\("visibility", "public"\)/);
   assert.match(backdrop, /const imageWorks = useMemo/);
+  assert.match(backdrop, /loadGuestPhotographyImages/);
+  assert.match(backdrop, /from\("ravine_next_works"\)/);
+  assert.match(backdrop, /\.eq\("work_type", "photography"\)/);
+  assert.match(home, /function stableMix/);
+  assert.doesNotMatch(home, /Math\.random\(\)|randomInt/);
   assert.match(backdrop, /setImageIndex\(\(index\) => imageWorks\.length/);
   assert.match(backdrop, /backgroundMode === "image" \? currentImage\?\.thumbnail_url/);
 });
