@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { canAccessRAVINEVideo } from "@/lib/ravine-video-access";
 
 export const dynamic = "force-dynamic";
 
@@ -34,11 +35,11 @@ export async function GET(
   const supabase = await createClient();
   const { data: video, error } = await supabase
     .from("videos")
-    .select("video_url,published,visibility,discovery_enabled")
+    .select("video_url,published,visibility,discovery_enabled,user_id,creator_id")
     .eq("id", videoId)
     .maybeSingle();
 
-  if (error || !video || video.published !== true || video.visibility !== "public" || video.discovery_enabled === false) {
+  if (error || !video || !(await canAccessRAVINEVideo(supabase, video))) {
     return new NextResponse("Not found", { status: 404 });
   }
 
