@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { ArrowDownUp, Search, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import styles from "./StudioWorkManager.module.css";
 
 type Work = {
   id: number;
@@ -21,6 +23,9 @@ type Props = {
   works: Work[];
   locale: "ar" | "en";
 };
+type StatusFilter = "all" | "published" | "draft";
+type TypeFilter = "all" | "short" | "video" | "podcast" | "documentary" | "short_film" | "film" | "series";
+type SortMode = "newest" | "views" | "likes" | "title";
 
 const allowedContentTypes = new Set(["short", "video", "podcast", "documentary", "short_film", "film", "series"]);
 const allowedVisibility = new Set(["public", "followers", "unlisted", "private", "custom"]);
@@ -58,6 +63,10 @@ function contentTypeLabel(value: string | null, ar: boolean) {
 export default function StudioWorkManager({ works: initialWorks, locale }: Props) {
   const ar = locale === "ar";
   const [works, setWorks] = useState(initialWorks);
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
+  const [sortMode, setSortMode] = useState<SortMode>("newest");
   const [busyId, setBusyId] = useState<number | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editTitle, setEditTitle] = useState("");
@@ -66,6 +75,31 @@ export default function StudioWorkManager({ works: initialWorks, locale }: Props
   const [editQuality, setEditQuality] = useState("1080p");
   const [editVisibility, setEditVisibility] = useState("public");
   const [error, setError] = useState("");
+
+  const visibleWorks = useMemo(() => {
+    const normalizedQuery = query.trim().toLocaleLowerCase(locale);
+    const filtered = works.filter((work) => {
+      const matchesQuery = !normalizedQuery || [work.title || "", work.description || ""]
+        .join(" ").toLocaleLowerCase(locale).includes(normalizedQuery);
+      const matchesStatus = statusFilter === "all"
+        || (statusFilter === "published" ? work.published === true : work.published !== true);
+      const matchesType = typeFilter === "all" || (work.content_type || "video") === typeFilter;
+      return matchesQuery && matchesStatus && matchesType;
+    });
+    return filtered.sort((left, right) => {
+      if (sortMode === "views") return Number(right.views || 0) - Number(left.views || 0);
+      if (sortMode === "likes") return Number(right.likes || 0) - Number(left.likes || 0);
+      if (sortMode === "title") return (left.title || "").localeCompare(right.title || "", locale, { sensitivity: "base" });
+      return (Date.parse(right.created_at || "") || 0) - (Date.parse(left.created_at || "") || 0);
+    });
+  }, [works, query, statusFilter, typeFilter, sortMode, locale]);
+
+  function clearFilters() {
+    setQuery("");
+    setStatusFilter("all");
+    setTypeFilter("all");
+    setSortMode("newest");
+  }
 
   function beginEdit(work: Work) {
     setEditingId(work.id);
@@ -220,8 +254,67 @@ export default function StudioWorkManager({ works: initialWorks, locale }: Props
 
       {error ? <div className="empty-state"><strong>{ar ? "حدث خطأ." : "Something went wrong."}</strong><span>{error}</span></div> : null}
 
+      <div className={styles.discovery}>
+        <label className={styles.search}>
+          <Search size={16} aria-hidden="true" />
+          <input
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder={ar ? "ابحث في أعمالك..." : "Search your work..."}
+            aria-label={ar ? "البحث في أعمالك" : "Search your work"}
+          />
+          {query ? <button type="button" onClick={() => setQuery("")} aria-label={ar ? "مسح البحث" : "Clear search"}><X size={14} /></button> : null}
+        </label>
+        <label className={styles.filter}>
+          <span>{ar ? "الحالة" : "Status"}</span>
+          <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as StatusFilter)} aria-label={ar ? "تصفية حسب حالة النشر" : "Filter by publishing status"}>
+            <option value="all">{ar ? "كل الحالات" : "All statuses"}</option>
+            <option value="published">{ar ? "منشور" : "Published"}</option>
+            <option value="draft">{ar ? "مسودات" : "Drafts"}</option>
+          </select>
+        </label>
+        <label className={styles.filter}>
+          <span>{ar ? "النوع" : "Format"}</span>
+          <select value={typeFilter} onChange={(event) => setTypeFilter(event.target.value as TypeFilter)} aria-label={ar ? "تصفية حسب نوع المحتوى" : "Filter by format"}>
+            <option value="all">{ar ? "كل الأنواع" : "All formats"}</option>
+            <option value="short">{ar ? "شورتات" : "Shorts"}</option>
+            <option value="video">{ar ? "فيديو" : "Video"}</option>
+            <option value="podcast">{ar ? "بودكاست" : "Podcast"}</option>
+            <option value="documentary">{ar ? "وثائقي" : "Documentary"}</option>
+            <option value="short_film">{ar ? "فيلم قصير" : "Short film"}</option>
+            <option value="film">{ar ? "فيلم مطوّل" : "Feature film"}</option>
+            <option value="series">{ar ? "حلقات المسلسلات" : "Series episodes"}</option>
+          </select>
+        </label>
+        <label className={styles.filter}>
+          <ArrowDownUp size={14} aria-hidden="true" />
+          <span>{ar ? "الترتيب" : "Sort"}</span>
+          <select value={sortMode} onChange={(event) => setSortMode(event.target.value as SortMode)} aria-label={ar ? "ترتيب الأعمال" : "Sort work"}>
+            <option value="newest">{ar ? "الأحدث" : "Newest"}</option>
+            <option value="views">{ar ? "الأكثر مشاهدة" : "Most viewed"}</option>
+            <option value="likes">{ar ? "الأكثر إعجابًا" : "Most liked"}</option>
+            <option value="title">{ar ? "العنوان أبجديًا" : "Title A–Z"}</option>
+          </select>
+        </label>
+        <div className={styles.count} role="status" aria-live="polite">
+          <strong>{visibleWorks.length.toLocaleString(ar ? "ar-EG" : "en-US")}</strong>
+          <span>{ar ? "من " + works.length.toLocaleString("ar-EG") + " عمل" : "of " + works.length.toLocaleString("en-US") + " works"}</span>
+          {(query || statusFilter !== "all" || typeFilter !== "all" || sortMode !== "newest") ?
+            <button type="button" onClick={clearFilters}>{ar ? "إعادة الضبط" : "Reset"}</button> : null}
+        </div>
+      </div>
+
+      {visibleWorks.length === 0 ? (
+        <div className={styles.noResults} role="status">
+          <strong>{ar ? "لا توجد أعمال مطابقة." : "No matching work."}</strong>
+          <span>{ar ? "جرّب تغيير البحث أو المرشحات." : "Try changing your search or filters."}</span>
+          <button type="button" onClick={clearFilters}>{ar ? "عرض كل الأعمال" : "Show all work"}</button>
+        </div>
+      ) : null}
+
       <div className="studio-work-list">
-        {works.map((work) => {
+        {visibleWorks.map((work) => {
           const editing = editingId === work.id;
           const busy = busyId === work.id;
           const publishBlocked = !work.published && !isPublishable(work);

@@ -42,6 +42,9 @@ jobs:
       - name: Studio media validation tests
         run: node --test tests/studio-media-validation.test.mjs
 
+      - name: Studio work manager tests
+        run: node --test tests/studio-work-manager.test.mjs
+
       - name: Creator application UI regression tests
         run: node --test tests/creator-apply-ui.test.mjs
 
