@@ -9,9 +9,10 @@ type Props = {
   creatorId: number;
   locale: "ar" | "en";
   creatorUserId: string | null;
+  returnPath?: string;
 };
 
-export default function FollowCreator({ creatorId, locale, creatorUserId }: Props) {
+export default function FollowCreator({ creatorId, locale, creatorUserId, returnPath }: Props) {
   const ar = locale === "ar";
   const [userId, setUserId] = useState<string | null>(null);
   const [following, setFollowing] = useState(false);
@@ -27,7 +28,7 @@ export default function FollowCreator({ creatorId, locale, creatorUserId }: Prop
         const { data: auth } = await supabase.auth.getUser();
         if (!active) return;
         setUserId(auth.user?.id ?? null);
-        if (!auth.user || !creatorId) {
+        if (!auth.user || !creatorId || creatorUserId === auth.user.id) {
           setBusy(false);
           return;
         }
@@ -59,7 +60,7 @@ export default function FollowCreator({ creatorId, locale, creatorUserId }: Prop
 
   async function toggle() {
     if (!userId) {
-      requestRavineAuth(`/${locale}/creators/${creatorId}`);
+      requestRavineAuth(returnPath || `/${locale}/creators/${creatorId}`);
       return;
     }
 
@@ -86,6 +87,10 @@ export default function FollowCreator({ creatorId, locale, creatorUserId }: Prop
     } finally {
       setBusy(false);
     }
+  }
+
+  if (userId && creatorUserId === userId) {
+    return <div className="ravine-follow-control"><span className="ravine-follow-own-identity">{ar ? "هويتك الإبداعية" : "Your creator identity"}</span></div>;
   }
 
   return (

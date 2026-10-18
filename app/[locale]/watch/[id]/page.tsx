@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import RAVINEWorkPlayer from "@/components/RAVINEWorkPlayer";
 import WatchActions from "@/components/WatchActions";
+import FollowCreator from "@/components/FollowCreator";
 import styles from "./watch-creator.module.css";
 import { isYouTubeUrl, resolveAssetPlaybackUrl, type RAVINEPlaybackAsset } from "@/lib/ravine-playback-core";
 import { isPlayableRAVINEWork, toRAVINEWork, type RAVINEWorkSource } from "@/lib/ravine-work-universe";
@@ -11,7 +12,7 @@ import { canAccessRAVINEVideo } from "@/lib/ravine-video-access";
 export const dynamic = "force-dynamic";
 
 type Locale = "ar" | "en";
-type Creator = { id: number; name: string | null; username: string | null; avatar_url: string | null; specialty: string | null };
+type Creator = { id: number; name: string | null; username: string | null; avatar_url: string | null; specialty: string | null; user_id: string | null };
 type Chapter = { id: number; title: string; start_seconds: number; end_seconds: number | null; thumbnail_url: string | null };
 type Asset = RAVINEPlaybackAsset;
 
@@ -33,7 +34,7 @@ export default async function WatchPage({ params }: { params: Promise<{ locale: 
 
   const [{ data: creator }, { data: chaptersData }, { data: assetsData }] = await Promise.all([
     video.creator_id
-      ? supabase.from("creators").select("id,name,username,avatar_url,specialty").eq("id", video.creator_id).maybeSingle()
+      ? supabase.from("creators").select("id,name,username,avatar_url,specialty,user_id").eq("id", video.creator_id).maybeSingle()
       : Promise.resolve({ data: null }),
     supabase.from("work_chapters").select("id,title,start_seconds,end_seconds,thumbnail_url").eq("work_id", videoId).order("sort_order", { ascending: true }),
     supabase.from("work_media_assets").select("id,kind,media_url,duration,label,language,mime_type").eq("work_id", videoId).order("sort_order", { ascending: true }),
@@ -98,6 +99,9 @@ export default async function WatchPage({ params }: { params: Promise<{ locale: 
               </span>
             </Link>
           )}
+          {creatorRecord && video.published ? (
+            <FollowCreator creatorId={creatorRecord.id} creatorUserId={creatorRecord.user_id} locale={locale} returnPath={"/" + locale + "/watch/" + videoId} />
+          ) : null}
         </div>
         {video.published ? <WatchActions videoId={video.id} duration={video.duration} locale={locale} /> : null}
       </div>
