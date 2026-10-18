@@ -25,3 +25,16 @@ test("creator directory supports localized search, sorting, and empty following 
   assert.ok(component.includes('href={"/" + locale + "/creators/" + creator.id}'));
   assert.match(component, /aria-live="polite"/);
 });
+
+
+test("creator public user profiles expose follow with a return path and prevent following the owner", () => {
+  const page = read("../app/[locale]/u/[username]/page.tsx");
+  const component = read("../components/FollowCreator.tsx");
+  assert.match(page, /import FollowCreator from "@\/components\/FollowCreator"/);
+  assert.match(page, /let creatorIdentity: Creator \| null = null/);
+  assert.match(page, /creatorIdentity = creator/);
+  assert.match(page, /<FollowCreator creatorId=\{creatorIdentity\.id\} creatorUserId=\{creatorIdentity\.user_id\} locale=\{locale\} returnPath=\{/);
+  assert.match(page, /encodeURIComponent\(handle\)/);
+  assert.match(component, /creatorUserId === auth\.user\.id/);
+  assert.match(component, /creatorUserId === userId/);
+});

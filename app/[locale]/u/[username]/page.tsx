@@ -3,6 +3,7 @@ import { ArrowUpRight, BadgeCheck, Clapperboard, UserRound } from "lucide-react"
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { westernDigits } from "@/lib/ravine-format";
+import FollowCreator from "@/components/FollowCreator";
 
 export const dynamic = "force-dynamic";
 type Locale = "ar" | "en";
@@ -22,10 +23,12 @@ export default async function PublicUserPage({params}:{params:Promise<{locale:st
   if(!profile)return notFound();
 
   let works:Work[]=[];
+  let creatorIdentity: Creator | null = null;
   if(profile.is_creator){
     const {data:creatorData}=await s.from("creators").select("id,username,user_id").eq("user_id",profile.id).maybeSingle();
     const creator=creatorData as Creator|null;
     if(creator){
+      creatorIdentity = creator;
       const {data:worksData}=await s.from("videos").select("id,title,description,thumbnail_url,views,duration,content_type,creator_id").eq("published",true).eq("visibility","public").eq("creator_id",creator.id).order("created_at",{ascending:false}).limit(12);
       works=(worksData??[]) as Work[];
     }
@@ -38,7 +41,7 @@ export default async function PublicUserPage({params}:{params:Promise<{locale:st
       <div className="public-profile-cover">{profile.cover_url?<img src={profile.cover_url} alt=""/>:null}<div className="public-profile-cover-wash"/></div>
       <div className="public-profile-hero-inner">
         <div className="public-profile-avatar">{profile.avatar_url?<img src={profile.avatar_url} alt=""/>:<span>{name.slice(0,1).toUpperCase()}</span>}</div>
-        <div className="public-profile-identity"><div className="public-profile-kicker">RAVINE / {profile.is_creator?(ar?"المبدع":"CREATOR"):(ar?"الملف الشخصي":"PROFILE")}</div><h1>{name}</h1><div className="public-profile-handle">@{handle}{profile.is_verified?<span className="public-profile-verified"><BadgeCheck size={13}/>{ar?"موثق":"Verified"}</span>:null}</div><p>{profile.bio||(profile.is_creator?(ar?"مبدع داخل عالم رَافِين.":"Creator inside the RAVINE world."):(ar?"هذا الملف الشخصي على رَافِين.":"A personal profile on RAVINE."))}</p><div className="public-profile-actions">{profile.is_creator&&profile.trailer_url?<a className="public-profile-button secondary" href={profile.trailer_url} target="_blank" rel="noreferrer"><Clapperboard size={15}/>{ar?"مشاهدة التريلر":"Watch trailer"}</a>:null}<Link className="public-profile-button secondary" href={`/${locale}/discover`}><UserRound size={15}/>{ar?"استكشف رَافِين":"Explore RAVINE"}</Link></div></div>
+        <div className="public-profile-identity"><div className="public-profile-kicker">RAVINE / {profile.is_creator?(ar?"المبدع":"CREATOR"):(ar?"الملف الشخصي":"PROFILE")}</div><h1>{name}</h1><div className="public-profile-handle">@{handle}{profile.is_verified?<span className="public-profile-verified"><BadgeCheck size={13}/>{ar?"موثق":"Verified"}</span>:null}</div><p>{profile.bio||(profile.is_creator?(ar?"مبدع داخل عالم رَافِين.":"Creator inside the RAVINE world."):(ar?"هذا الملف الشخصي على رَافِين.":"A personal profile on RAVINE."))}</p><div className="public-profile-actions">{profile.is_creator&&profile.trailer_url?<a className="public-profile-button secondary" href={profile.trailer_url} target="_blank" rel="noreferrer"><Clapperboard size={15}/>{ar?"مشاهدة التريلر":"Watch trailer"}</a>:null}{creatorIdentity?<FollowCreator creatorId={creatorIdentity.id} creatorUserId={creatorIdentity.user_id} locale={locale} returnPath={"/"+locale+"/u/"+encodeURIComponent(handle)}/>:null}<Link className="public-profile-button secondary" href={`/${locale}/discover`}><UserRound size={15}/>{ar?"استكشف رَافِين":"Explore RAVINE"}</Link></div></div>
       </div>
     </header>
     <section className="public-profile-body">
