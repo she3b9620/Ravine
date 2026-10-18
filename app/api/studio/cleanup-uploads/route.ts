@@ -15,24 +15,7 @@ function jsonError(error: string, status: number) {
 function isCreatorUploadPublicId(value: unknown, creatorId: number) {
   if (typeof value !== "string" || value.length > 200) return false;
   return new RegExp(
-    `^ravine/creators/${creatorId}/works/${creatorId}-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}import { createHash } from "node:crypto";
-import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
-
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
-
-function jsonError(error: string, status: number) {
-  return NextResponse.json(
-    { error },
-    { status, headers: { "Cache-Control": "no-store, max-age=0" } },
-  );
-}
-
-function isCreatorUploadPublicId(value: unknown, creatorId: number) {
-  if (typeof value !== "string" || value.length > 200) return false;
-  return new RegExp(
-,
+    `^ravine/creators/${creatorId}/works/${creatorId}-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`,
     "i",
   ).test(value);
 }

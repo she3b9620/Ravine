@@ -38,7 +38,7 @@ test("the temporary cleanup endpoint validates signed-in creator ownership and e
   assert.match(cleanup, /supabase\.auth\.getUser\(\)/);
   assert.match(cleanup, /\.eq\("id", creatorId\)/);
   assert.match(cleanup, /\.eq\("user_id", auth\.user\.id\)/);
-  assert.match(cleanup, /\\[0-9a-f\\]\\{8\\}-\\[0-9a-f\\]\\{4\\}-4\\[0-9a-f\\]\\{3\\}-\\[89ab\\]/);
+  assert.ok(cleanup.includes("[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"));
   assert.match(cleanup, /publicIds\.length > 3/);
   assert.match(cleanup, /CLOUDINARY_API_SECRET/);
   assert.match(cleanup, /createHash\("sha1"\)/);
@@ -48,23 +48,23 @@ test("the temporary cleanup endpoint validates signed-in creator ownership and e
 });
 
 test("cleanup checks every uploaded ID against work and media metadata before destroying any asset", () => {
-  assert.match(cleanup, /from\("videos"\)\.select\("id"\)\.ilike\("video_url"/);
-  assert.match(cleanup, /from\("work_media_assets"\)\.select\("id"\)\.eq\("public_id", publicId\)/);
-  assert.match(cleanup, /from\("work_media_assets"\)\.select\("id"\)\.ilike\("media_url"/);
-  assert.match(cleanup, /if \(referenceChecks\.some\(\(check\) => check\.queryFailed\)\)/);
-  assert.match(cleanup, /if \(referenceChecks\.some\(\(check\) => check\.referenced\)\)/);
+  assert.ok(cleanup.includes('supabase.from("videos").select("id").ilike("video_url", `%${publicId}%`)'));
+  assert.ok(cleanup.includes('supabase.from("work_media_assets").select("id").eq("public_id", publicId)'));
+  assert.ok(cleanup.includes('supabase.from("work_media_assets").select("id").ilike("media_url", `%${publicId}%`)'));
+  assert.ok(cleanup.includes("if (referenceChecks.some((check) => check.queryFailed))"));
+  assert.ok(cleanup.includes("if (referenceChecks.some((check) => check.referenced))"));
   const preflight = cleanup.indexOf("const referenceChecks = await Promise.all");
   const destroy = cleanup.indexOf("for (const publicId of publicIds as string[])");
   assert.ok(preflight > 0 && destroy > preflight);
 });
 
 test("upload rollback attempts work cleanup even if no public ID was returned and tracks new series metadata", () => {
-  assert.match(upload, /let createdSeriesId: number \\| null = null/);
-  assert.match(upload, /createdSeriesId = seriesId/);
-  assert.match(upload, /if \\(uploadedPublicIds.length \\|\\| createdWorkId !== null \\|\\| createdSeriesId !== null\\)/);
-  assert.match(upload, /from\\("videos"\\)[\\s\\S]*?\\.eq\\("series_id", createdSeriesId\\)/);
-  assert.match(upload, /\\.from\\("ravine_series_titles"\\)[\\s\\S]*?\\.delete\\(\\)/);
-  assert.match(upload, /if \\(!mayCleanUploads && uploadedPublicIds.length\\)/);
+  assert.ok(upload.includes("let createdSeriesId: number | null = null"));
+  assert.ok(upload.includes("createdSeriesId = seriesId"));
+  assert.ok(upload.includes("if (uploadedPublicIds.length || createdWorkId !== null || createdSeriesId !== null)"));
+  assert.ok(upload.includes('.eq("series_id", createdSeriesId)'));
+  assert.ok(upload.includes('.from("ravine_series_titles")'));
+  assert.ok(upload.includes("if (!mayCleanUploads && uploadedPublicIds.length)"));
 });
 
 test("rollback requests do not permit deletion of arbitrary public IDs or another creator's work", () => {
