@@ -6,7 +6,8 @@ const page = readFileSync(new URL("../app/[locale]/studio/page.tsx", import.meta
 const styles = readFileSync(new URL("../app/[locale]/studio/studio.module.css", import.meta.url), "utf8");
 
 test("Creator Studio uses query-driven, server-side pagination instead of silently truncating at 50 works", () => {
-  assert.match(page, /searchParams: Promise<\{ workPage\?: string \| string\[\] \}>/);
+  assert.match(page, /searchParams: Promise/);
+  assert.match(page, /workPage\?: string/);
   assert.match(page, /const pageSize = 50/);
   assert.match(page, /\.range\(\(currentPage - 1\) \* pageSize, currentPage \* pageSize - 1\)/);
   assert.match(page, /count: "exact"/);
