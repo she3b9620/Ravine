@@ -50,7 +50,7 @@ test("watch history hides unpublished or restricted work and library filters med
   assert.match(library, /\.eq\("published", true\)/);
   assert.match(library, /\.eq\("visibility", "public"\)/);
   assert.match(library, /const table: "video_likes" \| "video_saves" = mode === "liked" \? "video_likes" : "video_saves"/);
-  assert.match(library, /const table: "video_likes" \\| "video_saves" = mode === "liked" \\? "video_likes" : "video_saves"/);
+  assert.ok(library.includes('const table: "video_likes" | "video_saves" = mode === "liked" ? "video_likes" : "video_saves"'));
 });
 
 test("username-based public profile excludes unpublished and non-public creator work", () => {
