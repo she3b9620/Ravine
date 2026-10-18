@@ -9,6 +9,8 @@ export const dynamic = "force-dynamic";
 
 type Locale = "ar" | "en";
 
+type CreatorIdentity = { id: number; name: string; username: string | null; specialty: string | null; followers: number | null };
+
 type Work = {
   id: number;
   title: string;
@@ -23,7 +25,7 @@ type Work = {
   created_at: string | null;
 };
 
-export default async function StudioPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ workPage?: string | string[] }> }) {
+export default async function StudioPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ workPage?: string | string[]; creatorId?: string | string[] }> }) {
   const { locale: rawLocale } = await params;
   const query = await searchParams;
   const locale: Locale = rawLocale === "en" ? "en" : "ar";
@@ -33,10 +35,31 @@ export default async function StudioPage({ params, searchParams }: { params: Pro
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) redirect(`/${locale}/auth?next=/${locale}/studio`);
 
-  const [{ data: creator }, { data: application }] = await Promise.all([
-    supabase.from("creators").select("id,name,username,specialty,followers").eq("user_id", auth.user.id).maybeSingle(),
+  const [{ data: creatorRows, error: creatorsError }, { data: application }] = await Promise.all([
+    supabase.from("creators").select("id,name,username,specialty,followers").eq("user_id", auth.user.id).order("created_at", { ascending: true }),
     supabase.from("creator_applications").select("status,created_at,reviewer_notes,reviewed_at").eq("user_id", auth.user.id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
   ]);
+
+  const creators = (creatorRows ?? []) as CreatorIdentity[];
+  const rawCreatorId = Array.isArray(query.creatorId) ? query.creatorId[0] : query.creatorId;
+  const selectedCreatorId = rawCreatorId ? Number(rawCreatorId) : null;
+  if (rawCreatorId && (
+    !Number.isSafeInteger(selectedCreatorId)
+    || !creators.some((item) => item.id === selectedCreatorId)
+  )) {
+    redirect(`/${locale}/studio`);
+  }
+  const creator = (selectedCreatorId
+    ? creators.find((item) => item.id === selectedCreatorId)
+    : creators[0]) ?? null;
+
+  if (creatorsError) {
+    return <section className="section studio-page"><div className="eyebrow">RAVINE / STUDIO</div>
+      <div className="empty-state" role="status"><strong>{ar ? "تعذّر تحميل هويات المبدعين." : "Creator identities could not be loaded."}</strong>
+        <span>{ar ? "تعذّر استرجاع هويات حسابك الآن. حاول تحديث الصفحة بعد قليل." : "Your creator identities could not be retrieved right now. Please refresh the page shortly."}</span>
+      </div>
+    </section>;
+  }
 
   if (!creator) {
     return (
@@ -99,6 +122,20 @@ export default async function StudioPage({ params, searchParams }: { params: Pro
         </div>
         <Link className="button secondary" href={`/${locale}/creators/${creator.id}`}>{ar ? "فتح الملف العام" : "Open public profile"}</Link>
       </div>
+      {creators.length > 1 ? <nav className={styles.creatorSwitch} dir={ar ? "rtl" : "ltr"} aria-label={ar ? "اختيار هوية المبدع" : "Choose creator identity"}>
+        <span className={styles.creatorSwitchLabel}>{ar ? "الهويات الإبداعية" : "Creator identities"}</span>
+        <div className={styles.creatorSwitchOptions}>
+          {creators.map((identity) => <Link
+            key={identity.id}
+            href={`/${locale}/studio?creatorId=${identity.id}`}
+            className={identity.id === creator.id ? styles.creatorOptionActive : styles.creatorOption}
+            aria-current={identity.id === creator.id ? "page" : undefined}
+          >
+            <strong>{identity.name}</strong>
+            <small>@{identity.username || `creator-${identity.id}`}</small>
+          </Link>)}
+        </div>
+      </nav> : null}
       <div className="work-grid">
         <article className="work"><div className="work-art"/><div className="work-body"><div className="work-kicker">PROFILE</div><h3>{creator.specialty || "Creator"}</h3><p>@{creator.username || `creator-${creator.id}`}</p></div></article>
         <article className="work"><div className="work-art"/><div className="work-body"><div className="work-kicker">WORKS</div><h3>{statisticsError ? "—" : safeTotalWorks.toLocaleString(locale)}</h3><p>{statisticsError ? (ar ? "تعذّر تحميل الإحصاءات" : "Statistics unavailable") : (ar ? `${Number(publishedCount || 0).toLocaleString(locale)} منشور · ${Number(draftCount || 0).toLocaleString(locale)} مسودة` : `${Number(publishedCount || 0).toLocaleString(locale)} published · ${Number(draftCount || 0).toLocaleString(locale)} drafts`)}</p></div></article>
@@ -117,13 +154,13 @@ export default async function StudioPage({ params, searchParams }: { params: Pro
         <StudioWorkManager works={works} locale={locale} />
         {pageCount > 1 ? <nav className={styles.pagination} dir={ar ? "rtl" : "ltr"} aria-label={ar ? "صفحات الأعمال" : "Work pages"}>
           {currentPage > 1
-            ? <Link className={styles.pageLink} href={`/${locale}/studio?workPage=${currentPage - 1}`}>{ar ? "السابق" : "Previous"}</Link>
+            ? <Link className={styles.pageLink} href={`/${locale}/studio?creatorId=${creator.id}&workPage=${currentPage - 1}`}>{ar ? "السابق" : "Previous"}</Link>
             : <span className={styles.pageDisabled}>{ar ? "السابق" : "Previous"}</span>}
           <span className={styles.pageIndicator} aria-current="page">{ar
             ? `صفحة ${currentPage.toLocaleString(locale)} من ${pageCount.toLocaleString(locale)}`
             : `Page ${currentPage.toLocaleString(locale)} of ${pageCount.toLocaleString(locale)}`}</span>
           {currentPage < pageCount
-            ? <Link className={styles.pageLink} href={`/${locale}/studio?workPage=${currentPage + 1}`}>{ar ? "التالي" : "Next"}</Link>
+            ? <Link className={styles.pageLink} href={`/${locale}/studio?creatorId=${creator.id}&workPage=${currentPage + 1}`}>{ar ? "التالي" : "Next"}</Link>
             : <span className={styles.pageDisabled}>{ar ? "التالي" : "Next"}</span>}
         </nav> : null}
       </>}
