@@ -122,6 +122,7 @@
   min-width: 0;
   scroll-snap-align: start;
   scroll-snap-stop: always;
+  scroll-margin-top: 92px;
 }
 
 .reelStage {
@@ -409,4 +410,9 @@
   color: #392419;
   background: rgba(196, 122, 82, .2);
   border-color: rgba(112, 64, 47, .26);
+}
+
+:global(html[data-ravine-shorts-reels="true"]) {
+  scroll-snap-type: y proximity;
+  scroll-padding-top: 88px;
 }
