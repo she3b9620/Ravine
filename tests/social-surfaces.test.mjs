@@ -73,3 +73,16 @@ test("notification links and read actions remain independent and accessible", ()
   assert.match(css, /@media \(max-width: 680px\)/);
   assert.match(css, /prefers-reduced-motion: reduce/);
 });
+
+
+test("Library separates saved work from liked work and keeps each view searchable", () => {
+  const page = read("../app/[locale]/library/page.tsx");
+  const catalog = read("../components/RAVINEWorkCatalog.tsx");
+  assert.match(page, /filters\.tab === "liked"/);
+  assert.match(page, /from\("video_likes"\)/);
+  assert.match(page, /from\("video_saves"\)/);
+  assert.match(page, /tab=liked/);
+  assert.match(page, /<RAVINEWorkCatalog locale=\{locale\} items=\{items\}/);
+  assert.match(catalog, /const \[query, setQuery\] = useState/);
+  assert.match(catalog, /Most viewed/);
+});

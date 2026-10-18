@@ -40,10 +40,14 @@ test("live search API filters public visibility as well as explicit search visib
 });
 
 
-test("watch history and legacy library hide unpublished and restricted work", () => {
-  for (const path of ["../app/[locale]/history/page.tsx", "../app/[locale]/library/page.tsx"]) {
-    const source = read(path);
-    assert.match(source, /\.eq\("videos\.published", true\)/, path);
-    assert.match(source, /\.eq\("videos\.visibility", "public"\)/, path);
-  }
+test("watch history hides unpublished or restricted work and library filters media rows", () => {
+  const history = read("../app/[locale]/history/page.tsx");
+  assert.match(history, /\.eq\("videos\.published", true\)/);
+  assert.match(history, /\.eq\("videos\.visibility", "public"\)/);
+
+  const library = read("../app/[locale]/library/page.tsx");
+  assert.match(library, /\.eq\("published", true\)/);
+  assert.match(library, /\.eq\("visibility", "public"\)/);
+  assert.match(library, /from\("video_likes"\)/);
+  assert.match(library, /from\("video_saves"\)/);
 });
