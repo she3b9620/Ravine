@@ -51,3 +51,9 @@ test("watch history hides unpublished or restricted work and library filters med
   assert.match(library, /from\("video_likes"\)/);
   assert.match(library, /from\("video_saves"\)/);
 });
+
+test("username-based public profile excludes unpublished and non-public creator work", () => {
+  const source = read("../app/[locale]/u/[username]/page.tsx");
+  assert.match(source, /\.eq\("published",true\)/);
+  assert.match(source, /\.eq\("visibility","public"\)/);
+});

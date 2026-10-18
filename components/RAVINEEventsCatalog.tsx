@@ -6,7 +6,7 @@ import { CalendarClock, Clock3, Radio, Search, Tv, X } from "lucide-react";
 import styles from "./RAVINEEventsCatalog.module.css";
 
 export type RAVINEEventItem = {
-  id: number;
+  id: number | string;
   title: string;
   description: string | null;
   type: string;

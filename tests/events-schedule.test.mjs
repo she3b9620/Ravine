@@ -37,3 +37,10 @@ test("Spaces page exposes the staged schedule without inventing a live provider"
   assert.match(component, /creatorId: number \| null/);
   assert.match(component, /town_hall/);
 });
+
+test("shared event catalogue accepts string IDs for UUID-backed Spaces and numeric IDs for live events", () => {
+  const component = read("../components/RAVINEEventsCatalog.tsx");
+  const spaces = read("../app/[locale]/spaces/page.tsx");
+  assert.match(component, /id: number \| string/);
+  assert.match(spaces, /id: space\.id/);
+});

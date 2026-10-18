@@ -26,7 +26,7 @@ export default async function PublicUserPage({params}:{params:Promise<{locale:st
     const {data:creatorData}=await s.from("creators").select("id,username,user_id").eq("user_id",profile.id).maybeSingle();
     const creator=creatorData as Creator|null;
     if(creator){
-      const {data:worksData}=await s.from("videos").select("id,title,description,thumbnail_url,views,duration,content_type,creator_id").eq("published",true).eq("creator_id",creator.id).order("created_at",{ascending:false}).limit(12);
+      const {data:worksData}=await s.from("videos").select("id,title,description,thumbnail_url,views,duration,content_type,creator_id").eq("published",true).eq("visibility","public").eq("creator_id",creator.id).order("created_at",{ascending:false}).limit(12);
       works=(worksData??[]) as Work[];
     }
   }
