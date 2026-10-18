@@ -30,8 +30,8 @@ test("pagination navigation is accessible, localized, and keeps page numbers bou
   assert.match(page, /Math\.max\(1, Math\.ceil\(safeFilteredTotalWorks \/ pageSize\)\)/);
   assert.match(page, /const currentPage = Math\.min\(validRequestedPage, pageCount\)/);
   assert.match(page, /const validRequestedPage = Number\.isSafeInteger\(requestedPage\) && requestedPage > 0 \? requestedPage : 1/);
-  assert.match(page, /studioPageHref\(currentPage - 1\)/);
-  assert.match(page, /studioPageHref\(currentPage \+ 1\)/);
+  assert.match(page, /studioPageHref\(currentPage - 1, creator\.id\)/);
+  assert.match(page, /studioPageHref\(currentPage \+ 1, creator\.id\)/);
   assert.match(page, /aria-label=\{ar \? "صفحات الأعمال" : "Work pages"\}/);
   assert.match(page, /aria-current="page"/);
   assert.match(page, /"السابق"/);
