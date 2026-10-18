@@ -78,7 +78,7 @@ export default async function RAVINEMediaCatalog({locale,contentType}:{locale:"a
         {!error&&works.length>0?<div className="ravine-series-count">{formatCountLabel(works.length,locale,contentType)}</div>:null}
       </div>
     </div>
-    {error?<div className="empty-state"><strong>{ar?(contentType==="podcast"?"تعذر تحميل البودكاست.":"تعذر تحميل المحتوى."):(contentType==="podcast"?"We could not load podcasts.":"We could not load this content.")}</strong><span>{error.message}</span></div>
+    {error?<div className="empty-state"><strong>{ar?(contentType==="podcast"?"تعذر تحميل البودكاست.":"تعذر تحميل المحتوى."):(contentType==="podcast"?"We could not load podcasts.":"We could not load this content.")}</strong><span>{ar ? "تعذّر جلب الأعمال الآن. جرّب تحديث الصفحة بعد قليل." : "The catalogue could not retrieve works right now. Please refresh the page shortly."}</span></div>
       :works.length===0?<div className="empty-state"><strong>{ar?config.arEmpty:config.enEmpty}</strong><span>{ar?"ستظهر الأعمال هنا بعد اعتماد نشرها من مساحة المبدع.":"Published work will appear here after creator publication."}</span></div>
       :contentType==="short"?<RAVINEShortsBrowse locale={locale} works={works}/>
       :<RAVINEWorkCatalog locale={locale} items={items}/>}
