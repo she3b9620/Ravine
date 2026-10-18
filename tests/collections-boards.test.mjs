@@ -49,5 +49,5 @@ test("collections directory supports search, visibility filters and sorting", ()
   assert.match(component, /itemCount/);
   assert.match(component, /aria-pressed=\{visibility === item\.id\}/);
   assert.match(component, /value="works"/);
-  assert.match(component, /private && item\.owned/);
+  assert.ok(component.includes('item.owned && item.visibility === "private"'));
 });
