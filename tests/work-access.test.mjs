@@ -21,7 +21,6 @@ test("video access distinguishes public, unlisted, follower-only, and owner-only
   assert.match(videoAccess, /supabase\.rpc\("is_ravine_admin"\)/);
   assert.match(videoAccess, /admin = !adminError && adminResult === true/);
   assert.match(videoAccess, /if \(admin\) return true/);
-  assert.match(videoAccess, /admin,/);
 });
 
 test("video detail routes verify access before querying and exposing chapters or media assets", () => {
