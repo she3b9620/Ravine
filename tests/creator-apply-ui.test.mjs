@@ -46,3 +46,11 @@ test("creator application and status screens use a centered wrapper with visible
   assert.match(styles, /\.statusPage\s*\{[^}]*max-width:\s*1480px/s);
   assert.match(styles, /@media\(max-width:560px\)[\s\S]*?\.statusPage\{padding:30px 16px\}/);
 });
+
+test("creator application uses a centered page frame with visible, responsive side gutters", () => {
+  assert.match(styles, /\.applyPage\s*\{[^}]*max-width:\s*1640px/s);
+  assert.match(styles, /\.applyPage\s*\{[^}]*margin-inline:\s*auto/s);
+  assert.match(styles, /\.applyPage\s*\{[^}]*padding-inline:\s*clamp\(24px,\s*4\.2vw,\s*72px\)/s);
+  assert.match(styles, /@media\s*\(max-width:\s*860px\)[\s\S]*?\.applyPage\s*\{[^}]*padding-inline:\s*clamp\(18px,\s*4vw,\s*32px\)/s);
+  assert.match(styles, /@media\s*\(max-width:\s*560px\)[\s\S]*?\.applyPage\s*\{[^}]*padding-inline:\s*16px/s);
+});
