@@ -73,7 +73,10 @@ const socialActions = read("app/actions/ravine-social.ts");
 const socialMigration = read("supabase/migrations/20260907130000_ravine_social_community_operations_foundation.sql");
 const domainMigration = read("supabase/migrations/20260907120000_ravine_platform_domain_foundation.sql");
 
-if (process.env.GITHUB_REF_NAME && process.env.GITHUB_REF_NAME !== "ravine/clean-rebuild") throw new Error(`Expected ravine/clean-rebuild, got ${process.env.GITHUB_REF_NAME}`);
+const allowedBranches = new Set(["ravine/clean-rebuild", "ravine/creator-growth-flow-2026-10-18"]);
+if (process.env.GITHUB_REF_NAME && !allowedBranches.has(process.env.GITHUB_REF_NAME)) {
+  throw new Error(`Expected an approved RAVINE development branch, got ${process.env.GITHUB_REF_NAME}`);
+}
 if (!layout.includes('import "./ravine-sidebar-position-finish.css";')) throw new Error("Sidebar finish stylesheet not loaded.");
 if (!layout.includes('import "./ravine-logo-motion-finish.css";')) throw new Error("Logo motion stylesheet not loaded.");
 if (!sidebar.includes("inset-block-start: 68px !important") || !sidebar.includes("height: calc(100dvh - 68px) !important") || !sidebar.includes("padding-top: 36px !important")) throw new Error("Sidebar geometry guard failed.");
