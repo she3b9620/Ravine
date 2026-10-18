@@ -38,3 +38,11 @@ test("light-theme validation and rejected-application messages have explicit con
 test("the creator application UI regression test is part of CI", () => {
   assert.match(workflow, /node --test tests\/creator-apply-ui\.test\.mjs/);
 });
+
+test("creator application and status screens use a centered wrapper with visible side gutters", () => {
+  assert.match(styles, /\.applyPage\s*\{[^}]*max-width:\s*1480px/s);
+  assert.match(styles, /\.applyPage\s*\{[^}]*box-sizing:\s*border-box/s);
+  assert.match(styles, /\.applyPage\s*\{[^}]*padding-inline:\s*clamp\(24px,5vw,76px\)/s);
+  assert.match(styles, /\.statusPage\s*\{[^}]*max-width:\s*1480px/s);
+  assert.match(styles, /@media\(max-width:560px\)[\s\S]*?\.statusPage\{padding:30px 16px\}/);
+});

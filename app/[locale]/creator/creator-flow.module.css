@@ -107,7 +107,16 @@
 .rejectedNotice p{margin:7px 0 0;color:var(--stone,#a7a098);font-size:11px;line-height:1.75}
 .rejectedNotice>span{white-space:nowrap;color:var(--copper,#c47a52);font-size:10px;font-weight:800}
 .notice{color:var(--stone,#a7a098);font-size:11px;line-height:1.8}
-.statusPage{display:grid;place-items:center;min-height:58vh;padding:48px 0}
+.statusPage{
+  display:grid;
+  place-items:center;
+  width:100%;
+  max-width:1480px;
+  box-sizing:border-box;
+  margin-inline:auto;
+  min-height:58vh;
+  padding:48px clamp(24px,5vw,76px);
+}
 .statusCard{position:relative;display:flex;width:min(100%,600px);flex-direction:column;align-items:center;padding:clamp(28px,5vw,50px);border:1px solid rgba(241,233,220,.12);border-radius:28px;background:linear-gradient(145deg,rgba(21,23,25,.96),rgba(12,15,16,.98));text-align:center;box-shadow:0 28px 75px rgba(0,0,0,.18)}
 .statusIcon{display:grid;place-items:center;width:62px;height:62px;margin-bottom:19px;border:1px solid rgba(196,122,82,.33);border-radius:20px;background:rgba(196,122,82,.08);color:var(--copper,#c47a52)}
 .statusCard h1{margin:9px 0 11px;font-size:clamp(28px,4vw,43px);line-height:1.12;letter-spacing:-.035em}
@@ -202,9 +211,11 @@
 
 /* Application-page layout and typography refinement */
 .applyPage{
-  width:min(var(--max,1440px),100%);
+  width:100%;
+  max-width:1480px;
+  box-sizing:border-box;
   margin-inline:auto;
-  padding-inline:clamp(18px,3.2vw,48px);
+  padding-inline:clamp(24px,5vw,76px);
   overflow-wrap:anywhere;
 }
 .applyPage *{min-width:0}
@@ -315,6 +326,7 @@
 }
 @media(max-width:860px){
  .applyPage{padding-inline:clamp(16px,3vw,26px)}
+ .statusPage{padding-inline:clamp(16px,3vw,26px)}
  .workflow{grid-template-columns:minmax(0,1fr);gap:18px}
  .railSteps{grid-template-columns:repeat(4,minmax(0,1fr))}
  .railStep{grid-template-columns:1fr;justify-items:start;min-height:105px;padding:12px}
@@ -325,7 +337,8 @@
  .formMessage{margin-inline:26px}
 }
 @media(max-width:560px){
- .applyPage{padding-inline:15px;padding-bottom:38px}
+ .applyPage{padding-inline:16px;padding-bottom:38px}
+ .statusPage{padding:30px 16px}
  .applyHero{padding-bottom:28px}
  .heroCopy h1{font-size:clamp(35px,10vw,48px);line-height:1.22}
  .heroCopy>p{font-size:14px;line-height:1.9}
