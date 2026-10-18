@@ -10,14 +10,17 @@ test("video access distinguishes public, unlisted, follower-only, and owner-only
   assert.match(policy, /"public" \| "unlisted" \| "followers"/);
   assert.match(policy, /case "unlisted": return true/);
   assert.match(policy, /context\.authenticated && context\.followsCreator/);
-  assert.match(videoAccess, /if \(video\.published !== true && !creatorIdentityOwner && !admin\) return false/);
+  assert.match(videoAccess, /video\.published === true && \(policy === "public" \|\| policy === "unlisted"\)/);
+  assert.match(videoAccess, /if \(!user\) return false/);
+  assert.match(videoAccess, /if \(creatorIdentityOwner\) return true/);
+  assert.match(videoAccess, /if \(video\.published !== true\) return false/);
   assert.match(videoAccess, /from\("follows"\)/);
   assert.match(videoAccess, /custom: "private"/);
   assert.match(videoAccess, /member: false/);
   assert.match(videoAccess, /invited: false/);
   assert.match(videoAccess, /supabase\.rpc\("is_ravine_admin"\)/);
   assert.match(videoAccess, /admin = !adminError && adminResult === true/);
-  assert.match(videoAccess, /!creatorIdentityOwner && !admin/);
+  assert.match(videoAccess, /if \(admin\) return true/);
   assert.match(videoAccess, /admin,/);
 });
 

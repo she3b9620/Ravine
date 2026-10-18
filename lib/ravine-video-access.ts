@@ -27,11 +27,19 @@ export async function canAccessRAVINEVideo(
   supabase: ServerSupabase,
   video: RAVINEVideoAccessRecord,
 ): Promise<boolean> {
+  const rawVisibility = (video.visibility || "public").trim().toLowerCase();
+  const policy = visibilityPolicies[rawVisibility] || "private";
+
+  // Public and unlisted published works need no identity or admin lookup.
+  // Their direct page URL is the intended access boundary.
+  if (video.published === true && (policy === "public" || policy === "unlisted")) return true;
+
   const { data: auth } = await supabase.auth.getUser();
   const user = auth.user;
-  let creatorIdentityOwner = Boolean(user && video.user_id === user.id);
+  if (!user) return false;
 
-  if (user && !creatorIdentityOwner && video.creator_id) {
+  let creatorIdentityOwner = video.user_id === user.id;
+  if (!creatorIdentityOwner && video.creator_id) {
     const { data: creator } = await supabase
       .from("creators")
       .select("user_id")
@@ -39,23 +47,20 @@ export async function canAccessRAVINEVideo(
       .maybeSingle();
     creatorIdentityOwner = creator?.user_id === user.id;
   }
+  if (creatorIdentityOwner) return true;
 
-  // Use the same server-side admin RPC as the protected platform tooling.
-  // A failed/missing RPC is intentionally treated as non-admin.
-  let admin = false;
-  if (user && !creatorIdentityOwner) {
-    const { data: adminResult, error: adminError } = await supabase.rpc("is_ravine_admin");
-    admin = !adminError && adminResult === true;
-  }
+  // Use the same server-side admin RPC as protected platform tooling.
+  // A failed or missing RPC is intentionally treated as non-admin.
+  const { data: adminResult, error: adminError } = await supabase.rpc("is_ravine_admin");
+  const admin = !adminError && adminResult === true;
+  if (admin) return true;
 
-  // Drafts are accessible only to the owner or a verified RAVINE administrator.
-  if (video.published !== true && !creatorIdentityOwner && !admin) return false;
+  // Drafts stay owner/admin-only. Membership tiers and invitations remain
+  // fail-closed until their connected database policies and UI are verified.
+  if (video.published !== true) return false;
 
-  const rawVisibility = (video.visibility || "public").trim().toLowerCase();
-  const policy = visibilityPolicies[rawVisibility] || "private";
   let followsCreator = false;
-
-  if (policy === "followers" && user && video.creator_id && !creatorIdentityOwner) {
+  if (policy === "followers" && video.creator_id) {
     const { data: follow, error } = await supabase
       .from("follows")
       .select("creator_id")
@@ -66,13 +71,11 @@ export async function canAccessRAVINEVideo(
   }
 
   return canAccessRAVINEWork(policy, {
-    authenticated: Boolean(user),
-    creatorIdentityOwner,
+    authenticated: true,
+    creatorIdentityOwner: false,
     followsCreator,
-    // Membership tiers and invitation lists are intentionally fail-closed
-    // until the connected database policies and UI are verified.
     member: false,
     invited: false,
-    admin,
+    admin: false,
   });
 }
