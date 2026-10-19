@@ -158,16 +158,32 @@ export default async function DiscoverPage({
   // Clamp hostile or stale page values before asking PostgREST for a range.
   const currentPage = Math.min(requestedPage, pageCount);
 
-  const request = applyDiscoverFilters(
+  let orderedRequest = applyDiscoverFilters(
     supabase
       .from("videos")
       .select("id,title,description,thumbnail_url,video_url,duration,views,likes,content_type,quality,aspect_ratio"),
     filters,
     query,
-  )
-    .order("created_at", { ascending: firstParam(filters.sort) === "oldest" })
-    .order("id", { ascending: firstParam(filters.sort) === "oldest" })
-    .range((currentPage - 1) * pageSize, currentPage * pageSize - 1);
+  );
+  const sort = firstParam(filters.sort);
+  if (sort === "oldest") {
+    orderedRequest = orderedRequest
+      .order("created_at", { ascending: true })
+      .order("id", { ascending: true });
+  } else if (sort === "views") {
+    orderedRequest = orderedRequest
+      .order("views", { ascending: false, nullsFirst: false })
+      .order("id", { ascending: false });
+  } else if (sort === "likes") {
+    orderedRequest = orderedRequest
+      .order("likes", { ascending: false, nullsFirst: false })
+      .order("id", { ascending: false });
+  } else {
+    orderedRequest = orderedRequest
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false });
+  }
+  const request = orderedRequest.range((currentPage - 1) * pageSize, currentPage * pageSize - 1);
 
   const creatorRequest = query
     ? supabase
@@ -244,7 +260,8 @@ export default async function DiscoverPage({
     if (["720p", "1080p", "1440p", "2k", "4k", "4K"].includes(quality || "")) {
       params.set("quality", quality!);
     }
-    if (firstParam(filters.sort) === "oldest") params.set("sort", "oldest");
+    const sort = firstParam(filters.sort);
+    if (["oldest", "views", "likes"].includes(sort || "")) params.set("sort", sort!);
     params.set("page", String(targetPage));
     return "/" + locale + "/discover?" + params.toString() + "#discover-results";
   }

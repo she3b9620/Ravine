@@ -11,7 +11,11 @@ test("Discover counts all matching public work and slices it into stable server-
   assert.match(page, /const pageSize = 48/);
   assert.match(page, /\.range\(\(currentPage - 1\) \* pageSize, currentPage \* pageSize - 1\)/);
   assert.match(page, /\.order\("created_at", \{ ascending: firstParam\(filters\.sort\) === "oldest" \}\)/);
-  assert.match(page, /\.order\("id", \{ ascending: firstParam\(filters\.sort\) === "oldest" \}\)/);
+  assert.match(page, /sort === "views"/);
+  assert.match(page, /sort === "likes"/);
+  assert.match(page, /\.order\("views", \{ ascending: false, nullsFirst: false \}\)/);
+  assert.match(page, /\.order\("likes", \{ ascending: false, nullsFirst: false \}\)/);
+  assert.match(page, /\.order\("id", \{ ascending: false \}\)/);
   assert.match(page, /formatRavineNumber\(totalWorkCount, locale\)/);
 });
 
@@ -34,9 +38,12 @@ test("pagination preserves safe active filters, search, and ordering and resets 
   assert.match(page, /params\.set\("duration", duration!\)/);
   assert.match(page, /params\.set\("format", format!\)/);
   assert.match(page, /params\.set\("quality", quality!\)/);
-  assert.match(page, /params\.set\("sort", "oldest"\)/);
-  assert.match(page, /params\.set\("page", String\(targetPage\)\)/);
+  assert.match(page, /\["oldest", "views", "likes"\]\.includes\(sort \|\| ""\)/);
+  assert.match(page, /params\.set\("sort", sort!\)/);
   const filters = read("../components/DiscoverFilters.tsx");
+  assert.match(filters, /value: "views", ar: "الأكثر مشاهدة", en: "Most viewed"/);
+  assert.match(filters, /value: "likes", ar: "الأكثر إعجابًا", en: "Most liked"/);
+  assert.match(page, /params\.set\("page", String\(targetPage\)\)/);
   assert.doesNotMatch(filters, /params\.set\("page"/);
 });
 

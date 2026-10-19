@@ -30,7 +30,12 @@ const formats: Option[] = [
   { value: "1:1", ar: "مربع · 1:1", en: "Square · 1:1" }, { value: "other", ar: "نسبة أخرى", en: "Other ratio" },
 ];
 const qualities = [{ value: "1080p", ar: "1080p", en: "1080p" }, { value: "1440p", ar: "1440p", en: "1440p" }, { value: "4K", ar: "4K", en: "4K" }];
-const sorts = [{ value: "newest", ar: "الأحدث", en: "Newest" }, { value: "oldest", ar: "الأقدم", en: "Oldest" }];
+const sorts: Option[] = [
+  { value: "newest", ar: "الأحدث", en: "Newest" },
+  { value: "oldest", ar: "الأقدم", en: "Oldest" },
+  { value: "views", ar: "الأكثر مشاهدة", en: "Most viewed" },
+  { value: "likes", ar: "الأكثر إعجابًا", en: "Most liked" },
+];
 
 function buildDiscoverHref(locale: Locale, query: string, category: string, type: string, duration: string, format: string, quality: string, sort: string) {
   const params = new URLSearchParams();
