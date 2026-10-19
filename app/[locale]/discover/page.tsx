@@ -55,13 +55,14 @@ type Community = {
   privacy: string;
 };
 type SearchParams = {
-  q?: string;
-  category?: string;
-  type?: string;
-  duration?: string;
-  format?: string;
-  quality?: string;
-  sort?: string;
+  q?: string | string[];
+  category?: string | string[];
+  type?: string | string[];
+  duration?: string | string[];
+  format?: string | string[];
+  quality?: string | string[];
+  sort?: string | string[];
+  page?: string | string[];
 };
 
 function durationLabel(seconds: number | null) {
@@ -86,8 +87,48 @@ function normalizeQuery(value: string | undefined) {
 const allowedTypes = ["short", "video", "podcast", "documentary", "short_film", "film", "series", "live"] as const;
 type AllowedType = (typeof allowedTypes)[number];
 
+function firstParam(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
 function isAllowedType(value: string | undefined): value is AllowedType {
   return Boolean(value && allowedTypes.includes(value as AllowedType));
+}
+
+type DiscoverVideoQuery = ReturnType<ReturnType<Awaited<ReturnType<typeof createClient>>["from"]>["select"]>;
+
+function applyDiscoverFilters(request: DiscoverVideoQuery, filters: SearchParams, query: string) {
+  let next = request
+    .eq("published", true)
+    .eq("visibility", "public")
+    .eq("search_visible", true);
+
+  if (query) next = next.or("title.ilike.%" + query + "%,description.ilike.%" + query + "%");
+
+  const type = firstParam(filters.type);
+  if (isAllowedType(type)) next = next.eq("content_type", type);
+
+  const categoryId = Number(firstParam(filters.category));
+  if (Number.isSafeInteger(categoryId) && categoryId > 0) next = next.eq("category_id", categoryId);
+
+  const duration = firstParam(filters.duration);
+  if (duration === "under-5") next = next.lt("duration", 5 * 60);
+  if (duration === "5-20") next = next.gte("duration", 5 * 60).lt("duration", 20 * 60);
+  if (duration === "20-60") next = next.gte("duration", 20 * 60).lt("duration", 60 * 60);
+  if (duration === "over-60") next = next.gte("duration", 60 * 60);
+
+  const format = firstParam(filters.format);
+  if (format === "16:9" || format === "9:16" || format === "1:1") {
+    next = next.eq("aspect_ratio", format);
+  }
+  if (format === "other") next = next.not("aspect_ratio", "in", "(16:9,9:16,1:1)");
+
+  const quality = firstParam(filters.quality);
+  if (["720p", "1080p", "1440p", "2k", "4k", "4K"].includes(quality || "")) {
+    next = next.eq("quality", quality === "4K" ? "4k" : quality);
+  }
+
+  return next;
 }
 
 export default async function DiscoverPage({
@@ -101,31 +142,32 @@ export default async function DiscoverPage({
   const locale: Locale = rawLocale === "en" ? "en" : "ar";
   const isArabic = locale === "ar";
   const supabase = await createClient();
-  const query = normalizeQuery(filters.q);
+  const query = normalizeQuery(firstParam(filters.q));
+  const pageSize = 48;
+  const rawPage = Number(firstParam(filters.page));
+  const requestedPage = Number.isSafeInteger(rawPage) && rawPage > 0 ? rawPage : 1;
 
-  let request = supabase
-    .from("videos")
-    .select("id,title,description,thumbnail_url,video_url,duration,views,likes,content_type,quality,aspect_ratio")
-    .eq("published", true)
-    .eq("visibility", "public")
-    .eq("search_visible", true)
-    .limit(48);
+  const countRequest = applyDiscoverFilters(
+    supabase.from("videos").select("id", { count: "exact", head: true }),
+    filters,
+    query,
+  );
+  const workCountResult = await countRequest;
+  const totalWorkCount = workCountResult.count ?? 0;
+  const pageCount = Math.max(1, Math.ceil(totalWorkCount / pageSize));
+  // Clamp hostile or stale page values before asking PostgREST for a range.
+  const currentPage = Math.min(requestedPage, pageCount);
 
-  if (query) request = request.or("title.ilike.%" + query + "%,description.ilike.%" + query + "%");
-  if (isAllowedType(filters.type)) request = request.eq("content_type", filters.type);
-
-  const categoryId = Number(filters.category);
-  if (Number.isFinite(categoryId) && categoryId > 0) request = request.eq("category_id", categoryId);
-  if (filters.duration === "under-5") request = request.lt("duration", 5 * 60);
-  if (filters.duration === "5-20") request = request.gte("duration", 5 * 60).lt("duration", 20 * 60);
-  if (filters.duration === "20-60") request = request.gte("duration", 20 * 60).lt("duration", 60 * 60);
-  if (filters.duration === "over-60") request = request.gte("duration", 60 * 60);
-  if (filters.format === "16:9" || filters.format === "9:16" || filters.format === "1:1") {
-    request = request.eq("aspect_ratio", filters.format);
-  }
-  if (filters.format === "other") request = request.not("aspect_ratio", "in", "(16:9,9:16,1:1)");
-  if (filters.quality) request = request.eq("quality", filters.quality);
-  request = request.order("created_at", { ascending: filters.sort === "oldest" });
+  const request = applyDiscoverFilters(
+    supabase
+      .from("videos")
+      .select("id,title,description,thumbnail_url,video_url,duration,views,likes,content_type,quality,aspect_ratio"),
+    filters,
+    query,
+  )
+    .order("created_at", { ascending: firstParam(filters.sort) === "oldest" })
+    .order("id", { ascending: firstParam(filters.sort) === "oldest" })
+    .range((currentPage - 1) * pageSize, currentPage * pageSize - 1);
 
   const creatorRequest = query
     ? supabase
@@ -176,7 +218,7 @@ export default async function DiscoverPage({
   const creators = (creatorResult.data ?? []) as Creator[];
   const events = (eventResult.data ?? []) as EventRow[];
   const communities = (communityResult.data ?? []) as Community[];
-  const hasWorkError = Boolean(workResult.error);
+  const hasWorkError = Boolean(workCountResult.error || workResult.error);
   const hasCreatorError = Boolean(creatorResult.error);
   const hasEventError = Boolean(eventResult.error);
   const hasCommunityError = Boolean(communityResult.error);
@@ -184,6 +226,28 @@ export default async function DiscoverPage({
     ? normalizedCategories.filter((category) =>
         (category.name + " " + (category.slug || "")).toLocaleLowerCase(locale).includes(query.toLocaleLowerCase(locale)))
     : [];
+
+  function discoverPageHref(targetPage: number) {
+    const params = new URLSearchParams();
+    if (query) params.set("q", query);
+
+    const categoryId = Number(firstParam(filters.category));
+    if (Number.isSafeInteger(categoryId) && categoryId > 0) params.set("category", String(categoryId));
+    const type = firstParam(filters.type);
+    if (isAllowedType(type)) params.set("type", type);
+
+    const duration = firstParam(filters.duration);
+    if (["under-5", "5-20", "20-60", "over-60"].includes(duration || "")) params.set("duration", duration!);
+    const format = firstParam(filters.format);
+    if (["16:9", "9:16", "1:1", "other"].includes(format || "")) params.set("format", format!);
+    const quality = firstParam(filters.quality);
+    if (["720p", "1080p", "1440p", "2k", "4k", "4K"].includes(quality || "")) {
+      params.set("quality", quality!);
+    }
+    if (firstParam(filters.sort) === "oldest") params.set("sort", "oldest");
+    params.set("page", String(targetPage));
+    return "/" + locale + "/discover?" + params.toString() + "#discover-results";
+  }
 
   const eventCreatorIds = Array.from(new Set(events.map((event) => Number(event.creator_id)).filter((id) => Number.isSafeInteger(id) && id > 0)));
   const eventRecordingIds = Array.from(new Set(events.map((event) => Number(event.recording_video_id)).filter((id) => Number.isSafeInteger(id) && id > 0)));
@@ -295,12 +359,12 @@ export default async function DiscoverPage({
       <DiscoverFilters
         locale={locale}
         query={query}
-        category={filters.category ?? ""}
-        type={filters.type ?? ""}
-        duration={filters.duration ?? ""}
-        format={filters.format ?? ""}
-        quality={filters.quality ?? ""}
-        sort={filters.sort ?? "newest"}
+        category={firstParam(filters.category) ?? ""}
+        type={firstParam(filters.type) ?? ""}
+        duration={firstParam(filters.duration) ?? ""}
+        format={firstParam(filters.format) ?? ""}
+        quality={firstParam(filters.quality) ?? ""}
+        sort={firstParam(filters.sort) ?? "newest"}
         categories={normalizedCategories}
       />
 
@@ -311,7 +375,7 @@ export default async function DiscoverPage({
             <h2 id="discover-work-heading">{copy.workHeading}</h2>
           </div>
           <span className="discover-result-count">
-            {formatRavineNumber(videos.length, locale)} {copy.workCount}
+            {formatRavineNumber(totalWorkCount, locale)} {copy.workCount}
           </span>
         </div>
 
@@ -350,6 +414,30 @@ export default async function DiscoverPage({
             <span>{copy.noWorkHelp}</span>
           </div>
         )}
+
+        {!hasWorkError && totalWorkCount > 0 ? (
+          <p className="discover-pagination-summary" aria-live="polite">
+            {isArabic
+              ? `عرض ${formatRavineNumber((currentPage - 1) * pageSize + 1, locale)}–${formatRavineNumber(Math.min(currentPage * pageSize, totalWorkCount), locale)} من ${formatRavineNumber(totalWorkCount, locale)} عمل`
+              : `Showing ${formatRavineNumber((currentPage - 1) * pageSize + 1, locale)}–${formatRavineNumber(Math.min(currentPage * pageSize, totalWorkCount), locale)} of ${formatRavineNumber(totalWorkCount, locale)} works`}
+          </p>
+        ) : null}
+
+        {!hasWorkError && pageCount > 1 ? (
+          <nav className="discover-pagination" aria-label={isArabic ? "صفحات الأعمال" : "Work pages"}>
+            {currentPage > 1
+              ? <Link className="discover-pagination-link" href={discoverPageHref(currentPage - 1)}>{isArabic ? "السابق" : "Previous"}</Link>
+              : <span className="discover-pagination-disabled" aria-disabled="true">{isArabic ? "السابق" : "Previous"}</span>}
+            <span className="discover-pagination-current" aria-current="page">
+              {isArabic
+                ? `صفحة ${formatRavineNumber(currentPage, locale)} من ${formatRavineNumber(pageCount, locale)}`
+                : `Page ${formatRavineNumber(currentPage, locale)} of ${formatRavineNumber(pageCount, locale)}`}
+            </span>
+            {currentPage < pageCount
+              ? <Link className="discover-pagination-link" href={discoverPageHref(currentPage + 1)}>{isArabic ? "التالي" : "Next"}</Link>
+              : <span className="discover-pagination-disabled" aria-disabled="true">{isArabic ? "التالي" : "Next"}</span>}
+          </nav>
+        ) : null}
       </section>
 
       {query && matchingCategories.length ? (
