@@ -93,7 +93,7 @@ test("public creator profiles paginate the complete published and public work li
   assert.match(page, /\.eq\("visibility", "public"\)/);
   assert.match(page, /\.range\(\(currentPage - 1\) \* pageSize, currentPage \* pageSize - 1\)/);
   assert.match(page, /const currentPage = Math\.min\(requestedPage, pageCount\)/);
-  assert.match(page, /params\.set\("workPage", String\(targetPage\)\)/);
+  assert.match(page, /new URLSearchParams\(\{ workPage: String\(targetPage\) \}\)/);
   assert.match(page, /className=\{styles\.workPagination\}/);
   assert.match(page, /totalWorkCount\.toLocaleString\(locale\)/);
   assert.match(css, /\.workPageLink:focus-visible/);
