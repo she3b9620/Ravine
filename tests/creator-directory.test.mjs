@@ -6,8 +6,8 @@ const read = (path) => readFileSync(new URL(path, import.meta.url), "utf8");
 
 test("Following view requires authentication and queries only the current user's followed creator IDs", () => {
   const page = read("../app/[locale]/creators/page.tsx");
-  assert.match(page, /searchParams: Promise<\{ tab\?: string \}>/);
-  assert.match(page, /query\.tab === "following"/);
+  assert.match(page, /searchParams: Promise<CreatorDirectoryQuery>/);
+  assert.match(page, /firstParam\(query\.tab\) === "following"/);
   assert.match(page, /auth\?next=/);
   assert.match(page, /from\("follows"\)/);
   assert.match(page, /\.eq\("follower_id", auth\.user\.id\)/);
@@ -45,7 +45,10 @@ test("the public creator directory searches the complete server-side catalog and
   const component = read("../components/RAVINECreatorDirectory.tsx");
   assert.match(page, /const pageSize = 24/);
   assert.match(page, /select\("id", \{ count: "exact", head: true \}\)/);
-  assert.match(page, /name\.ilike\.%.*username\.ilike\.%.*specialty\.ilike\.%.*bio\.ilike\.%/);
+  assert.ok(page.includes("name.ilike.%"));
+  assert.ok(page.includes("username.ilike.%"));
+  assert.ok(page.includes("specialty.ilike.%"));
+  assert.ok(page.includes("bio.ilike.%"));
   assert.match(page, /\.range\(\(currentPage - 1\) \* pageSize, currentPage \* pageSize - 1\)/);
   assert.match(page, /currentPage = Math\.min\(requestedPage, pageCount\)/);
   assert.match(page, /\.order\("name", \{ ascending: true, nullsFirst: false \}\)/);
