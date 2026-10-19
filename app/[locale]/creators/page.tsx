@@ -16,18 +16,46 @@ type CreatorRow = {
   followers: number | null;
 };
 type FollowRow = { creator_id: number };
+type SortMode = "followers" | "name";
+type CreatorDirectoryQuery = {
+  tab?: string | string[];
+  q?: string | string[];
+  sort?: string | string[];
+  page?: string | string[];
+};
+
+function firstParam(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+function normalizeCreatorSearch(value: string | undefined) {
+  return (value ?? "")
+    .trim()
+    .slice(0, 100)
+    .replace(/[(),%_*"\\]/g, " ")
+    .replace(/\\s+/g, " ")
+    .trim();
+}
 
 export default async function CreatorsPage({
   params,
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<CreatorDirectoryQuery>;
 }) {
   const [{ locale: rawLocale }, query] = await Promise.all([params, searchParams]);
   const locale: Locale = rawLocale === "en" ? "en" : "ar";
   const ar = locale === "ar";
-  const followingOnly = query.tab === "following";
+  const followingOnly = firstParam(query.tab) === "following";
+  const searchQuery = normalizeCreatorSearch(firstParam(query.q));
+  const sortMode: SortMode = firstParam(query.sort) === "name" ? "name" : "followers";
+  const rawPage = Number(firstParam(query.page));
+  const requestedPage = Number.isSafeInteger(rawPage) && rawPage > 0 ? rawPage : 1;
+  const pageSize = 24;
+  let currentPage = 1;
+  let pageCount = 1;
+  let totalCount = 0;
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
 
@@ -66,14 +94,40 @@ export default async function CreatorsPage({
         }
       }
     }
+    totalCount = rows.length;
   } else {
-    const { data, error } = await supabase
-      .from("creators")
-      .select("id,name,username,avatar_url,bio,specialty,followers")
-      .order("followers", { ascending: false, nullsFirst: false })
-      .limit(100);
-    if (error) errorMessage = error.message;
-    else rows = (data ?? []) as CreatorRow[];
+    // Search/count the complete directory, then fetch only the clamped page.
+    const countQuery = supabase.from("creators").select("id", { count: "exact", head: true });
+    if (searchQuery) {
+      countQuery.or(
+        "name.ilike.%" + searchQuery + "%,username.ilike.%" + searchQuery +
+        "%,specialty.ilike.%" + searchQuery + "%,bio.ilike.%" + searchQuery + "%",
+      );
+    }
+    const { count, error: countError } = await countQuery;
+    if (countError) {
+      errorMessage = countError.message;
+    } else {
+      totalCount = count ?? 0;
+      pageCount = Math.max(1, Math.ceil(totalCount / pageSize));
+      currentPage = Math.min(requestedPage, pageCount);
+
+      const pageQuery = supabase
+        .from("creators")
+        .select("id,name,username,avatar_url,bio,specialty,followers");
+      if (searchQuery) {
+        pageQuery.or(
+          "name.ilike.%" + searchQuery + "%,username.ilike.%" + searchQuery +
+          "%,specialty.ilike.%" + searchQuery + "%,bio.ilike.%" + searchQuery + "%",
+        );
+      }
+      const orderedQuery = sortMode === "name"
+        ? pageQuery.order("name", { ascending: true, nullsFirst: false }).order("id", { ascending: true })
+        : pageQuery.order("followers", { ascending: false, nullsFirst: false }).order("id", { ascending: true });
+      const { data, error } = await orderedQuery.range((currentPage - 1) * pageSize, currentPage * pageSize - 1);
+      if (error) errorMessage = error.message;
+      else rows = (data ?? []) as CreatorRow[];
+    }
   }
 
   const items: RAVINECreatorDirectoryItem[] = rows.map((creator) => ({
@@ -118,7 +172,17 @@ export default async function CreatorsPage({
           <span>{ar ? "تحقق من اتصالك ثم حاول مجددًا." : "Check your connection and try again."}</span>
         </div>
       ) : (
-        <RAVINECreatorDirectory locale={locale} view={followingOnly ? "following" : "all"} creators={items} />
+        <RAVINECreatorDirectory
+          key={followingOnly ? "following" : `all-${searchQuery}-${sortMode}-${currentPage}`}
+          locale={locale}
+          view={followingOnly ? "following" : "all"}
+          creators={items}
+          query={followingOnly ? "" : searchQuery}
+          sort={followingOnly ? "followers" : sortMode}
+          page={currentPage}
+          pageCount={followingOnly ? 1 : pageCount}
+          totalCount={followingOnly ? items.length : totalCount}
+        />
       )}
     </section>
   );

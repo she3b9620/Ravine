@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { ArrowDownUp, Search, Users, X } from "lucide-react";
 import { formatRavineNumber } from "@/lib/ravine-number-formatter";
 import styles from "./RAVINECreatorDirectory.module.css";
@@ -16,12 +17,27 @@ export type RAVINECreatorDirectoryItem = {
   followers: number;
 };
 
+type SortMode = "followers" | "name";
 type Props = {
   locale: "ar" | "en";
   view: "all" | "following";
   creators: RAVINECreatorDirectoryItem[];
+  query: string;
+  sort: SortMode;
+  page: number;
+  pageCount: number;
+  totalCount: number;
 };
-type SortMode = "followers" | "name";
+
+function directoryHref(locale: "ar" | "en", query: string, sort: SortMode, page: number) {
+  const params = new URLSearchParams();
+  const cleanQuery = query.trim().slice(0, 100).replace(/[(),%_*"\\]/g, " ").replace(/\\s+/g, " ").trim();
+  if (cleanQuery) params.set("q", cleanQuery);
+  if (sort !== "followers") params.set("sort", sort);
+  if (page > 1) params.set("page", String(page));
+  const search = params.toString();
+  return "/" + locale + "/creators" + (search ? "?" + search : "") + "#creator-directory-results";
+}
 
 const copy = {
   ar: {
@@ -58,13 +74,29 @@ const copy = {
   },
 } as const;
 
-export default function RAVINECreatorDirectory({ locale, view, creators }: Props) {
+export default function RAVINECreatorDirectory({ locale, view, creators, query: initialQuery, sort: initialSort, page, pageCount, totalCount }: Props) {
   const ar = locale === "ar";
   const t = copy[locale];
-  const [query, setQuery] = useState("");
-  const [sort, setSort] = useState<SortMode>("followers");
+  const router = useRouter();
+  const [query, setQuery] = useState(initialQuery);
+  const [sort, setSort] = useState<SortMode>(initialSort);
+  const [isPending, startTransition] = useTransition();
+  const skipInitialSync = useRef(true);
+
+  useEffect(() => {
+    if (view !== "all") return;
+    if (skipInitialSync.current) {
+      skipInitialSync.current = false;
+      return;
+    }
+    const timeout = window.setTimeout(() => {
+      startTransition(() => router.replace(directoryHref(locale, query, sort, 1), { scroll: false }));
+    }, 320);
+    return () => window.clearTimeout(timeout);
+  }, [locale, query, router, sort, startTransition, view]);
 
   const visibleCreators = useMemo(() => {
+    if (view === "all") return creators;
     const normalized = query.trim().toLocaleLowerCase(locale);
     const filtered = creators.filter((creator) => !normalized || [
       creator.name,
@@ -75,7 +107,7 @@ export default function RAVINECreatorDirectory({ locale, view, creators }: Props
     return filtered.sort((left, right) => sort === "name"
       ? left.name.localeCompare(right.name, locale, { sensitivity: "base" })
       : right.followers - left.followers);
-  }, [creators, locale, query, sort]);
+  }, [creators, locale, query, sort, view]);
 
   const emptyTitle = query.trim()
     ? t.emptySearch
@@ -89,7 +121,7 @@ export default function RAVINECreatorDirectory({ locale, view, creators }: Props
       : (ar ? "سيظهر هنا المبدعون الذين تتوافق أعمالهم مع بحثك." : "Creators whose work matches your path will appear here.");
 
   return (
-    <div className={styles.directory}>
+    <div className={styles.directory} id="creator-directory-results" aria-busy={view === "all" && isPending}>
       <div className={styles.controls}>
         <label className={styles.search}>
           <Search size={17} aria-hidden="true" />
@@ -106,7 +138,7 @@ export default function RAVINECreatorDirectory({ locale, view, creators }: Props
           </select>
         </label>
         <div className={styles.count} role="status" aria-live="polite">
-          <strong>{formatRavineNumber(visibleCreators.length, locale)}</strong>
+          <strong>{formatRavineNumber(view === "all" ? totalCount : visibleCreators.length, locale)}</strong>
           <span>{view === "following" ? (ar ? "مبدع تتابعهم" : "followed creators") : (ar ? "مبدع" : "creators")}</span>
         </div>
       </div>
@@ -139,6 +171,27 @@ export default function RAVINECreatorDirectory({ locale, view, creators }: Props
           {view === "following" && !creators.length ? <Link href={"/" + locale + "/creators"} className="button secondary">{ar ? "اكتشف المبدعين" : "Explore creators"}</Link> : null}
         </div>
       )}
+
+      {view === "all" && totalCount > 0 ? (
+        <p className={styles.paginationSummary} aria-live="polite">
+          {ar
+            ? `عرض ${formatRavineNumber((page - 1) * 24 + 1, locale)}–${formatRavineNumber(Math.min(page * 24, totalCount), locale)} من ${formatRavineNumber(totalCount, locale)} مبدع`
+            : `Showing ${formatRavineNumber((page - 1) * 24 + 1, locale)}–${formatRavineNumber(Math.min(page * 24, totalCount), locale)} of ${formatRavineNumber(totalCount, locale)} creators`}
+        </p>
+      ) : null}
+      {view === "all" && pageCount > 1 ? (
+        <nav className={styles.pagination} aria-label={ar ? "صفحات المبدعين" : "Creator pages"}>
+          {page > 1
+            ? <Link className={styles.pageLink} href={directoryHref(locale, query, sort, page - 1)}>{ar ? "السابق" : "Previous"}</Link>
+            : <span className={styles.pageDisabled} aria-disabled="true">{ar ? "السابق" : "Previous"}</span>}
+          <span className={styles.pageIndicator} aria-current="page">
+            {ar ? `صفحة ${formatRavineNumber(page, locale)} من ${formatRavineNumber(pageCount, locale)}` : `Page ${formatRavineNumber(page, locale)} of ${formatRavineNumber(pageCount, locale)}`}
+          </span>
+          {page < pageCount
+            ? <Link className={styles.pageLink} href={directoryHref(locale, query, sort, page + 1)}>{ar ? "التالي" : "Next"}</Link>
+            : <span className={styles.pageDisabled} aria-disabled="true">{ar ? "التالي" : "Next"}</span>}
+        </nav>
+      ) : null}
     </div>
   );
 }

@@ -29,3 +29,17 @@
 @media(max-width:980px){.controls{grid-template-columns:minmax(0,1fr) minmax(190px,240px)}.count{grid-column:1/-1;justify-items:start;display:flex;align-items:baseline;gap:7px}}
 @media(max-width:620px){.controls{grid-template-columns:minmax(0,1fr);gap:9px}.search,.sort{min-height:46px}.count{grid-column:auto}}
 @media(prefers-reduced-motion:reduce){.search,.sort{scroll-behavior:auto}}
+
+
+.paginationSummary{margin:0;color:var(--stone,#9a9690);font-size:12px;line-height:1.7}
+.pagination{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:12px;margin:18px auto 4px}
+.pageLink,.pageDisabled,.pageIndicator{display:inline-flex;justify-content:center;align-items:center;min-width:108px;min-height:42px;padding:9px 15px;border:1px solid rgba(241,233,220,.14);border-radius:999px;background:rgba(21,23,25,.55);color:var(--ivory,#f1e9dc);font-size:12px;font-weight:650;text-align:center;text-decoration:none;transition:border-color .2s ease,background-color .2s ease,transform .2s ease}
+.pageLink:hover{border-color:rgba(196,122,82,.65);background:rgba(196,122,82,.08);transform:translateY(-1px)}
+.pageLink:focus-visible{outline:2px solid var(--copper,#c47a52);outline-offset:3px}
+.pageDisabled{opacity:.4;cursor:not-allowed}
+.pageIndicator{min-width:128px;border-color:rgba(196,122,82,.25);background:rgba(196,122,82,.07);color:var(--copper,#c47a52)}
+:global(html[data-theme="light"]) .pageLink,:global(html[data-theme="light"]) .pageDisabled,:global(html[data-theme="light"]) .pageIndicator{border-color:rgba(24,63,70,.18);background:rgba(24,63,70,.035);color:#183f46}
+:global(html[data-theme="light"]) .pageLink:hover{border-color:rgba(196,122,82,.58);background:rgba(196,122,82,.08)}
+:global(html[data-theme="light"]) .pageIndicator{border-color:rgba(196,122,82,.3);background:rgba(196,122,82,.08);color:#70402f}
+@media(max-width:560px){.pagination{gap:7px}.pageLink,.pageDisabled{min-width:88px;padding-inline:11px}.pageIndicator{min-width:105px}}
+@media(prefers-reduced-motion:reduce){.pageLink{transition:none}.pageLink:hover{transform:none}}

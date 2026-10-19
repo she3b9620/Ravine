@@ -38,3 +38,21 @@ test("creator public user profiles expose follow with a return path and prevent 
   assert.match(component, /creatorUserId === auth\.user\.id/);
   assert.match(component, /creatorUserId === userId/);
 });
+
+
+test("the public creator directory searches the complete server-side catalog and paginates exact matches", () => {
+  const page = read("../app/[locale]/creators/page.tsx");
+  const component = read("../components/RAVINECreatorDirectory.tsx");
+  assert.match(page, /const pageSize = 24/);
+  assert.match(page, /select\("id", \{ count: "exact", head: true \}\)/);
+  assert.match(page, /name\.ilike\.%.*username\.ilike\.%.*specialty\.ilike\.%.*bio\.ilike\.%/);
+  assert.match(page, /\.range\(\(currentPage - 1\) \* pageSize, currentPage \* pageSize - 1\)/);
+  assert.match(page, /currentPage = Math\.min\(requestedPage, pageCount\)/);
+  assert.match(page, /\.order\("name", \{ ascending: true, nullsFirst: false \}\)/);
+  assert.match(page, /\.order\("followers", \{ ascending: false, nullsFirst: false \}\)/);
+  assert.match(component, /router\.replace\(directoryHref\(locale, query, sort, 1\)/);
+  assert.match(component, /href=\{directoryHref\(locale, query, sort, page - 1\)\}/);
+  assert.match(component, /href=\{directoryHref\(locale, query, sort, page \+ 1\)\}/);
+  assert.match(component, /params\.set\("page", String\(page\)\)/);
+  assert.match(component, /Showing .*creators/);
+});
