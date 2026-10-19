@@ -10,7 +10,9 @@ test("Discover counts all matching public work and slices it into stable server-
   assert.match(page, /select\("id", \{ count: "exact", head: true \}\)/);
   assert.match(page, /const pageSize = 48/);
   assert.match(page, /\.range\(\(currentPage - 1\) \* pageSize, currentPage \* pageSize - 1\)/);
-  assert.match(page, /\.order\("created_at", \{ ascending: firstParam\(filters\.sort\) === "oldest" \}\)/);
+  assert.match(page, /sort === "oldest"/);
+  assert.match(page, /\.order\("created_at", \{ ascending: true \}\)/);
+  assert.match(page, /\.order\("created_at", \{ ascending: false \}\)/);
   assert.match(page, /sort === "views"/);
   assert.match(page, /sort === "likes"/);
   assert.match(page, /\.order\("views", \{ ascending: false, nullsFirst: false \}\)/);
