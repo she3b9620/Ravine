@@ -28,6 +28,8 @@ test("deletion only removes Cloudinary media from the configured account", () =>
   assert.match(route, /video\/destroy/);
   assert.match(route, /AbortSignal\.timeout\(20_000\)/);
   assert.match(route, /CLOUDINARY_API_SECRET/);
+  assert.match(route, /isCreatorWorkPublicId/);
+  assert.match(route, /ravine\\/creators\\/\$\{creatorId\}\\/works\\/\$\{creatorId\}-\[0-9a-f\]\{8\}/);
 });
 
 test("media cleanup fails closed and keeps the database work when an asset cannot be removed", () => {
@@ -39,6 +41,18 @@ test("media cleanup fails closed and keeps the database work when an asset canno
   assert.ok(cleanupFailure >= 0 && workDelete > cleanupFailure);
   assert.doesNotMatch(route, /payload\.error\?\.message/);
   assert.doesNotMatch(route, /deleteError\.message/);
+});
+
+test("destructive Cloudinary cleanup is restricted to UUID-v4 assets signed for the work's exact creator folder", () => {
+  assert.match(route, /select\("id,creator_id,video_url,series_id,creators!inner\(user_id\)"\)/);
+  assert.match(route, /const creatorId = Number\(work\.creator_id\)/);
+  assert.match(route, /function isCreatorWorkPublicId\(publicId: string, creatorId: number\)/);
+  assert.match(route, /ravine\/creators\/\$\{creatorId\}\/works\/\$\{creatorId\}-\[0-9a-f\]\{8\}-\[0-9a-f\]\{4\}-4\[0-9a-f\]\{3\}-\[89ab\]\[0-9a-f\]\{3\}-\[0-9a-f\]\{12\}/);
+  assert.match(route, /cloudinaryOwnedIds\.some\(\(id\) => !isCreatorWorkPublicId\(id as string, creatorId\)\)/);
+  const folderGuard = route.indexOf("cloudinaryOwnedIds.some((id) => !isCreatorWorkPublicId");
+  const destroyLoop = route.indexOf("for (const publicId of publicIds)");
+  assert.ok(folderGuard >= 0 && destroyLoop > folderGuard);
+  assert.match(route, /A media asset is outside this creator's verified RAVINE folder; the work was not deleted/);
 });
 
 test("deleting the last public episode updates the visibility of its parent series", () => {

@@ -57,6 +57,64 @@ function isCloudinaryUrl(value: string | null) {
   }
 }
 
+function isCreatorWorkPublicId(publicId: string, creatorId: number) {
+  // Destructive cleanup must be limited to this creator's RAVINE work folder
+  // and the UUID-v4 identifiers issued by the authenticated signing endpoint.
+  return new RegExp(
+    `^ravine/creators/${creatorId}/works/${creatorId}-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}import { createHash } from "node:crypto";
+import { NextResponse, type NextRequest } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+
+const CLOUDINARY_HOST = "res.cloudinary.com";
+
+function extractCloudinaryPublicId(videoUrl: string | null, cloudName: string) {
+  if (!videoUrl || !cloudName) return null;
+
+  try {
+    const url = new URL(videoUrl);
+    if (url.protocol !== "https:" || url.hostname.toLowerCase() !== CLOUDINARY_HOST) return null;
+
+    const parts = url.pathname.split("/").filter(Boolean);
+    if (parts.length < 4 || parts[0] !== cloudName || parts[1] !== "video" || parts[2] !== "upload") {
+      return null;
+    }
+
+    const publicIdParts = parts.slice(3);
+    while (publicIdParts.length) {
+      const first = publicIdParts[0];
+      if (/^v\d+$/.test(first) || first.includes(",") || /^(?:w|h|c|q|f|d|g|ar|br|fl|vc|so|du|ac|vs|eo|ki|pg|l|u|t)_/.test(first)) {
+        publicIdParts.shift();
+      } else {
+        break;
+      }
+    }
+
+    if (!publicIdParts.length) return null;
+    const publicId = publicIdParts.join("/").replace(/\.[^.]+$/, "");
+    return publicId && !publicId.startsWith("/") ? publicId : null;
+  } catch {
+    return null;
+  }
+}
+
+function belongsToCloudinaryAccount(value: string | null, cloudName: string) {
+  if (!value || !cloudName) return false;
+  try {
+    const url = new URL(value);
+    const parts = url.pathname.split("/").filter(Boolean);
+    return url.protocol === "https:"
+      && url.hostname.toLowerCase() === CLOUDINARY_HOST
+      && parts[0] === cloudName;
+  } catch {
+    return false;
+  }
+}
+
+,
+    "i",
+  ).test(publicId);
+}
+
 async function destroyCloudinaryVideo(publicId: string, cloudName: string, apiKey: string, apiSecret: string) {
   const timestamp = Math.floor(Date.now() / 1000).toString();
   const signature = createHash("sha1")
@@ -92,6 +150,7 @@ async function destroyCloudinaryVideo(publicId: string, cloudName: string, apiKe
 type CreatorOwnership = { user_id: string | null };
 type WorkWithCreator = {
   id: number;
+  creator_id: number | null;
   video_url: string | null;
   series_id: number | null;
   creators?: CreatorOwnership | CreatorOwnership[] | null;
@@ -126,7 +185,7 @@ export async function POST(request: NextRequest) {
 
     const { data: rawWork, error: workError } = await supabase
       .from("videos")
-      .select("id,video_url,series_id,creators!inner(user_id)")
+      .select("id,creator_id,video_url,series_id,creators!inner(user_id)")
       .eq("id", videoId)
       .maybeSingle();
 
@@ -135,6 +194,10 @@ export async function POST(request: NextRequest) {
     }
 
     const work = rawWork as unknown as WorkWithCreator;
+    const creatorId = Number(work.creator_id);
+    if (!Number.isSafeInteger(creatorId) || creatorId < 1) {
+      return jsonError("The work's creator identity could not be verified; the work was not deleted.", 422);
+    }
     const creatorOwner = Array.isArray(work.creators)
       ? work.creators[0]?.user_id ?? null
       : work.creators?.user_id ?? null;
@@ -191,8 +254,13 @@ export async function POST(request: NextRequest) {
     }
 
     const cloudinaryOwnedUrls = mediaUrls.filter((url) => belongsToCloudinaryAccount(url, cloudName));
-    if (cloudinaryOwnedUrls.some((url) => !extractCloudinaryPublicId(url, cloudName))) {
+    const cloudinaryOwnedIds = cloudinaryOwnedUrls
+      .map((url) => extractCloudinaryPublicId(url, cloudName));
+    if (cloudinaryOwnedIds.some((id) => !id)) {
       return jsonError("A media URL could not be verified for safe cleanup; the work was not deleted.", 422);
+    }
+    if (cloudinaryOwnedIds.some((id) => !isCreatorWorkPublicId(id as string, creatorId))) {
+      return jsonError("A media asset is outside this creator's verified RAVINE folder; the work was not deleted.", 422);
     }
 
     const mainPublicId = extractCloudinaryPublicId(work.video_url, cloudName);
