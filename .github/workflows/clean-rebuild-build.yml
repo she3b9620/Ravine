@@ -85,7 +85,7 @@ jobs:
         run: node --test tests/audio-only-podcast.test.mjs
 
       - name: Discover taxonomy and query tests
-        run: node --test tests/discover-taxonomy.test.mjs
+        run: node --test tests/discover-taxonomy.test.mjs tests/discover-pagination.test.mjs
 
       - name: Community privacy and membership tests
         run: node --test tests/community-access.test.mjs
