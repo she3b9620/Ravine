@@ -22,7 +22,7 @@ test("deletion only removes Cloudinary media from the configured account", () =>
   assert.match(route, /url\.hostname\.toLowerCase\(\) !== CLOUDINARY_HOST/);
   assert.match(route, /parts\[0\] === cloudName/);
   assert.match(route, /extractCloudinaryPublicId\(asset\.media_url, cloudName\)/);
-  assert.match(route, /cloudinaryOwnedUrls\.some\(\(url\) => !extractCloudinaryPublicId/);
+  assert.match(route, /cloudinaryOwnedIds\.some\(\(id\) => !isCreatorWorkPublicId/);
   assert.doesNotMatch(route, /asset\.public_id/);
   assert.match(route, /new Set\(\[\.\.\.auxiliaryPublicIds, mainPublicId\]/);
   assert.match(route, /video\/destroy/);
