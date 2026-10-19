@@ -67,6 +67,7 @@ import "./ravine-system-restore-2026-09-07.css";
 import "./ravine-logo-motion-finish.css";
 import "./ravine-sidebar-position-finish.css";
 import "./ravine-final-experience-fix-2026-09-07.css";
+import "./ravine-media-mode-and-creator-application.css";
 
 const locales = ["ar", "en"] as const;
 type Locale = (typeof locales)[number];
