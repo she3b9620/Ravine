@@ -81,3 +81,21 @@ test("public work-detail failures show localized recovery guidance instead of ra
   assert.match(source, /Work details could not be retrieved right now/);
   assert.match(source, /تعذّر جلب تفاصيل العمل الآن/);
 });
+
+
+test("public creator profiles paginate the complete published and public work list without exposing restricted items", () => {
+  const page = read("../app/[locale]/creators/[id]/page.tsx");
+  const css = read("../app/[locale]/creators/[id]/creator-profile.module.css");
+  assert.match(page, /searchParams: Promise<\{ workPage\?: string \| string\[\] \}>/);
+  assert.match(page, /select\("id", \{ count: "exact", head: true \}\)/);
+  assert.match(page, /\.eq\("creator_id", creatorId\)/);
+  assert.match(page, /\.eq\("published", true\)/);
+  assert.match(page, /\.eq\("visibility", "public"\)/);
+  assert.match(page, /\.range\(\(currentPage - 1\) \* pageSize, currentPage \* pageSize - 1\)/);
+  assert.match(page, /const currentPage = Math\.min\(requestedPage, pageCount\)/);
+  assert.match(page, /params\.set\("workPage", String\(targetPage\)\)/);
+  assert.match(page, /className=\{styles\.workPagination\}/);
+  assert.match(page, /totalWorkCount\.toLocaleString\(locale\)/);
+  assert.match(css, /\.workPageLink:focus-visible/);
+  assert.match(css, /html\[data-theme="light"\].*workPageLink/);
+});

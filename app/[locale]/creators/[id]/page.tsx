@@ -127,12 +127,22 @@ function WorkGrid({ works, locale, ar }: { works: Work[]; locale: Locale; ar: bo
   );
 }
 
-export default async function CreatorProfilePage({ params }: { params: Promise<{ locale: string; id: string }> }) {
-  const { locale: rawLocale, id } = await params;
+export default async function CreatorProfilePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string; id: string }>;
+  searchParams: Promise<{ workPage?: string | string[] }>;
+}) {
+  const [{ locale: rawLocale, id }, query] = await Promise.all([params, searchParams]);
   const locale: Locale = rawLocale === "en" ? "en" : "ar";
   const ar = locale === "ar";
   const creatorId = Number(id);
   if (!Number.isInteger(creatorId) || creatorId < 1) notFound();
+  const rawPage = Array.isArray(query.workPage) ? query.workPage[0] : query.workPage;
+  const parsedPage = Number(rawPage);
+  const requestedPage = Number.isSafeInteger(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+  const pageSize = 24;
 
   const supabase = await createClient();
   const { data: creatorData, error: creatorError } = await supabase
@@ -143,7 +153,17 @@ export default async function CreatorProfilePage({ params }: { params: Promise<{
   const creator = creatorData as Creator | null;
   if (creatorError || !creator) notFound();
 
-  const [{ data: worksData }, { data: profileData }, { data: eventData }] = await Promise.all([
+  const { count: workTotalCount, error: workCountError } = await supabase
+    .from("videos")
+    .select("id", { count: "exact", head: true })
+    .eq("creator_id", creatorId)
+    .eq("published", true)
+    .eq("visibility", "public");
+  const totalWorkCount = workTotalCount ?? 0;
+  const pageCount = Math.max(1, Math.ceil(totalWorkCount / pageSize));
+  const currentPage = Math.min(requestedPage, pageCount);
+
+  const [worksResult, { data: profileData }, { data: eventData }, { data: trailerData }] = await Promise.all([
     supabase
       .from("videos")
       .select("id,title,description,thumbnail_url,video_url,duration,views,likes,content_type,quality")
@@ -151,7 +171,8 @@ export default async function CreatorProfilePage({ params }: { params: Promise<{
       .eq("published", true)
       .eq("visibility", "public")
       .order("created_at", { ascending: false })
-      .limit(24),
+      .order("id", { ascending: false })
+      .range((currentPage - 1) * pageSize, currentPage * pageSize - 1),
     creator.user_id
       ? supabase.from("profiles").select("cover_url,website_url,bio").eq("id", creator.user_id).maybeSingle()
       : Promise.resolve({ data: null }),
@@ -162,6 +183,17 @@ export default async function CreatorProfilePage({ params }: { params: Promise<{
       .in("status", ["scheduled", "live"])
       .order("scheduled_at", { ascending: true, nullsFirst: false })
       .limit(12),
+    supabase
+      .from("videos")
+      .select("id,title,description,thumbnail_url,video_url,duration,views,likes,content_type,quality")
+      .eq("creator_id", creatorId)
+      .eq("published", true)
+      .eq("visibility", "public")
+      .not("video_url", "is", null)
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ]);
 
   const creatorEvents = ((eventData ?? []) as CreatorEventRow[]).map((event): RAVINEEventItem => ({
@@ -180,11 +212,17 @@ export default async function CreatorProfilePage({ params }: { params: Promise<{
     recordingHref: null,
     detailHref: "/" + locale + "/events/" + event.id,
   }));
-  const works = (worksData || []) as Work[];
+  const works = (worksResult.data || []) as Work[];
+  const workQueryError = Boolean(workCountError || worksResult.error);
   const profile = profileData as Profile | null;
-  const trailer = works.find((w) => Boolean(w.video_url));
+  const trailer = (trailerData as Work | null) || (currentPage === 1 ? works.find((w) => Boolean(w.video_url)) ?? null : null);
   const totalViews = works.reduce((s, w) => s + Number(w.views || 0), 0);
   const totalLikes = works.reduce((s, w) => s + Number(w.likes || 0), 0);
+
+  function creatorWorkPageHref(targetPage: number) {
+    const params = new URLSearchParams({ workPage: String(targetPage) });
+    return "/" + locale + "/creators/" + creatorId + "?" + params.toString() + "#creator-works";
+  }
   const specialty = creator.specialty || (ar ? "صانع أعمال إبداعية" : "Creative maker");
   const displayName = creator.name || creator.username || (ar ? "مبدع RAVINE" : "RAVINE Creator");
   const visualBio =
@@ -299,11 +337,11 @@ export default async function CreatorProfilePage({ params }: { params: Promise<{
           <strong>{specialty}</strong>
         </div>
         <div className={styles.identityBlock}>
-          <span className={styles.label}>{ar ? "الأعمال" : "Works"}</span>
-          <strong>{works.length.toLocaleString(locale)}</strong>
+          <span className={styles.label}>{ar ? "الأعمال المنشورة" : "Published works"}</span>
+          <strong>{workQueryError ? "—" : totalWorkCount.toLocaleString(locale)}</strong>
         </div>
         <div className={styles.identityBlock}>
-          <span className={styles.label}>{ar ? "المشاهدات عبر الأعمال" : "Views across work"}</span>
+          <span className={styles.label}>{ar ? "مشاهدات الأعمال المعروضة" : "Views on shown works"}</span>
           <strong>{totalViews.toLocaleString(locale)}</strong>
         </div>
         <div className={styles.identityBlock}>
@@ -312,7 +350,15 @@ export default async function CreatorProfilePage({ params }: { params: Promise<{
         </div>
       </section>
 
-      {workSections.length ? (
+      <div id="creator-works">
+      {workQueryError ? (
+        <section className="section">
+          <div className="empty-state" role="alert">
+            <strong>{ar ? "تعذّر تحميل الأعمال." : "We could not load this creator's work."}</strong>
+            <span>{ar ? "تعذّر جلب قائمة الأعمال الآن. أعد المحاولة بعد قليل." : "The published work list could not be retrieved. Please try again shortly."}</span>
+          </div>
+        </section>
+      ) : workSections.length ? (
         <>
           {workSections.map((section) => (
             <section className="section" key={section.key}>
@@ -345,6 +391,27 @@ export default async function CreatorProfilePage({ params }: { params: Promise<{
           </div>
         </section>
       )}
+        {!workQueryError && totalWorkCount > 0 ? (
+          <p className={styles.workPaginationSummary} aria-live="polite">
+            {ar
+              ? `عرض ${((currentPage - 1) * pageSize + 1).toLocaleString(locale)}–${Math.min(currentPage * pageSize, totalWorkCount).toLocaleString(locale)} من ${totalWorkCount.toLocaleString(locale)} عمل`
+              : `Showing ${((currentPage - 1) * pageSize + 1).toLocaleString(locale)}–${Math.min(currentPage * pageSize, totalWorkCount).toLocaleString(locale)} of ${totalWorkCount.toLocaleString(locale)} works`}
+          </p>
+        ) : null}
+        {!workQueryError && pageCount > 1 ? (
+          <nav className={styles.workPagination} aria-label={ar ? "صفحات أعمال المبدع" : "Creator work pages"}>
+            {currentPage > 1
+              ? <Link className={styles.workPageLink} href={creatorWorkPageHref(currentPage - 1)}>{ar ? "السابق" : "Previous"}</Link>
+              : <span className={styles.workPageDisabled} aria-disabled="true">{ar ? "السابق" : "Previous"}</span>}
+            <span className={styles.workPageIndicator} aria-current="page">
+              {ar ? `صفحة ${currentPage.toLocaleString(locale)} من ${pageCount.toLocaleString(locale)}` : `Page ${currentPage.toLocaleString(locale)} of ${pageCount.toLocaleString(locale)}`}
+            </span>
+            {currentPage < pageCount
+              ? <Link className={styles.workPageLink} href={creatorWorkPageHref(currentPage + 1)}>{ar ? "التالي" : "Next"}</Link>
+              : <span className={styles.workPageDisabled} aria-disabled="true">{ar ? "التالي" : "Next"}</span>}
+          </nav>
+        ) : null}
+      </div>
 
       <section className={`${styles.reputation} section`}>
         <div className={styles.reputationGrid}>
@@ -360,12 +427,12 @@ export default async function CreatorProfilePage({ params }: { params: Promise<{
             </p>
             <div className={styles.signalRow}>
               <div>
-                <span>{ar ? "إعجابات على الأعمال" : "Likes on work"}</span>
+                <span>{ar ? "إعجابات الأعمال المعروضة" : "Likes on shown works"}</span>
                 <strong>{totalLikes.toLocaleString(locale)}</strong>
               </div>
               <div>
                 <span>{ar ? "نطاق الملف" : "Portfolio scope"}</span>
-                <strong>{works.length ? (ar ? "نشط" : "Active") : ar ? "قيد البناء" : "Building"}</strong>
+                <strong>{totalWorkCount ? (ar ? "نشط" : "Active") : ar ? "قيد البناء" : "Building"}</strong>
               </div>
             </div>
           </div>
