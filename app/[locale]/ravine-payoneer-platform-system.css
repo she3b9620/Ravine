@@ -1,0 +1,519 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Arabic:wght@400;500;600;700;800&display=swap");
+
+/* RAVINE × Payoneer visual system
+   Product structure, routes, permissions, content models and the cinematic hero stay intact.
+   Uses Payoneer's Avenir Next World family when locally available, with modern web-safe fallbacks.
+   The approved RAVINE mockup's own brand palette remains the source of accent colors. */
+
+:root {
+  --rv-type-body: "avenirnextworld-regular", "Avenir Next World", "Avenir Next", Inter, "Noto Sans Arabic", Arial, sans-serif;
+  --rv-type-strong: "avenirnextworld-demi", "Avenir Next World", "Avenir Next", Inter, "Noto Sans Arabic", Arial, sans-serif;
+  --rv-radius-xs: 6px;
+  --rv-radius-sm: 8px;
+  --rv-radius-md: 12px;
+  --rv-radius-lg: 16px;
+  --rv-radius-xl: 20px;
+  --rv-space-page: clamp(18px, 4vw, 56px);
+  --rv-product-copper: #c47a52;
+  --rv-product-petrol: #183f46;
+  --rv-product-ivory: #f1e9dc;
+  --rv-product-umber: #70402f;
+  --rv-product-copper-light: #d49a78;
+}
+
+.ravine-shell {
+  --rv-page: #090909;
+  --rv-panel: #151719;
+  --rv-panel-raised: #1b1e20;
+  --rv-panel-soft: #111415;
+  --rv-text: #f1e9dc;
+  --rv-text-muted: #b2ada6;
+  --rv-text-dim: #918c86;
+  --rv-border: rgba(241, 233, 220, .14);
+  --rv-border-soft: rgba(241, 233, 220, .08);
+  --rv-control: #101314;
+  --rv-control-hover: #1b2021;
+  --rv-shadow: 0 12px 32px rgba(0, 0, 0, .14);
+  background: var(--rv-page);
+  color: var(--rv-text);
+  font-family: var(--rv-type-body) !important;
+}
+
+html[data-theme="light"] .ravine-shell {
+  --rv-page: #ffffff;
+  --rv-panel: #ffffff;
+  --rv-panel-raised: #ffffff;
+  --rv-panel-soft: #f4f4f4;
+  --rv-text: #212529;
+  --rv-text-muted: #4a4a4a;
+  --rv-text-dim: #73777c;
+  --rv-border: #d9d9d9;
+  --rv-border-soft: #ededed;
+  --rv-control: #ffffff;
+  --rv-control-hover: #f3f3f3;
+  --rv-shadow: 0 8px 24px rgba(25, 35, 45, .055);
+  background: var(--rv-page);
+  color: var(--rv-text);
+}
+
+/* Typography is consistently Avenir-style throughout product UI, Arabic and English.
+   RAVINE's image-based wordmark and cinematic hero media remain untouched. */
+.ravine-shell,
+.ravine-shell :is(h1,h2,h3,h4,h5,h6,p,a,button,input,textarea,select,label,small,strong,em,span,li,dt,dd,summary,th,td,legend,option,blockquote,figcaption,time,output) {
+  font-family: var(--rv-type-body) !important;
+  font-synthesis: none;
+}
+
+.ravine-shell :is(h1,h2,h3,h4,h5,h6,.section h2,.discover-page h1,.auth-card h1,.watch-copy h1,.creator-profile-title,.creator-feature strong,.pathway-card strong,.home-gated-item strong,.work h3,.video-meta h2) {
+  font-family: var(--rv-type-strong) !important;
+  font-weight: 600;
+  letter-spacing: -.022em;
+  text-wrap: balance;
+}
+
+.ravine-shell[lang="ar"] :is(h1,h2,h3,h4,h5,h6,p,a,button,input,textarea,select,label,small,strong,em,span,li,dt,dd,summary,th,td,legend,option,blockquote,figcaption,time,output) {
+  letter-spacing: 0;
+}
+
+.ravine-shell :is(p,li,dd,dt,blockquote,figcaption) {
+  line-height: 1.75;
+}
+
+.ravine-shell :is(.eyebrow,.home-state-kicker,.home-feed-label,.video-kicker,.work-kicker,.watch-kicker,.ravine-language,.duration,.video-stats,.home-work-meta,.ravine-footer-meta) {
+  font-family: var(--rv-type-strong) !important;
+}
+
+/* Shared application canvas and consistent reading width. Do not add a new wrapper or alter routes. */
+.ravine-main {
+  background: var(--rv-page);
+  color: var(--rv-text);
+}
+
+.ravine-main :is(.discover-page,.auth-page,.creator-apply-page,.creator-page,.studio-page,.dashboard-page,.settings-page,.account-page,.community-page,.podcasts-page,.documentaries-page,.short-films-page,.films-page,.series-page,.shorts-page,.notifications-page,.messages-page,.collections-page,.spaces-page,.events-page,.library-page,.opportunities-page) {
+  color: var(--rv-text);
+}
+
+.ravine-main :is(.discover-page,.auth-page,.creator-apply-page,.creator-page,.studio-page,.dashboard-page,.settings-page,.account-page,.community-page,.podcasts-page,.documentaries-page,.short-films-page,.films-page,.series-page,.shorts-page,.notifications-page,.messages-page,.collections-page,.spaces-page,.events-page,.library-page,.opportunities-page) h1 {
+  font-family: var(--rv-type-strong) !important;
+  font-weight: 600 !important;
+  letter-spacing: -.028em;
+  line-height: 1.14;
+  text-wrap: balance;
+}
+
+.ravine-main :is(.section,.discover-page,.auth-page,.creator-apply-page,.creator-page,.studio-page,.dashboard-page,.settings-page,.account-page,.community-page,.podcasts-page,.documentaries-page,.short-films-page,.films-page,.series-page,.shorts-page,.notifications-page,.messages-page,.collections-page,.spaces-page,.events-page,.library-page,.opportunities-page) h2 {
+  font-family: var(--rv-type-strong) !important;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.ravine-main :is(.section-note,.page-description,.page-intro,.auth-intro,.empty-state p,.muted,.subtle,.form-help,.helper-text) {
+  color: var(--rv-text-muted);
+  line-height: 1.8;
+}
+
+/* Header, primary navigation and sidebar: clean, quiet surfaces and crisp separators. */
+html[data-theme="light"] .ravine-header {
+  background: rgba(255,255,255,.94) !important;
+  border-bottom-color: #e3e3e3 !important;
+  color: #212529 !important;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+html[data-theme="light"] .ravine-header :is(a,button,.ravine-nav-link,.ravine-minor-link,.ravine-header-icon) {
+  color: #212529;
+}
+
+html[data-theme="light"] .ravine-header :is(.ravine-header-social,.ravine-header-preferences) {
+  border-color: #e2e2e2;
+  background: #fff;
+}
+
+html[data-theme="light"] .ravine-header :is(.ravine-header-icon,.ravine-mobile-menu-button) {
+  background: #fff !important;
+  color: #212529 !important;
+  border-color: #dedede !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="light"] .ravine-header :is(.ravine-language,.ravine-header-preferences .ravine-language) {
+  border-color: #dedede;
+  background: #fff;
+  color: #212529;
+}
+
+html[data-theme="light"] .ravine-header :is(a:hover,button:hover,.ravine-nav-link:hover,.ravine-minor-link:hover) {
+  color: var(--rv-product-petrol);
+}
+
+html[data-theme="light"] .ravine-sidebar {
+  background: #fff !important;
+  border-inline-end: 1px solid #e3e3e3 !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="light"] .ravine-sidebar :is(a,button,span,svg) {
+  color: #34383c;
+}
+
+html[data-theme="light"] .ravine-sidebar :is(a:hover,button:hover,[aria-current="page"],.is-active) {
+  background: #f1f3f3 !important;
+  color: var(--rv-product-petrol) !important;
+}
+
+/* Standard content cards: 12px geometry, subtle borders, low shadows. */
+.ravine-main :is(.work,.video-card,.home-work-card,.creator-feature,.pathway-card,.home-gated-item,.empty-state,.auth-card,.panel,.surface-card,.content-card,.creator-card,.collection-card,.community-card,.notification-card,.message-card,.event-card,.opportunity-card,.settings-card,.account-card,.studio-card,.dashboard-card,.stat-card,.metric-card,.filter-panel,.search-panel,.modal-card,.dialog,.profile-panel,.profile-section,.upload-panel,.upload-dropzone,.form-panel,.table-panel) {
+  border-radius: var(--rv-radius-md);
+  border-color: var(--rv-border);
+  box-shadow: var(--rv-shadow);
+}
+
+.ravine-main :is(.work,.video-card,.home-work-card,.creator-feature,.pathway-card,.home-gated-item,.auth-card,.panel,.surface-card,.content-card,.creator-card,.collection-card,.community-card,.notification-card,.message-card,.event-card,.opportunity-card,.settings-card,.account-card,.studio-card,.dashboard-card,.stat-card,.metric-card,.filter-panel,.search-panel,.profile-panel,.profile-section,.upload-panel,.upload-dropzone,.form-panel,.table-panel) {
+  background: var(--rv-panel);
+  color: var(--rv-text);
+}
+
+.ravine-main :is(.work,.video-card,.home-work-card,.creator-feature,.pathway-card,.home-gated-item,.panel,.surface-card,.content-card,.creator-card,.collection-card,.community-card,.notification-card,.message-card,.event-card,.opportunity-card,.settings-card,.account-card,.studio-card,.dashboard-card,.stat-card,.metric-card,.filter-panel,.search-panel,.profile-panel,.profile-section,.upload-panel,.upload-dropzone,.form-panel,.table-panel) {
+  border: 1px solid var(--rv-border);
+}
+
+.ravine-main :is(.work,.video-card,.home-work-card,.creator-feature,.pathway-card,.content-card,.creator-card,.collection-card,.community-card,.notification-card,.message-card,.event-card,.opportunity-card,.settings-card,.account-card,.studio-card,.dashboard-card,.stat-card,.metric-card) {
+  transition: border-color .22s ease, box-shadow .22s ease, transform .22s ease, background-color .22s ease;
+}
+
+.ravine-main :is(.work,.video-card,.home-work-card,.creator-feature,.pathway-card,.content-card,.creator-card,.collection-card,.community-card,.notification-card,.message-card,.event-card,.opportunity-card,.settings-card,.account-card,.studio-card,.dashboard-card,.stat-card,.metric-card):hover {
+  border-color: color-mix(in srgb, var(--rv-product-copper) 52%, var(--rv-border)) !important;
+  box-shadow: 0 12px 28px rgba(0,0,0,.095);
+}
+
+html[data-theme="light"] .ravine-main :is(.work,.video-card,.home-work-card,.creator-feature,.pathway-card,.content-card,.creator-card,.collection-card,.community-card,.notification-card,.message-card,.event-card,.opportunity-card,.settings-card,.account-card,.studio-card,.dashboard-card,.stat-card,.metric-card) {
+  background: #fff;
+  color: #212529;
+  border-color: #e2e2e2;
+  box-shadow: 0 5px 18px rgba(20,30,40,.035);
+}
+
+html[data-theme="light"] .ravine-main :is(.work,.video-card,.home-work-card,.creator-feature,.pathway-card,.content-card,.creator-card,.collection-card,.community-card,.notification-card,.message-card,.event-card,.opportunity-card,.settings-card,.account-card,.studio-card,.dashboard-card,.stat-card,.metric-card):hover {
+  border-color: rgba(112,64,47,.34) !important;
+  box-shadow: 0 12px 28px rgba(20,30,40,.075);
+}
+
+.ravine-main :is(.work h3,.video-card h2,.video-card h3,.home-work-body h3,.creator-feature strong,.pathway-card strong,.home-gated-item strong,.card-title,.panel-title) {
+  font-family: var(--rv-type-strong) !important;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--rv-text);
+}
+
+html[data-theme="light"] .ravine-main :is(.work h3,.video-card h2,.video-card h3,.home-work-body h3,.creator-feature strong,.pathway-card strong,.home-gated-item strong,.card-title,.panel-title) {
+  color: #212529;
+}
+
+.ravine-main :is(.work p,.video-card p,.home-work-creator,.creator-feature span:last-child,.card-description,.panel-description) {
+  color: var(--rv-text-muted);
+}
+
+html[data-theme="light"] .ravine-main :is(.work p,.video-card p,.home-work-creator,.creator-feature span:last-child,.card-description,.panel-description) {
+  color: #62676c;
+}
+
+/* Buttons and links use a quieter Payoneer-like geometry without changing their purpose. */
+.ravine-shell :is(.button,.watch-action,.auth-google,.auth-switch,.auth-submit,.ravine-auth-trigger,.home-rail-link,.tab-button,.filter-chip,.chip,.badge-button,.segmented-control button) {
+  border-radius: var(--rv-radius-sm);
+  font-family: var(--rv-type-strong) !important;
+  font-weight: 600;
+  transition: background-color .18s ease, color .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+.ravine-shell :is(.button,.auth-submit) {
+  min-height: 44px;
+}
+
+.ravine-shell :is(.button.primary,.auth-submit,.ravine-auth-trigger-primary) {
+  box-shadow: none;
+}
+
+html[data-theme="light"] .ravine-shell .button.secondary {
+  color: #212529;
+  border-color: #d8d8d8;
+  background: #fff;
+}
+
+html[data-theme="light"] .ravine-shell .button.secondary:hover {
+  border-color: #bdbdbd;
+  background: #f5f5f5;
+}
+
+html[data-theme="light"] .ravine-shell :is(.auth-google,.auth-switch,.watch-action) {
+  color: #212529;
+  border-color: #d9d9d9;
+  background: #fff;
+}
+
+html[data-theme="light"] .ravine-shell :is(.auth-google,.auth-switch,.watch-action):hover {
+  border-color: #bfbfbf;
+  background: #f4f4f4;
+}
+
+.ravine-shell a:not(.ravine-brand):focus-visible,
+.ravine-shell button:focus-visible,
+.ravine-shell input:focus-visible,
+.ravine-shell textarea:focus-visible,
+.ravine-shell select:focus-visible {
+  outline: 2px solid rgba(196,122,82,.72);
+  outline-offset: 3px;
+}
+
+/* Inputs, selects, checkboxes, menus and upload forms. */
+.ravine-main :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),textarea,select,[role="combobox"],[contenteditable="true"]) {
+  min-height: 44px;
+  border-radius: var(--rv-radius-sm);
+  border: 1px solid var(--rv-border);
+  background: var(--rv-control);
+  color: var(--rv-text);
+  box-shadow: none;
+  font-family: var(--rv-type-body) !important;
+  padding-inline: 12px;
+}
+
+.ravine-main textarea {
+  min-height: 100px;
+  padding-block: 11px;
+  resize: vertical;
+}
+
+.ravine-main :is(input,textarea,select,[role="combobox"]):focus {
+  border-color: rgba(196,122,82,.72) !important;
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(196,122,82,.10);
+}
+
+.ravine-main :is(input,textarea)::placeholder {
+  color: var(--rv-text-dim);
+  opacity: 1;
+}
+
+.ravine-main :is(input[type="checkbox"],input[type="radio"]) {
+  accent-color: var(--rv-product-copper);
+}
+
+html[data-theme="light"] .ravine-main :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),textarea,select,[role="combobox"],[contenteditable="true"]) {
+  background: #fff;
+  color: #212529;
+  border-color: #d7d7d7;
+}
+
+html[data-theme="light"] .ravine-main :is(input,textarea)::placeholder {
+  color: #83878b;
+}
+
+/* Filters, tabs, status chips and pagination. */
+.ravine-main :is(.selection-tabs,.tabs,.tab-list,[role="tablist"],.segmented-control) {
+  gap: 5px;
+  border-radius: 10px;
+}
+
+.ravine-main :is(.selection-tab,.tab-button,[role="tab"],.filter-chip,.chip,.status-pill,.work-kicker,.video-kicker,.tag,.badge) {
+  border-radius: 7px;
+}
+
+html[data-theme="light"] .ravine-main :is(.selection-tab,.tab-button,[role="tab"],.filter-chip,.chip,.status-pill,.tag,.badge) {
+  border-color: #dedede;
+  color: #45494d;
+}
+
+html[data-theme="light"] .ravine-main :is(.selection-tab.active,.tab-button.active,[role="tab"][aria-selected="true"],.filter-chip.active,.chip.active) {
+  background: #183f46;
+  color: #fff;
+  border-color: #183f46;
+}
+
+/* Tables and data-dense screens use the same quiet separators and legible numerals. */
+.ravine-main table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  color: var(--rv-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.ravine-main :is(th,td) {
+  padding: 13px 14px;
+  border-bottom: 1px solid var(--rv-border-soft);
+  text-align: start;
+  vertical-align: middle;
+}
+
+.ravine-main th {
+  color: var(--rv-text-muted);
+  font-family: var(--rv-type-strong) !important;
+  font-weight: 600;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+html[data-theme="light"] .ravine-main :is(th,td) {
+  border-bottom-color: #e8e8e8;
+}
+
+.ravine-main :is(hr,.divider,.separator) {
+  border: 0;
+  border-top: 1px solid var(--rv-border);
+}
+
+/* Overlays and dialogs are polished but remain governed by their existing interaction logic. */
+.ravine-shell :is(.auth-card,.ravine-search-dialog,.modal-card,.dialog,[role="dialog"]) {
+  border-radius: var(--rv-radius-lg);
+}
+
+html[data-theme="light"] .ravine-main :is(.auth-card,.panel,.surface-card,.content-card,.filter-panel,.search-panel,.profile-panel,.profile-section,.upload-panel,.form-panel,.table-panel,.dashboard-card,.settings-card,.account-card,.studio-card) {
+  background: #fff;
+  color: #212529;
+  border-color: #dfdfdf;
+  box-shadow: 0 10px 28px rgba(20,30,40,.045);
+}
+
+html[data-theme="light"] .ravine-main .auth-card {
+  background: #fff;
+  border-color: #dedede;
+  box-shadow: 0 18px 52px rgba(20,30,40,.08);
+}
+
+html[data-theme="light"] .ravine-main .auth-page {
+  background: #f2f2f2;
+}
+
+html[data-theme="light"] .ravine-main :is(.auth-card h1,.auth-card h2,.auth-card h3,.page-title,.panel-title) {
+  color: #212529;
+}
+
+html[data-theme="light"] .ravine-main :is(.auth-intro,.form-help,.helper-text,.page-description,.page-intro,.section-note) {
+  color: #62676c;
+}
+
+/* Creator and account workspaces get calm page gutters, not extra visual noise. */
+.ravine-main :is(.creator-apply-page,.creator-page,.studio-page,.dashboard-page,.settings-page,.account-page,.community-page,.podcasts-page,.documentaries-page,.short-films-page,.films-page,.series-page,.shorts-page,.notifications-page,.messages-page,.collections-page,.spaces-page,.events-page,.library-page,.opportunities-page) {
+  padding-inline: clamp(18px, 3vw, 42px);
+}
+
+.ravine-main :is(.creator-apply-page,.creator-page,.studio-page,.dashboard-page,.settings-page,.account-page,.community-page,.podcasts-page,.documentaries-page,.short-films-page,.films-page,.series-page,.shorts-page,.notifications-page,.messages-page,.collections-page,.spaces-page,.events-page,.library-page,.opportunities-page) :is(.section-head,.page-header,.page-heading,.dashboard-header,.studio-header,.creator-header) {
+  gap: clamp(16px, 2.5vw, 32px);
+  margin-bottom: clamp(22px, 3vw, 36px);
+}
+
+.ravine-main :is(.creator-apply-page,.creator-page,.studio-page,.dashboard-page,.settings-page,.account-page,.community-page,.podcasts-page,.documentaries-page,.short-films-page,.films-page,.series-page,.shorts-page,.notifications-page,.messages-page,.collections-page,.spaces-page,.events-page,.library-page,.opportunities-page) :is(.section,.panel,.content-card,.dashboard-card,.studio-card,.form-panel,.table-panel) {
+  border-radius: var(--rv-radius-md);
+}
+
+/* Video pages retain their dark viewing environment; only metadata and controls are normalized. */
+.ravine-main .watch-page {
+  color: #f1e9dc;
+  background: #090909;
+}
+
+.ravine-main .watch-video {
+  border-radius: var(--rv-radius-md);
+}
+
+.ravine-main .watch-copy :is(h1,h2,h3) {
+  font-family: var(--rv-type-strong) !important;
+}
+
+.ravine-main .watch-copy p {
+  color: #b2ada6;
+}
+
+.ravine-main .watch-action {
+  min-height: 40px;
+  border-radius: 8px;
+}
+
+html[data-theme="light"] .ravine-main .watch-page {
+  background: #090909;
+  color: #f1e9dc;
+}
+
+/* Footer follows the strong, near-black closing band in Payoneer's editorial system. */
+.ravine-footer {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 42px max(var(--rv-space-page), calc((100vw - 1360px) / 2)) 30px !important;
+  border-top: 1px solid rgba(241,233,220,.11) !important;
+  background:
+    radial-gradient(ellipse at 8% 0%, rgba(24,63,70,.18), transparent 38%),
+    #131314 !important;
+  color: #f1e9dc !important;
+}
+
+.ravine-footer > * {
+  max-width: 1360px;
+}
+
+.ravine-footer p,
+.ravine-footer :is(span,a) {
+  color: rgba(241,233,220,.75);
+}
+
+.ravine-footer .ravine-footer-brand {
+  color: #f1e9dc;
+}
+
+.ravine-footer-meta {
+  color: #a9a9a9 !important;
+}
+
+/* Home hero is deliberately excluded from surface, height, composition and cinematic media rules. */
+.ravine-shell.guest-shell .home-guest-hero .ravine-guest-cinematic-backdrop,
+.ravine-shell.guest-shell .home-guest-hero .ravine-guest-cinematic-video,
+.ravine-shell.guest-shell .home-guest-hero .ravine-guest-cinematic-image {
+  pointer-events: none;
+}
+
+/* Accessibility and layout resilience. */
+@media (max-width: 1100px) {
+  .ravine-header-inner {
+    gap: 16px;
+  }
+
+  .ravine-main :is(th,td) {
+    padding: 11px;
+  }
+}
+
+@media (max-width: 820px) {
+  .ravine-main :is(.section,.discover-page,.auth-page,.creator-apply-page,.creator-page,.studio-page,.dashboard-page,.settings-page,.account-page,.community-page,.podcasts-page,.documentaries-page,.short-films-page,.films-page,.series-page,.shorts-page,.notifications-page,.messages-page,.collections-page,.spaces-page,.events-page,.library-page,.opportunities-page) {
+    scroll-margin-top: 82px;
+  }
+
+  .ravine-main :is(.section-head,.page-header,.page-heading,.dashboard-header,.studio-header,.creator-header) {
+    gap: 16px;
+  }
+
+  .ravine-footer {
+    padding: 30px 18px 24px !important;
+  }
+}
+
+@media (max-width: 560px) {
+  .ravine-shell :is(.button,.auth-submit,.auth-google,.auth-switch,.watch-action) {
+    max-width: 100%;
+  }
+
+  .ravine-main :is(th,td) {
+    padding: 9px 8px;
+    font-size: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ravine-shell *,
+  .ravine-shell *::before,
+  .ravine-shell *::after {
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
