@@ -232,3 +232,146 @@ html[data-theme="light"] .ravine-header-search .ravine-search-trigger:hover {
   .ravine-header-inner { padding-inline: 12px !important; column-gap: 8px !important; }
   .ravine-header-search .ravine-search-trigger { padding-inline: 12px !important; gap: 9px !important; }
 }
+
+
+/* RAVINE / Payoneer-reference design-system pass — 2026-10-21 */
+/*
+ * Use Payoneer's Arabic/English site as a reference for layout discipline and motion,
+ * without copying its brand, color system, page content, or replacing RAVINE's cinematic hero.
+ * Avenir Next World is named as the intended family. The licensed font files are not in this
+ * repository yet, so the existing script-aware RAVINE family remains the runtime fallback.
+ */
+:root {
+  --ravine-type-family: "Avenir Next World", "Avenir Next", RavineSansMixed, system-ui, sans-serif;
+  --ravine-layout-gutter: clamp(18px, 3vw, 44px);
+  --ravine-layout-max: 1500px;
+  --ravine-motion-ease: cubic-bezier(.2, .72, .24, 1);
+  --ravine-motion-fast: 180ms;
+  --ravine-motion-medium: 320ms;
+  --ravine-motion-slow: 520ms;
+  --ravine-focus-ring: 0 0 0 3px rgba(196, 122, 82, .24);
+}
+
+/* One intended type family for both scripts; current local fonts are a safe fallback. */
+.ravine-shell,
+.ravine-shell :is(h1,h2,h3,h4,h5,h6,p,a,button,input,textarea,select,label,summary,small,span,strong,em,li,dt,dd,th,td,legend,output) {
+  font-family: var(--ravine-type-family) !important;
+  font-synthesis: none;
+  font-kerning: normal;
+}
+
+/* Shared page geometry: measured gutters and predictable alignment, without flattening the cinema UI. */
+.ravine-main {
+  min-width: 0;
+  overflow-x: clip;
+}
+.ravine-header-inner,
+.ravine-footer {
+  width: min(100%, var(--ravine-layout-max));
+  padding-inline: var(--ravine-layout-gutter);
+}
+.ravine-header-inner {
+  gap: clamp(12px, 1.55vw, 26px);
+}
+.ravine-footer {
+  padding-block: clamp(28px, 3.3vw, 44px);
+}
+.ravine-main .section {
+  padding-inline: var(--ravine-layout-gutter);
+  padding-block: clamp(56px, 5.3vw, 84px);
+  scroll-margin-top: 92px;
+}
+.ravine-main .section-head {
+  gap: clamp(16px, 2.2vw, 32px);
+}
+.ravine-main .section-head > :first-child {
+  min-width: 0;
+}
+.ravine-main .section-note {
+  max-width: 64ch;
+  text-wrap: pretty;
+}
+
+/* A coherent interaction language: quiet borders, responsive surfaces, and no exaggerated bounce. */
+.ravine-shell :is(.button,.ravine-auth-trigger,.ravine-search-trigger,.ravine-language,.watch-action,.selection-tab,.ravine-mobile-menu-button) {
+  transition:
+    color var(--ravine-motion-fast) ease,
+    background-color var(--ravine-motion-medium) ease,
+    border-color var(--ravine-motion-medium) ease,
+    box-shadow var(--ravine-motion-medium) ease,
+    transform var(--ravine-motion-medium) var(--ravine-motion-ease);
+}
+.ravine-shell :is(.button,.ravine-auth-trigger,.ravine-search-trigger,.watch-action,.selection-tab,.ravine-mobile-menu-button):focus-visible,
+.ravine-shell a:focus-visible {
+  outline: 2px solid var(--copper, #C47A52);
+  outline-offset: 3px;
+  box-shadow: var(--ravine-focus-ring);
+}
+.ravine-shell :is(.video-card,.work,.pathway-card,.creator-feature,.home-gated-item,.home-guest-note) {
+  transition:
+    transform var(--ravine-motion-medium) var(--ravine-motion-ease),
+    border-color var(--ravine-motion-medium) ease,
+    background-color var(--ravine-motion-medium) ease,
+    box-shadow var(--ravine-motion-medium) ease;
+}
+.ravine-shell :is(.video-card,.work,.pathway-card,.creator-feature):hover {
+  border-color: color-mix(in srgb, var(--copper, #C47A52) 45%, transparent);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, .2);
+}
+.ravine-shell :is(.video-card,.work,.pathway-card,.creator-feature):hover {
+  transform: translateY(-4px);
+}
+.ravine-shell .video-thumb img {
+  transition: transform 640ms var(--ravine-motion-ease), filter 420ms ease;
+}
+.ravine-shell .video-card:hover .video-thumb img {
+  transform: scale(1.035);
+}
+.ravine-shell :is(.button,.watch-action,.selection-tab):active {
+  transform: translateY(1px) scale(.99);
+}
+
+/* Keep motion tied to useful feedback. On supporting browsers, sections reveal as they enter view. */
+@keyframes ravinePayoneerStyleSectionReveal {
+  from { opacity: .18; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@supports (animation-timeline: view()) {
+  .ravine-main .ravine-page-transition .section {
+    animation: ravinePayoneerStyleSectionReveal 1ms linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 24%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ravine-shell,
+  .ravine-shell *,
+  .ravine-shell *::before,
+  .ravine-shell *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+  .ravine-shell :is(.video-card,.work,.pathway-card,.creator-feature):hover,
+  .ravine-shell :is(.button,.watch-action,.selection-tab):active {
+    transform: none !important;
+  }
+}
+@media (max-width: 820px) {
+  .ravine-header-inner { gap: 10px; }
+  .ravine-main .section {
+    padding-inline: clamp(16px, 4vw, 24px);
+    padding-block: clamp(44px, 8vw, 62px);
+    scroll-margin-top: 76px;
+  }
+}
+@media (max-width: 480px) {
+  .ravine-header-inner,
+  .ravine-footer {
+    padding-inline: 16px;
+  }
+  .ravine-shell :is(.video-card,.work,.pathway-card,.creator-feature):hover {
+    transform: translateY(-2px);
+  }
+}
