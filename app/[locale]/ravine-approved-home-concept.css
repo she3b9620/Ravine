@@ -1,0 +1,902 @@
+/* RAVINE approved cinematic home concept — 2026-10-21
+   Implements the user-approved visual direction on the isolated preview branch.
+   Preserve the official RAVINE typography, data flow, routes, access rules and shell. */
+
+.ravine-main .home-guest {
+  --ravine-home-ink: #171717;
+  --ravine-home-paper: #f1e9dc;
+  --ravine-home-paper-white: #fffdf9;
+  --ravine-home-teal: #183f46;
+  --ravine-home-copper: #c47a52;
+  --ravine-home-border-light: rgba(23, 23, 23, .13);
+  color: #f1e9dc;
+  background: #090909;
+  overflow: clip;
+  isolation: isolate;
+}
+
+.ravine-main .home-guest > section.section {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: clamp(54px, 6.2vw, 92px) max(clamp(20px, 4vw, 52px), calc((100vw - 1360px) / 2)) !important;
+  box-sizing: border-box !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  position: relative;
+  isolation: isolate;
+}
+
+.ravine-main .home-guest > section.section > * {
+  width: min(100%, 1360px) !important;
+  max-width: 1360px !important;
+  margin-inline: auto !important;
+  box-sizing: border-box;
+}
+
+.ravine-main .home-guest > section.section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: .65;
+  background: radial-gradient(ellipse at 86% 0%, rgba(196,122,82,.08), transparent 35%);
+}
+
+.ravine-main .home-guest > section.section .section-head {
+  position: relative;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: clamp(18px, 3vw, 40px);
+  margin-bottom: clamp(26px, 3vw, 40px) !important;
+  padding-bottom: 20px !important;
+  border-bottom: 1px solid rgba(241,233,220,.18) !important;
+}
+
+.ravine-main .home-guest > section.section .section-head::after {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  bottom: -1px;
+  width: 76px;
+  height: 3px;
+  background: linear-gradient(90deg, #c47a52, rgba(196,122,82,0));
+}
+
+.ravine-main .home-guest > section.section .eyebrow,
+.ravine-main .home-guest > section.section .home-feed-label {
+  margin-bottom: 12px;
+  color: #c47a52;
+  font-weight: 750;
+  letter-spacing: .12em;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.ravine-main .home-guest > section.section h2 {
+  max-width: 19ch;
+  margin: 0;
+  font-size: clamp(30px, 3.6vw, 48px);
+  line-height: 1.22;
+  letter-spacing: -.025em;
+  text-wrap: balance;
+}
+
+.ravine-main .home-guest > section.section .section-note,
+.ravine-main .home-guest > section.section p {
+  line-height: 1.85;
+}
+
+/* Cinematic opening: rich full-bleed video/photo scene with legible copy. */
+.ravine-shell.guest-shell .home-guest-hero {
+  min-height: clamp(500px, 59svh, 690px) !important;
+  padding: clamp(72px, 9vw, 120px) clamp(24px, 5vw, 72px) clamp(68px, 8vw, 106px) !important;
+  display: flex !important;
+  align-items: center !important;
+  position: relative !important;
+  overflow: hidden !important;
+  background: #090909 !important;
+  border: 0 !important;
+}
+
+.ravine-shell.guest-shell .home-guest-hero .ravine-guest-cinematic-backdrop {
+  inset: 0 !important;
+  height: 100% !important;
+  opacity: 1 !important;
+}
+
+.ravine-shell.guest-shell .home-guest-hero .ravine-guest-cinematic-image,
+.ravine-shell.guest-shell .home-guest-hero .ravine-guest-cinematic-video {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center 48% !important;
+  transform: scale(1.015) !important;
+  filter: saturate(.88) contrast(1.08) brightness(.7) !important;
+}
+
+.ravine-shell[lang="ar"].guest-shell .home-guest-hero .ravine-guest-cinematic-wash {
+  background:
+    linear-gradient(270deg, rgba(9,9,9,.88) 0%, rgba(9,9,9,.68) 28%, rgba(9,9,9,.24) 64%, rgba(9,9,9,.12) 100%),
+    linear-gradient(180deg, rgba(9,9,9,.26) 0%, rgba(9,9,9,.04) 45%, rgba(9,9,9,.14) 76%, rgba(9,9,9,.28) 100%) !important;
+}
+
+.ravine-shell[lang="en"].guest-shell .home-guest-hero .ravine-guest-cinematic-wash {
+  background:
+    linear-gradient(90deg, rgba(9,9,9,.88) 0%, rgba(9,9,9,.68) 28%, rgba(9,9,9,.24) 64%, rgba(9,9,9,.12) 100%),
+    linear-gradient(180deg, rgba(9,9,9,.26) 0%, rgba(9,9,9,.04) 45%, rgba(9,9,9,.14) 76%, rgba(9,9,9,.28) 100%) !important;
+}
+
+.ravine-shell.guest-shell .home-guest-hero .ravine-guest-cinematic-backdrop::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: auto 0 0 !important;
+  height: 20% !important;
+  z-index: 4 !important;
+  pointer-events: none !important;
+  filter: none !important;
+  opacity: 1 !important;
+  background: linear-gradient(180deg, rgba(241,233,220,0) 0%, rgba(241,233,220,.12) 42%, rgba(241,233,220,.48) 76%, #f1e9dc 100%) !important;
+}
+
+.ravine-shell.guest-shell .home-guest-hero .hero-inner {
+  width: min(100%, 1360px) !important;
+  max-width: 1360px !important;
+  margin: 0 auto !important;
+  padding: 26px 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  position: relative !important;
+  z-index: 5 !important;
+  transform: none !important;
+  scale: 1 !important;
+  animation: ravineApprovedHeroIn .8s cubic-bezier(.2,.7,.2,1) both !important;
+}
+
+.ravine-shell[lang="ar"].guest-shell .home-guest-hero .hero-inner {
+  text-align: right !important;
+}
+
+.ravine-shell.guest-shell .home-guest-hero .home-state-kicker {
+  order: 1 !important;
+  margin: 0 0 18px !important;
+  color: #d49a78 !important;
+  font-size: 12px !important;
+  line-height: 1.6 !important;
+  font-weight: 800 !important;
+  letter-spacing: .13em !important;
+  text-shadow: 0 2px 20px rgba(0,0,0,.7) !important;
+}
+
+.ravine-shell.guest-shell .home-guest-hero h1 {
+  order: 2 !important;
+  width: min(100%, 760px) !important;
+  max-width: 760px !important;
+  margin: 0 0 20px !important;
+  color: #f1e9dc !important;
+  font-size: clamp(42px, 5.2vw, 76px) !important;
+  line-height: 1.18 !important;
+  letter-spacing: -.035em !important;
+  font-weight: 850 !important;
+  text-shadow: 0 3px 24px rgba(0,0,0,.58) !important;
+  -webkit-text-stroke: 0 transparent !important;
+  text-wrap: balance !important;
+}
+
+.ravine-shell[lang="en"].guest-shell .home-guest-hero h1 {
+  line-height: .99 !important;
+  letter-spacing: -.055em !important;
+}
+
+.ravine-shell.guest-shell .home-guest-hero p {
+  order: 3 !important;
+  width: min(100%, 640px) !important;
+  max-width: 640px !important;
+  margin: 0 !important;
+  color: rgba(241,233,220,.92) !important;
+  font-size: clamp(15px, 1.25vw, 18px) !important;
+  line-height: 1.9 !important;
+  font-weight: 450 !important;
+  text-shadow: 0 2px 16px rgba(0,0,0,.72) !important;
+  -webkit-text-stroke: 0 transparent !important;
+}
+
+.ravine-shell.guest-shell .home-guest-hero .home-state-actions {
+  order: 4 !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 11px !important;
+  margin: 28px 0 0 !important;
+}
+
+.ravine-shell.guest-shell .home-guest-hero .home-state-actions .button,
+.ravine-shell.guest-shell .home-guest-hero .home-state-actions .ravine-auth-trigger {
+  min-height: 48px !important;
+  padding: 0 20px !important;
+  border-radius: 9px !important;
+  box-shadow: none !important;
+  text-decoration: none !important;
+}
+
+.ravine-shell.guest-shell .home-guest-hero .home-state-actions .ravine-auth-trigger {
+  color: #17110d !important;
+  border: 1px solid #c47a52 !important;
+  background: #c47a52 !important;
+}
+
+.ravine-shell.guest-shell .home-guest-hero .home-state-actions .button.secondary {
+  color: #f1e9dc !important;
+  border: 1px solid rgba(241,233,220,.38) !important;
+  background: rgba(9,9,9,.26) !important;
+  backdrop-filter: blur(10px);
+}
+
+/* The first editorial section deliberately switches to RAVINE ivory, as in the approved mockup. */
+.ravine-main .home-guest > section.section:nth-child(2) {
+  color: #171717 !important;
+  background: #f1e9dc !important;
+  padding-top: clamp(42px, 5vw, 72px) !important;
+  padding-bottom: clamp(48px, 5.5vw, 80px) !important;
+}
+
+.ravine-main .home-guest > section.section:nth-child(2)::before {
+  opacity: .95;
+  background:
+    radial-gradient(ellipse at 10% 12%, rgba(24,63,70,.075), transparent 36%),
+    radial-gradient(ellipse at 95% 92%, rgba(196,122,82,.07), transparent 32%);
+}
+
+.ravine-main .home-guest > section.section:nth-child(2) .eyebrow,
+.ravine-main .home-guest > section.section:nth-child(2) .home-feed-label {
+  color: #70402f !important;
+}
+
+.ravine-main .home-guest > section.section:nth-child(2) .home-guest-preview {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.62fr) minmax(260px, .7fr) !important;
+  align-items: center !important;
+  gap: clamp(26px, 4.2vw, 64px) !important;
+}
+
+.ravine-main .home-guest > section.section:nth-child(2) .home-guest-preview > :first-child {
+  min-width: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.ravine-main .home-guest > section.section:nth-child(2) .home-guest-preview h2 {
+  max-width: 19ch !important;
+  margin: 0 0 13px !important;
+  color: #171717 !important;
+  font-size: clamp(32px, 3.5vw, 49px) !important;
+  line-height: 1.23 !important;
+}
+
+.ravine-main .home-guest > section.section:nth-child(2) .home-guest-intro {
+  max-width: 62ch !important;
+  margin: 0 0 27px !important;
+  color: #56514b !important;
+  font-size: clamp(14px, 1.15vw, 16px) !important;
+  line-height: 1.9 !important;
+}
+
+.ravine-main .home-guest > section.section:nth-child(2) .home-guest-preview .video-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+  align-items: stretch !important;
+}
+
+.ravine-main .home-guest > section.section:nth-child(2) .home-guest-preview .home-work-card:nth-child(n+4) {
+  display: none !important;
+}
+
+.ravine-main .home-guest .home-work-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgba(23,23,23,.11) !important;
+  border-radius: 11px !important;
+  color: #171717 !important;
+  background: #fffdf9 !important;
+  box-shadow: 0 8px 24px rgba(23,23,23,.055) !important;
+  text-decoration: none !important;
+  transition: transform .28s ease, border-color .28s ease, box-shadow .28s ease !important;
+}
+
+.ravine-main .home-guest .home-work-card:hover,
+.ravine-main .home-guest .home-work-card:focus-visible {
+  transform: translateY(-4px) !important;
+  border-color: rgba(112,64,47,.46) !important;
+  box-shadow: 0 16px 34px rgba(23,23,23,.12) !important;
+}
+
+.ravine-main .home-guest .home-work-thumb {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 0 !important;
+  background: #183f46 !important;
+}
+
+.ravine-main .home-guest .home-work-thumb-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  transition: transform .5s cubic-bezier(.2,.65,.25,1);
+}
+
+.ravine-main .home-guest .home-work-card:hover .home-work-thumb-image {
+  transform: scale(1.045);
+}
+
+.ravine-main .home-guest .home-work-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 5px;
+  padding: 13px 14px 14px !important;
+}
+
+.ravine-main .home-guest .home-work-body h3 {
+  margin: 0 !important;
+  color: #171717 !important;
+  font-size: clamp(14px, 1.1vw, 17px) !important;
+  font-weight: 750;
+  line-height: 1.43 !important;
+  text-wrap: pretty;
+}
+
+.ravine-main .home-guest .home-work-creator {
+  margin: 0 !important;
+  color: #635b53 !important;
+  font-size: 12px !important;
+  line-height: 1.5 !important;
+}
+
+.ravine-main .home-guest .home-work-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 8px;
+  color: #756d65 !important;
+  font-size: 10px !important;
+}
+
+.ravine-main .home-guest .home-work-quality,
+.ravine-main .home-guest .home-work-duration {
+  color: #fffdf9 !important;
+}
+
+/* Guest invitation is the anchor panel opposite the work cards. */
+.ravine-main .home-guest > section.section:nth-child(2) .home-guest-note {
+  align-self: stretch !important;
+  position: relative !important;
+  top: auto !important;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0 !important;
+  min-height: 270px;
+  padding: clamp(24px, 3vw, 40px) !important;
+  border: 1px solid rgba(196,122,82,.42) !important;
+  border-inline-start: 4px solid #c47a52 !important;
+  border-radius: 12px !important;
+  color: #f1e9dc !important;
+  background:
+    radial-gradient(ellipse at 100% 0%, rgba(196,122,82,.14), transparent 45%),
+    linear-gradient(145deg, #204950, #112e33) !important;
+  box-shadow: 0 18px 38px rgba(24,63,70,.16) !important;
+}
+
+.ravine-main .home-guest > section.section:nth-child(2) .home-guest-note::before {
+  content: "R / 01";
+  display: block;
+  margin: 0 0 26px;
+  color: #d49a78;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .18em;
+  line-height: 1;
+}
+
+.ravine-main .home-guest > section.section:nth-child(2) .home-guest-note strong {
+  display: block;
+  max-width: 16ch;
+  margin: 0 0 14px !important;
+  color: #f1e9dc !important;
+  font-size: clamp(24px, 2.2vw, 34px) !important;
+  line-height: 1.36 !important;
+  text-wrap: balance;
+}
+
+.ravine-main .home-guest > section.section:nth-child(2) .home-guest-note p {
+  margin: 0 !important;
+  color: rgba(241,233,220,.84) !important;
+  font-size: 14px !important;
+  line-height: 1.95 !important;
+  text-shadow: none !important;
+}
+
+/* Second editorial band: selectable works remain functional and clearly distinct. */
+.ravine-main .home-guest > section.selection-section {
+  color: #f1e9dc !important;
+  background:
+    radial-gradient(ellipse at 12% 4%, rgba(24,63,70,.35), transparent 38%),
+    #101516 !important;
+  border-top: 1px solid rgba(241,233,220,.08) !important;
+  border-bottom: 1px solid rgba(241,233,220,.08) !important;
+}
+
+.ravine-main .home-guest > section.selection-section .section-head {
+  align-items: end !important;
+}
+
+.ravine-main .home-guest > section.selection-section h2 {
+  color: #f1e9dc !important;
+}
+
+.ravine-main .home-guest > section.selection-section .section-note {
+  color: #a9a39b !important;
+}
+
+.ravine-main .home-guest > section.selection-section .video-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 16px !important;
+}
+
+.ravine-main .home-guest > section.selection-section .home-work-card:nth-child(n+4) {
+  display: none !important;
+}
+
+.ravine-main .home-guest > section.selection-section .home-work-card {
+  border-color: rgba(241,233,220,.13) !important;
+  background: #171c1d !important;
+  color: #f1e9dc !important;
+  box-shadow: 0 14px 34px rgba(0,0,0,.14) !important;
+}
+
+.ravine-main .home-guest > section.selection-section .home-work-body h3 {
+  color: #f1e9dc !important;
+}
+
+.ravine-main .home-guest > section.selection-section .home-work-creator,
+.ravine-main .home-guest > section.selection-section .home-work-meta {
+  color: #a9a39b !important;
+}
+
+.ravine-main .home-guest > section.selection-section .selection-tabs {
+  padding: 4px !important;
+  gap: 4px !important;
+  border: 1px solid rgba(241,233,220,.14) !important;
+  border-radius: 9px !important;
+  background: rgba(9,9,9,.22) !important;
+}
+
+.ravine-main .home-guest > section.selection-section .selection-tab {
+  min-height: 38px !important;
+  padding-inline: 14px !important;
+  border: 1px solid transparent !important;
+  border-radius: 6px !important;
+  color: #b4ada5 !important;
+  background: transparent !important;
+  font-size: 12px !important;
+}
+
+.ravine-main .home-guest > section.selection-section .selection-tab.active {
+  color: #17110d !important;
+  background: #c47a52 !important;
+  border-color: #c47a52 !important;
+}
+
+/* Live and audio: two matching panels rather than two disconnected page columns. */
+.ravine-main .home-guest > section.media-section {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: clamp(18px, 2.2vw, 30px) !important;
+  align-items: stretch !important;
+  background: #090d0e !important;
+  padding-top: clamp(42px, 5.2vw, 76px) !important;
+  padding-bottom: clamp(54px, 6vw, 86px) !important;
+}
+
+.ravine-main .home-guest > section.media-section .media-column {
+  min-width: 0 !important;
+  padding: clamp(20px, 2.6vw, 34px) !important;
+  border: 1px solid rgba(241,233,220,.13) !important;
+  border-radius: 12px !important;
+  background:
+    radial-gradient(ellipse at 100% 0%, rgba(24,63,70,.32), transparent 43%),
+    linear-gradient(140deg, #151b1c, #101415) !important;
+  box-shadow: 0 16px 42px rgba(0,0,0,.12) !important;
+}
+
+.ravine-main .home-guest > section.media-section .section-head {
+  align-items: center !important;
+}
+
+.ravine-main .home-guest > section.media-section .section-head h2 {
+  color: #f1e9dc !important;
+}
+
+.ravine-main .home-guest > section.media-section .mini-grid {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 10px !important;
+}
+
+.ravine-main .home-guest > section.media-section .home-work-card {
+  display: grid !important;
+  grid-template-columns: minmax(120px, .82fr) minmax(0, 1fr) !important;
+  align-items: stretch;
+  border-color: rgba(241,233,220,.1) !important;
+  border-radius: 9px !important;
+  background: rgba(241,233,220,.035) !important;
+  color: #f1e9dc !important;
+  box-shadow: none !important;
+}
+
+.ravine-main .home-guest > section.media-section .home-work-thumb {
+  height: 100%;
+  min-height: 112px;
+  aspect-ratio: auto;
+}
+
+.ravine-main .home-guest > section.media-section .home-work-body {
+  padding: 13px 14px !important;
+}
+
+.ravine-main .home-guest > section.media-section .home-work-body h3 {
+  color: #f1e9dc !important;
+  font-size: 15px !important;
+}
+
+.ravine-main .home-guest > section.media-section .home-work-creator,
+.ravine-main .home-guest > section.media-section .home-work-meta {
+  color: #a9a39b !important;
+}
+
+.ravine-main .home-guest > section.media-section .home-work-card:nth-child(n+3) {
+  display: none !important;
+}
+
+/* Creators get an airy ivory strip; the idea cards and community return to the dark palette. */
+.ravine-main .home-guest > section.section:nth-child(5) {
+  color: #171717 !important;
+  background: #f8f3eb !important;
+}
+
+.ravine-main .home-guest > section.section:nth-child(5)::before {
+  background:
+    radial-gradient(ellipse at 7% 10%, rgba(24,63,70,.055), transparent 34%),
+    radial-gradient(ellipse at 92% 90%, rgba(196,122,82,.09), transparent 34%);
+}
+
+.ravine-main .home-guest > section.section:nth-child(5) .eyebrow {
+  color: #70402f !important;
+}
+
+.ravine-main .home-guest > section.section:nth-child(5) h2 {
+  color: #171717 !important;
+}
+
+.ravine-main .home-guest > section.section:nth-child(5) .section-note {
+  color: #625a52 !important;
+}
+
+.ravine-main .home-guest > section.section:nth-child(5) .creator-strip {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 13px !important;
+}
+
+.ravine-main .home-guest > section.section:nth-child(5) .creator-feature {
+  padding: 17px !important;
+  border: 1px solid rgba(23,23,23,.10) !important;
+  border-radius: 10px !important;
+  background: #fffdf9 !important;
+  box-shadow: 0 8px 24px rgba(23,23,23,.04) !important;
+}
+
+.ravine-main .home-guest > section.section:nth-child(5) .creator-feature strong {
+  color: #171717 !important;
+}
+
+.ravine-main .home-guest > section.section:nth-child(5) .creator-feature .video-kicker {
+  color: #70402f !important;
+}
+
+.ravine-main .home-guest > section.section:nth-child(5) .creator-feature span:last-child {
+  color: #6f675e !important;
+}
+
+.ravine-main .home-guest > section.section:nth-child(6) {
+  background: #111617 !important;
+  color: #f1e9dc !important;
+}
+
+.ravine-main .home-guest > section.section:nth-child(6) h2 {
+  color: #f1e9dc !important;
+}
+
+.ravine-main .home-guest > section.section:nth-child(6) .home-gated-row {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 13px !important;
+}
+
+.ravine-main .home-guest > section.section:nth-child(6) .home-gated-item {
+  min-width: 0;
+  padding: clamp(20px, 2.4vw, 32px) !important;
+  border: 1px solid rgba(241,233,220,.13) !important;
+  border-radius: 10px !important;
+  background:
+    radial-gradient(ellipse at 100% 0%, rgba(24,63,70,.3), transparent 45%),
+    #171d1e !important;
+}
+
+.ravine-main .home-guest > section.section:nth-child(6) .home-gated-item > span {
+  display: block;
+  margin-bottom: 24px;
+  color: #d49a78 !important;
+  font-size: 11px !important;
+  font-weight: 800;
+  letter-spacing: .18em;
+}
+
+.ravine-main .home-guest > section.section:nth-child(6) .home-gated-item strong {
+  display: block;
+  margin-bottom: 10px;
+  color: #f1e9dc !important;
+  font-size: 20px;
+  line-height: 1.45;
+}
+
+.ravine-main .home-guest > section.section:nth-child(6) .home-gated-item p {
+  margin: 0;
+  color: #aaa39b !important;
+  font-size: 13px;
+  line-height: 1.85;
+}
+
+.ravine-main .home-guest > section.home-community-teaser {
+  color: #f1e9dc !important;
+  background:
+    radial-gradient(ellipse at 7% 0%, rgba(196,122,82,.10), transparent 36%),
+    radial-gradient(ellipse at 94% 100%, rgba(24,63,70,.45), transparent 42%),
+    #183f46 !important;
+  border-top: 1px solid rgba(241,233,220,.12) !important;
+}
+
+.ravine-main .home-guest > section.home-community-teaser h2 {
+  color: #f1e9dc !important;
+}
+
+.ravine-main .home-guest > section.home-community-teaser .section-note,
+.ravine-main .home-guest > section.home-community-teaser .home-community-loop {
+  color: rgba(241,233,220,.78) !important;
+}
+
+.ravine-main .home-guest .home-community-path {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 9px !important;
+  margin-top: 28px !important;
+}
+
+.ravine-main .home-guest .home-community-path span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 15px;
+  border: 1px solid rgba(241,233,220,.21);
+  border-radius: 7px;
+  color: #f1e9dc;
+  background: rgba(9,9,9,.12);
+  font-size: 13px;
+}
+
+.ravine-main .home-guest .home-community-path i {
+  color: #d49a78;
+  font-style: normal;
+}
+
+.ravine-main .home-guest .home-community-loop {
+  margin: 18px 0 0 !important;
+  font-size: 13px;
+}
+
+/* Keep light-mode readability explicit while preserving the alternating editorial bands. */
+html[data-theme="light"] .ravine-shell.guest-shell .home-guest-hero .home-state-actions .button.secondary {
+  color: #f1e9dc !important;
+  background: rgba(9,9,9,.3) !important;
+}
+
+html[data-theme="light"] .ravine-main .home-guest > section.section:nth-child(2) {
+  background: #f1e9dc !important;
+}
+
+html[data-theme="light"] .ravine-main .home-guest > section.section:nth-child(2) .home-guest-note {
+  color: #f1e9dc !important;
+}
+
+html[data-theme="light"] .ravine-main .home-guest > section.selection-section {
+  background:
+    radial-gradient(ellipse at 12% 4%, rgba(24,63,70,.35), transparent 38%),
+    #101516 !important;
+}
+
+html[data-theme="light"] .ravine-main .home-guest > section.media-section {
+  background: #090d0e !important;
+}
+
+html[data-theme="light"] .ravine-main .home-guest > section.section:nth-child(5) {
+  background: #f8f3eb !important;
+}
+
+@keyframes ravineApprovedHeroIn {
+  from { opacity: 0; transform: translate3d(0, 22px, 0); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (max-width: 1100px) {
+  .ravine-main .home-guest > section.section:nth-child(2) .home-guest-preview {
+    grid-template-columns: minmax(0, 1fr) minmax(240px, .72fr) !important;
+    gap: 24px !important;
+  }
+
+  .ravine-main .home-guest > section.section:nth-child(2) .home-guest-preview .video-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .ravine-main .home-guest > section.section:nth-child(2) .home-guest-preview .home-work-card:nth-child(n+3) {
+    display: none !important;
+  }
+
+  .ravine-main .home-guest > section.media-section .media-column {
+    padding: 20px !important;
+  }
+
+  .ravine-main .home-guest > section.section:nth-child(5) .creator-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .ravine-main .home-guest > section.section {
+    padding: 44px 18px !important;
+  }
+
+  .ravine-shell.guest-shell .home-guest-hero {
+    min-height: 560px !important;
+    padding: 80px 20px 70px !important;
+  }
+
+  .ravine-shell.guest-shell .home-guest-hero .hero-inner {
+    width: 100% !important;
+    padding-block: 24px !important;
+  }
+
+  .ravine-shell.guest-shell .home-guest-hero h1 {
+    font-size: clamp(38px, 10.5vw, 56px) !important;
+    line-height: 1.22 !important;
+    margin-bottom: 15px !important;
+  }
+
+  .ravine-shell.guest-shell .home-guest-hero p {
+    font-size: 15px !important;
+    line-height: 1.8 !important;
+  }
+
+  .ravine-shell.guest-shell .home-guest-hero .home-state-actions {
+    gap: 8px !important;
+    margin-top: 22px !important;
+  }
+
+  .ravine-shell.guest-shell .home-guest-hero .home-state-actions .button,
+  .ravine-shell.guest-shell .home-guest-hero .home-state-actions .ravine-auth-trigger {
+    min-height: 45px !important;
+    padding-inline: 14px !important;
+  }
+
+  .ravine-main .home-guest > section.section:nth-child(2) .home-guest-preview {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 24px !important;
+  }
+
+  .ravine-main .home-guest > section.section:nth-child(2) .home-guest-preview .video-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+
+  .ravine-main .home-guest > section.section:nth-child(2) .home-guest-preview .home-work-card:nth-child(n+3) {
+    display: none !important;
+  }
+
+  .ravine-main .home-guest > section.section:nth-child(2) .home-guest-note {
+    min-height: 0 !important;
+    padding: 23px !important;
+  }
+
+  .ravine-main .home-guest > section.selection-section .section-head {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+  }
+
+  .ravine-main .home-guest > section.selection-section .video-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+
+  .ravine-main .home-guest > section.selection-section .home-work-card:nth-child(n+3) {
+    display: none !important;
+  }
+
+  .ravine-main .home-guest > section.media-section {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 14px !important;
+  }
+
+  .ravine-main .home-guest > section.media-section .home-work-card {
+    grid-template-columns: minmax(108px, .75fr) minmax(0, 1fr) !important;
+  }
+
+  .ravine-main .home-guest > section.section:nth-child(5) .creator-strip,
+  .ravine-main .home-guest > section.section:nth-child(6) .home-gated-row {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .ravine-main .home-guest > section.home-community-teaser .section-head {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+  }
+
+  .ravine-main .home-guest .home-community-path {
+    align-items: stretch !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .ravine-main .home-guest > section.section:nth-child(2) .home-guest-preview .video-grid,
+  .ravine-main .home-guest > section.selection-section .video-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .ravine-main .home-guest .home-work-body {
+    padding: 12px !important;
+  }
+
+  .ravine-main .home-guest > section.media-section .home-work-card {
+    grid-template-columns: 108px minmax(0, 1fr) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ravine-shell.guest-shell .home-guest-hero .hero-inner,
+  .ravine-main .home-guest .home-work-card,
+  .ravine-main .home-guest .home-work-thumb-image {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .ravine-main .home-guest .home-work-card:hover,
+  .ravine-main .home-guest .home-work-card:focus-visible {
+    transform: none !important;
+  }
+}
