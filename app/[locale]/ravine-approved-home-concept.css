@@ -900,3 +900,20 @@ html[data-theme="light"] .ravine-main .home-guest > section.section:nth-child(5)
     transform: none !important;
   }
 }
+
+
+/* Grid item sizing correction: each Live/Audio panel must occupy its own grid track. */
+.ravine-main .home-guest > section.media-section > .media-column {
+  width: auto !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+}
+
+.ravine-main .home-guest .home-work-thumb {
+  height: auto !important;
+}
+
+.ravine-main .home-guest > section.media-section .home-work-thumb {
+  height: 100% !important;
+}
