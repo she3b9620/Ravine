@@ -236,13 +236,10 @@ html[data-theme="light"] .ravine-header-search .ravine-search-trigger:hover {
 
 /* RAVINE / Payoneer-reference design-system pass — 2026-10-21 */
 /*
- * Use Payoneer's Arabic/English site as a reference for layout discipline and motion,
- * without copying its brand, color system, page content, or replacing RAVINE's cinematic hero.
- * Avenir Next World stays first when a properly licensed local/webfont is available. Because the
- * files are not included here, Manrope and Noto Sans Arabic provide a practical, script-aware fallback.
+ * Reference the clean hierarchy, spacing, and interaction restraint of Payoneer's site.
+ * Keep RAVINE's original script-aware typography; this pass must not set font-family.
  */
 :root {
-  --ravine-type-family: "Avenir Next World", "Avenir Next", Manrope, "Noto Sans Arabic", RavineSansMixed, system-ui, sans-serif;
   --ravine-layout-gutter: clamp(18px, 3vw, 44px);
   --ravine-layout-max: 1500px;
   --ravine-motion-ease: cubic-bezier(.2, .72, .24, 1);
@@ -252,10 +249,8 @@ html[data-theme="light"] .ravine-header-search .ravine-search-trigger:hover {
   --ravine-focus-ring: 0 0 0 3px rgba(196, 122, 82, .24);
 }
 
-/* One intended type family for both scripts; current local fonts are a safe fallback. */
 .ravine-shell,
 .ravine-shell :is(h1,h2,h3,h4,h5,h6,p,a,button,input,textarea,select,label,summary,small,span,strong,em,li,dt,dd,th,td,legend,output) {
-  font-family: var(--ravine-type-family) !important;
   font-synthesis: none;
   font-kerning: normal;
 }
@@ -725,49 +720,4 @@ html[data-theme="light"] .ravine-main .home-community-path span { color: #171717
   .ravine-main .selection-tab {
     flex: 1 1 auto;
   }
-}
-
-
-/* RAVINE FINAL PAYONEER FONT AUTHORITY — override legacy !important font locks. */
-/* Legacy typography styles use stronger html/body + locale selectors and !important.
-   Deliberately use the root ID so this reference font choice actually wins the cascade. */
-html#ravine-font-authority body .ravine-shell,
-html#ravine-font-authority body .ravine-shell *,
-html#ravine-font-authority body .ravine-shell[lang="ar"],
-html#ravine-font-authority body .ravine-shell[lang="ar"] *,
-html#ravine-font-authority body .ravine-shell[lang="en"],
-html#ravine-font-authority body .ravine-shell[lang="en"] *,
-html#ravine-font-authority body .ravine-search-overlay,
-html#ravine-font-authority body .ravine-search-overlay *,
-html#ravine-font-authority body .ravine-search-dialog,
-html#ravine-font-authority body .ravine-search-dialog *,
-html#ravine-font-authority body .ravine-auth-overlay,
-html#ravine-font-authority body .ravine-auth-overlay *,
-html#ravine-font-authority body .ravine-auth-dialog,
-html#ravine-font-authority body .ravine-auth-dialog *,
-html#ravine-font-authority body .ravine-message-center,
-html#ravine-font-authority body .ravine-message-center * {
-  font-family: var(--ravine-type-family) !important;
-  font-synthesis: none !important;
-  font-kerning: normal !important;
-}
-
-/* Keep the RAVINE identity artwork untouched while giving all text consistent metrics. */
-html#ravine-font-authority body .ravine-shell .ravine-brand,
-html#ravine-font-authority body .ravine-shell .ravine-footer-brand,
-html#ravine-font-authority body .ravine-shell .ravine-brand *,
-html#ravine-font-authority body .ravine-shell .ravine-footer-brand * {
-  font-family: Satoshi, sans-serif !important;
-}
-
-/* Consistent Payoneer-like corporate typography rhythm; no palette or geometry changes. */
-html#ravine-font-authority body .ravine-shell :is(h1,h2,h3,h4,h5,h6) {
-  font-weight: 600 !important;
-  letter-spacing: -0.025em;
-}
-html#ravine-font-authority body .ravine-shell :is(button,input,textarea,select,.button,.ravine-nav-link,.ravine-minor-link) {
-  font-weight: 500;
-}
-html#ravine-font-authority body .ravine-shell :is(p,li,.section-note,.video-meta p,.watch-copy p) {
-  font-weight: 400;
 }
