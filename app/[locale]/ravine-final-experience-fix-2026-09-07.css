@@ -238,11 +238,11 @@ html[data-theme="light"] .ravine-header-search .ravine-search-trigger:hover {
 /*
  * Use Payoneer's Arabic/English site as a reference for layout discipline and motion,
  * without copying its brand, color system, page content, or replacing RAVINE's cinematic hero.
- * Avenir Next World is named as the intended family. The licensed font files are not in this
- * repository yet, so the existing script-aware RAVINE family remains the runtime fallback.
+ * Avenir Next World stays first when a properly licensed local/webfont is available. Because the
+ * files are not included here, Manrope and Noto Sans Arabic provide a practical, script-aware fallback.
  */
 :root {
-  --ravine-type-family: "Avenir Next World", "Avenir Next", RavineSansMixed, system-ui, sans-serif;
+  --ravine-type-family: "Avenir Next World", "Avenir Next", Manrope, "Noto Sans Arabic", RavineSansMixed, system-ui, sans-serif;
   --ravine-layout-gutter: clamp(18px, 3vw, 44px);
   --ravine-layout-max: 1500px;
   --ravine-motion-ease: cubic-bezier(.2, .72, .24, 1);
