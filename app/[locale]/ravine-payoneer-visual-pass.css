@@ -1,0 +1,301 @@
+/* RAVINE — visible Payoneer-inspired layout pass.
+   The reference is its clean hierarchy, generous spacing, controlled cards, and crisp interaction.
+   Keep RAVINE's cinematic imagery, colors, existing content, routes, and original fonts. */
+
+/* Full-width editorial bands make the page structure visibly intentional instead of one long flat canvas. */
+.ravine-main .home-guest > section.section {
+  position: relative !important;
+  isolation: isolate !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding-block: clamp(58px, 7vw, 104px) !important;
+  padding-inline: max(clamp(20px, 4vw, 44px), calc((100vw - 1320px) / 2)) !important;
+  border-block: 1px solid rgba(241, 233, 220, .075) !important;
+}
+.ravine-main .home-guest > section.section:nth-child(even) {
+  background:
+    radial-gradient(ellipse at 7% 20%, rgba(24, 63, 70, .28), transparent 46%),
+    linear-gradient(108deg, rgba(24, 63, 70, .14), rgba(21, 23, 25, .32) 57%, rgba(196, 122, 82, .055)) !important;
+}
+.ravine-main .home-guest > section.section:nth-child(odd) {
+  background:
+    radial-gradient(ellipse at 92% 8%, rgba(196, 122, 82, .085), transparent 36%),
+    linear-gradient(110deg, rgba(241, 233, 220, .018), rgba(9, 9, 9, .1) 60%, rgba(24, 63, 70, .10)) !important;
+}
+html[data-theme="light"] .ravine-main .home-guest > section.section:nth-child(even) {
+  background:
+    radial-gradient(ellipse at 7% 20%, rgba(24, 63, 70, .07), transparent 46%),
+    linear-gradient(108deg, #f1e9dc 0%, #fffdf9 57%, #f7eee7 100%) !important;
+  border-color: rgba(23, 23, 23, .09) !important;
+}
+html[data-theme="light"] .ravine-main .home-guest > section.section:nth-child(odd) {
+  background:
+    radial-gradient(ellipse at 92% 8%, rgba(196, 122, 82, .07), transparent 36%),
+    #fffdf9 !important;
+  border-color: rgba(23, 23, 23, .08) !important;
+}
+
+/* Normalize section widths and improve long-page rhythm without touching the cinematic hero. */
+.ravine-main .home-guest > section.section > * {
+  box-sizing: border-box !important;
+  width: min(100%, 1320px) !important;
+  max-width: 1320px !important;
+  margin-inline: auto !important;
+}
+.ravine-main .home-guest > section.section .section-head {
+  align-items: end !important;
+  gap: clamp(20px, 3vw, 42px) !important;
+  margin-bottom: clamp(28px, 3.2vw, 44px) !important;
+  padding-bottom: 22px !important;
+  border-bottom: 1px solid rgba(241, 233, 220, .16) !important;
+}
+.ravine-main .home-guest > section.section .section-head::after {
+  content: "" !important;
+  position: absolute !important;
+  inset-inline-start: 0 !important;
+  bottom: -1px !important;
+  width: 96px !important;
+  height: 3px !important;
+  background: linear-gradient(90deg, #c47a52, rgba(196, 122, 82, 0)) !important;
+}
+html[data-theme="light"] .ravine-main .home-guest > section.section .section-head {
+  border-bottom-color: rgba(23, 23, 23, .13) !important;
+}
+
+/* Preview becomes a deliberate two-column composition: work on the left, a clear guest explainer on the side. */
+.ravine-main .home-guest .home-guest-preview {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.5fr) minmax(270px, .62fr) !important;
+  align-items: start !important;
+  gap: clamp(20px, 2.8vw, 40px) !important;
+}
+.ravine-main .home-guest .home-guest-preview > :first-child {
+  min-width: 0 !important;
+  padding: clamp(20px, 2.5vw, 34px) !important;
+  border: 1px solid rgba(241, 233, 220, .12) !important;
+  border-radius: 18px !important;
+  background: linear-gradient(145deg, rgba(21, 23, 25, .90), rgba(15, 19, 20, .76)) !important;
+  box-shadow: 0 22px 58px rgba(0, 0, 0, .18) !important;
+}
+html[data-theme="light"] .ravine-main .home-guest .home-guest-preview > :first-child {
+  border-color: rgba(23, 23, 23, .10) !important;
+  background: linear-gradient(145deg, #ffffff, #f8f3ec) !important;
+  box-shadow: 0 18px 48px rgba(23, 23, 23, .055) !important;
+}
+.ravine-main .home-guest .home-guest-preview h2 {
+  max-width: 18ch !important;
+  margin-block: 12px 18px !important;
+  font-size: clamp(30px, 3.3vw, 48px) !important;
+  line-height: 1.24 !important;
+  text-wrap: balance !important;
+}
+.ravine-main .home-guest .home-guest-preview .home-guest-intro {
+  max-width: 68ch !important;
+  margin-bottom: 28px !important;
+  font-size: clamp(15px, 1.2vw, 17px) !important;
+  line-height: 1.9 !important;
+}
+.ravine-main .home-guest .home-guest-preview .video-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+}
+.ravine-main .home-guest .home-guest-note {
+  position: sticky !important;
+  top: 104px !important;
+  align-self: start !important;
+  min-width: 0 !important;
+  padding: clamp(22px, 2.6vw, 34px) !important;
+  border: 1px solid rgba(196, 122, 82, .38) !important;
+  border-inline-start: 4px solid #c47a52 !important;
+  border-radius: 16px !important;
+  background: linear-gradient(145deg, rgba(24, 63, 70, .30), rgba(21, 23, 25, .92)) !important;
+  box-shadow: 0 22px 58px rgba(0, 0, 0, .16) !important;
+}
+.ravine-main .home-guest .home-guest-note strong {
+  display: block !important;
+  margin: 0 0 14px !important;
+  font-size: clamp(22px, 2.1vw, 29px) !important;
+  line-height: 1.38 !important;
+  text-wrap: balance !important;
+}
+.ravine-main .home-guest .home-guest-note p {
+  margin: 0 !important;
+  line-height: 1.95 !important;
+}
+html[data-theme="light"] .ravine-main .home-guest .home-guest-note {
+  color: #171717 !important;
+  border-color: rgba(112, 64, 47, .22) !important;
+  border-inline-start-color: #70402f !important;
+  background: linear-gradient(145deg, #f1e9dc, #ffffff) !important;
+  box-shadow: 0 18px 48px rgba(23, 23, 23, .06) !important;
+}
+html[data-theme="light"] .ravine-main .home-guest .home-guest-note strong {
+  color: #171717 !important;
+}
+html[data-theme="light"] .ravine-main .home-guest .home-guest-note p {
+  color: #55504a !important;
+}
+
+/* Work cards: clearer media framing, crisp borders, and a smaller more controlled radius. */
+.ravine-main .home-guest .video-grid {
+  align-items: stretch !important;
+  gap: clamp(12px, 1.5vw, 20px) !important;
+}
+.ravine-main .home-guest .video-grid .work,
+.ravine-main .home-guest .video-grid .video-card {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(241, 233, 220, .12) !important;
+  border-radius: 14px !important;
+  background: #121617 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .12) !important;
+}
+html[data-theme="light"] .ravine-main .home-guest .video-grid .work,
+html[data-theme="light"] .ravine-main .video-grid .video-card {
+  border-color: rgba(23, 23, 23, .11) !important;
+  background: #ffffff !important;
+  box-shadow: 0 8px 24px rgba(23, 23, 23, .045) !important;
+}
+.ravine-main .home-guest .video-grid .work-art {
+  height: auto !important;
+  aspect-ratio: 16 / 9 !important;
+  border-radius: 0 !important;
+}
+.ravine-main .home-guest .video-grid .work-art::before {
+  inset: 12% !important;
+}
+.ravine-main .home-guest .video-grid .work-body,
+.ravine-main .home-guest .video-grid .video-meta {
+  padding: 16px !important;
+}
+.ravine-main .home-guest .video-grid .work h3,
+.ravine-main .home-guest .video-grid .video-meta h2 {
+  margin: 8px 0 !important;
+  font-size: clamp(17px, 1.45vw, 21px) !important;
+  line-height: 1.4 !important;
+}
+.ravine-main .home-guest .video-grid .work p,
+.ravine-main .home-guest .video-grid .video-meta p {
+  line-height: 1.75 !important;
+}
+.ravine-main .home-guest .video-grid .work:hover,
+.ravine-main .home-guest .video-grid .video-card:hover {
+  border-color: rgba(196, 122, 82, .60) !important;
+  box-shadow: 0 16px 34px rgba(0, 0, 0, .22) !important;
+  transform: translateY(-3px) !important;
+}
+
+/* Selection controls and actions become structured controls rather than oversized capsules. */
+.ravine-main .home-guest .selection-tabs {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 6px !important;
+  padding: 5px !important;
+  border: 1px solid rgba(241, 233, 220, .15) !important;
+  border-radius: 12px !important;
+  background: rgba(9, 9, 9, .18) !important;
+}
+.ravine-main .home-guest .selection-tab {
+  min-height: 40px !important;
+  padding-inline: 16px !important;
+  border-radius: 8px !important;
+}
+.ravine-main .home-guest .selection-tab.active {
+  color: #090909 !important;
+  background: #c47a52 !important;
+  border-color: #c47a52 !important;
+}
+.ravine-main .home-guest .button,
+.ravine-main .home-guest .home-state-actions > * {
+  min-height: 46px !important;
+  border-radius: 10px !important;
+}
+html[data-theme="light"] .ravine-main .home-guest .selection-tabs {
+  border-color: rgba(23, 23, 23, .14) !important;
+  background: rgba(23, 23, 23, .035) !important;
+}
+
+/* Paired live/audio blocks and creator/community cards share the same visual system. */
+.ravine-main .home-guest .media-section {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  align-items: stretch !important;
+  gap: clamp(16px, 2vw, 28px) !important;
+}
+.ravine-main .home-guest .media-column {
+  min-width: 0 !important;
+  padding: clamp(20px, 2.4vw, 32px) !important;
+  border: 1px solid rgba(241, 233, 220, .12) !important;
+  border-radius: 16px !important;
+  background: linear-gradient(145deg, rgba(24, 63, 70, .18), rgba(21, 23, 25, .72)) !important;
+}
+html[data-theme="light"] .ravine-main .home-guest .media-column {
+  border-color: rgba(23, 23, 23, .10) !important;
+  background: linear-gradient(145deg, #ffffff, #f8f3ec) !important;
+}
+.ravine-main .home-guest .creator-feature,
+.ravine-main .home-guest .home-gated-item {
+  border: 1px solid rgba(241, 233, 220, .12) !important;
+  border-radius: 14px !important;
+  background: linear-gradient(145deg, rgba(24, 63, 70, .18), rgba(21, 23, 25, .65)) !important;
+}
+html[data-theme="light"] .ravine-main .home-guest .creator-feature,
+html[data-theme="light"] .ravine-main .home-guest .home-gated-item {
+  border-color: rgba(23, 23, 23, .10) !important;
+  background: linear-gradient(145deg, #ffffff, #f8f3ec) !important;
+}
+.ravine-main .home-guest .home-community-teaser {
+  padding: clamp(24px, 4vw, 56px) !important;
+  border: 1px solid rgba(196, 122, 82, .24) !important;
+  border-radius: 18px !important;
+  background:
+    radial-gradient(ellipse at 10% 10%, rgba(24, 63, 70, .28), transparent 42%),
+    linear-gradient(135deg, rgba(21, 23, 25, .96), rgba(9, 9, 9, .78)) !important;
+}
+html[data-theme="light"] .ravine-main .home-guest .home-community-teaser {
+  border-color: rgba(112, 64, 47, .16) !important;
+  background: linear-gradient(135deg, #f1e9dc, #ffffff) !important;
+}
+
+/* Respect narrow screens; the two-column arrangements collapse before cards become cramped. */
+@media (max-width: 900px) {
+  .ravine-main .home-guest .home-guest-preview {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .ravine-main .home-guest .home-guest-note {
+    position: relative !important;
+    top: auto !important;
+  }
+}
+@media (max-width: 700px) {
+  .ravine-main .home-guest > section.section {
+    padding-inline: 18px !important;
+    padding-block: 48px !important;
+  }
+  .ravine-main .home-guest .home-guest-preview > :first-child {
+    padding: 18px !important;
+  }
+  .ravine-main .home-guest .home-guest-preview .video-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .ravine-main .home-guest .media-section {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .ravine-main .home-guest .selection-tabs {
+    justify-content: flex-start !important;
+    border-radius: 10px !important;
+  }
+  .ravine-main .home-guest .section-head {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ravine-main .home-guest .video-grid .work:hover,
+  .ravine-main .home-guest .video-grid .video-card:hover {
+    transform: none !important;
+  }
+}
