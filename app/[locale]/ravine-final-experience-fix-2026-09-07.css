@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Arabic:wght@400;500;600;700;800&display=swap");
+
 /* RAVINE final experience corrections — scoped, theme-safe, no geometry resets. */
 
 /* Radio drawer: true warm editorial Light Mode, plus deterministic RTL placement. */
@@ -231,4 +233,57 @@ html[data-theme="light"] .ravine-header-search .ravine-search-trigger:hover {
 @media (max-width: 480px) {
   .ravine-header-inner { padding-inline: 12px !important; column-gap: 8px !important; }
   .ravine-header-search .ravine-search-trigger { padding-inline: 12px !important; gap: 9px !important; }
+}
+
+
+/* RAVINE — Payoneer typography pass (type only; existing layout and colors are unchanged).
+   Payoneer's public marketing site uses Avenir Next World.
+   That font is commercially licensed, so RAVINE does not copy or rehost its font files.
+   A locally licensed Avenir Next World takes priority; otherwise Manrope + Noto Sans Arabic
+   provide a reliable open-source, cross-script fallback. */
+
+:root {
+  --ravine-payoneer-font: "Avenir Next World", "avenirnextworld-regular", Manrope, "Noto Sans Arabic", "Segoe UI", Arial, sans-serif;
+  --font-latin: var(--ravine-payoneer-font);
+  --font-mixed: var(--ravine-payoneer-font);
+  --font-arabic-display: var(--ravine-payoneer-font);
+  --font-arabic-text: var(--ravine-payoneer-font);
+  --font-arabic-ui: var(--ravine-payoneer-font);
+  --ravine-font-display: var(--ravine-payoneer-font);
+  --ravine-font-text: var(--ravine-payoneer-font);
+  --ravine-font-ui: var(--ravine-payoneer-font);
+  --ravine-ui-mixed: var(--ravine-payoneer-font);
+  --ravine-display-mixed: var(--ravine-payoneer-font);
+  --ravine-text-mixed: var(--ravine-payoneer-font);
+}
+
+/* This is the final typography authority after the existing legacy font locks.
+   An html ID gives these rules enough specificity to consistently win without
+   changing individual components, sizes, spacing, colors, or page geometry. */
+html#ravine-font-authority,
+html#ravine-font-authority body,
+html#ravine-font-authority body .ravine-shell,
+html#ravine-font-authority body .ravine-shell *,
+html#ravine-font-authority body [data-ravine-locale],
+html#ravine-font-authority body [data-ravine-locale] *,
+html#ravine-font-authority body .ravine-search-overlay,
+html#ravine-font-authority body .ravine-search-overlay *,
+html#ravine-font-authority body .ravine-search-dialog,
+html#ravine-font-authority body .ravine-search-dialog *,
+html#ravine-font-authority body .ravine-auth-overlay,
+html#ravine-font-authority body .ravine-auth-overlay *,
+html#ravine-font-authority body .ravine-auth-dialog,
+html#ravine-font-authority body .ravine-auth-dialog *,
+html#ravine-font-authority body .ravine-message-center,
+html#ravine-font-authority body .ravine-message-center * {
+  font-family: var(--ravine-payoneer-font) !important;
+  font-synthesis: none !important;
+}
+
+/* Preserve the existing RAVINE wordmark treatment. */
+html#ravine-font-authority body .ravine-shell .ravine-brand,
+html#ravine-font-authority body .ravine-shell .ravine-footer-brand,
+html#ravine-font-authority body .ravine-shell .ravine-brand *,
+html#ravine-font-authority body .ravine-shell .ravine-footer-brand * {
+  font-family: Satoshi, sans-serif !important;
 }
