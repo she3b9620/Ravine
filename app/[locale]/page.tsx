@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import AuthTrigger from "@/components/AuthTrigger";
 import GuestCinematicBackdrop from "@/components/GuestCinematicBackdrop";
 import HomeWorkCard, { type HomeWork } from "@/components/HomeWorkCard";
+import RavineHeroVideoButton from "@/components/RavineHeroVideoButton";
 import "./home-enhancements.module.css";
 
 const copy = {
