@@ -4,7 +4,7 @@ import { ravineNumber } from "@/lib/ravine-format";
 import VideoHoverPreview from "./VideoHoverPreview";
 
 type Locale = "ar" | "en";
-type WorkCreator = { name: string | null; username: string | null };
+type WorkCreator = { name: string | null; username: string | null; avatar_url?: string | null };
 export type HomeWork = { id: number; title: string | null; description: string | null; thumbnail_url: string | null; video_url: string | null; duration: number | null; views: number | null; likes: number | null; content_type: string | null; quality: string | null; creator_id: number | null; creators: WorkCreator[] | WorkCreator | null };
 function getCreator(creator: HomeWork["creators"]) { return Array.isArray(creator) ? creator[0] ?? null : creator; }
 function formatDuration(seconds: number | null) { if (!seconds || seconds < 1) return "—"; const total = Math.round(seconds); const h = Math.floor(total / 3600); const m = Math.floor((total % 3600) / 60); const s = total % 60; return h > 0 ? `${h}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}` : `${m}:${String(s).padStart(2,"0")}`; }
@@ -16,8 +16,12 @@ export default function HomeWorkCard({ work, locale, compact = false }: { work: 
   const creator=getCreator(work.creators); const type=contentTypeLabel(work.content_type,locale); const quality=qualityLabel(work.quality,locale); const title=work.title||(locale==="ar"?"عمل بدون عنوان":"Untitled work"); const creatorName=creator?.name||(creator?.username?`@${creator.username}`:locale==="ar"?"مبدع":"Creator"); const source=previewSource(work);
   const views = ravineNumber(Number(work.views || 0), locale, "western");
   const likes = ravineNumber(Number(work.likes || 0), locale, "western");
-  return <Link href={`/${locale}/watch/${work.id}`} className={`home-work-card${compact?" compact":""}`} prefetch={false}>
-    <div className="home-work-thumb"><img className="home-work-thumb-image" src={work.thumbnail_url||"/RAVINE.PNG"} alt="" loading="lazy" />{source?<VideoHoverPreview videoUrl={source} videoId={work.id}/>:null}<span className="home-work-preview-wash" aria-hidden="true"/><span className="home-work-duration" dir="ltr" data-preserve-numerals>{formatDuration(work.duration)}</span><span className="home-work-quality">{quality||type}</span></div>
-    <div className="home-work-body"><h3>{title}</h3><p className="home-work-creator">{creatorName}</p><div className="home-work-meta"><span dir="ltr" data-preserve-numerals>{views} {locale==="ar"?"مشاهدة":"views"}</span><span dir="ltr" data-preserve-numerals>{likes} {locale==="ar"?"إعجاب":"likes"}</span></div></div>
+  return <Link href={"/" + locale + "/watch/" + work.id} className={"home-work-card" + (compact ? " compact" : "")} prefetch={false}>
+    <div className="home-work-thumb"><img className="home-work-thumb-image" src={work.thumbnail_url || "/RAVINE.PNG"} alt="" loading="lazy" />{source ? <VideoHoverPreview videoUrl={source} videoId={work.id} /> : null}<span className="home-work-preview-wash" aria-hidden="true" /><span className="home-work-quality">{quality || type}</span></div>
+    <div className="home-work-body">
+      <h3>{title}</h3>
+      <p className="home-work-creator">{creator?.avatar_url ? <img className="home-work-creator-avatar" src={creator.avatar_url} alt="" loading="lazy" /> : <span className="home-work-creator-avatar fallback" aria-hidden="true">{creatorName.slice(0, 1).toUpperCase()}</span>}<span className="home-work-creator-name">{creatorName}</span></p>
+      <div className="home-work-meta"><span className="home-work-duration-meta" dir="ltr" data-preserve-numerals>{formatDuration(work.duration)}</span><span className="home-work-view-meta" dir="ltr" data-preserve-numerals>{views} {locale === "ar" ? "مشاهدة" : "views"}</span><span className="home-work-like-meta" dir="ltr" data-preserve-numerals>{likes} {locale === "ar" ? "إعجاب" : "likes"}</span></div>
+    </div>
   </Link>;
 }
