@@ -37,7 +37,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   try {
     const [profileResult, worksResult, creatorsResult] = await Promise.all([
       user ? supabase.from("profiles").select("display_name,username,avatar_url").eq("id", user.id).maybeSingle() : Promise.resolve({ data: null }),
-      supabase.from("videos").select("id,title,description,thumbnail_url,video_url,duration,views,likes,content_type,quality,creator_id,creators(name,username)").eq("published", true).eq("visibility", "public").order("created_at", { ascending: false }).limit(60),
+      supabase.from("videos").select("id,title,description,thumbnail_url,video_url,duration,views,likes,content_type,quality,creator_id,creators(name,username,avatar_url)").eq("published", true).eq("visibility", "public").order("created_at", { ascending: false }).limit(60),
       supabase.from("creators").select("id,name,username,avatar_url,specialty,followers").order("followers", { ascending: false, nullsFirst: false }).limit(10)
     ]);
     viewer = (profileResult.data ?? null) as ViewerProfile | null;
@@ -45,7 +45,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     if (user) {
       const followResult = await supabase.from("follows").select("creator_id").eq("follower_id", user.id).limit(30);
       const ids = (followResult.data ?? []).map((item) => item.creator_id).filter((id): id is number => typeof id === "number");
-      if (ids.length) { const followingResult = await supabase.from("videos").select("id,title,description,thumbnail_url,video_url,duration,views,likes,content_type,quality,creator_id,creators(name,username)").eq("published", true).in("creator_id", ids).order("created_at", { ascending: false }).limit(18); if (!followingResult.error) followingWorks = (followingResult.data ?? []) as HomeWork[]; }
+      if (ids.length) { const followingResult = await supabase.from("videos").select("id,title,description,thumbnail_url,video_url,duration,views,likes,content_type,quality,creator_id,creators(name,username,avatar_url)").eq("published", true).in("creator_id", ids).order("created_at", { ascending: false }).limit(18); if (!followingResult.error) followingWorks = (followingResult.data ?? []) as HomeWork[]; }
     }
   } catch { works = []; creators = []; followingWorks = []; viewer = null; }
   // Keep server-rendered feed order deterministic across browser-tab returns.
