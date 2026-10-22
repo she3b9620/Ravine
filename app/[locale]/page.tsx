@@ -3,7 +3,6 @@ import { createClient } from "@/lib/supabase/server";
 import AuthTrigger from "@/components/AuthTrigger";
 import GuestCinematicBackdrop from "@/components/GuestCinematicBackdrop";
 import HomeWorkCard, { type HomeWork } from "@/components/HomeWorkCard";
-import RavineHeroVideoButton from "@/components/RavineHeroVideoButton";
 import "./home-enhancements.module.css";
 
 const copy = {
@@ -37,7 +36,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   try {
     const [profileResult, worksResult, creatorsResult] = await Promise.all([
       user ? supabase.from("profiles").select("display_name,username,avatar_url").eq("id", user.id).maybeSingle() : Promise.resolve({ data: null }),
-      supabase.from("videos").select("id,title,description,thumbnail_url,video_url,duration,views,likes,content_type,quality,creator_id,creators(name,username,avatar_url)").eq("published", true).eq("visibility", "public").order("created_at", { ascending: false }).limit(60),
+      supabase.from("videos").select("id,title,description,thumbnail_url,video_url,duration,views,likes,content_type,quality,creator_id,creators(name,username)").eq("published", true).eq("visibility", "public").order("created_at", { ascending: false }).limit(60),
       supabase.from("creators").select("id,name,username,avatar_url,specialty,followers").order("followers", { ascending: false, nullsFirst: false }).limit(10)
     ]);
     viewer = (profileResult.data ?? null) as ViewerProfile | null;
@@ -45,7 +44,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     if (user) {
       const followResult = await supabase.from("follows").select("creator_id").eq("follower_id", user.id).limit(30);
       const ids = (followResult.data ?? []).map((item) => item.creator_id).filter((id): id is number => typeof id === "number");
-      if (ids.length) { const followingResult = await supabase.from("videos").select("id,title,description,thumbnail_url,video_url,duration,views,likes,content_type,quality,creator_id,creators(name,username,avatar_url)").eq("published", true).in("creator_id", ids).order("created_at", { ascending: false }).limit(18); if (!followingResult.error) followingWorks = (followingResult.data ?? []) as HomeWork[]; }
+      if (ids.length) { const followingResult = await supabase.from("videos").select("id,title,description,thumbnail_url,video_url,duration,views,likes,content_type,quality,creator_id,creators(name,username)").eq("published", true).in("creator_id", ids).order("created_at", { ascending: false }).limit(18); if (!followingResult.error) followingWorks = (followingResult.data ?? []) as HomeWork[]; }
     }
   } catch { works = []; creators = []; followingWorks = []; viewer = null; }
   // Keep server-rendered feed order deterministic across browser-tab returns.
@@ -81,120 +80,13 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     <section className="section home-community-teaser"><div className="section-head"><div><div className="eyebrow">{t.communityEyebrow}</div><h2>{t.communityTitle}</h2><p className="section-note">{t.communityBody}</p></div><Link className="button secondary" href={`/${locale}/community`}>{locale === "ar" ? "دخول المجتمعات" : "Enter communities"}</Link></div><div className="home-community-path"><span>{t.communityGeneral}</span><i>→</i><span>{t.communityTopics}</span><i>→</i><span>{t.communityCreators}</span><i>→</i><span>{t.communityGroups}</span></div><p className="home-community-loop">{t.communityLoop}</p></section>
   </div>;
 
-  return (
-    <div className="home-guest ravine-reference-home">
-      <section className="hero home-guest-hero ravine-reference-hero">
-        <GuestCinematicBackdrop locale={locale} />
-        <div className="hero-inner ravine-reference-hero-inner">
-          <span className="ravine-reference-hero-kicker" dir="ltr">R A V I N E</span>
-          <h1>{locale === "ar" ? "حيث تلتقي القصص بالمبدعين" : "Where stories meet creators"}</h1>
-          <p>{locale === "ar" ? "منصة سينمائية تجمع بين الأعمال الإبداعية وصنّاعها. اكتشف قصصًا جديدة، وتواصل مع مبدعين من جميع أنحاء العالم." : "A cinematic platform bringing creative work and its makers together. Discover new stories and connect with creators around the world."}</p>
-          <div className="home-state-actions ravine-reference-hero-actions">
-            <Link className="button ravine-reference-cta-primary" href={"/" + locale + "/discover"}>{t.discover}</Link>
-            <RavineHeroVideoButton locale={locale} />
-          </div>
-          <div className="ravine-reference-slide-meta" dir="ltr" aria-label={locale === "ar" ? "شرائح الواجهة" : "Hero slides"}>
-            <span className="is-active">01</span><span>02</span><span>03</span><i aria-hidden="true"><b /></i>
-          </div>
-        </div>
-        <span className="ravine-reference-scroll-mark" aria-hidden="true"><i />SCROLL</span>
-      </section>
-
-      <div className="ravine-reference-overview">
-        <section className="ravine-reference-featured" aria-labelledby="ravine-featured-heading">
-          <div className="ravine-reference-section-heading" dir="rtl">
-            <h2 id="ravine-featured-heading">{locale === "ar" ? "أعمال مختارة" : "Featured work"}</h2>
-            <Link href={"/" + locale + "/discover"}>{locale === "ar" ? "عرض الكل" : "View all"} <span aria-hidden="true">←</span></Link>
-          </div>
-          {publicWorks.length ? (
-            <div className="ravine-reference-work-grid" dir="ltr">
-              {publicWorks.slice(0, 4).map((work) => <WorkCard key={work.id} work={work} locale={locale} />)}
-            </div>
-          ) : (
-            <div className="ravine-reference-empty">{t.empty}</div>
-          )}
-        </section>
-
-        <aside className="ravine-reference-intro-panel" dir="rtl">
-          <h2>{locale === "ar" ? "منصة للإبداع والتواصل" : "A platform for creativity and connection"}</h2>
-          <p>{locale === "ar" ? "رَافِين هي مساحة تجمع بين المواهب والأفكار، حيث يمكن للمبدعين عرض أعمالهم وبناء جمهورهم، واكتشاف محتوى استثنائي من مختلف أنحاء العالم." : "RAVINE brings talent and ideas together, helping creators present their work, grow an audience, and discover exceptional stories from around the world."}</p>
-          <Link href={"/" + locale + "/about"}>{locale === "ar" ? "تعرّف على المزيد" : "Learn more"} <span aria-hidden="true">←</span></Link>
-        </aside>
-      </div>
-
-      <div className="ravine-reference-mid-layout">
-        <div className="ravine-reference-media-dark" dir="rtl">
-          <section className="ravine-reference-media-block" aria-labelledby="ravine-live-heading">
-            <div className="ravine-reference-section-heading compact">
-              <h2 id="ravine-live-heading"><i className="ravine-reference-dot live" />{locale === "ar" ? "بث مباشر" : "Live"}</h2>
-              <Link href={"/" + locale + "/live"}>{locale === "ar" ? "عرض الكل" : "View all"} <span aria-hidden="true">←</span></Link>
-            </div>
-            {liveWorks.length ? <div className="ravine-reference-media-card">{<WorkCard work={liveWorks[0]} locale={locale} compact />}</div> : <p className="ravine-reference-muted">{t.emptyLive}</p>}
-          </section>
-
-          <section className="ravine-reference-media-block podcast" aria-labelledby="ravine-podcast-heading">
-            <div className="ravine-reference-section-heading compact">
-              <h2 id="ravine-podcast-heading"><i className="ravine-reference-dot podcast" />{locale === "ar" ? "بودكاست" : "Podcasts"}</h2>
-              <Link href={"/" + locale + "/podcasts"}>{locale === "ar" ? "عرض الكل" : "View all"} <span aria-hidden="true">←</span></Link>
-            </div>
-            {podcastWorks.length ? <div className="ravine-reference-media-card">{<WorkCard work={podcastWorks[0]} locale={locale} compact />}</div> : <p className="ravine-reference-muted">{t.emptyPodcast}</p>}
-          </section>
-        </div>
-
-        <aside className="ravine-reference-creators-panel" dir="rtl">
-          <div className="ravine-reference-section-heading compact">
-            <h2>{locale === "ar" ? "مبدعون مميزون" : "Featured creators"}</h2>
-            <Link className="ravine-reference-arrows" href={"/" + locale + "/creators"} aria-label={locale === "ar" ? "عرض المبدعين" : "Browse creators"}>‹ <span>›</span></Link>
-          </div>
-          {creators.length ? <div className="ravine-reference-creator-grid">{creators.slice(0, 4).map((creator) => <CreatorCard key={creator.id} creator={creator} locale={locale} />)}</div> : <p className="ravine-reference-muted">{t.emptyCreators}</p>}
-        </aside>
-      </div>
-
-      <div className="ravine-reference-bottom-layout">
-        <section className="ravine-reference-categories-panel" aria-labelledby="ravine-categories-heading" dir="rtl">
-          <div className="ravine-reference-section-heading compact">
-            <h2 id="ravine-categories-heading">{locale === "ar" ? "التصنيفات" : "Categories"}</h2>
-            <Link href={"/" + locale + "/library"}>{locale === "ar" ? "عرض الكل" : "View all"} <span aria-hidden="true">←</span></Link>
-          </div>
-          <div className="ravine-reference-category-grid" dir="ltr">
-            <Link className="ravine-reference-category-card" href={"/" + locale + "/films"}>
-              <img src={publicWorks[0]?.thumbnail_url || "/RAVINE.PNG"} alt="" loading="lazy" />
-              <span>{locale === "ar" ? "أفلام" : "Films"}</span>
-            </Link>
-            <Link className="ravine-reference-category-card" href={"/" + locale + "/documentaries"}>
-              <img src={publicWorks[1]?.thumbnail_url || publicWorks[0]?.thumbnail_url || "/RAVINE.PNG"} alt="" loading="lazy" />
-              <span>{locale === "ar" ? "وثائقيات" : "Documentaries"}</span>
-            </Link>
-            <Link className="ravine-reference-category-card" href={"/" + locale + "/series"}>
-              <img src={publicWorks[2]?.thumbnail_url || publicWorks[0]?.thumbnail_url || "/RAVINE.PNG"} alt="" loading="lazy" />
-              <span>{locale === "ar" ? "مسلسلات" : "Series"}</span>
-            </Link>
-          </div>
-        </section>
-
-        <aside className="ravine-reference-community-card" dir="rtl">
-          <img className="ravine-reference-community-backdrop" src={publicWorks[3]?.thumbnail_url || publicWorks[0]?.thumbnail_url || "/RAVINE.PNG"} alt="" loading="lazy" />
-          <div className="ravine-reference-community-content">
-            <strong>{locale === "ar" ? "كن جزءًا من مجتمع RAVINE" : "Be part of the RAVINE community"}</strong>
-            <p>{locale === "ar" ? "استكشف، شارك، وتواصل مع مبدعين من جميع أنحاء العالم." : "Explore, share, and connect with creators from around the world."}</p>
-            <Link href={"/" + locale + "/community"}>{locale === "ar" ? "انضم الآن" : "Join now"} <span aria-hidden="true">←</span></Link>
-          </div>
-        </aside>
-      </div>
-
-      <section className="section selection-section ravine-reference-selection">
-        <div className="section-head">
-          <div><div className="eyebrow">{locale === "ar" ? "رَافِين / المختارات" : "RAVINE / SELECT"}</div><h2>{t.selections}</h2><p className="section-note selection-note">{t.selectionsBody}</p></div>
-          <div className="selection-tabs"><span className="selection-tab active">{t.daily}</span><span className="selection-tab">{t.weekly}</span><span className="selection-tab">{t.monthly}</span><span className="selection-tab">{t.yearly}</span></div>
-        </div>
-        {publicWorks.length ? <div className="video-grid">{publicWorks.slice(0, 6).map((work) => <WorkCard key={work.id} work={work} locale={locale} />)}</div> : <div className="empty-state"><strong>{t.empty}</strong></div>}
-      </section>
-
-      <section className="section ravine-reference-ideas">
-        <div className="section-head"><div><div className="eyebrow">{locale === "ar" ? "رَافِين / الفكرة" : "RAVINE / THE IDEA"}</div><h2>{t.ideas}</h2></div><Link className="button secondary" href={"/" + locale + "/discover"}>{t.discover}</Link></div>
-        <div className="home-gated-row"><div className="home-gated-item"><span>01</span><strong>{t.quality}</strong><p>{t.qualityBody}</p></div><div className="home-gated-item"><span>02</span><strong>{t.identity}</strong><p>{t.identityBody}</p></div><div className="home-gated-item"><span>03</span><strong>{t.graph}</strong><p>{t.graphBody}</p></div></div>
-        <div className="ravine-reference-community-path"><span>{t.communityGeneral}</span><i>→</i><span>{t.communityTopics}</span><i>→</i><span>{t.communityCreators}</span><i>→</i><span>{t.communityGroups}</span></div>
-      </section>
-    </div>
-  );
+  return <div className="home-guest">
+    <section className="hero home-guest-hero"><GuestCinematicBackdrop locale={locale} /><div className="hero-inner"><div className="home-state-kicker">{t.guestEyebrow}</div><h1>{t.guestTitle}</h1><p>{t.guestBody}</p><div className="home-state-actions"><AuthTrigger locale={locale} label={t.signup} /><Link className="button secondary" href={`/${locale}/discover`}>{t.discover}</Link></div></div></section>
+    <section className="section"><div className="home-guest-preview"><div><div className="eyebrow">{locale === "ar" ? "رَافِين / معاينة" : "RAVINE / PREVIEW"}</div><h2>{t.guestPreview}</h2><p className="home-guest-intro">{t.guestPreviewBody}</p><div className="video-grid">{publicWorks.slice(0, 6).map((work) => <WorkCard key={work.id} work={work} locale={locale} />)}</div></div><div className="home-guest-note"><strong>{locale === "ar" ? "شاهد، تعرّف، ثم انضم." : "See it. Understand it. Then join."}</strong><p>{locale === "ar" ? "التصفح العام متاح للضيوف، بينما الإعجاب والحفظ والمتابعة والتقييم والمجتمعات والموجز الشخصي تحتاج إلى حساب." : "Public browsing stays open to guests; liking, saving, following, rating, community actions and a personal feed require an account."}</p></div></div></section>
+    <section className="section selection-section"><div className="section-head"><div><div className="eyebrow">{locale === "ar" ? "رَافِين / المختارات" : "RAVINE / SELECT"}</div><h2>{t.selections}</h2><p className="section-note selection-note">{t.selectionsBody}</p></div><div className="selection-tabs"><span className="selection-tab active">{t.daily}</span><span className="selection-tab">{t.weekly}</span><span className="selection-tab">{t.monthly}</span><span className="selection-tab">{t.yearly}</span></div></div>{publicWorks.length ? <div className="video-grid">{publicWorks.slice(0, 6).map((work) => <WorkCard key={work.id} work={work} locale={locale} />)}</div> : <div className="empty-state"><strong>{t.empty}</strong></div>}</section>
+    <section className="section media-section"><div className="media-column"><div className="section-head compact"><div><div className="eyebrow">{locale === "ar" ? "رَافِين / جلسات مباشرة" : "RAVINE / LIVE"}</div><h2>{t.liveTitle}</h2></div><Link className="button secondary" href={`/${locale}/live`}>{t.discover}</Link></div>{liveWorks.length ? <div className="mini-grid">{liveWorks.map((work) => <WorkCard key={work.id} work={work} locale={locale} compact />)}</div> : <div className="empty-state"><strong>{t.emptyLive}</strong></div>}</div><div className="media-column"><div className="section-head compact"><div><div className="eyebrow">{locale === "ar" ? "رَافِين / البرامج الصوتية والوثائقيات" : "RAVINE / AUDIO + DOCUMENTARY"}</div><h2>{locale === "ar" ? "البودكاست والوثائقي" : "Podcasts & Documentaries"}</h2></div><Link className="button secondary" href={`/${locale}/podcasts`}>{t.discover}</Link></div>{podcastWorks.length ? <div className="mini-grid">{podcastWorks.map((work) => <WorkCard key={work.id} work={work} locale={locale} compact />)}</div> : <div className="empty-state"><strong>{t.emptyPodcast}</strong></div>}</div></section>
+    <section className="section"><div className="section-head"><div><div className="eyebrow">{locale === "ar" ? "رَافِين / المبدعون" : "RAVINE / PEOPLE"}</div><h2>{t.creatorsTitle}</h2><p className="section-note">{t.creatorsBody}</p></div></div>{creators.length ? <div className="creator-strip">{creators.slice(0, 6).map((creator) => <CreatorCard key={creator.id} creator={creator} locale={locale} />)}</div> : <div className="empty-state"><strong>{t.emptyCreators}</strong></div>}</section>
+    <section className="section"><div className="section-head"><div><div className="eyebrow">{locale === "ar" ? "رَافِين / أفكار" : "RAVINE / IDEAS"}</div><h2>{t.ideas}</h2></div><Link className="button secondary" href={`/${locale}/discover`}>{t.discover}</Link></div><div className="home-gated-row"><div className="home-gated-item"><span>01</span><strong>{t.quality}</strong><p>{t.qualityBody}</p></div><div className="home-gated-item"><span>02</span><strong>{t.identity}</strong><p>{t.identityBody}</p></div><div className="home-gated-item"><span>03</span><strong>{t.graph}</strong><p>{t.graphBody}</p></div></div></section>
+    <section className="section home-community-teaser"><div className="section-head"><div><div className="eyebrow">{t.communityEyebrow}</div><h2>{t.communityTitle}</h2><p className="section-note">{t.communityBody}</p></div><Link className="button secondary" href={`/${locale}/community`}>{locale === "ar" ? "استكشف المجتمعات" : "Explore communities"}</Link></div><div className="home-community-path"><span>{t.communityGeneral}</span><i>→</i><span>{t.communityTopics}</span><i>→</i><span>{t.communityCreators}</span><i>→</i><span>{t.communityGroups}</span></div><p className="home-community-loop">{t.communityLoop}</p></section>
+  </div>;
 }
