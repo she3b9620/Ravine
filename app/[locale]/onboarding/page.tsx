@@ -21,6 +21,7 @@ export default function OnboardingPage() {
   const [language, setLanguage] = useState<"ar" | "en">(locale);
   const [country, setCountry] = useState("");
   const checkTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const usernameCheckRef = useRef(0);
 
   useEffect(() => {
     let mounted = true;
@@ -59,6 +60,8 @@ export default function OnboardingPage() {
     const clean = cleanUsernameValue(nextUsername);
     setUsername(clean);
     setUsernameSuggestions([]);
+    usernameCheckRef.current += 1;
+    const requestId = usernameCheckRef.current;
     if (checkTimer.current) clearTimeout(checkTimer.current);
     if (clean.length < 3) { setUsernameState("idle"); return; }
     setUsernameState("checking");
@@ -66,6 +69,7 @@ export default function OnboardingPage() {
       const supabase = createClient();
       const { data: userData } = await supabase.auth.getUser();
       const { data: existing, error: lookupError } = await supabase.from("profiles").select("id").eq("username", clean).maybeSingle();
+      if (requestId !== usernameCheckRef.current) return;
       if (lookupError) { setUsernameState("idle"); return; }
       if (!existing || existing.id === userData.user?.id) {
         setUsernameState("available");
@@ -73,6 +77,7 @@ export default function OnboardingPage() {
       }
       const candidates = suggestUsernames(clean);
       const { data: takenRows } = await supabase.from("profiles").select("username").in("username", candidates);
+      if (requestId !== usernameCheckRef.current) return;
       const taken = new Set((takenRows ?? []).map((row) => row.username));
       setUsernameSuggestions(candidates.filter((candidate) => !taken.has(candidate)));
       setUsernameState("taken");
