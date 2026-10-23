@@ -66,7 +66,7 @@ function sectionMeta(key: string, ar: boolean) {
   return ar ? item.ar : item.en;
 }
 
-function buildWorkSections(works: Work[], ar: boolean): WorkSection[] {
+function buildWorkSections(works: Work[]): WorkSection[] {
   const order = ["video", "cut", "documentary", "podcast", "live", "series", "bts", "other"];
   const buckets = new Map<string, Work[]>();
   for (const work of works) {
@@ -156,7 +156,7 @@ export default async function CreatorProfilePage({ params }: { params: Promise<{
     (ar
       ? "هوية إبداعية من مجتمع RAVINE، تُعرَف من خلال الأعمال المنشورة لا من الضجيج حولها."
       : "A creative identity from the RAVINE community, defined through the work rather than the noise around it.");
-  const workSections = buildWorkSections(works, ar);
+  const workSections = buildWorkSections(works);
 
   return (
     <main className={styles.page} dir={ar ? "rtl" : "ltr"}>
