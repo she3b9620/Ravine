@@ -11,11 +11,15 @@ import "./ravine-dashboard.css";
 import "./ravine-final-visual-fixes.css";
 import "./home-feed-density.css";
 import type { ReactNode } from "react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html suppressHydrationWarning data-scroll-behavior="smooth">
-      <body>{children}</body>
+      <body>
+        {children}
+        <SpeedInsights />
+      </body>
     </html>
   );
 }
