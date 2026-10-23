@@ -59,6 +59,12 @@ export default function StudioPage() {
       setLoading(true);
       setError("");
 
+      if (!supabase) {
+        setError(isArabic ? "إعدادات الاتصال غير متاحة حاليًا." : "Connection settings are currently unavailable.");
+        setLoading(false);
+        return;
+      }
+
       const { data: userData, error: userError } = await supabase.auth.getUser();
       if (!mounted) return;
 

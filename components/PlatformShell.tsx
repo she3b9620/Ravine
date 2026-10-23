@@ -63,6 +63,13 @@ export default function PlatformShell({ children, active = "", title, eyebrow, d
     if (savedTheme === "light") setDark(false);
     let mounted = true;
 
+    if (!supabase) {
+      setUserName("");
+      return () => {
+        mounted = false;
+      };
+    }
+
     void supabase.auth.getSession().then(({ data }) => {
       if (!mounted) return;
       setUserName(data.session?.user?.email?.split("@")[0] || "");
