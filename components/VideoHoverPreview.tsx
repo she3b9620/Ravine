@@ -71,7 +71,7 @@ export default function VideoHoverPreview({ videoUrl, videoId }: Props) {
     }
   }, []);
 
-  const finishPreview = useCallback((run: number) => {
+  function finishPreview(run: number) {
     if (run !== runRef.current || !hoveredRef.current) return;
     setPhase("fading");
     fadeTimerRef.current = window.setTimeout(() => {
@@ -84,9 +84,9 @@ export default function VideoHoverPreview({ videoUrl, videoId }: Props) {
         if (hoveredRef.current && run === runRef.current) startPreview(run);
       }, LOOP_GAP_MS);
     }, FADE_OUT_MS);
-  }, [resetVideos]);
+  }
 
-  const scheduleNext = useCallback((index: number, run: number) => {
+  function scheduleNext(index: number, run: number) {
     sequenceTimerRef.current = window.setTimeout(() => {
       if (!hoveredRef.current || run !== runRef.current) return;
       const times = timesRef.current;
@@ -110,9 +110,9 @@ export default function VideoHoverPreview({ videoUrl, videoId }: Props) {
         scheduleNext(index + 1, run);
       }
     }, SAMPLE_MS);
-  }, [finishPreview]);
+    }
 
-  const startPreview = useCallback((run: number) => {
+  function startPreview(run: number) {
     if (!source || !hoveredRef.current || run !== runRef.current) return;
     const a = videoARef.current;
     const b = videoBRef.current;
@@ -145,7 +145,7 @@ export default function VideoHoverPreview({ videoUrl, videoId }: Props) {
     a.addEventListener("loadedmetadata", onMetadata, { once: true });
     a.load();
     b.load();
-  }, [scheduleNext, source]);
+  }
 
   const stopPreview = useCallback(() => {
     hoveredRef.current = false;
