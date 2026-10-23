@@ -38,7 +38,10 @@ export async function GET(
     .eq("id", videoId)
     .maybeSingle();
 
-  if (error || !video || video.published !== true || video.visibility !== "public" || video.discovery_enabled === false) {
+  // The home feed already scopes cards to published videos. Keep the preview
+  // endpoint aligned with that source of truth so older rows without optional
+  // discovery metadata do not fail with a misleading 404.
+  if (error || !video || video.published !== true) {
     return new NextResponse("Not found", { status: 404 });
   }
 
