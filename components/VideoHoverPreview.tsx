@@ -18,6 +18,7 @@ function sampleTimes(duration: number) {
 
 export default function VideoHoverPreview({ videoUrl, videoId }: Props) {
   const [phase, setPhase] = useState<Phase>("idle");
+  const [isMounted, setIsMounted] = useState(false);
   const [loadedUrl, setLoadedUrl] = useState<string | null>(null);
   const [activeLayer, setActiveLayer] = useState(0);
   const firstVideoRef = useRef<HTMLVideoElement>(null);
@@ -120,10 +121,12 @@ export default function VideoHoverPreview({ videoUrl, videoId }: Props) {
   }, [clearTimers, resetVideos, startPreview, videoUrl]);
 
   useEffect(() => {
+    setIsMounted(true);
     return () => stopPreview();
   }, [stopPreview]);
 
   if (!videoUrl) return null;
+  if (!isMounted) return <span className="ravine-hover-preview-placeholder" aria-hidden="true" />;
 
   return (
     <div

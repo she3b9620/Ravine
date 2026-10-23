@@ -16,7 +16,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html suppressHydrationWarning data-scroll-behavior="smooth">
-      <body>
+      <body suppressHydrationWarning>
         {children}
         <SpeedInsights />
       </body>
