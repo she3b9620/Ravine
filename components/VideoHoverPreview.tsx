@@ -15,7 +15,7 @@ const SAMPLE_RATIOS = [0.08, 0.26, 0.46, 0.66, 0.84];
 function isYouTubeUrl(value: string | null) {
   if (!value) return false;
   try {
-    const host = new URL(value, window.location.origin).hostname.toLowerCase().replace(/^www\./, "");
+    const host = new URL(value, "https://ravine.local").hostname.toLowerCase().replace(/^www\./, "");
     return host === "youtube.com" || host === "youtu.be" || host.endsWith(".youtube.com");
   } catch {
     return false;
@@ -25,7 +25,7 @@ function isYouTubeUrl(value: string | null) {
 function normalizeSource(value: string | null, videoId: number) {
   if (!value || isYouTubeUrl(value)) return null;
   try {
-    const url = new URL(value, window.location.origin);
+    const url = new URL(value, "https://ravine.local");
     if (url.pathname.includes("/storage/v1/object/public/videos/")) return `/api/media/video/${videoId}`;
   } catch {
     return null;
