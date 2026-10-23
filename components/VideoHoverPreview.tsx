@@ -125,8 +125,7 @@ export default function VideoHoverPreview({ videoUrl, videoId }: Props) {
     return () => stopPreview();
   }, [stopPreview]);
 
-  if (!videoUrl) return null;
-  if (!isMounted) return <span className="ravine-hover-preview-placeholder" aria-hidden="true" />;
+  if (!videoUrl || !isMounted) return null;
 
   return (
     <div
