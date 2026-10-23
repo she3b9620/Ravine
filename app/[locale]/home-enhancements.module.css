@@ -1,7 +1,7 @@
 :global(.selection-section){position:relative}
 :global(.selection-note){margin-top:14px}
 :global(.selection-tabs){display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
-:global(.selection-tab){display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:0 12px;border:1px solid rgba(241,233,220,.12);border-radius:999px;color:#9A9690;font-size:11px;font-weight:700;letter-spacing:.04em;transition:color .24s ease,border-color .24s ease,background .24s ease,transform .24s ease}
+:global(.selection-tab){display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:0 12px;border:1px solid rgba(241,233,220,.12);border-radius:999px;background:transparent;color:#9A9690;font:inherit;font-size:11px;font-weight:700;letter-spacing:.04em;line-height:1;cursor:pointer;transition:color .24s ease,border-color .24s ease,background .24s ease,transform .24s ease}
 :global(.selection-tab:hover){transform:translateY(-1px);border-color:rgba(212,154,120,.45);color:#F1E9DC}
 :global(.selection-tab.active){border-color:rgba(196,122,82,.55);background:rgba(196,122,82,.09);color:#C47A52}
 :global(.ravine-period-tab){position:relative;gap:7px}
