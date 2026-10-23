@@ -18,6 +18,7 @@ function sampleTimes(duration: number) {
 
 export default function VideoHoverPreview({ videoUrl, videoId }: Props) {
   const [phase, setPhase] = useState<Phase>("idle");
+  const [loadedUrl, setLoadedUrl] = useState<string | null>(null);
   const [activeLayer, setActiveLayer] = useState(0);
   const firstVideoRef = useRef<HTMLVideoElement>(null);
   const secondVideoRef = useRef<HTMLVideoElement>(null);
@@ -48,6 +49,7 @@ export default function VideoHoverPreview({ videoUrl, videoId }: Props) {
 
   const stopPreview = useCallback(() => {
     hoveredRef.current = false;
+    setLoadedUrl(null);
     runRef.current += 1;
     clearTimers();
     resetVideos();
@@ -109,6 +111,7 @@ export default function VideoHoverPreview({ videoUrl, videoId }: Props) {
   const handleEnter = useCallback(() => {
     if (!videoUrl) return;
     hoveredRef.current = true;
+    setLoadedUrl(videoUrl);
     runRef.current += 1;
     clearTimers();
     resetVideos();
@@ -130,8 +133,8 @@ export default function VideoHoverPreview({ videoUrl, videoId }: Props) {
       aria-hidden="true"
       data-video-id={videoId}
     >
-      <video ref={firstVideoRef} className={`ravine-hover-preview-layer${activeLayer === 0 && phase === "active" ? " is-active" : ""}`} src={videoUrl} muted playsInline preload="metadata" tabIndex={-1} />
-      <video ref={secondVideoRef} className={`ravine-hover-preview-layer${activeLayer === 1 && phase === "active" ? " is-active" : ""}`} src={videoUrl} muted playsInline preload="metadata" tabIndex={-1} />
+      <video ref={firstVideoRef} className={`ravine-hover-preview-layer${activeLayer === 0 && phase === "active" ? " is-active" : ""}`} src={loadedUrl ?? undefined} muted playsInline preload="metadata" tabIndex={-1} />
+      <video ref={secondVideoRef} className={`ravine-hover-preview-layer${activeLayer === 1 && phase === "active" ? " is-active" : ""}`} src={loadedUrl ?? undefined} muted playsInline preload="metadata" tabIndex={-1} />
       <span className="ravine-hover-preview-wash" />
     </div>
   );

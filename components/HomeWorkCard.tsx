@@ -1,12 +1,7 @@
 "use client";
-import dynamic from "next/dynamic";
 import Link from "next/link";
+import VideoHoverPreview from "./VideoHoverPreview";
 import { ravineNumber } from "@/lib/ravine-format";
-
-const VideoHoverPreview = dynamic(() => import("./VideoHoverPreview"), {
-  ssr: false,
-  loading: () => null,
-});
 
 type Locale = "ar" | "en";
 type WorkCreator = { name: string | null; username: string | null };
