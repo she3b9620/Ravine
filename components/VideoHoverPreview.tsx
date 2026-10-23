@@ -17,7 +17,6 @@ function sampleTimes(duration: number) {
 }
 
 export default function VideoHoverPreview({ videoUrl, videoId }: Props) {
-  const [mounted, setMounted] = useState(false);
   const [phase, setPhase] = useState<Phase>("idle");
   const [activeLayer, setActiveLayer] = useState(0);
   const firstVideoRef = useRef<HTMLVideoElement>(null);
@@ -118,11 +117,10 @@ export default function VideoHoverPreview({ videoUrl, videoId }: Props) {
   }, [clearTimers, resetVideos, startPreview, videoUrl]);
 
   useEffect(() => {
-    setMounted(true);
     return () => stopPreview();
   }, [stopPreview]);
 
-  if (!videoUrl || !mounted) return null;
+  if (!videoUrl) return null;
 
   return (
     <div
