@@ -201,6 +201,15 @@ export default function HomePage() {
     async function loadHome() {
       setLoading(true);
 
+      if (!supabase) {
+        setVideos([]);
+        setCreators([]);
+        setCategories(fallbackCategories);
+        setLoading(false);
+        setAuthResolved(true);
+        return;
+      }
+
       try {
         const [
           videosResponse,
