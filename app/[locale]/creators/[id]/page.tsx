@@ -118,15 +118,18 @@ export default async function CreatorProfilePage({ params }: { params: Promise<{
   const { locale: rawLocale, id } = await params;
   const locale: Locale = rawLocale === "en" ? "en" : "ar";
   const ar = locale === "ar";
-  const creatorId = Number(id);
-  if (!Number.isInteger(creatorId) || creatorId < 1) notFound();
+  const numericCreatorId = Number(id);
+  const hasNumericId = Number.isInteger(numericCreatorId) && numericCreatorId > 0;
+  const creatorKey = decodeURIComponent(id).trim();
+  if (!creatorKey) notFound();
 
   const supabase = await createClient();
-  const { data: creatorData, error: creatorError } = await supabase
+  const creatorQuery = supabase
     .from("creators")
-    .select("id,name,username,avatar_url,bio,specialty,followers,user_id")
-    .eq("id", creatorId)
-    .maybeSingle();
+    .select("id,name,username,avatar_url,bio,specialty,followers,user_id");
+  const { data: creatorData, error: creatorError } = hasNumericId
+    ? await creatorQuery.eq("id", numericCreatorId).maybeSingle()
+    : await creatorQuery.eq("username", creatorKey.replace(/^@/, "")).maybeSingle();
   const creator = creatorData as Creator | null;
   if (creatorError || !creator) notFound();
 
@@ -134,7 +137,7 @@ export default async function CreatorProfilePage({ params }: { params: Promise<{
     supabase
       .from("videos")
       .select("id,title,description,thumbnail_url,video_url,duration,views,likes,content_type,quality")
-      .eq("creator_id", creatorId)
+      .eq("creator_id", creator.id)
       .eq("published", true)
       .order("created_at", { ascending: false })
       .limit(24),
@@ -184,8 +187,8 @@ export default async function CreatorProfilePage({ params }: { params: Promise<{
             <div className={styles.nameRow}>
               <h1>{displayName}</h1>
             </div>
-            <div className={styles.handleLine}>
-              @{creator.username || `creator-${creator.id}`} <span>·</span> {specialty}
+            <div className={styles.handleLine} dir="ltr">
+              <bdi>@{creator.username || `creator-${creator.id}`}</bdi> <span>·</span> <bdi>{specialty}</bdi>
             </div>
             <p className={styles.bio}>{visualBio}</p>
             <div className={styles.actions}>
