@@ -61,6 +61,7 @@ export default async function StudioPage({ params }: { params: Promise<{ locale:
     .limit(50);
 
   const works = (worksData ?? []) as Work[];
+  const formatCount = (value: number) => new Intl.NumberFormat(ar ? "ar-EG" : "en-US").format(value);
   const publishedCount = works.filter((work) => work.published).length;
   const draftCount = works.length - publishedCount;
 
@@ -76,7 +77,7 @@ export default async function StudioPage({ params }: { params: Promise<{ locale:
       </div>
       <div className="work-grid">
         <article className="work"><div className="work-art"/><div className="work-body"><div className="work-kicker">PROFILE</div><h3>{creator.specialty || "Creator"}</h3><p>@{creator.username || `creator-${creator.id}`}</p></div></article>
-        <article className="work"><div className="work-art"/><div className="work-body"><div className="work-kicker">WORKS</div><h3>{works.length.toLocaleString()}</h3><p>{ar ? `${publishedCount} منشور · ${draftCount} مسودة` : `${publishedCount} published · ${draftCount} drafts`}</p></div></article>
+        <article className="work"><div className="work-art"/><div className="work-body"><div className="work-kicker">WORKS</div><h3>{formatCount(works.length)}</h3><p>{ar ? `${publishedCount} منشور · ${draftCount} مسودة` : `${publishedCount} published · ${draftCount} drafts`}</p></div></article>
         <article className="work"><div className="work-art"/><div className="work-body"><div className="work-kicker">AUDIENCE</div><h3>{Number(creator.followers || 0).toLocaleString()}</h3><p>{ar ? "متابع" : "followers"}</p></div></article>
       </div>
       <StudioUpload creatorId={creator.id} locale={locale} />

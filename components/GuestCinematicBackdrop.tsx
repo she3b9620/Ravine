@@ -22,7 +22,13 @@ function toPlaybackSource(work: Work) {
   } catch { return null; }
   return work.video_url;
 }
-function shuffle<T>(items: T[]) { const result = [...items]; for (let i = result.length - 1; i > 0; i -= 1) { const j = Math.floor(Math.random() * (i + 1)); [result[i], result[j]] = [result[j], result[i]]; } return result; }
+function stableShuffle<T extends { id?: number }>(items: T[]) {
+  return [...items].sort((a, b) => {
+    const left = String(a.id ?? "");
+    const right = String(b.id ?? "");
+    return left.localeCompare(right, "en");
+  });
+}
 
 async function loadAllGuestHeroWorks(supabase: ReturnType<typeof createClient>) {
   const all: Work[] = [];
@@ -52,7 +58,7 @@ export default function GuestCinematicBackdrop({ locale }: GuestCinematicBackdro
   const [volume, setVolume] = useState(DEFAULT_VOLUME);
   const [repeat, setRepeat] = useState(false);
   const [backgroundMode, setBackgroundMode] = useState<BackgroundMode>("video");
-  const playableWorks = useMemo(() => shuffle(works.map((work) => ({ ...work, src: toPlaybackSource(work) })).filter((work) => work.src && work.content_type !== "podcast" && work.content_type !== "live")) as Array<Work & { src: string }>, [works]);
+  const playableWorks = useMemo(() => stableShuffle(works.map((work) => ({ ...work, src: toPlaybackSource(work) })).filter((work) => work.src && work.content_type !== "podcast" && work.content_type !== "live")) as Array<Work & { src: string }>, [works]);
   const current = playableWorks[currentIndex] ?? null;
 
   useEffect(() => {

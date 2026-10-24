@@ -27,6 +27,10 @@ function isPublishable(work: Work) {
   return Boolean(work.title.trim() && work.video_url?.trim() && allowedContentTypes.has(work.content_type || "video"));
 }
 
+function formatCount(value: number | null, locale: "ar" | "en") {
+  return new Intl.NumberFormat(locale === "ar" ? "ar-EG" : "en-US").format(Number(value || 0));
+}
+
 function visibilityLabel(value: string | null, ar: boolean) {
   const labels: Record<string, [string, string]> = {
     public: ["عام", "PUBLIC"],
@@ -250,7 +254,7 @@ export default function StudioWorkManager({ works: initialWorks, locale }: Props
                   <>
                     <h3>{work.title}</h3>
                     <p>{work.description || (ar ? "بدون وصف." : "No description.")}</p>
-                    <div className="video-stats"><span>{Number(work.views || 0).toLocaleString()} {ar ? "مشاهدة" : "views"}</span><span>{Number(work.likes || 0).toLocaleString()} {ar ? "إعجاب" : "likes"}</span></div>
+                    <div className="video-stats"><span>{formatCount(work.views, locale)} {ar ? "مشاهدة" : "views"}</span><span>{Number(work.likes || 0).toLocaleString()} {ar ? "إعجاب" : "likes"}</span></div>
                   </>
                 )}
               </div>
