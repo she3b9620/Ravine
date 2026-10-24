@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient as createSupabaseAdminClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
@@ -28,12 +29,21 @@ export default async function StudioPage({ params }: { params: Promise<{ locale:
   const locale: Locale = rawLocale === "en" ? "en" : "ar";
   const ar = locale === "ar";
   const supabase = await createClient();
+  const cookieStore = await cookies();
+  const activeCreatorCookie = cookieStore.get("ravine-active-creator-id")?.value;
+  const parsedCreatorId = activeCreatorCookie ? Number(activeCreatorCookie) : null;
+  const requestedCreatorId = parsedCreatorId !== null && Number.isInteger(parsedCreatorId) && parsedCreatorId > 0 ? parsedCreatorId : null;
+  const hasRequestedCreator = requestedCreatorId !== null;
 
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) redirect(`/${locale}/auth?next=/${locale}/studio`);
 
+  const creatorQuery = supabase
+    .from("creators")
+    .select("id,name,username,specialty,followers")
+    .eq("user_id", auth.user.id);
   const [{ data: creator }, { data: application }, { data: profile }] = await Promise.all([
-    supabase.from("creators").select("id,name,username,specialty,followers").eq("user_id", auth.user.id).maybeSingle(),
+    (hasRequestedCreator ? creatorQuery.eq("id", requestedCreatorId as number) : creatorQuery.order("created_at", { ascending: true })).maybeSingle(),
     supabase.from("creator_applications").select("status,created_at,reviewer_notes,reviewed_at").eq("user_id", auth.user.id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
     supabase.from("profiles").select("display_name,username,bio,avatar_url,is_creator").eq("id", auth.user.id).maybeSingle(),
   ]);
