@@ -55,6 +55,7 @@ export default function StudioUpload({ creatorId, locale }: Props) {
   const previewFileInputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [uploadStage, setUploadStage] = useState("");
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
@@ -76,16 +77,30 @@ export default function StudioUpload({ creatorId, locale }: Props) {
     }
   }
 
-  async function uploadToRavine(uploadFile: File): Promise<CloudinaryUpload> {
+  function uploadToRavine(uploadFile: File): Promise<CloudinaryUpload> {
     const formData = new FormData();
     formData.append("file", uploadFile);
     formData.append("creatorId", String(creatorId));
-    const response = await fetch("/api/studio/upload-media", { method: "POST", body: formData });
-    const payload = (await response.json()) as CloudinaryUpload;
-    if (!response.ok || !payload.secure_url) {
-      throw new Error(payload.error?.message || (ar ? "تعذر رفع الملف." : "Media upload failed."));
-    }
-    return payload;
+
+    return new Promise((resolve, reject) => {
+      const request = new XMLHttpRequest();
+      request.open("POST", "/api/studio/upload-media");
+      request.responseType = "json";
+      request.upload.onprogress = (event) => {
+        if (event.lengthComputable) setUploadProgress(Math.round((event.loaded / event.total) * 100));
+      };
+      request.onerror = () => reject(new Error(ar ? "تعذر الاتصال بخدمة رفع الوسائط." : "Could not connect to the media upload service."));
+      request.onabort = () => reject(new Error(ar ? "تم إلغاء رفع الملف." : "The upload was cancelled."));
+      request.onload = () => {
+        const payload = (request.response || {}) as CloudinaryUpload;
+        if (request.status < 200 || request.status >= 300 || !payload.secure_url) {
+          reject(new Error(payload.error?.message || (ar ? "تعذر رفع الملف." : "Media upload failed.")));
+          return;
+        }
+        resolve(payload);
+      };
+      request.send(formData);
+    });
   }
 
   function validateAuxiliaryMedia(kind: "trailer" | "preview", upload: CloudinaryUpload) {
@@ -134,10 +149,13 @@ export default function StudioUpload({ creatorId, locale }: Props) {
       const { data: auth } = await supabase.auth.getUser();
       if (!auth.user) throw new Error("RAVINE_AUTH_REQUIRED");
 
+      setUploadProgress(0);
       setUploadStage(ar ? "جارٍ رفع ملف العمل…" : "Uploading the main work…");
       const mainUpload = await uploadToRavine(file);
+      setUploadProgress(trailerFile || previewFile ? 0 : null);
       setUploadStage(trailerFile ? (ar ? "جارٍ رفع الـTrailer…" : "Uploading the trailer…") : previewFile ? (ar ? "جارٍ رفع الـPreview…" : "Uploading the preview…") : (ar ? "جارٍ حفظ بيانات العمل…" : "Saving work metadata…"));
       const trailerUpload = trailerFile ? await uploadToRavine(trailerFile) : null;
+      setUploadProgress(previewFile ? 0 : null);
       setUploadStage(previewFile ? (ar ? "جارٍ رفع الـPreview…" : "Uploading the preview…") : (ar ? "جارٍ حفظ بيانات العمل…" : "Saving work metadata…"));
       const previewUpload = previewFile ? await uploadToRavine(previewFile) : null;
 
@@ -217,6 +235,7 @@ export default function StudioUpload({ creatorId, locale }: Props) {
       if (mainFileInputRef.current) mainFileInputRef.current.value = "";
       if (trailerFileInputRef.current) trailerFileInputRef.current.value = "";
       if (previewFileInputRef.current) previewFileInputRef.current.value = "";
+      setUploadProgress(null);
       setMessage(ar ? "تم رفع العمل وحفظه كمسودة مع إعدادات الظهور والـTrailer/Preview." : "The work was uploaded and saved as a draft with visibility and optional trailer/preview settings.");
       router.refresh();
     } catch (submitError) {
@@ -224,6 +243,7 @@ export default function StudioUpload({ creatorId, locale }: Props) {
     } finally {
       setBusy(false);
       setUploadStage("");
+      setUploadProgress(null);
     }
   }
 
@@ -303,7 +323,7 @@ export default function StudioUpload({ creatorId, locale }: Props) {
       {visibility === "custom" ? <div className="empty-state"><strong>{ar ? "الجمهور المخصص محفوظ كنوع وصول" : "Custom audience is prepared as an access mode"}</strong><span>{ar ? "اختيار الأشخاص/الأعضاء المسموح لهم سيُدار من واجهة الوصول المخصصة في الخطوة التالية." : "Selecting the allowed people or members will be handled by the dedicated access UI next."}</span></div> : null}
       {error ? <div className="empty-state"><strong>{ar ? "تعذر حفظ العمل." : "Work could not be saved."}</strong><span>{error}</span></div> : null}
       {message ? <div className="empty-state"><strong>{ar ? "تم الحفظ." : "Saved."}</strong><span>{message}</span></div> : null}
-      {busy && uploadStage ? <div className="empty-state" role="status" aria-live="polite"><strong>{ar ? "جاري تجهيز العمل" : "Preparing your work"}</strong><span>{uploadStage}</span></div> : null}
+      {busy && uploadStage ? <div className="empty-state" role="status" aria-live="polite"><strong>{ar ? "جاري تجهيز العمل" : "Preparing your work"}</strong><span>{uploadStage}</span>{uploadProgress !== null ? <><progress value={uploadProgress} max="100" aria-label={ar ? "نسبة رفع الملف" : "Upload progress"} /><small>{uploadProgress}%</small></> : null}</div> : null}
 
       <button className="button primary" type="submit" disabled={busy}>
         {busy ? (ar ? "جارٍ الرفع…" : "Uploading…") : (ar ? "رفع وحفظ كمسودة" : "Upload and save draft")}
