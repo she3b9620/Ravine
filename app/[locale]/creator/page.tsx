@@ -1,9 +1,5 @@
-import { redirect } from "next/navigation";
+import StudioPage from "../studio/page";
 
-type Locale = "ar" | "en";
-
-export default async function CreatorSpaceAlias({ params }: { params: Promise<{ locale: string }> }) {
-  const { locale: rawLocale } = await params;
-  const locale: Locale = rawLocale === "en" ? "en" : "ar";
-  redirect(`/${locale}/studio`);
+export default function CreatorSpace({ params }: { params: Promise<{ locale: string }> }) {
+  return <StudioPage params={params} />;
 }
