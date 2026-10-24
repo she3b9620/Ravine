@@ -14,7 +14,7 @@ export const RAVINE_PLATFORM_MODULES: RAVINEPlatformModule[] = [
   { key: "watch", title: "Watch / Cinema", href: "/watch", family: "experience", status: "implemented", audience: "guest" },
   { key: "works", title: "Work Universe", href: "/work", family: "experience", status: "implemented", audience: "guest" },
   { key: "creators", title: "Creator Universe", href: "/creators", family: "creator", status: "implemented", audience: "guest" },
-  { key: "creator-studio", title: "Creator Studio", href: "/creator", family: "creator", status: "implemented", audience: "creator" },
+  { key: "creator-studio", title: "Creator Studio", href: "/studio", family: "creator", status: "implemented", audience: "creator" },
   { key: "community", title: "Community", href: "/community", family: "community", status: "implemented", audience: "viewer" },
   { key: "live", title: "Live", href: "/live", family: "live", status: "implemented", audience: "viewer" },
   { key: "podcasts", title: "Podcasts", href: "/podcasts", family: "experience", status: "implemented", audience: "viewer" },
