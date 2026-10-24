@@ -14,16 +14,6 @@ type CloudinaryUpload = {
   error?: { message?: string };
 };
 
-type MediaAsset = {
-  work_id: number;
-  kind: "main" | "trailer" | "preview";
-  media_url: string | null;
-  public_id: string | null;
-  duration: number | null;
-  mime_type: string | null;
-  sort_order: number;
-};
-
 const videoAccept = "video/mp4,video/webm,video/quicktime,video/x-matroska";
 const audioAccept = "audio/mpeg,audio/mp4,audio/wav,audio/ogg,audio/aac,audio/x-m4a";
 
@@ -154,49 +144,32 @@ export default function StudioUpload({ creatorId, locale }: Props) {
       }
 
       const aspectRatio = isShort ? "9:16" : "16:9";
-      const { data: work, error: insertError } = await supabase
-        .from("videos")
-        .insert({
-          creator_id: creatorId,
-          user_id: auth.user.id,
-          title: title.trim(),
-          description: description.trim() || null,
-          video_url: mainUpload.secure_url,
-          duration: mainUpload.duration || null,
-          published: false,
-          visibility,
-          content_type: contentType,
-          ...(isSeries ? { series_id: seriesId, season_number: Number(seasonNumber), episode_number: Number(episodeNumber) } : {}),
-          aspect_ratio: aspectRatio,
-          quality,
-          is_creator_content: true,
-          views: 0,
-          likes: 0,
-        })
-        .select("id")
-        .single();
-      if (insertError || !work) throw insertError || new Error(ar ? "تعذر إنشاء العمل." : "Could not create the work.");
-
-      const mediaAssets: MediaAsset[] = [
-        {
-          work_id: work.id,
-          kind: "main",
-          media_url: mainUpload.secure_url ?? null,
-          public_id: mainUpload.public_id ?? null,
-          duration: mainUpload.duration ?? null,
-          mime_type: file.type || null,
-          sort_order: 0,
-        },
-        ...(trailerUpload
-          ? [{ work_id: work.id, kind: "trailer" as const, media_url: trailerUpload.secure_url ?? null, public_id: trailerUpload.public_id ?? null, duration: trailerUpload.duration ?? null, mime_type: trailerFile?.type || null, sort_order: 1 }]
-          : []),
-        ...(previewUpload
-          ? [{ work_id: work.id, kind: "preview" as const, media_url: previewUpload.secure_url ?? null, public_id: previewUpload.public_id ?? null, duration: previewUpload.duration ?? null, mime_type: previewFile?.type || null, sort_order: 2 }]
-          : []),
+      const mediaAssets = [
+        { kind: "main", mediaUrl: mainUpload.secure_url, publicId: mainUpload.public_id, duration: mainUpload.duration, mimeType: file.type, sortOrder: 0 },
+        ...(trailerUpload ? [{ kind: "trailer", mediaUrl: trailerUpload.secure_url, publicId: trailerUpload.public_id, duration: trailerUpload.duration, mimeType: trailerFile?.type, sortOrder: 1 }] : []),
+        ...(previewUpload ? [{ kind: "preview", mediaUrl: previewUpload.secure_url, publicId: previewUpload.public_id, duration: previewUpload.duration, mimeType: previewFile?.type, sortOrder: 2 }] : []),
       ];
-
-      const { error: assetsError } = await supabase.from("work_media_assets").insert(mediaAssets);
-      if (assetsError) throw assetsError;
+      const createResponse = await fetch("/api/studio/create-work", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          creatorId,
+          title,
+          description,
+          videoUrl: mainUpload.secure_url,
+          duration: mainUpload.duration,
+          contentType,
+          quality,
+          visibility,
+          seriesId,
+          seasonNumber: isSeries ? Number(seasonNumber) : null,
+          episodeNumber: isSeries ? Number(episodeNumber) : null,
+          aspectRatio,
+          mediaAssets,
+        }),
+      });
+      const createPayload = (await createResponse.json()) as { ok?: boolean; error?: string };
+      if (!createResponse.ok || !createPayload.ok) throw new Error(createPayload.error || (ar ? "تعذر إنشاء العمل." : "Could not create the work."));
 
       setTitle("");
       setDescription("");
