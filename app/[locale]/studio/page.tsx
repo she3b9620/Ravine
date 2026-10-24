@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { createClient as createSupabaseAdminClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import StudioUpload from "@/components/StudioUpload";
 import StudioWorkManager from "@/components/StudioWorkManager";
@@ -31,12 +32,35 @@ export default async function StudioPage({ params }: { params: Promise<{ locale:
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) redirect(`/${locale}/auth?next=/${locale}/studio`);
 
-  const [{ data: creator }, { data: application }] = await Promise.all([
+  const [{ data: creator }, { data: application }, { data: profile }] = await Promise.all([
     supabase.from("creators").select("id,name,username,specialty,followers").eq("user_id", auth.user.id).maybeSingle(),
     supabase.from("creator_applications").select("status,created_at,reviewer_notes,reviewed_at").eq("user_id", auth.user.id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
+    supabase.from("profiles").select("display_name,username,bio,avatar_url,is_creator").eq("id", auth.user.id).maybeSingle(),
   ]);
 
-  if (!creator) {
+  let activeCreator = creator;
+  if (!activeCreator && profile?.is_creator) {
+    const adminKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    if (adminKey && supabaseUrl) {
+      const admin = createSupabaseAdminClient(supabaseUrl, adminKey, { auth: { autoRefreshToken: false, persistSession: false } });
+      const { data: recoveredCreator } = await admin
+        .from("creators")
+        .insert({
+          user_id: auth.user.id,
+          name: profile.display_name || auth.user.email?.split("@")[0] || "RAVINE Creator",
+          username: profile.username,
+          bio: profile.bio,
+          avatar_url: profile.avatar_url,
+          specialty: "Creative maker",
+        })
+        .select("id,name,username,specialty,followers")
+        .single();
+      activeCreator = recoveredCreator;
+    }
+  }
+
+  if (!activeCreator) {
     return (
       <section className="section">
         <div className="eyebrow">RAVINE / STUDIO</div>
@@ -56,7 +80,7 @@ export default async function StudioPage({ params }: { params: Promise<{ locale:
   const { data: worksData } = await supabase
     .from("videos")
     .select("id,title,description,content_type,quality,published,visibility,video_url,views,likes,created_at")
-    .eq("creator_id", creator.id)
+    .eq("creator_id", activeCreator.id)
     .order("created_at", { ascending: false })
     .limit(50);
 
@@ -70,17 +94,17 @@ export default async function StudioPage({ params }: { params: Promise<{ locale:
       <div className="eyebrow">RAVINE / STUDIO</div>
       <div className="section-head">
         <div>
-          <h1>{ar ? `مرحبًا، ${creator.name}.` : `Welcome, ${creator.name}.`}</h1>
+          <h1>{ar ? `مرحبًا، ${activeCreator.name}.` : `Welcome, ${activeCreator.name}.`}</h1>
           <p className="section-note">{ar ? "مساحة العمل والإدارة الخاصة بهويتك الإبداعية." : "Your workspace for managing your creative identity and published work."}</p>
         </div>
-        <Link className="button secondary" href={`/${locale}/creators/${creator.id}`}>{ar ? "فتح الملف العام" : "Open public profile"}</Link>
+        <Link className="button secondary" href={`/${locale}/creators/${activeCreator.id}`}>{ar ? "فتح الملف العام" : "Open public profile"}</Link>
       </div>
       <div className="work-grid">
-        <article className="work"><div className="work-art"/><div className="work-body"><div className="work-kicker">PROFILE</div><h3>{creator.specialty || "Creator"}</h3><p>@{creator.username || `creator-${creator.id}`}</p></div></article>
+        <article className="work"><div className="work-art"/><div className="work-body"><div className="work-kicker">PROFILE</div><h3>{activeCreator.specialty || "Creator"}</h3><p>@{activeCreator.username || `creator-${activeCreator.id}`}</p></div></article>
         <article className="work"><div className="work-art"/><div className="work-body"><div className="work-kicker">WORKS</div><h3>{formatCount(works.length)}</h3><p>{ar ? `${publishedCount} منشور · ${draftCount} مسودة` : `${publishedCount} published · ${draftCount} drafts`}</p></div></article>
-        <article className="work"><div className="work-art"/><div className="work-body"><div className="work-kicker">AUDIENCE</div><h3>{Number(creator.followers || 0).toLocaleString()}</h3><p>{ar ? "متابع" : "followers"}</p></div></article>
+        <article className="work"><div className="work-art"/><div className="work-body"><div className="work-kicker">AUDIENCE</div><h3>{Number(activeCreator.followers || 0).toLocaleString()}</h3><p>{ar ? "متابع" : "followers"}</p></div></article>
       </div>
-      <StudioUpload creatorId={creator.id} locale={locale} />
+      <StudioUpload creatorId={activeCreator.id} locale={locale} />
       <StudioWorkManager works={works} locale={locale} />
     </section>
   );
