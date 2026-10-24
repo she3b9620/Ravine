@@ -54,6 +54,7 @@ export default function StudioUpload({ creatorId, locale }: Props) {
   const trailerFileInputRef = useRef<HTMLInputElement>(null);
   const previewFileInputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
+  const [uploadStage, setUploadStage] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
@@ -127,13 +128,17 @@ export default function StudioUpload({ creatorId, locale }: Props) {
     }
 
     setBusy(true);
+    setUploadStage(ar ? "جارٍ تجهيز الجلسة…" : "Preparing your session…");
     try {
       const supabase = createClient();
       const { data: auth } = await supabase.auth.getUser();
       if (!auth.user) throw new Error("RAVINE_AUTH_REQUIRED");
 
+      setUploadStage(ar ? "جارٍ رفع ملف العمل…" : "Uploading the main work…");
       const mainUpload = await uploadToRavine(file);
+      setUploadStage(trailerFile ? (ar ? "جارٍ رفع الـTrailer…" : "Uploading the trailer…") : previewFile ? (ar ? "جارٍ رفع الـPreview…" : "Uploading the preview…") : (ar ? "جارٍ حفظ بيانات العمل…" : "Saving work metadata…"));
       const trailerUpload = trailerFile ? await uploadToRavine(trailerFile) : null;
+      setUploadStage(previewFile ? (ar ? "جارٍ رفع الـPreview…" : "Uploading the preview…") : (ar ? "جارٍ حفظ بيانات العمل…" : "Saving work metadata…"));
       const previewUpload = previewFile ? await uploadToRavine(previewFile) : null;
 
       if (previewUpload) validateAuxiliaryMedia("preview", previewUpload);
@@ -218,6 +223,7 @@ export default function StudioUpload({ creatorId, locale }: Props) {
       setError(mapUploadError(submitError, ar));
     } finally {
       setBusy(false);
+      setUploadStage("");
     }
   }
 
@@ -297,6 +303,7 @@ export default function StudioUpload({ creatorId, locale }: Props) {
       {visibility === "custom" ? <div className="empty-state"><strong>{ar ? "الجمهور المخصص محفوظ كنوع وصول" : "Custom audience is prepared as an access mode"}</strong><span>{ar ? "اختيار الأشخاص/الأعضاء المسموح لهم سيُدار من واجهة الوصول المخصصة في الخطوة التالية." : "Selecting the allowed people or members will be handled by the dedicated access UI next."}</span></div> : null}
       {error ? <div className="empty-state"><strong>{ar ? "تعذر حفظ العمل." : "Work could not be saved."}</strong><span>{error}</span></div> : null}
       {message ? <div className="empty-state"><strong>{ar ? "تم الحفظ." : "Saved."}</strong><span>{message}</span></div> : null}
+      {busy && uploadStage ? <div className="empty-state" role="status" aria-live="polite"><strong>{ar ? "جاري تجهيز العمل" : "Preparing your work"}</strong><span>{uploadStage}</span></div> : null}
 
       <button className="button primary" type="submit" disabled={busy}>
         {busy ? (ar ? "جارٍ الرفع…" : "Uploading…") : (ar ? "رفع وحفظ كمسودة" : "Upload and save draft")}
