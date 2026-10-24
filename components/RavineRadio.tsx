@@ -59,6 +59,7 @@ export default function RavineRadio({ locale }: Props) {
 
   const playerRef = useRef<YouTubePlayer | null>(null);
   const playerHostRef = useRef<HTMLDivElement | null>(null);
+  const playerReadyRef = useRef(false);
   const drawerRef = useRef<HTMLElement | null>(null);
   const activeIdRef = useRef(active.id);
   const playingRef = useRef(playing);
@@ -120,6 +121,7 @@ export default function RavineRadio({ locale }: Props) {
           events: {
             onReady: () => {
               if (cancelled) return;
+              playerReadyRef.current = true;
               setDuration(player.getDuration?.() ?? 0);
               player.setVolume?.(volume * 100);
               if (playingRef.current) player.playVideo?.();
@@ -157,6 +159,7 @@ export default function RavineRadio({ locale }: Props) {
 
     return () => {
       cancelled = true;
+      playerReadyRef.current = false;
       playerRef.current?.destroy();
       playerRef.current = null;
     };
@@ -263,10 +266,14 @@ export default function RavineRadio({ locale }: Props) {
     window.open(target, "_blank", "noopener,noreferrer");
   };
 
+  useEffect(() => {
+    if (!playerReadyRef.current) return;
+    playerRef.current?.setVolume?.(Math.round(volume * 100));
+  }, [volume]);
+
   const setRadioVolume = (next: number) => {
     const clamped = Math.max(0, Math.min(1, Number.isFinite(next) ? next : 1));
     setVolume(clamped);
-    playerRef.current?.setVolume?.(Math.round(clamped * 100));
   };
 
   const toggleRadioMute = () => {
@@ -283,6 +290,7 @@ export default function RavineRadio({ locale }: Props) {
     const nextPlaying = !playing;
     setHasStarted(true);
     setPlaying(nextPlaying);
+    if (!playerReadyRef.current) return;
     if (nextPlaying) {
       playerRef.current?.playVideo?.();
     } else {
