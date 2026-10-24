@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import RAVINEWorkPlayer from "@/components/RAVINEWorkPlayer";
 import WatchActions from "@/components/WatchActions";
 import styles from "./watch-creator.module.css";
-import { isYouTubeUrl, resolveAssetPlaybackUrl, type RAVINEPlaybackAsset } from "@/lib/ravine-playback-core";
+import { isYouTubeUrl, resolveAssetPlaybackUrl, resolveWorkPlaybackUrl, type RAVINEPlaybackAsset } from "@/lib/ravine-playback-core";
 import { isPlayableRAVINEWork, toRAVINEWork, type RAVINEWorkSource } from "@/lib/ravine-work-universe";
 
 export const dynamic = "force-dynamic";
@@ -49,7 +49,7 @@ export default async function WatchPage({ params }: { params: Promise<{ locale: 
     : [];
   const playbackAssets = assets.length > 0 || !playbackAllowed || !video.video_url
     ? assets
-    : [{ id: -videoId, kind: "main", media_url: video.video_url, duration: video.duration, label: null, language: null, mime_type: null }];
+    : [{ id: -videoId, kind: "main", media_url: resolveWorkPlaybackUrl(videoId, video.video_url) ?? video.video_url, duration: video.duration, label: null, language: null, mime_type: null }];
 
   const creatorRecord = creator as Creator | null;
   const chapters = (chaptersData ?? []) as Chapter[];
