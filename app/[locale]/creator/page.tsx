@@ -1,8 +1,7 @@
-import { redirect } from "next/navigation";
+import StudioPage from "../studio/page";
 
 export const dynamic = "force-dynamic";
 
-export default async function CreatorSpace({ params }: { params: Promise<{ locale: string }> }) {
-  const { locale } = await params;
-  redirect(`/${locale}/studio`);
+export default function CreatorSpace({ params }: { params: Promise<{ locale: string }> }) {
+  return <StudioPage params={params} />;
 }
