@@ -43,7 +43,9 @@ export default async function StudioPage({ params }: { params: Promise<{ locale:
     .select("id,name,username,specialty,followers")
     .eq("user_id", auth.user.id);
   const [{ data: creator }, { data: application }, { data: profile }] = await Promise.all([
-    (hasRequestedCreator ? creatorQuery.eq("id", requestedCreatorId as number) : creatorQuery.order("created_at", { ascending: true })).maybeSingle(),
+    hasRequestedCreator
+      ? creatorQuery.eq("id", requestedCreatorId as number).maybeSingle()
+      : Promise.resolve({ data: null }),
     supabase.from("creator_applications").select("status,created_at,reviewer_notes,reviewed_at").eq("user_id", auth.user.id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
     supabase.from("profiles").select("display_name,username,bio,avatar_url,is_creator").eq("id", auth.user.id).maybeSingle(),
   ]);

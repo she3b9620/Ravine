@@ -75,7 +75,7 @@ export default function CreatorIdentitySwitcher({ locale, onNavigate }: Props) {
     persistIdentity(creator.id);
     setOpen(false);
     onNavigate?.();
-    window.location.assign(`/${locale}/studio`);
+    window.location.assign(`/${locale}/creator`);
   }
 
   if (loading || !creators.length) return null;
