@@ -76,6 +76,11 @@ export default function CreatorApplyPage() {
         .maybeSingle();
       if (!mounted) return;
       if (application) {
+        const applicationStatus = application.status || null;
+        if (applicationStatus === "approved" || applicationStatus === "accepted") {
+          router.replace(`/${locale}/studio`);
+          return;
+        }
         setSpecialties(Array.isArray(application.specialties) ? application.specialties : []);
         setBio(application.bio || "");
         setExperience(application.experience || "");
