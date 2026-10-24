@@ -16,6 +16,7 @@ type CloudinaryUpload = {
 
 const videoAccept = "video/mp4,video/webm,video/quicktime,video/x-matroska";
 const audioAccept = "audio/mpeg,audio/mp4,audio/wav,audio/ogg,audio/aac,audio/x-m4a";
+const maxUploadBytes = 500 * 1024 * 1024;
 
 function mapUploadError(error: unknown, ar: boolean) {
   const message = error instanceof Error ? error.message : String(error);
@@ -58,6 +59,19 @@ export default function StudioUpload({ creatorId, locale }: Props) {
   const isSeries = contentType === "series";
   const isVideoLike = contentType === "video" || contentType === "short_film" || contentType === "film" || contentType === "documentary" || isSeries;
 
+  function validateSelectedFile(selectedFile: File, kind: "main" | "trailer" | "preview") {
+    if (selectedFile.size > maxUploadBytes) {
+      throw new Error(ar ? "حجم الملف يتجاوز الحد الأقصى 500 ميجابايت." : "The file exceeds the 500 MB upload limit.");
+    }
+    const isAudio = selectedFile.type.startsWith("audio/");
+    if (kind === "preview" && isAudio) {
+      throw new Error(ar ? "ملف الـPreview يجب أن يكون فيديو." : "A preview must be a video file.");
+    }
+    if (isPodcast ? (!isAudio && !selectedFile.type.startsWith("video/")) : !selectedFile.type.startsWith("video/")) {
+      throw new Error(ar ? "صيغة الملف غير مدعومة لهذا النوع من المحتوى." : "This file format is not supported for the selected content type.");
+    }
+  }
+
   async function uploadToRavine(uploadFile: File): Promise<CloudinaryUpload> {
     const formData = new FormData();
     formData.append("file", uploadFile);
@@ -97,6 +111,15 @@ export default function StudioUpload({ creatorId, locale }: Props) {
 
     if (isShort && trailerFile) {
       setError(ar ? "الشورت نفسه لا يحتاج Trailer؛ يمكن أن يكون مستقلًا أو مرتبطًا بعمل لاحقًا." : "Shorts do not need a trailer; they can remain independent or link to a work later.");
+      return;
+    }
+
+    try {
+      validateSelectedFile(file, "main");
+      if (trailerFile) validateSelectedFile(trailerFile, "trailer");
+      if (previewFile) validateSelectedFile(previewFile, "preview");
+    } catch (validationError) {
+      setError(validationError instanceof Error ? validationError.message : String(validationError));
       return;
     }
 

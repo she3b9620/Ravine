@@ -261,7 +261,7 @@ export default function StudioWorkManager({ works: initialWorks, locale }: Props
               {!editing ? (
                 <div className="studio-work-actions">
                   <button className="button secondary" type="button" onClick={() => beginEdit(work)} disabled={busy}>{ar ? "تعديل" : "Edit"}</button>
-                  <button className="button secondary" type="button" onClick={() => void togglePublished(work)} disabled={busy || publishBlocked}>{busy ? "…" : work.published ? (ar ? "إخفاء" : "Unpublish") : (ar ? "نشر" : "Publish")}</button>
+                  <button className="button secondary" type="button" onClick={() => void togglePublished(work)} disabled={busy} title={publishBlocked ? (ar ? "أكمل بيانات العمل والوسائط أولًا" : "Complete the work metadata and media first") : undefined}>{busy ? "…" : work.published ? (ar ? "إخفاء" : "Unpublish") : (ar ? "نشر" : "Publish")}</button>
                   <button className="button secondary" type="button" onClick={() => void removeWork(work)} disabled={busy}>{ar ? "حذف" : "Delete"}</button>
                 </div>
               ) : null}
