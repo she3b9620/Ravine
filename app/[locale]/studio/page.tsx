@@ -39,7 +39,8 @@ export default async function StudioPage({ params }: { params: Promise<{ locale:
   ]);
 
   let activeCreator = creator;
-  if (!activeCreator && profile?.is_creator) {
+  const hasApprovedCreatorAccess = application?.status === "approved" || application?.status === "accepted" || Boolean(profile?.is_creator);
+  if (!activeCreator && hasApprovedCreatorAccess) {
     const adminKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     if (adminKey && supabaseUrl) {
@@ -48,10 +49,10 @@ export default async function StudioPage({ params }: { params: Promise<{ locale:
         .from("creators")
         .insert({
           user_id: auth.user.id,
-          name: profile.display_name || auth.user.email?.split("@")[0] || "RAVINE Creator",
-          username: profile.username,
-          bio: profile.bio,
-          avatar_url: profile.avatar_url,
+          name: profile?.display_name || auth.user.email?.split("@")[0] || "RAVINE Creator",
+          username: profile?.username,
+          bio: profile?.bio,
+          avatar_url: profile?.avatar_url,
           specialty: "Creative maker",
         })
         .select("id,name,username,specialty,followers")
