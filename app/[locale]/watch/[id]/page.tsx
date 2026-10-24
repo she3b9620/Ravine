@@ -47,6 +47,9 @@ export default async function WatchPage({ params }: { params: Promise<{ locale: 
         return mediaUrl ? [{ ...asset, media_url: mediaUrl }] : [];
       })
     : [];
+  const playbackAssets = assets.length > 0 || !playbackAllowed || !video.video_url
+    ? assets
+    : [{ id: -videoId, kind: "main", media_url: video.video_url, duration: video.duration, label: null, language: null, mime_type: null }];
 
   const creatorRecord = creator as Creator | null;
   const chapters = (chaptersData ?? []) as Chapter[];
@@ -64,7 +67,7 @@ export default async function WatchPage({ params }: { params: Promise<{ locale: 
   return (
     <main className="watch-page" dir={ar ? "rtl" : "ltr"}>
       <div className="watch-frame">
-        <RAVINEWorkPlayer work={work} locale={locale} chapters={chapters} assets={assets} />
+        <RAVINEWorkPlayer work={work} locale={locale} chapters={chapters} assets={playbackAssets} />
         {isYouTubeUrl(video.video_url as string | null) && (
           <div className="empty-state" style={{ margin: "16px 0" }}>
             <strong>{ar ? "هذا العمل يحتاج نسخة مستقلة داخل RAVINE قبل التشغيل." : "This work needs an independent RAVINE media asset before it can play."}</strong>

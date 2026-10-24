@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import RAVINEWorkContext from "@/components/RAVINEWorkContext";
 import RAVINEWorkPlayer from "@/components/RAVINEWorkPlayer";
 import { createClient } from "@/lib/supabase/server";
-import type { RAVINEPlaybackAsset } from "@/lib/ravine-playback-core";
+import { resolveWorkPlaybackUrl, type RAVINEPlaybackAsset } from "@/lib/ravine-playback-core";
 import { isPlayableRAVINEWork, toRAVINEWork, type RAVINEWorkSource } from "@/lib/ravine-work-universe";
 
 export const dynamic = "force-dynamic";
@@ -74,6 +74,9 @@ export default async function WorkPage({ params }: { params: Promise<{ locale: s
   const playable = isPlayableRAVINEWork(work);
   const chapters = (chapterData ?? []) as Chapter[];
   const assets = (assetData ?? []) as unknown as RAVINEPlaybackAsset[];
+  const playbackAssets = assets.length > 0 || !playable || !work.mediaUrl
+    ? assets
+    : [{ id: -workId, kind: "main", media_url: resolveWorkPlaybackUrl(workId, work.mediaUrl) ?? work.mediaUrl, duration: work.duration, label: null, language: null, mime_type: null }];
 
   return (
     <section className="section ravine-work-page">
@@ -86,7 +89,7 @@ export default async function WorkPage({ params }: { params: Promise<{ locale: s
         </div>
       </div>
 
-      <RAVINEWorkPlayer work={work} locale={locale} chapters={chapters} assets={assets} />
+      <RAVINEWorkPlayer work={work} locale={locale} chapters={chapters} assets={playbackAssets} />
       <RAVINEWorkContext work={work} locale={locale} playable={playable} />
 
       {!playable && work.mediaUrl && work.mediaUrl.includes("youtube.com") ? (
