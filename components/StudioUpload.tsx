@@ -68,14 +68,11 @@ export default function StudioUpload({ creatorId, locale }: Props) {
   const isSeries = contentType === "series";
   const isVideoLike = contentType === "video" || contentType === "short_film" || contentType === "film" || contentType === "documentary" || isSeries;
 
-  async function uploadToCloudinary(uploadFile: File, cloudName: string, uploadPreset: string): Promise<CloudinaryUpload> {
+  async function uploadToRavine(uploadFile: File): Promise<CloudinaryUpload> {
     const formData = new FormData();
     formData.append("file", uploadFile);
-    formData.append("upload_preset", uploadPreset);
-    const response = await fetch(`https://api.cloudinary.com/v1_1/${encodeURIComponent(cloudName)}/video/upload`, {
-      method: "POST",
-      body: formData,
-    });
+    formData.append("creatorId", String(creatorId));
+    const response = await fetch("/api/studio/upload-media", { method: "POST", body: formData });
     const payload = (await response.json()) as CloudinaryUpload;
     if (!response.ok || !payload.secure_url) {
       throw new Error(payload.error?.message || (ar ? "تعذر رفع الملف." : "Media upload failed."));
@@ -113,22 +110,15 @@ export default function StudioUpload({ creatorId, locale }: Props) {
       return;
     }
 
-    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
-    if (!cloudName || !uploadPreset) {
-      setError(ar ? "رفع الوسائط غير مهيأ بعد. يجب إعداد Cloudinary في إعدادات المشروع." : "Media upload is not configured yet. Configure Cloudinary in the project settings.");
-      return;
-    }
-
     setBusy(true);
     try {
       const supabase = createClient();
       const { data: auth } = await supabase.auth.getUser();
       if (!auth.user) throw new Error("RAVINE_AUTH_REQUIRED");
 
-      const mainUpload = await uploadToCloudinary(file, cloudName, uploadPreset);
-      const trailerUpload = trailerFile ? await uploadToCloudinary(trailerFile, cloudName, uploadPreset) : null;
-      const previewUpload = previewFile ? await uploadToCloudinary(previewFile, cloudName, uploadPreset) : null;
+      const mainUpload = await uploadToRavine(file);
+      const trailerUpload = trailerFile ? await uploadToRavine(trailerFile) : null;
+      const previewUpload = previewFile ? await uploadToRavine(previewFile) : null;
 
       if (previewUpload) validateAuxiliaryMedia("preview", previewUpload);
 
@@ -158,7 +148,7 @@ export default function StudioUpload({ creatorId, locale }: Props) {
             })
             .select("id")
             .single();
-          if (seriesInsertError || !newSeries) throw seriesInsertError || new Error(ar ? "تعذر إنشاء سجل المسلسل." : "Could not create the series record.");
+          if (seriesInsertError || !newSeries) throw seriesInsertError || new Error(ar ? "تعذر إن��اء سجل المسلسل." : "Could not create the series record.");
           seriesId = Number(newSeries.id);
         }
       }
