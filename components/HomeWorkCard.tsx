@@ -17,7 +17,7 @@ export default function HomeWorkCard({ work, locale, compact = false }: { work: 
   const views = ravineNumber(Number(work.views || 0), locale, "western");
   const likes = ravineNumber(Number(work.likes || 0), locale, "western");
   return <Link href={`/${locale}/watch/${work.id}`} className={`home-work-card${compact?" compact":""}`} prefetch={false}>
-    <div className="home-work-thumb"><img className="home-work-thumb-image" src={work.thumbnail_url||"/RAVINE.PNG"} alt="" loading="lazy" />{source?<VideoHoverPreview videoUrl={source} videoId={work.id}/>:null}<span className="home-work-preview-wash" aria-hidden="true"/><span className="home-work-duration" dir="ltr" data-preserve-numerals>{formatDuration(work.duration)}</span><span className="home-work-quality">{quality||type}</span></div>
+    <div className="home-work-thumb"><img className="home-work-thumb-image" src={work.thumbnail_url||"/RAVINE.PNG"} alt="" loading="lazy" /><VideoHoverPreview videoUrl={source} videoId={work.id}/><span className="home-work-preview-wash" aria-hidden="true"/><span className="home-work-duration" dir="ltr" data-preserve-numerals>{formatDuration(work.duration)}</span><span className="home-work-quality">{quality||type}</span></div>
     <div className="home-work-body"><h3>{title}</h3><p className="home-work-creator">{creatorName}</p><div className="home-work-meta"><span dir="ltr" data-preserve-numerals>{views} {locale==="ar"?"مشاهدة":"views"}</span><span dir="ltr" data-preserve-numerals>{likes} {locale==="ar"?"إعجاب":"likes"}</span></div></div>
   </Link>;
 }
