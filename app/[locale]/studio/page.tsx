@@ -45,19 +45,29 @@ export default async function StudioPage({ params }: { params: Promise<{ locale:
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     if (adminKey && supabaseUrl) {
       const admin = createSupabaseAdminClient(supabaseUrl, adminKey, { auth: { autoRefreshToken: false, persistSession: false } });
+      const creatorPayload = {
+        user_id: auth.user.id,
+        name: profile?.display_name || auth.user.email?.split("@")[0] || "RAVINE Creator",
+        username: profile?.username,
+        bio: profile?.bio,
+        avatar_url: profile?.avatar_url,
+        specialty: "Creative maker",
+      };
       const { data: recoveredCreator } = await admin
         .from("creators")
-        .insert({
-          user_id: auth.user.id,
-          name: profile?.display_name || auth.user.email?.split("@")[0] || "RAVINE Creator",
-          username: profile?.username,
-          bio: profile?.bio,
-          avatar_url: profile?.avatar_url,
-          specialty: "Creative maker",
-        })
+        .insert(creatorPayload)
         .select("id,name,username,specialty,followers")
-        .single();
+        .maybeSingle();
       activeCreator = recoveredCreator;
+
+      if (!activeCreator) {
+        const { data: existingCreator } = await admin
+          .from("creators")
+          .select("id,name,username,specialty,followers")
+          .eq("user_id", auth.user.id)
+          .maybeSingle();
+        activeCreator = existingCreator;
+      }
     }
   }
 
