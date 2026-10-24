@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 type Work = {
   id: number;
@@ -59,6 +60,7 @@ function contentTypeLabel(value: string | null, ar: boolean) {
 
 export default function StudioWorkManager({ works: initialWorks, locale }: Props) {
   const ar = locale === "ar";
+  const router = useRouter();
   const [works, setWorks] = useState(initialWorks);
   const [busyId, setBusyId] = useState<number | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -114,6 +116,7 @@ export default function StudioWorkManager({ works: initialWorks, locale }: Props
       }
       setWorks((current) => current.map((work) => (work.id === id ? payload.work as Work : work)));
       setEditingId(null);
+      router.refresh();
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : String(saveError));
     } finally {
@@ -155,6 +158,7 @@ export default function StudioWorkManager({ works: initialWorks, locale }: Props
       }
 
       setWorks((current) => current.map((item) => (item.id === work.id ? payload.work as Work : item)));
+      router.refresh();
     } catch (publishError) {
       setError(publishError instanceof Error ? publishError.message : String(publishError));
     } finally {
@@ -182,6 +186,7 @@ export default function StudioWorkManager({ works: initialWorks, locale }: Props
         throw new Error(payload.error || (ar ? "تعذر حذف العمل." : "Could not delete work."));
       }
       setWorks((current) => current.filter((item) => item.id !== work.id));
+      router.refresh();
     } catch (deleteError) {
       setError(deleteError instanceof Error ? deleteError.message : String(deleteError));
     } finally {
