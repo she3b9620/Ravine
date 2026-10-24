@@ -55,7 +55,7 @@ export default async function StudioPage({ params }: { params: Promise<{ locale:
       };
       const { data: recoveredCreator } = await admin
         .from("creators")
-        .insert(creatorPayload)
+        .upsert(creatorPayload, { onConflict: "user_id", ignoreDuplicates: true })
         .select("id,name,username,specialty,followers")
         .maybeSingle();
       activeCreator = recoveredCreator;
