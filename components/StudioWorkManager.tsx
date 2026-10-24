@@ -1,8 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
-
 type Work = {
   id: number;
   title: string;
@@ -94,26 +92,24 @@ export default function StudioWorkManager({ works: initialWorks, locale }: Props
     setBusyId(id);
     setError("");
     try {
-      const supabase = createClient();
-      const { data, error: updateError } = await supabase
-        .from("videos")
-        .update({
-          title: editTitle.trim(),
-          description: editDescription.trim() || null,
-          content_type: editType,
+      const response = await fetch("/api/studio/update-work", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          videoId: id,
+          title: editTitle,
+          description: editDescription,
+          contentType: editType,
           quality: editQuality,
           visibility: editVisibility,
-        })
-        .eq("id", id)
-        .select("id,title,description,content_type,quality,published,visibility,video_url,views,likes,created_at")
-        .single();
-
-      if (updateError || !data) {
-        setError(updateError?.message || (ar ? "تعذر التحديث." : "Update failed."));
-      } else {
-        setWorks((current) => current.map((work) => (work.id === id ? (data as Work) : work)));
-        setEditingId(null);
+        }),
+      });
+      const payload = (await response.json()) as { ok?: boolean; error?: string; work?: Work };
+      if (!response.ok || !payload.ok || !payload.work) {
+        throw new Error(payload.error || (ar ? "تعذر التحديث." : "Update failed."));
       }
+      setWorks((current) => current.map((work) => (work.id === id ? payload.work as Work : work)));
+      setEditingId(null);
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : String(saveError));
     } finally {
