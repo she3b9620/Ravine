@@ -58,7 +58,6 @@ export default function RavineRadio({ locale }: Props) {
   const [miniHidden, setMiniHidden] = useState(false);
 
   const playerRef = useRef<YouTubePlayer | null>(null);
-  const playerHostRef = useRef<HTMLDivElement | null>(null);
   const playerReadyRef = useRef(false);
   const drawerRef = useRef<HTMLElement | null>(null);
   const activeIdRef = useRef(active.id);
@@ -98,13 +97,17 @@ export default function RavineRadio({ locale }: Props) {
 
   useEffect(() => {
     let cancelled = false;
+    const playerMount = document.createElement("div");
+    playerMount.className = "ravine-radio-player-mount";
+    playerMount.setAttribute("aria-hidden", "true");
+    document.body.appendChild(playerMount);
 
     const mountPlayer = async () => {
       try {
         const YT = await loadYouTubeIframeApi();
-        if (cancelled || playerRef.current || !playerHostRef.current) return;
+        if (cancelled || playerRef.current) return;
 
-        const player = new YT.Player(playerHostRef.current, {
+        const player = new YT.Player(playerMount, {
           videoId: activeIdRef.current,
           playerVars: {
             autoplay: 0,
@@ -162,6 +165,7 @@ export default function RavineRadio({ locale }: Props) {
       playerReadyRef.current = false;
       playerRef.current?.destroy();
       playerRef.current = null;
+      playerMount.remove();
     };
   }, []);
 
@@ -612,7 +616,6 @@ export default function RavineRadio({ locale }: Props) {
         </div>
       ) : null}
 
-      <div ref={playerHostRef} className="ravine-radio-player" aria-hidden="true" />
     </div>
   );
 }

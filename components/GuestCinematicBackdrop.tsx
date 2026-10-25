@@ -114,7 +114,7 @@ export default function GuestCinematicBackdrop({ locale }: GuestCinematicBackdro
     video.muted = muted;
     video.volume = volume / 100;
     void video.play().catch(() => undefined);
-  }, [current?.src, backgroundMode, videoReady]);
+  }, [current?.src, backgroundMode, videoReady, muted, volume]);
 
   useEffect(() => { const video = videoRef.current; if (!video) return; video.muted = muted; video.volume = volume / 100; }, [muted, volume]);
 
