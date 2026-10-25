@@ -17,29 +17,35 @@ export default function RavineLogoMotion() {
     let active = true;
 
     const sync = async (authenticatedHint?: boolean) => {
-      const authenticated = authenticatedHint ?? Boolean((await supabase.auth.getUser()).data.user);
-      if (!active) return;
-      const stored = window.localStorage.getItem(RAVINE_LOGO_MOTION_KEY);
-      applyLogoMotion(stored !== "off", authenticated);
+      try {
+        const authenticated = authenticatedHint ?? Boolean((await supabase.auth.getUser()).data.user);
+        if (!active) return;
+        const stored = window.localStorage.getItem(RAVINE_LOGO_MOTION_KEY);
+        applyLogoMotion(stored !== "off", authenticated);
+      } catch {
+        if (!active) return;
+        applyLogoMotion(false, false);
+      }
     };
 
     void sync(false);
-    void supabase.auth.getUser().then(({ data }) => sync(Boolean(data.user)));
+    void sync();
 
     const onChange = (event: Event) => {
       const customEvent = event as CustomEvent<{ enabled?: boolean }>;
       if (typeof customEvent.detail?.enabled !== "boolean") return;
-      void supabase.auth.getUser().then(({ data }) => {
+      void sync().then(() => {
         if (!active) return;
-        applyLogoMotion(customEvent.detail!.enabled!, Boolean(data.user));
+        const enabled = customEvent.detail?.enabled ?? false;
+        applyLogoMotion(enabled, document.documentElement.dataset.ravineAuth === "authenticated");
       });
     };
 
     const onStorage = (event: StorageEvent) => {
       if (event.key !== RAVINE_LOGO_MOTION_KEY) return;
-      void supabase.auth.getUser().then(({ data }) => {
+      void sync().then(() => {
         if (!active) return;
-        applyLogoMotion(event.newValue !== "off", Boolean(data.user));
+        applyLogoMotion(event.newValue !== "off", document.documentElement.dataset.ravineAuth === "authenticated");
       });
     };
 
