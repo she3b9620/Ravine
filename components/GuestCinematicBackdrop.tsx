@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { RAVINE_HERO_VIDEOS } from "@/lib/ravine-hero-videos";
 
 type GuestCinematicBackdropProps = { locale: "ar" | "en" };
 type Work = { id: number; video_url: string | null; thumbnail_url: string | null; duration: number | null; content_type: string | null };
@@ -11,6 +12,7 @@ type VideoControlEvent = CustomEvent<{ action: "play" | "pause" | "next" | "prev
 
 const DEFAULT_VOLUME = 60;
 const HERO_PAGE_SIZE = 500;
+const HERO_VIDEO_DELAY_MS = 3000;
 
 function toPlaybackSource(work: Work) {
   if (!work.video_url) return null;
@@ -57,8 +59,18 @@ export default function GuestCinematicBackdrop({ locale }: GuestCinematicBackdro
   const [muted, setMuted] = useState(true);
   const [volume, setVolume] = useState(DEFAULT_VOLUME);
   const [repeat, setRepeat] = useState(false);
-  const [backgroundMode, setBackgroundMode] = useState<BackgroundMode>("video");
-  const playableWorks = useMemo(() => stableShuffle(works.map((work) => ({ ...work, src: toPlaybackSource(work) })).filter((work) => work.src && work.content_type !== "podcast" && work.content_type !== "live")) as Array<Work & { src: string }>, [works]);
+  const [backgroundMode, setBackgroundMode] = useState<BackgroundMode>("image");
+  const [videoReady, setVideoReady] = useState(false);
+  const playableWorks = useMemo(() => {
+    const databaseWorks = works
+      .map((work) => ({ ...work, src: toPlaybackSource(work) }))
+      .filter((work) => work.src && work.content_type !== "podcast" && work.content_type !== "live");
+    const fallbackThumbnail = works.find((work) => work.thumbnail_url)?.thumbnail_url ?? null;
+    const fallbackWorks: Array<Work & { src: string }> = RAVINE_HERO_VIDEOS
+      .filter((video): video is { source: "local"; src: string; poster?: string } => video.source === "local")
+      .map((video, index) => ({ id: -(index + 1), video_url: video.src, thumbnail_url: video.poster ?? fallbackThumbnail, duration: null, content_type: "hero", src: video.src }));
+    return (fallbackWorks.length ? fallbackWorks : databaseWorks) as Array<Work & { src: string }>;
+  }, [works]);
   const current = playableWorks[currentIndex] ?? null;
 
   useEffect(() => {
@@ -73,24 +85,36 @@ export default function GuestCinematicBackdrop({ locale }: GuestCinematicBackdro
     if (!isGuestHome) return;
     let mounted = true;
     const supabase = createClient();
-    void loadAllGuestHeroWorks(supabase).then((data) => { if (mounted) setWorks(data); }, () => { if (mounted) setWorks([]); });
+    void loadAllGuestHeroWorks(supabase).then(
+      (data) => { if (mounted) setWorks(data); },
+      () => { if (mounted) setWorks([]); }
+    );
     return () => { mounted = false; };
   }, [isGuestHome]);
 
-  useEffect(() => { setCurrentIndex(0); }, [playableWorks.length]);
+  useEffect(() => {
+    if (!playableWorks.length) return;
+    setCurrentIndex(Math.floor(Math.random() * playableWorks.length));
+  }, [playableWorks.length]);
+
+  useEffect(() => {
+    setVideoReady(false);
+    setBackgroundMode("image");
+    const timer = window.setTimeout(() => {
+      setVideoReady(true);
+      setBackgroundMode("video");
+    }, HERO_VIDEO_DELAY_MS);
+    return () => window.clearTimeout(timer);
+  }, [current?.src]);
 
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || !current) return;
-    if (backgroundMode === "image") {
-      video.pause();
-      return;
-    }
+    if (!video || !current || !videoReady || backgroundMode === "image") return;
     video.load();
     video.muted = muted;
     video.volume = volume / 100;
-    void video.play().then(() => undefined, () => undefined);
-  }, [current?.src, backgroundMode]);
+    void video.play().catch(() => undefined);
+  }, [current?.src, backgroundMode, videoReady]);
 
   useEffect(() => { const video = videoRef.current; if (!video) return; video.muted = muted; video.volume = volume / 100; }, [muted, volume]);
 
@@ -105,7 +129,7 @@ export default function GuestCinematicBackdrop({ locale }: GuestCinematicBackdro
       }
       if (!video) return;
       switch (detail.action) {
-        case "play": if (backgroundMode === "image") { setBackgroundMode("video"); break; } void video.play().then(() => undefined, () => undefined); break;
+        case "play": setVideoReady(true); setBackgroundMode("video"); void video.play().catch(() => undefined); break;
         case "pause": video.pause(); break;
         case "toggle-audio": { const nextMuted = detail.muted ?? !video.muted; setMuted(nextMuted); video.muted = nextMuted; break; }
         case "set-volume": { const next = Math.max(0, Math.min(100, detail.volume ?? volume)); setVolume(next); video.volume = next / 100; const nextMuted = detail.muted ?? next === 0; setMuted(nextMuted); video.muted = nextMuted; break; }
@@ -128,7 +152,16 @@ export default function GuestCinematicBackdrop({ locale }: GuestCinematicBackdro
     const onPlay = () => window.dispatchEvent(new CustomEvent("ravine-video-playback-state", { detail: { playing: true, currentTime: video.currentTime || 0, duration: video.duration || current?.duration || 0 } }));
     const onPause = () => window.dispatchEvent(new CustomEvent("ravine-video-playback-state", { detail: { playing: false, currentTime: video.currentTime || 0, duration: video.duration || current?.duration || 0 } }));
     const onVolume = () => { setVolume(Math.round(video.volume * 100)); window.dispatchEvent(new CustomEvent("ravine-video-audio-state", { detail: { muted: video.muted, volume: Math.round(video.volume * 100) } })); syncVolume(); };
-    const onEnded = () => { if (repeat) { video.currentTime = 0; void video.play().then(() => undefined, () => undefined); } else if (playableWorks.length > 1) setCurrentIndex((index) => (index + 1) % playableWorks.length); };
+    const onEnded = () => {
+      if (repeat) {
+        video.currentTime = 0;
+        void video.play().catch(() => undefined);
+      } else {
+        video.pause();
+        setBackgroundMode("image");
+        setVideoReady(false);
+      }
+    };
     video.addEventListener("timeupdate", onTime); video.addEventListener("play", onPlay); video.addEventListener("pause", onPause); video.addEventListener("volumechange", onVolume); video.addEventListener("ended", onEnded); syncVolume();
     return () => { video.removeEventListener("timeupdate", onTime); video.removeEventListener("play", onPlay); video.removeEventListener("pause", onPause); video.removeEventListener("volumechange", onVolume); video.removeEventListener("ended", onEnded); };
   }, [current?.duration, playableWorks.length, repeat]);
