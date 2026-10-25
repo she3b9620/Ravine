@@ -7,7 +7,6 @@ import {
   ExternalLink,
   Pause,
   Play,
-  Radio,
   Search,
   SkipBack,
   SkipForward,
@@ -26,13 +25,14 @@ type RadioTrack = {
   id: string;
   title: string;
   subtitle: string;
+  category: "Music" | "Podcast" | "Film";
 };
 
 type CloseDirection = "left" | "right" | "up" | "down";
 
 const RADIO_CATALOG: RadioTrack[] = [
-  { id: "RLKQ-cHohFc", title: "RAVINE Radio", subtitle: "Cinematic listening" },
-  { id: "O2zRehtoU1w", title: "RAVINE Sessions", subtitle: "Visual culture & sound" },
+  { id: "RLKQ-cHohFc", title: "RAVINE Radio", subtitle: "Cinematic listening", category: "Music" },
+  { id: "O2zRehtoU1w", title: "RAVINE Sessions", subtitle: "Visual culture & sound", category: "Podcast" },
 ];
 
 function formatTime(seconds: number) {
@@ -330,17 +330,6 @@ export default function RavineRadio({ locale }: Props) {
     }, 280);
   }
 
-  const toggleDrawer = () => {
-    if (closing) {
-      if (closeTimerRef.current) window.clearTimeout(closeTimerRef.current);
-      closeTimerRef.current = null;
-      setClosing(false);
-      setOpen(true);
-      return;
-    }
-    setOpen((value) => !value);
-  };
-
   const closeX = closeDirection === "left" ? "-108%" : closeDirection === "right" ? "108%" : "0";
   const closeY = closeDirection === "up" ? "-108%" : closeDirection === "down" ? "108%" : "0";
   const drawerStyle = {
@@ -363,7 +352,9 @@ export default function RavineRadio({ locale }: Props) {
         .ravine-radio-search-box input{width:100%;border:0;outline:0;background:transparent;color:var(--ivory);font:inherit;font-size:14px;min-width:0}
         .ravine-radio-search-box input::placeholder{color:var(--stone);opacity:.8}
         .ravine-radio-search-results{display:grid;gap:7px}
-        .ravine-radio-search-result{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;width:100%;text-align:start;border:1px solid rgba(241,233,220,.07);background:rgba(241,233,220,.025);color:var(--ivory);border-radius:12px;padding:10px 11px;cursor:pointer;transition:transform .2s ease,border-color .2s ease,background .2s ease}
+        .ravine-radio-search-result{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;width:100%;text-align:start;border:1px solid rgba(241,233,220,.07);background:rgba(241,233,220,.025);color:var(--ivory);border-radius:12px;padding:10px 11px;cursor:pointer;transition:transform .2s ease,border-color .2s ease,background .2s ease}
+        .ravine-radio-art{width:48px;height:48px;object-fit:cover;border-radius:9px;background:#183f46;box-shadow:inset 0 0 0 1px rgba(241,233,220,.12)}
+        .ravine-radio-category{font-size:9px;color:#d49a78;letter-spacing:.12em;text-transform:uppercase}
         .ravine-radio-search-result:hover{transform:translateY(-1px);border-color:rgba(196,122,82,.28);background:rgba(196,122,82,.05)}
         .ravine-radio-search-result.is-active{border-color:rgba(196,122,82,.34);background:rgba(196,122,82,.065)}
         .ravine-radio-search-result-copy{display:grid;gap:3px;min-width:0}
@@ -469,7 +460,9 @@ export default function RavineRadio({ locale }: Props) {
               {filteredTracks.length > 0 ? (
                 filteredTracks.map((track) => (
                   <button key={track.id} type="button" className={`ravine-radio-search-result${active.id === track.id ? " is-active" : ""}`} onClick={() => selectTrack(track)} aria-pressed={active.id === track.id}>
+                    <img className="ravine-radio-art" src={`https://i.ytimg.com/vi/${track.id}/hqdefault.jpg`} alt="" loading="lazy" />
                     <span className="ravine-radio-search-result-copy">
+                      <span className="ravine-radio-category">{track.category}</span>
                       <span className="ravine-radio-search-result-title">{track.title}</span>
                       <span className="ravine-radio-search-result-subtitle">{track.subtitle}</span>
                     </span>
@@ -562,7 +555,7 @@ export default function RavineRadio({ locale }: Props) {
             aria-label={ar ? "مشغل راديو مصغر" : "Mini Radio Player"}
           >
             <div className="ravine-radio-mini-head">
-              <div className="ravine-radio-mini-art" aria-hidden="true"><Radio size={18} strokeWidth={1.8} /></div>
+              <img className="ravine-radio-mini-art" src={`https://i.ytimg.com/vi/${active.id}/hqdefault.jpg`} alt="" loading="lazy" />
               <div className="ravine-radio-mini-copy">
                 <span className="ravine-radio-mini-kicker">RAVINE RADIO</span>
                 <span className="ravine-radio-mini-title">{active.title}</span>
