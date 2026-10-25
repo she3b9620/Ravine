@@ -21,19 +21,34 @@ import {
 
 type Props = { locale: "ar" | "en" };
 
+type RadioCategory = "all" | "music" | "shorts" | "documentary" | "video-podcast" | "audio-podcast" | "short-film" | "feature-film" | "live";
+
 type RadioTrack = {
   id: string;
   title: string;
   subtitle: string;
-  category: "Music" | "Podcast" | "Film";
+  category: Exclude<RadioCategory, "all">;
 };
 
 type CloseDirection = "left" | "right" | "up" | "down";
 
 const RADIO_CATALOG: RadioTrack[] = [
-  { id: "RLKQ-cHohFc", title: "RAVINE Radio", subtitle: "Cinematic listening", category: "Music" },
-  { id: "O2zRehtoU1w", title: "RAVINE Sessions", subtitle: "Visual culture & sound", category: "Podcast" },
+  { id: "RLKQ-cHohFc", title: "RAVINE Radio", subtitle: "Cinematic listening", category: "music" },
+  { id: "O2zRehtoU1w", title: "RAVINE Sessions", subtitle: "Visual culture & sound", category: "video-podcast" },
+  { id: "aqz-KE-bpKQ", title: "RAVINE Shorts", subtitle: "Short-form cinema", category: "shorts" },
+  { id: "dQw4w9WgXcQ", title: "Documentary Room", subtitle: "Long-form stories", category: "documentary" },
+  { id: "ScMzIvxBSi4", title: "Audio Notes", subtitle: "Voices without a screen", category: "audio-podcast" },
+  { id: "M7lc1UVf-VE", title: "Short Film Room", subtitle: "Independent short films", category: "short-film" },
+  { id: "ysz5S6PUM-U", title: "Feature Film Room", subtitle: "A longer cinematic cut", category: "feature-film" },
+  { id: "jNQXAC9IVRw", title: "RAVINE Live", subtitle: "Sessions, guests & rooms", category: "live" },
 ];
+
+const RADIO_CATEGORY_LABELS: Record<RadioCategory, { ar: string; en: string }> = {
+  all: { ar: "الكل", en: "All" }, music: { ar: "موسيقى", en: "Music" }, shorts: { ar: "شورتس", en: "Shorts" },
+  documentary: { ar: "وثائقي", en: "Documentary" }, "video-podcast": { ar: "بودكاست مرئي", en: "Video podcast" },
+  "audio-podcast": { ar: "بودكاست صوتي", en: "Audio podcast" }, "short-film": { ar: "فيلم قصير", en: "Short film" },
+  "feature-film": { ar: "فيلم طويل", en: "Feature film" }, live: { ar: "لايف", en: "Live" },
+};
 
 function formatTime(seconds: number) {
   if (!Number.isFinite(seconds) || seconds <= 0) return "0:00";
@@ -51,6 +66,7 @@ export default function RavineRadio({ locale }: Props) {
   const [playing, setPlaying] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
   const [active, setActive] = useState(RADIO_CATALOG[0]);
+  const [activeCategory, setActiveCategory] = useState<RadioCategory>("all");
   const [query, setQuery] = useState("");
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -211,13 +227,18 @@ export default function RavineRadio({ locale }: Props) {
     };
   }, []);
 
+  const categoryTracks = useMemo(
+    () => activeCategory === "all" ? RADIO_CATALOG : RADIO_CATALOG.filter((track) => track.category === activeCategory),
+    [activeCategory],
+  );
+
   const filteredTracks = useMemo(() => {
     const normalized = query.trim().toLocaleLowerCase();
-    if (!normalized) return RADIO_CATALOG;
-    return RADIO_CATALOG.filter((track) =>
+    if (!normalized) return categoryTracks;
+    return categoryTracks.filter((track) =>
       `${track.title} ${track.subtitle}`.toLocaleLowerCase().includes(normalized),
     );
-  }, [query]);
+  }, [categoryTracks, query]);
 
   const activeIndex = RADIO_CATALOG.findIndex((track) => track.id === active.id);
 
@@ -345,6 +366,10 @@ export default function RavineRadio({ locale }: Props) {
         .ravine-radio-drawer{display:flex;flex-direction:column;gap:16px;will-change:transform,opacity;}
         .ravine-radio-drawer.is-closing{animation:ravineRadioDrawerOut .28s cubic-bezier(.55,.08,.68,.53) both!important;}
         .ravine-radio-search{display:flex;flex-direction:column;gap:9px}
+        .ravine-radio-modes{display:flex;gap:7px;overflow-x:auto;padding:2px 1px 5px;scrollbar-width:none}
+        .ravine-radio-modes::-webkit-scrollbar{display:none}
+        .ravine-radio-mode{flex:0 0 auto;border:1px solid rgba(241,233,220,.1);border-radius:999px;background:rgba(241,233,220,.035);color:var(--stone);padding:8px 12px;font:inherit;font-size:11px;cursor:pointer;transition:color .2s ease,border-color .2s ease,background .2s ease}
+        .ravine-radio-mode:hover,.ravine-radio-mode.is-active{color:var(--ivory);border-color:rgba(196,122,82,.45);background:rgba(196,122,82,.1)}
         .ravine-radio-search-label{display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--stone);font-size:11px;letter-spacing:.08em;text-transform:uppercase}
         .ravine-radio-search-box{display:flex;align-items:center;gap:10px;border:1px solid rgba(241,233,220,.11);background:rgba(241,233,220,.035);border-radius:14px;min-height:48px;padding:0 13px;transition:border-color .25s ease,background .25s ease,box-shadow .25s ease}
         .ravine-radio-search-box:focus-within{border-color:rgba(196,122,82,.42);background:rgba(196,122,82,.055);box-shadow:0 0 0 3px rgba(196,122,82,.08)}
@@ -432,6 +457,20 @@ export default function RavineRadio({ locale }: Props) {
         </div>
 
         <div className="ravine-radio-search">
+          <div className="ravine-radio-modes" role="tablist" aria-label={ar ? "أنماط محتوى رافين" : "RAVINE content modes"}>
+            {(Object.keys(RADIO_CATEGORY_LABELS) as RadioCategory[]).map((category) => (
+              <button
+                key={category}
+                type="button"
+                role="tab"
+                aria-selected={activeCategory === category}
+                className={`ravine-radio-mode${activeCategory === category ? " is-active" : ""}`}
+                onClick={() => setActiveCategory(category)}
+              >
+                {RADIO_CATEGORY_LABELS[category][ar ? "ar" : "en"]}
+              </button>
+            ))}
+          </div>
           <div className="ravine-radio-search-label">
             <span>{ar ? "ابحث عن أغنية أو جلسة" : "Find a song or session"}</span>
             <span>RAVINE RADIO</span>
@@ -490,7 +529,7 @@ export default function RavineRadio({ locale }: Props) {
           </div>
 
           <div className="ravine-radio-search-results">
-            {RADIO_CATALOG.map((track) => (
+            {categoryTracks.map((track) => (
               <button key={track.id} type="button" className={`ravine-radio-search-result${active.id === track.id ? " is-active" : ""}`} onClick={() => selectTrack(track)} aria-pressed={active.id === track.id}>
                 <span className="ravine-radio-search-result-copy">
                   <span className="ravine-radio-search-result-title">{track.title}</span>
