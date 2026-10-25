@@ -112,18 +112,23 @@ export default async function StudioPage({ params }: { params: Promise<{ locale:
   const publishedCount = works.filter((work) => work.published).length;
   const draftCount = works.length - publishedCount;
 
+  const creatorTier = profile?.is_creator ? (application?.status === "approved" || application?.status === "accepted" ? (ar ? "مبدع معتمد" : "Verified Creator") : (ar ? "مبدع" : "Creator")) : (ar ? "مبدع" : "Creator");
+  const nextTier = creatorTier.includes("معتمد") || creatorTier.includes("Verified") ? (ar ? "RAVINE Select — قيد التقييم" : "RAVINE Select — under review") : (ar ? "المستوى التالي: مبدع معتمد" : "Next: Verified Creator");
+
   return (
     <section className="section studio-page">
-      <div className="eyebrow">RAVINE / STUDIO</div>
-      <div className="section-head">
+      <div className="studio-command-header">
         <div>
-          <h1>{ar ? `مرحبًا، ${activeCreator.name}.` : `Welcome, ${activeCreator.name}.`}</h1>
-          <p className="section-note">{ar ? "مساحة العمل والإدارة الخاصة بهويتك الإبداعية." : "Your workspace for managing your creative identity and published work."}</p>
+          <div className="eyebrow">RAVINE / CREATOR SPACE</div>
+          <div className="studio-identity-line"><span className="studio-mode-mark" aria-hidden="true" /> <span>{ar ? "أنت تتفاعل الآن بصفتك" : "You are acting as"} <strong>{activeCreator.name}</strong></span></div>
+          <h1>{ar ? "لوحة المبدع الخاصة بك." : "Your creator command center."}</h1>
+          <p className="section-note">{ar ? "هنا تدير هويتك الإبداعية وأعمالك المنشورة. حسابك الشخصي يظل منفصلًا ويمكن العودة إليه من مبدّل الهوية." : "Manage your creative identity and published work here. Your personal account stays separate and is always available from the identity switcher."}</p>
         </div>
-        <Link className="button secondary" href={`/${locale}/creators/${activeCreator.id}`}>{ar ? "فتح الملف العام" : "Open public profile"}</Link>
+        <div className="studio-command-actions"><span className="studio-tier-badge">{creatorTier}</span><Link className="button secondary" href={`/${locale}/creators/${activeCreator.id}`}>{ar ? "فتح الملف العام" : "Open public profile"}</Link></div>
       </div>
+      <div className="studio-progress-panel"><div><div className="work-kicker">CREATOR PATH</div><h2>{ar ? "مسار الثقة والإبداع" : "Trust and creative path"}</h2><p>{nextTier}</p></div><div className="studio-progress-steps"><span className="is-done">{ar ? "حساب" : "Account"}</span><span className="is-done">{ar ? "مبدع" : "Creator"}</span><span className={creatorTier.includes("معتمد") || creatorTier.includes("Verified") ? "is-done" : ""}>{ar ? "معتمد" : "Verified"}</span><span>{ar ? "Select" : "Select"}</span></div></div>
       <div className="work-grid">
-        <article className="work"><div className="work-art"/><div className="work-body"><div className="work-kicker">PROFILE</div><h3>{activeCreator.specialty || "Creator"}</h3><p>@{activeCreator.username || `creator-${activeCreator.id}`}</p></div></article>
+        <article className="work"><div className="work-art"/><div className="work-body"><div className="work-kicker">IDENTITY</div><h3>{activeCreator.specialty || (ar ? "مبدع" : "Creator")}</h3><p>@{activeCreator.username || `creator-${activeCreator.id}`}</p></div></article>
         <article className="work"><div className="work-art"/><div className="work-body"><div className="work-kicker">WORKS</div><h3>{formatCount(works.length)}</h3><p>{ar ? `${publishedCount} منشور · ${draftCount} مسودة` : `${publishedCount} published · ${draftCount} drafts`}</p></div></article>
         <article className="work"><div className="work-art"/><div className="work-body"><div className="work-kicker">AUDIENCE</div><h3>{Number(activeCreator.followers || 0).toLocaleString()}</h3><p>{ar ? "متابع" : "followers"}</p></div></article>
       </div>
