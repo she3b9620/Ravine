@@ -24,16 +24,17 @@ type Work = {
   created_at: string | null;
 };
 
-export default async function StudioPage({ params }: { params: Promise<{ locale: string }> }) {
+export default async function StudioPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams?: Promise<{ creatorId?: string | string[] }> }) {
   const { locale: rawLocale } = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : {};
   const locale: Locale = rawLocale === "en" ? "en" : "ar";
   const ar = locale === "ar";
   const supabase = await createClient();
   const cookieStore = await cookies();
   const activeCreatorCookie = cookieStore.get("ravine-active-creator-id")?.value;
-  const parsedCreatorId = activeCreatorCookie ? Number(activeCreatorCookie) : null;
+  const queryCreatorValue = Array.isArray(resolvedSearchParams.creatorId) ? resolvedSearchParams.creatorId[0] : resolvedSearchParams.creatorId;
+  const parsedCreatorId = queryCreatorValue ? Number(queryCreatorValue) : activeCreatorCookie ? Number(activeCreatorCookie) : null;
   const requestedCreatorId = parsedCreatorId !== null && Number.isInteger(parsedCreatorId) && parsedCreatorId > 0 ? parsedCreatorId : null;
-  const hasRequestedCreator = requestedCreatorId !== null;
 
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) redirect(`/${locale}/auth?next=/${locale}/studio`);
@@ -43,9 +44,9 @@ export default async function StudioPage({ params }: { params: Promise<{ locale:
     .select("id,name,username,specialty,followers")
     .eq("user_id", auth.user.id);
   const [{ data: creator }, { data: application }, { data: profile }] = await Promise.all([
-    hasRequestedCreator
-      ? creatorQuery.eq("id", requestedCreatorId as number).maybeSingle()
-      : Promise.resolve({ data: null }),
+    requestedCreatorId !== null
+      ? creatorQuery.eq("id", requestedCreatorId).maybeSingle()
+      : creatorQuery.order("created_at", { ascending: true }).limit(1).maybeSingle(),
     supabase.from("creator_applications").select("status,created_at,reviewer_notes,reviewed_at").eq("user_id", auth.user.id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
     supabase.from("profiles").select("display_name,username,bio,avatar_url,is_creator").eq("id", auth.user.id).maybeSingle(),
   ]);
